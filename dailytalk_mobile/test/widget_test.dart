@@ -2,17 +2,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:dailytalk_mobile/main.dart';
 
 void main() {
-  testWidgets('Mostra mensagem de base de dados OK', (WidgetTester tester) async {
-    // Cria a aplicação em modo de teste, passando um valor fixo
-    // para simular a quantidade de atividades encontradas na base local.
-    await tester.pumpWidget(
-      const MyApp(activityCount: 1),
-    );
+  testWidgets('Mostra a tela inicial gamificada do DailyTalk', (WidgetTester tester) async {
+    // Carrega a aplicação principal no ambiente de teste.
+    await tester.pumpWidget(const DailyTalkApp());
 
-    // Verifica se o texto principal aparece no ecrã.
-    expect(find.textContaining('Base de dados SQLite OK'), findsOneWidget);
+    // Verifica se o nome da aplicação aparece.
+    expect(find.text('DailyTalk.pt'), findsWidgets);
 
-    // Verifica se a quantidade simulada de atividades aparece no ecrã.
-    expect(find.textContaining('Atividades locais encontradas: 1'), findsOneWidget);
+    // Verifica se o título da unidade aparece.
+    expect(find.text('UNIDADE 5'), findsOneWidget);
+
+    // Verifica se o tema atual aparece.
+    expect(find.text('Tema: Comunicação e amizades'), findsOneWidget);
   });
 }
