@@ -1,30 +1,11 @@
 /// Tipos de atividade disponíveis no percurso gamificado.
-enum LessonType {
-  audio,
-  dialogo,
-  vocabulario,
-  quiz,
-  revisao,
-  desafioFinal,
-}
+enum LessonType { audio, dialogo, vocabulario, quiz, revisao, desafioFinal }
 
 /// Estados possíveis da atividade.
-enum LessonStatus {
-  completed,
-  current,
-  available,
-  locked,
-}
+enum LessonStatus { completed, current, available, locked }
 
 /// Formas geométricas possíveis para cada nó do percurso.
-enum NodeShape {
-  circle,
-  roundedSquare,
-  diamond,
-  pentagon,
-  hexagon,
-  star,
-}
+enum NodeShape { circle, roundedSquare, diamond, pentagon, hexagon, star }
 
 /// Modelo simples para representar uma atividade no percurso.
 class LessonItem {

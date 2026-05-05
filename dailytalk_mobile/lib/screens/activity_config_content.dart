@@ -6,6 +6,8 @@ import '../data/database/app_database.dart';
 import '../data/repositories/activity_repository.dart';
 import 'activity_display_page.dart';
 
+import '../strategies/activity_strategy.dart';
+
 /// Conteúdo real da página de configuração da atividade.
 ///
 /// Este widget é colocado dentro do PlaceholderPage,
@@ -20,9 +22,7 @@ class ActivityConfigContent extends StatefulWidget {
 class _ActivityConfigContentState extends State<ActivityConfigContent> {
   final _formKey = GlobalKey<FormState>();
 
-  final _scenarioController = TextEditingController(
-    text: 'sala de aula',
-  );
+  final _scenarioController = TextEditingController(text: 'sala de aula');
 
   String _languageCode = 'pt-PT';
   String _difficulty = 'Média';
@@ -82,6 +82,8 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
         MaterialPageRoute(
           builder: (context) => ActivityDisplayPage(
             activityUrl: activityUrl,
+            remoteActivityId: remoteActivityId,
+            activityType: _activityType,
           ),
         ),
       );
@@ -106,9 +108,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
       decoration: BoxDecoration(
         color: const Color(0xFF14252D),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white12,
-        ),
+        border: Border.all(color: Colors.white12),
       ),
       child: Form(
         key: _formKey,
@@ -118,7 +118,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
             const SizedBox(height: 16),
 
             _buildDropdown(
-              label: 'Idioma',
+              label: 'Idioma a praticar',
               value: _languageCode,
               icon: Icons.language,
               items: const {
@@ -126,7 +126,10 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
                 'en-US': 'English',
                 'es-ES': 'Español',
                 'fr-FR': 'Français',
+                'it-IT': 'Italiano',
+                'de-DE': 'Deutsch',
               },
+
               onChanged: (value) {
                 setState(() {
                   _languageCode = value!;
@@ -158,12 +161,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
               label: 'Tipo de atividade',
               value: _activityType,
               icon: Icons.category,
-              items: const {
-                'vocabulario': 'Vocabulário',
-                'audio': 'Áudio',
-                'dialogo': 'Diálogo',
-                'quiz': 'Quiz',
-              },
+              items: ActivityStrategyFactory.creationOptions,
               onChanged: (value) {
                 setState(() {
                   _activityType = value!;
@@ -184,9 +182,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
                     ? const SizedBox(
                         width: 22,
                         height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.play_arrow),
                 label: Text(
@@ -233,10 +229,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
       initialValue: value,
       dropdownColor: const Color(0xFF14252D),
       style: const TextStyle(color: Colors.white),
-      decoration: _inputDecoration(
-        label: label,
-        icon: icon,
-      ),
+      decoration: _inputDecoration(label: label, icon: icon),
       items: items.entries.map((entry) {
         return DropdownMenuItem<String>(
           value: entry.key,
@@ -262,9 +255,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
       prefixIconColor: Colors.lightBlue,
       filled: true,
       fillColor: const Color(0xFF0D1B22),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: Colors.white24),
@@ -281,15 +272,11 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.redAccent,
-        ),
+        border: Border.all(color: Colors.redAccent),
       ),
       child: Text(
         _errorMessage!,
-        style: const TextStyle(
-          color: Colors.redAccent,
-        ),
+        style: const TextStyle(color: Colors.redAccent),
       ),
     );
   }

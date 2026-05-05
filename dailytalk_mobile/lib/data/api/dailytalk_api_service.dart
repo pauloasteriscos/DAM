@@ -84,4 +84,72 @@ class DailyTalkApiService {
 
     return activityUrl;
   }
+
+  /// Submete as respostas da atividade.
+  ///
+  /// Endpoint previsto: POST /submit.
+  ///
+  /// Payload esperado:
+  /// {
+  ///   "activityID": "...",
+  ///   "submission": {...}
+  /// }
+  Future<Map<String, dynamic>> submitActivity({
+    required String activityId,
+    required Map<String, dynamic> submission,
+  }) async {
+    if (AppConfig.useMockApi) {
+      final answers = submission['answers'];
+
+      final answerText = answers is List && answers.isNotEmpty
+          ? answers.first['value']?.toString() ?? ''
+          : '';
+
+      final score = answerText.trim().length >= 20 ? 90.0 : 70.0;
+
+      return {
+        'activityID': activityId,
+        'score': score,
+        'feedback': score >= 80
+            ? 'Boa resposta. A comunicação está clara e adequada ao contexto.'
+            : 'Resposta válida, mas pode ser melhorada com mais detalhe e vocabulário.',
+        'metrics': {
+          'totalInteractions': 1,
+          'answerLength': answerText.length,
+          'evaluatedBy': 'mock',
+        },
+      };
+    }
+
+    final uri = Uri.parse('${AppConfig.apiBaseUrl}/submit');
+
+    final response = await _client
+        .post(
+          uri,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'activityID': activityId,
+            'submission': submission,
+          }),
+        )
+        .timeout(
+          const Duration(seconds: 10),
+        );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(
+        'Erro ao submeter atividade. Código: ${response.statusCode}',
+      );
+    }
+
+    final decoded = jsonDecode(response.body);
+
+    if (decoded is! Map) {
+      throw Exception('Formato inválido em /submit.');
+    }
+
+    return Map<String, dynamic>.from(decoded);
+  }
 }

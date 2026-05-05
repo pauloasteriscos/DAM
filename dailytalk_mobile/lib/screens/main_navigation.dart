@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'activity_config_content.dart';
+import 'analytics_content.dart';
 import 'home_gamificada.dart';
 import 'placeholder_page.dart';
+import 'practice_content.dart';
+import 'results_content.dart';
+import 'settings_content.dart';
 
 /// Tela principal da aplicação.
 ///
@@ -25,25 +28,29 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _pages = const [
     HomeGamificada(),
     PlaceholderPage(
-      title: 'Configuração da Atividade',
-      message: 'Aqui será a configuração da nova atividade.',
-      icon: Icons.add_circle_outline,
-      child: ActivityConfigContent(),
+      title: 'Praticar',
+      message:
+          'Responde a atividades predefinidas e melhora a tua comunicação.',
+      icon: Icons.play_circle_outline,
+      child: PracticeContent(),
     ),
     PlaceholderPage(
       title: 'Meus Resultados',
-      message: 'Aqui será a página de resultados do aluno.',
+      message: 'Consulta o teu histórico de atividades e pontuações.',
       icon: Icons.emoji_events_outlined,
+      child: ResultsContent(),
     ),
     PlaceholderPage(
       title: 'Análises',
-      message: 'Aqui será a página de análises do professor.',
+      message: 'Consulta métricas de aprendizagem e acompanhamento pedagógico.',
       icon: Icons.bar_chart,
+      child: AnalyticsContent(),
     ),
     PlaceholderPage(
       title: 'Ajustes',
-      message: 'Aqui será a página de ajustes da aplicação.',
+      message: 'Configura a aplicação e acede a opções secundárias.',
       icon: Icons.settings,
+      child: SettingsContent(),
     ),
   ];
 
@@ -60,10 +67,7 @@ class _MainNavigationState extends State<MainNavigation> {
       backgroundColor: const Color(0xFF0D1B22),
 
       // Mantém cada página viva e apenas alterna qual delas fica visível.
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _pages),
 
       // Rodapé principal da aplicação.
       bottomNavigationBar: BottomNavigationBar(
@@ -74,13 +78,10 @@ class _MainNavigationState extends State<MainNavigation> {
         unselectedItemColor: Colors.white70,
         onTap: _onItemTapped,
         items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            label: 'Atividade',
+            icon: Icon(Icons.play_circle_outline),
+            label: 'Praticar',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.emoji_events_outlined),
@@ -90,10 +91,7 @@ class _MainNavigationState extends State<MainNavigation> {
             icon: Icon(Icons.bar_chart),
             label: 'Análises',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Ajustes',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Ajustes'),
         ],
       ),
     );

@@ -11,6 +11,7 @@ class PlaceholderPage extends StatelessWidget {
     required this.message,
     required this.icon,
     this.child,
+    this.showBackButton = false,
   });
 
   final String title;
@@ -20,17 +21,24 @@ class PlaceholderPage extends StatelessWidget {
   /// Conteúdo adicional opcional da página.
   final Widget? child;
 
+  /// Define se a página deve mostrar um botão de voltar.
+  ///
+  /// Útil quando a página é aberta por Navigator.push,
+  /// como no menu "Criar atividade".
+  final bool showBackButton;
+
   @override
   Widget build(BuildContext context) {
-    if (child == null) {
-      return _buildSimplePlaceholder();
-    }
-
-    return _buildPlaceholderWithContent();
+    return Material(
+      color: const Color(0xFF0D1B22),
+      child: child == null
+          ? _buildSimplePlaceholder(context)
+          : _buildPlaceholderWithContent(context),
+    );
   }
 
   /// Mantém o visual original das páginas que ainda são apenas placeholder.
-  Widget _buildSimplePlaceholder() {
+  Widget _buildSimplePlaceholder(BuildContext context) {
     return SafeArea(
       child: Container(
         color: const Color(0xFF0D1B22),
@@ -38,7 +46,10 @@ class PlaceholderPage extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
+            if (showBackButton) _buildBackButton(context),
+
             const SizedBox(height: 24),
+
             Text(
               title,
               textAlign: TextAlign.center,
@@ -48,13 +59,13 @@ class PlaceholderPage extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
+
             const Spacer(),
-            Icon(
-              icon,
-              color: Colors.lightBlue,
-              size: 90,
-            ),
+
+            Icon(icon, color: Colors.lightBlue, size: 90),
+
             const SizedBox(height: 24),
+
             Text(
               message,
               textAlign: TextAlign.center,
@@ -64,6 +75,7 @@ class PlaceholderPage extends StatelessWidget {
                 height: 1.4,
               ),
             ),
+
             const Spacer(),
           ],
         ),
@@ -72,7 +84,7 @@ class PlaceholderPage extends StatelessWidget {
   }
 
   /// Usa a mesma identidade visual, mas permite acrescentar conteúdo real.
-  Widget _buildPlaceholderWithContent() {
+  Widget _buildPlaceholderWithContent(BuildContext context) {
     return SafeArea(
       child: Container(
         color: const Color(0xFF0D1B22),
@@ -81,7 +93,10 @@ class PlaceholderPage extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
+              if (showBackButton) _buildBackButton(context),
+
               const SizedBox(height: 24),
+
               Text(
                 title,
                 textAlign: TextAlign.center,
@@ -91,13 +106,13 @@ class PlaceholderPage extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+
               const SizedBox(height: 20),
-              Icon(
-                icon,
-                color: Colors.lightBlue,
-                size: 72,
-              ),
+
+              Icon(icon, color: Colors.lightBlue, size: 72),
+
               const SizedBox(height: 18),
+
               Text(
                 message,
                 textAlign: TextAlign.center,
@@ -107,11 +122,24 @@ class PlaceholderPage extends StatelessWidget {
                   height: 1.4,
                 ),
               ),
+
               const SizedBox(height: 28),
+
               child!,
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// Botão de voltar usado quando a página é aberta fora da navegação principal.
+  Widget _buildBackButton(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: IconButton(
+        onPressed: () => Navigator.pop(context),
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
       ),
     );
   }

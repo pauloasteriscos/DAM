@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 
+import '../screens/create_activity_page.dart';
 import '../screens/language_selection_page.dart';
+import '../screens/my_activities_page.dart';
 
 /// Menu superior de três pontos.
 ///
-/// Este menu concentra ações globais da aplicação,
-/// como seleção de idioma, sincronização, ajuda e informação sobre a app.
+/// Este menu concentra ações globais e secundárias da aplicação.
+/// A ação principal da app é praticar atividades.
+/// A criação de atividades fica como opção secundária.
 class TopOverflowMenu extends StatelessWidget {
   const TopOverflowMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<_TopMenuAction>(
-      icon: const Icon(
-        Icons.more_vert,
-        color: Colors.white,
-        size: 30,
-      ),
+      icon: const Icon(Icons.more_vert, color: Colors.white, size: 30),
       color: const Color(0xFF14252D),
       onSelected: (action) {
         switch (action) {
@@ -29,16 +28,34 @@ class TopOverflowMenu extends StatelessWidget {
             );
             break;
 
-          case _TopMenuAction.sync:
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Sincronização será implementada nesta área.'),
+          case _TopMenuAction.createActivity:
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CreateActivityPage(),
               ),
+            );
+            break;
+
+          case _TopMenuAction.myActivities:
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MyActivitiesPage()),
             );
             break;
 
           case _TopMenuAction.help:
             _showHelpDialog(context);
+            break;
+
+          case _TopMenuAction.sync:
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Sincronização será implementada para atualizar dados e enviar submissões pendentes.',
+                ),
+              ),
+            );
             break;
 
           case _TopMenuAction.about:
@@ -50,31 +67,33 @@ class TopOverflowMenu extends StatelessWidget {
         return const [
           PopupMenuItem(
             value: _TopMenuAction.language,
+            child: _MenuItemContent(icon: Icons.language, text: 'Language'),
+          ),
+          PopupMenuItem(
+            value: _TopMenuAction.createActivity,
             child: _MenuItemContent(
-              icon: Icons.language,
-              text: 'Language',
+              icon: Icons.add_circle_outline,
+              text: 'Criar atividade',
             ),
           ),
           PopupMenuItem(
-            value: _TopMenuAction.sync,
+            value: _TopMenuAction.myActivities,
             child: _MenuItemContent(
-              icon: Icons.sync,
-              text: 'Sincronizar',
+              icon: Icons.folder_special_outlined,
+              text: 'Minhas atividades',
             ),
           ),
           PopupMenuItem(
             value: _TopMenuAction.help,
-            child: _MenuItemContent(
-              icon: Icons.help_outline,
-              text: 'Ajuda',
-            ),
+            child: _MenuItemContent(icon: Icons.help_outline, text: 'Ajuda'),
+          ),
+          PopupMenuItem(
+            value: _TopMenuAction.sync,
+            child: _MenuItemContent(icon: Icons.sync, text: 'Sincronizar'),
           ),
           PopupMenuItem(
             value: _TopMenuAction.about,
-            child: _MenuItemContent(
-              icon: Icons.info_outline,
-              text: 'Sobre',
-            ),
+            child: _MenuItemContent(icon: Icons.info_outline, text: 'Sobre'),
           ),
         ];
       },
@@ -88,20 +107,14 @@ class TopOverflowMenu extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF14252D),
-          title: const Text(
-            'Ajuda',
-            style: TextStyle(color: Colors.white),
-          ),
+          title: const Text('Ajuda', style: TextStyle(color: Colors.white)),
           content: const Text(
-            'Usa a Home para acompanhar o teu percurso de atividades.\n\n'
-            'Em Atividade, podes configurar uma nova prática escolhendo o cenário, '
-            'o idioma, a dificuldade e o tipo de exercício.\n\n'
-            'Em Resultados, poderás acompanhar o teu progresso. '
-            'Em Análises, professores poderão consultar métricas de aprendizagem.',
-            style: TextStyle(
-              color: Colors.white70,
-              height: 1.4,
-            ),
+            'Usa a Home para acompanhar o teu percurso.\n\n'
+            'Em Praticar, responde a atividades predefinidas e melhora a tua comunicação.\n\n'
+            'Em Resultados, acompanha o teu desempenho.\n\n'
+            'A opção Criar atividade está no menu superior e também nos Ajustes. '
+            'Ela deve ser usada quando quiseres propor atividades com base nas tuas dificuldades.',
+            style: TextStyle(color: Colors.white70, height: 1.4),
           ),
           actions: [
             TextButton(
@@ -115,9 +128,6 @@ class TopOverflowMenu extends StatelessWidget {
   }
 
   /// Mostra informação sobre a aplicação para o utilizador final.
-  ///
-  /// Este texto evita linguagem académica ou técnica e foca-se no valor
-  /// da aplicação para alunos, jogadores e comunidade.
   void _showAboutDailyTalkDialog(BuildContext context) {
     showDialog<void>(
       context: context,
@@ -145,10 +155,7 @@ class TopOverflowMenu extends StatelessWidget {
               'skins e outros elementos visuais.\n\n'
               'Atividades rejeitadas ou sinalizadas poderão ser revistas pela equipa '
               'mantenedora, podendo ser corrigidas, reformuladas ou removidas.',
-              style: TextStyle(
-                color: Colors.white70,
-                height: 1.4,
-              ),
+              style: TextStyle(color: Colors.white70, height: 1.4),
             ),
           ),
           actions: [
@@ -166,17 +173,16 @@ class TopOverflowMenu extends StatelessWidget {
 /// Ações disponíveis no menu superior.
 enum _TopMenuAction {
   language,
-  sync,
+  createActivity,
+  myActivities,
   help,
+  sync,
   about,
 }
 
 /// Conteúdo visual de cada item do menu.
 class _MenuItemContent extends StatelessWidget {
-  const _MenuItemContent({
-    required this.icon,
-    required this.text,
-  });
+  const _MenuItemContent({required this.icon, required this.text});
 
   final IconData icon;
   final String text;
@@ -185,18 +191,9 @@ class _MenuItemContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          color: Colors.white70,
-          size: 22,
-        ),
+        Icon(icon, color: Colors.white70, size: 22),
         const SizedBox(width: 12),
-        Text(
-          text,
-          style: const TextStyle(
-            color: Colors.white,
-          ),
-        ),
+        Text(text, style: const TextStyle(color: Colors.white)),
       ],
     );
   }
