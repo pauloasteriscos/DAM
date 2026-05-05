@@ -1,3 +1,4 @@
+import '../../models/app_status.dart';
 import '../api/dailytalk_api_service.dart';
 import '../dao/submission_dao.dart';
 
@@ -27,9 +28,13 @@ class SubmissionRepository {
     required String remoteActivityId,
     required String activityType,
     required String answerText,
+    String nativeLanguageCode = 'pt-PT',
+    String targetLanguageCode = 'it-IT',
   }) async {
     final submissionPayload = {
       'activityType': activityType,
+      'nativeLanguageCode': nativeLanguageCode,
+      'targetLanguageCode': targetLanguageCode,
       'submittedAt': DateTime.now().toIso8601String(),
       'answers': [
         {
@@ -66,9 +71,12 @@ class SubmissionRepository {
         metrics: metrics,
       );
 
+      final syncStatus = SubmissionSyncStatus.synced;
+
       return {
         'submission_id': submissionId,
-        'sync_status': 'synced',
+        'sync_status': syncStatus.databaseValue,
+        'sync_status_label': syncStatus.label,
         'remote_activity_id': remoteActivityId,
         'score': score,
         'feedback': feedbackText,

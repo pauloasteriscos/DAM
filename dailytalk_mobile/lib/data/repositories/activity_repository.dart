@@ -1,15 +1,13 @@
 import '../api/dailytalk_api_service.dart';
 import '../dao/activity_dao.dart';
+import '../../models/app_status.dart';
 
 /// Repository responsável por coordenar API + SQLite.
 ///
 /// A interface chama o Repository.
 /// O Repository decide quando chamar API e quando guardar localmente.
 class ActivityRepository {
-  ActivityRepository({
-    required this.apiService,
-    required this.activityDao,
-  });
+  ActivityRepository({required this.apiService, required this.activityDao});
 
   final DailyTalkApiService apiService;
   final ActivityDao activityDao;
@@ -32,7 +30,7 @@ class ActivityRepository {
       'scenario': scenario,
       'language_code': languageCode,
       'difficulty': difficulty,
-      'source': 'remote',
+      'source': ActivitySourceType.community.databaseValue,
       'is_cached': 1,
       'is_active': 1,
       'created_at': now,

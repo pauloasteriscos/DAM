@@ -7,6 +7,8 @@ import '../data/database/app_database.dart';
 import '../data/repositories/submission_repository.dart';
 import '../strategies/activity_strategy.dart';
 
+import '../models/app_status.dart';
+
 /// Conteúdo da página "Praticar".
 ///
 /// Esta página representa o foco principal da aplicação:
@@ -66,7 +68,7 @@ class _PracticeContentState extends State<PracticeContent> {
         'scenario': _strategy.defaultScenario,
         'language_code': 'it-IT',
         'difficulty': _strategy.defaultDifficulty,
-        'source': 'predefined',
+        'source': ActivitySourceType.predefined.databaseValue,
         'is_cached': 1,
         'is_active': 1,
       });
@@ -115,9 +117,7 @@ class _PracticeContentState extends State<PracticeContent> {
       decoration: BoxDecoration(
         color: const Color(0xFF14252D),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white12,
-        ),
+        border: Border.all(color: Colors.white12),
       ),
       child: Column(
         children: [
@@ -135,11 +135,7 @@ class _PracticeContentState extends State<PracticeContent> {
   Widget _buildActivityHeader() {
     return Column(
       children: [
-        Icon(
-          _strategy.icon,
-          color: _strategy.fillColor,
-          size: 58,
-        ),
+        Icon(_strategy.icon, color: _strategy.fillColor, size: 58),
         const SizedBox(height: 12),
         Text(
           'Atividade predefinida: ${_strategy.label}',
@@ -154,10 +150,7 @@ class _PracticeContentState extends State<PracticeContent> {
         const Text(
           'Pratica uma situação simples de comunicação no contexto escolar.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white70,
-            height: 1.4,
-          ),
+          style: TextStyle(color: Colors.white70, height: 1.4),
         ),
       ],
     );
@@ -227,9 +220,7 @@ class _PracticeContentState extends State<PracticeContent> {
                   ? const SizedBox(
                       width: 22,
                       height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.send),
               label: Text(
@@ -254,17 +245,11 @@ class _PracticeContentState extends State<PracticeContent> {
       decoration: BoxDecoration(
         color: Colors.green.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.greenAccent,
-        ),
+        border: Border.all(color: Colors.greenAccent),
       ),
       child: Column(
         children: [
-          const Icon(
-            Icons.check_circle,
-            color: Colors.greenAccent,
-            size: 44,
-          ),
+          const Icon(Icons.check_circle, color: Colors.greenAccent, size: 44),
           const SizedBox(height: 10),
           const Text(
             'Resposta submetida',
@@ -287,10 +272,7 @@ class _PracticeContentState extends State<PracticeContent> {
           Text(
             feedback,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white70,
-              height: 1.4,
-            ),
+            style: const TextStyle(color: Colors.white70, height: 1.4),
           ),
         ],
       ),
@@ -305,15 +287,11 @@ class _PracticeContentState extends State<PracticeContent> {
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.redAccent,
-        ),
+        border: Border.all(color: Colors.redAccent),
       ),
       child: Text(
         _errorMessage!,
-        style: const TextStyle(
-          color: Colors.redAccent,
-        ),
+        style: const TextStyle(color: Colors.redAccent),
       ),
     );
   }

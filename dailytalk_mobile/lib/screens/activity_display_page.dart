@@ -278,7 +278,10 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
   Widget _buildResultCard() {
     final score = _result?['score'];
     final feedback = _result?['feedback']?.toString() ?? 'Sem feedback.';
-    final syncStatus = _result?['sync_status']?.toString() ?? 'desconhecido';
+    final syncStatus =
+    _result?['sync_status_label']?.toString() ??
+    _result?['sync_status']?.toString() ??
+    'desconhecido';
 
     return Container(
       width: double.infinity,

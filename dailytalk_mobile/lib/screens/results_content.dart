@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/dao/submission_dao.dart';
 import '../data/database/app_database.dart';
+import '../models/app_status.dart';
 
 /// Conteúdo da página "Meus Resultados".
 ///
@@ -68,9 +69,7 @@ class _ResultsContentState extends State<ResultsContent> {
                 ? const SizedBox(
                     width: 22,
                     height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.refresh),
             label: Text(
@@ -95,18 +94,13 @@ class _ResultsContentState extends State<ResultsContent> {
       decoration: BoxDecoration(
         color: const Color(0xFF14252D),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.white12,
-        ),
+        border: Border.all(color: Colors.white12),
       ),
       child: const Text(
         'Ainda não há resultados carregados. '
         'Submete uma atividade e depois volta aqui para consultar o histórico.',
         textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Colors.white70,
-          height: 1.4,
-        ),
+        style: TextStyle(color: Colors.white70, height: 1.4),
       ),
     );
   }
@@ -120,6 +114,11 @@ class _ResultsContentState extends State<ResultsContent> {
         final feedback = result['feedback_text']?.toString() ?? 'Sem feedback.';
         final createdAt = result['created_at']?.toString() ?? '-';
 
+        final syncStatus = SubmissionSyncStatus.tryFromDatabase(
+          result['sync_status']?.toString(),
+        );
+        final syncStatusLabel = syncStatus?.label ?? 'Não disponível';
+
         return Container(
           width: double.infinity,
           margin: const EdgeInsets.only(bottom: 14),
@@ -127,9 +126,7 @@ class _ResultsContentState extends State<ResultsContent> {
           decoration: BoxDecoration(
             color: const Color(0xFF14252D),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: Colors.white12,
-            ),
+            border: Border.all(color: Colors.white12),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,14 +139,16 @@ class _ResultsContentState extends State<ResultsContent> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
               const SizedBox(height: 8),
+
               Text(
                 'Tipo: $type',
-                style: const TextStyle(
-                  color: Colors.white70,
-                ),
+                style: const TextStyle(color: Colors.white70),
               ),
+
               const SizedBox(height: 6),
+
               Text(
                 'Pontuação: $score',
                 style: const TextStyle(
@@ -158,21 +157,26 @@ class _ResultsContentState extends State<ResultsContent> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+
               const SizedBox(height: 8),
+
               Text(
                 feedback,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  height: 1.4,
-                ),
+                style: const TextStyle(color: Colors.white70, height: 1.4),
               ),
+
               const SizedBox(height: 8),
+
+              Text(
+                'Estado: $syncStatusLabel',
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+
+              const SizedBox(height: 8),
+
               Text(
                 'Data: $createdAt',
-                style: const TextStyle(
-                  color: Colors.white38,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Colors.white38, fontSize: 12),
               ),
             ],
           ),
@@ -188,15 +192,11 @@ class _ResultsContentState extends State<ResultsContent> {
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.redAccent,
-        ),
+        border: Border.all(color: Colors.redAccent),
       ),
       child: Text(
         _errorMessage!,
-        style: const TextStyle(
-          color: Colors.redAccent,
-        ),
+        style: const TextStyle(color: Colors.redAccent),
       ),
     );
   }

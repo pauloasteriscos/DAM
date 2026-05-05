@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:sqflite/sqflite.dart';
 
+import '../../models/app_status.dart';
+
 /// DAO para submissões e respetivos resultados.
 ///
 /// Esta tabela suporta o requisito de guardar submissões pendentes
@@ -25,7 +27,7 @@ class SubmissionDao {
       'student_id': studentId,
       'remote_activity_id': remoteActivityId,
       'submission_json': jsonEncode(submission),
-      'sync_status': 'pending',
+      'sync_status': SubmissionSyncStatus.pending.databaseValue,
       'attempt_count': 0,
       'created_at': now,
       'updated_at': now,
@@ -37,7 +39,10 @@ class SubmissionDao {
     return db.query(
       'submissions',
       where: 'sync_status IN (?, ?)',
-      whereArgs: ['pending', 'failed'],
+      whereArgs: [
+        SubmissionSyncStatus.pending.databaseValue,
+        SubmissionSyncStatus.failed.databaseValue,
+      ],
       orderBy: 'created_at ASC',
     );
   }
@@ -58,7 +63,12 @@ class SubmissionDao {
           updated_at = ?
       WHERE id = ?
       ''',
-      ['failed', error, now, submissionId],
+      [
+        SubmissionSyncStatus.failed.databaseValue,
+        error,
+        now,
+        submissionId,
+      ],
     );
   }
 
@@ -85,7 +95,7 @@ class SubmissionDao {
       await txn.update(
         'submissions',
         {
-          'sync_status': 'synced',
+          'sync_status': SubmissionSyncStatus.synced.databaseValue,
           'submitted_at': now,
           'updated_at': now,
           'last_sync_at': now,
@@ -124,7 +134,9 @@ class SubmissionDao {
   }
 
   /// Lista submissões de uma atividade.
-  Future<List<Map<String, Object?>>> getSubmissionsForActivity(int activityId) async {
+  Future<List<Map<String, Object?>>> getSubmissionsForActivity(
+    int activityId,
+  ) async {
     return db.query(
       'submissions',
       where: 'activity_id = ?',
@@ -141,6 +153,10 @@ class SubmissionDao {
         sr.*,
         s.activity_id,
         s.student_id,
+        s.sync_status AS sync_status,
+        s.submitted_at AS submitted_at,
+        s.last_sync_at AS last_sync_at,
+        s.last_error AS last_error,
         a.title,
         a.type,
         a.scenario,
