@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../data/api/dailytalk_api_service.dart';
-import '../data/dao/activity_dao.dart';
-import '../data/dao/submission_dao.dart';
-import '../data/database/app_database.dart';
-import '../data/repositories/submission_repository.dart';
+import '../data/facades/activity_workflow_facade.dart';
 
 /// Página de execução/submissão da atividade.
 ///
@@ -13,6 +9,9 @@ import '../data/repositories/submission_repository.dart';
 /// - permite escrever uma resposta;
 /// - submete via serviço mockado/POST /submit;
 /// - guarda o resultado localmente em SQLite.
+///
+/// O fluxo de submissão é delegado para ActivityWorkflowFacade,
+/// reduzindo o acoplamento desta tela com API, DAO, SQLite e Repository.
 class ActivityDisplayPage extends StatefulWidget {
   const ActivityDisplayPage({
     super.key,
@@ -58,31 +57,14 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
     });
 
     try {
-      final db = await AppDatabase.instance.database;
+      final facade = await ActivityWorkflowFacade.create();
 
-      final activityDao = ActivityDao(db);
-      final submissionDao = SubmissionDao(db);
-
-      final activity = await activityDao.getByRemoteActivityId(
-        widget.remoteActivityId,
-      );
-
-      if (activity == null) {
-        throw Exception('Atividade local não encontrada.');
-      }
-
-      final localActivityId = activity['id'] as int;
-
-      final repository = SubmissionRepository(
-        apiService: DailyTalkApiService(),
-        submissionDao: submissionDao,
-      );
-
-      final result = await repository.submitAnswer(
-        activityId: localActivityId,
+      final result = await facade.submitAnswerForRemoteActivity(
         remoteActivityId: widget.remoteActivityId,
         activityType: widget.activityType,
         answerText: _answerController.text.trim(),
+        nativeLanguageCode: 'pt-PT',
+        targetLanguageCode: 'it-IT',
       );
 
       if (!mounted) {
@@ -279,9 +261,9 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
     final score = _result?['score'];
     final feedback = _result?['feedback']?.toString() ?? 'Sem feedback.';
     final syncStatus =
-    _result?['sync_status_label']?.toString() ??
-    _result?['sync_status']?.toString() ??
-    'desconhecido';
+        _result?['sync_status_label']?.toString() ??
+        _result?['sync_status']?.toString() ??
+        'desconhecido';
 
     return Container(
       width: double.infinity,

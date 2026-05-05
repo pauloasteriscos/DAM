@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../data/api/dailytalk_api_service.dart';
-import '../data/dao/activity_dao.dart';
-import '../data/database/app_database.dart';
-import '../data/repositories/activity_repository.dart';
-import 'activity_display_page.dart';
-
+import '../data/facades/activity_workflow_facade.dart';
 import '../strategies/activity_strategy.dart';
+import 'activity_display_page.dart';
 
 /// Conteúdo real da página de configuração da atividade.
 ///
@@ -37,18 +33,11 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
     super.dispose();
   }
 
-  /// Constrói o repositório que coordena API + SQLite.
-  Future<ActivityRepository> _buildRepository() async {
-    final db = await AppDatabase.instance.database;
-
-    return ActivityRepository(
-      apiService: DailyTalkApiService(),
-      activityDao: ActivityDao(db),
-    );
-  }
-
   /// Valida o formulário, cria a atividade localmente,
   /// executa o deploy e abre a página de exibição da atividade.
+  ///
+  /// A criação, persistência local e deploy são delegados à Facade,
+  /// evitando que esta tela conheça diretamente API, DAO e Repository.
   Future<void> _startActivity() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -60,12 +49,9 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
     });
 
     try {
-      final repository = await _buildRepository();
+      final facade = await ActivityWorkflowFacade.create();
 
-      final remoteActivityId = 'DT-${DateTime.now().millisecondsSinceEpoch}';
-
-      final activityUrl = await repository.createAndDeployActivity(
-        remoteActivityId: remoteActivityId,
+      final launchResult = await facade.createAndDeployActivity(
         title: 'DailyTalk - ${_scenarioController.text.trim()}',
         type: _activityType,
         scenario: _scenarioController.text.trim(),
@@ -81,13 +67,17 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
         context,
         MaterialPageRoute(
           builder: (context) => ActivityDisplayPage(
-            activityUrl: activityUrl,
-            remoteActivityId: remoteActivityId,
-            activityType: _activityType,
+            activityUrl: launchResult.activityUrl,
+            remoteActivityId: launchResult.remoteActivityId,
+            activityType: launchResult.activityType,
           ),
         ),
       );
     } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
         _errorMessage = error.toString();
       });
@@ -129,7 +119,6 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
                 'it-IT': 'Italiano',
                 'de-DE': 'Deutsch',
               },
-
               onChanged: (value) {
                 setState(() {
                   _languageCode = value!;

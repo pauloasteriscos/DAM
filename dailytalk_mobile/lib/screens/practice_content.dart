@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../data/api/dailytalk_api_service.dart';
-import '../data/dao/activity_dao.dart';
-import '../data/dao/submission_dao.dart';
-import '../data/database/app_database.dart';
-import '../data/repositories/submission_repository.dart';
+import '../data/facades/activity_workflow_facade.dart';
 import '../strategies/activity_strategy.dart';
-
-import '../models/app_status.dart';
 
 /// Conteúdo da página "Praticar".
 ///
@@ -15,6 +9,7 @@ import '../models/app_status.dart';
 /// praticar atividades já existentes/predefinidas.
 ///
 /// A lógica do tipo de atividade é delegada para uma ActivityStrategy.
+/// O fluxo de submissão é delegado para ActivityWorkflowFacade.
 class PracticeContent extends StatefulWidget {
   const PracticeContent({super.key});
 
@@ -55,34 +50,13 @@ class _PracticeContentState extends State<PracticeContent> {
     });
 
     try {
-      final db = await AppDatabase.instance.database;
+      final facade = await ActivityWorkflowFacade.create();
 
-      final activityDao = ActivityDao(db);
-      final submissionDao = SubmissionDao(db);
-
-      // Garante que a atividade predefinida existe na base local.
-      final localActivityId = await activityDao.upsertActivity({
-        'remote_activity_id': _strategy.predefinedRemoteActivityId,
-        'title': 'Prática: ${_strategy.label}',
-        'type': _strategy.type,
-        'scenario': _strategy.defaultScenario,
-        'language_code': 'it-IT',
-        'difficulty': _strategy.defaultDifficulty,
-        'source': ActivitySourceType.predefined.databaseValue,
-        'is_cached': 1,
-        'is_active': 1,
-      });
-
-      final repository = SubmissionRepository(
-        apiService: DailyTalkApiService(),
-        submissionDao: submissionDao,
-      );
-
-      final result = await repository.submitAnswer(
-        activityId: localActivityId,
-        remoteActivityId: _strategy.predefinedRemoteActivityId,
-        activityType: _strategy.type,
+      final result = await facade.submitPracticeAnswer(
+        strategy: _strategy,
         answerText: _answerController.text.trim(),
+        nativeLanguageCode: 'pt-PT',
+        targetLanguageCode: 'it-IT',
       );
 
       if (!mounted) {
@@ -237,6 +211,10 @@ class _PracticeContentState extends State<PracticeContent> {
   Widget _buildResultBox() {
     final score = _result?['score']?.toString() ?? '-';
     final feedback = _result?['feedback']?.toString() ?? 'Sem feedback.';
+    final syncStatus =
+        _result?['sync_status_label']?.toString() ??
+        _result?['sync_status']?.toString() ??
+        'desconhecido';
 
     return Container(
       width: double.infinity,
@@ -266,6 +244,14 @@ class _PracticeContentState extends State<PracticeContent> {
               color: Colors.lightBlueAccent,
               fontSize: 16,
               fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Estado: $syncStatus',
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
             ),
           ),
           const SizedBox(height: 8),

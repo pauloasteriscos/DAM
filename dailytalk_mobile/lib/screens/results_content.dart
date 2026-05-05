@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../data/dao/submission_dao.dart';
-import '../data/database/app_database.dart';
+import '../data/facades/activity_workflow_facade.dart';
 import '../models/app_status.dart';
 
 /// Conteúdo da página "Meus Resultados".
 ///
 /// Nesta Sprint 2, a página permite carregar resultados
 /// guardados localmente após submissão de atividades.
+///
+/// O carregamento dos resultados é delegado para ActivityWorkflowFacade,
+/// reduzindo o acoplamento desta tela com SQLite e DAO.
 class ResultsContent extends StatefulWidget {
   const ResultsContent({super.key});
 
@@ -27,10 +29,9 @@ class _ResultsContentState extends State<ResultsContent> {
     });
 
     try {
-      final db = await AppDatabase.instance.database;
-      final submissionDao = SubmissionDao(db);
+      final facade = await ActivityWorkflowFacade.create();
 
-      final results = await submissionDao.getRecentResults();
+      final results = await facade.loadRecentResults();
 
       if (!mounted) {
         return;
@@ -139,16 +140,12 @@ class _ResultsContentState extends State<ResultsContent> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               Text(
                 'Tipo: $type',
                 style: const TextStyle(color: Colors.white70),
               ),
-
               const SizedBox(height: 6),
-
               Text(
                 'Pontuação: $score',
                 style: const TextStyle(
@@ -157,23 +154,17 @@ class _ResultsContentState extends State<ResultsContent> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               Text(
                 feedback,
                 style: const TextStyle(color: Colors.white70, height: 1.4),
               ),
-
               const SizedBox(height: 8),
-
               Text(
                 'Estado: $syncStatusLabel',
                 style: const TextStyle(color: Colors.white70, fontSize: 13),
               ),
-
               const SizedBox(height: 8),
-
               Text(
                 'Data: $createdAt',
                 style: const TextStyle(color: Colors.white38, fontSize: 12),
