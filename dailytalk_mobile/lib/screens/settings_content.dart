@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/facades/activity_workflow_facade.dart';
 import 'create_activity_page.dart';
 import 'language_selection_page.dart';
 import 'my_activities_page.dart';
@@ -7,7 +8,7 @@ import 'my_activities_page.dart';
 /// Conteúdo da página de Ajustes.
 ///
 /// Concentra opções secundárias da aplicação, incluindo idioma,
-/// comunidade, criação de atividades, ajuda e sincronização.
+/// comunidade, criação de atividades, ajuda, sincronização e informação geral.
 class SettingsContent extends StatelessWidget {
   const SettingsContent({super.key});
 
@@ -29,7 +30,9 @@ class SettingsContent extends StatelessWidget {
             );
           },
         ),
+
         const SizedBox(height: 12),
+
         _SettingsButton(
           icon: Icons.add_circle_outline,
           title: 'Criar atividade',
@@ -43,7 +46,9 @@ class SettingsContent extends StatelessWidget {
             );
           },
         ),
+
         const SizedBox(height: 12),
+
         _SettingsButton(
           icon: Icons.folder_special_outlined,
           title: 'Minhas atividades',
@@ -52,27 +57,27 @@ class SettingsContent extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const MyActivitiesPage()),
+              MaterialPageRoute(
+                builder: (context) => const MyActivitiesPage(),
+              ),
             );
           },
         ),
+
         const SizedBox(height: 12),
+
         _SettingsButton(
           icon: Icons.sync,
           title: 'Sincronizar',
           description:
               'Atualizar dados e enviar submissões pendentes quando houver ligação.',
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Sincronização será implementada com a fila sync_queue.',
-                ),
-              ),
-            );
+            _syncPendingSubmissions(context);
           },
         ),
+
         const SizedBox(height: 12),
+
         _SettingsButton(
           icon: Icons.help_outline,
           title: 'Ajuda',
@@ -81,7 +86,9 @@ class SettingsContent extends StatelessWidget {
             _showHelpDialog(context);
           },
         ),
+
         const SizedBox(height: 12),
+
         _SettingsButton(
           icon: Icons.info_outline,
           title: 'Sobre',
@@ -94,19 +101,54 @@ class SettingsContent extends StatelessWidget {
     );
   }
 
+  /// Executa a sincronização de submissões pendentes através da Facade.
+  ///
+  /// A Facade delega a operação para o Command responsável pela sincronização.
+  Future<void> _syncPendingSubmissions(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      final facade = await ActivityWorkflowFacade.create();
+      final result = await facade.syncPendingSubmissions();
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            '${result.message} '
+            'Sincronizadas: ${result.syncedCount}. '
+            'Falhas: ${result.failedCount}.',
+          ),
+        ),
+      );
+    } catch (error) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Erro ao sincronizar: $error'),
+        ),
+      );
+    }
+  }
+
   void _showHelpDialog(BuildContext context) {
     showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF14252D),
-          title: const Text('Ajuda', style: TextStyle(color: Colors.white)),
+          title: const Text(
+            'Ajuda',
+            style: TextStyle(color: Colors.white),
+          ),
           content: const Text(
             'Usa a Home para acompanhar o teu percurso.\n\n'
             'Em Praticar, responde a atividades predefinidas.\n\n'
             'Em Resultados, acompanha o teu desempenho.\n\n'
-            'A criação de atividades é uma opção secundária, disponível no menu superior e nos Ajustes.',
-            style: TextStyle(color: Colors.white70, height: 1.4),
+            'A criação de atividades é uma opção secundária, disponível no menu superior e nos Ajustes.\n\n'
+            'A opção Sincronizar permite enviar submissões pendentes quando existir ligação.',
+            style: TextStyle(
+              color: Colors.white70,
+              height: 1.4,
+            ),
           ),
           actions: [
             TextButton(
@@ -137,8 +179,13 @@ class SettingsContent extends StatelessWidget {
               'A aplicação inclui atividades criadas pela equipa DailyTalk.pt e '
               'também poderá incluir atividades propostas pela comunidade.\n\n'
               'Quem cria atividades úteis poderá ganhar pontos, aumentar a reputação '
-              'como ajudante da comunidade e desbloquear itens de personalização.',
-              style: TextStyle(color: Colors.white70, height: 1.4),
+              'como ajudante da comunidade e desbloquear itens de personalização.\n\n'
+              'As atividades criadas pela comunidade poderão ser avaliadas, revistas '
+              'e aprovadas antes de ficarem disponíveis para outros utilizadores.',
+              style: TextStyle(
+                color: Colors.white70,
+                height: 1.4,
+              ),
             ),
           ),
           actions: [
@@ -183,7 +230,11 @@ class _SettingsButton extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(icon, color: Colors.lightBlueAccent, size: 34),
+              Icon(
+                icon,
+                color: Colors.lightBlueAccent,
+                size: 34,
+              ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -208,7 +259,10 @@ class _SettingsButton extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Colors.white54),
+              const Icon(
+                Icons.chevron_right,
+                color: Colors.white54,
+              ),
             ],
           ),
         ),

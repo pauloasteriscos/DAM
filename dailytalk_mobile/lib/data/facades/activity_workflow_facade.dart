@@ -1,6 +1,7 @@
 import '../../models/app_status.dart';
 import '../../strategies/activity_strategy.dart';
 import '../api/dailytalk_api_service.dart';
+import '../commands/sync_command.dart';
 import '../dao/activity_dao.dart';
 import '../dao/submission_dao.dart';
 import '../database/app_database.dart';
@@ -33,7 +34,8 @@ class ActivityLaunchResult {
 /// - chamada à API;
 /// - gravação local;
 /// - submissão de respostas;
-/// - carregamento de resultados.
+/// - carregamento de resultados;
+/// - sincronização de submissões pendentes.
 class ActivityWorkflowFacade {
   ActivityWorkflowFacade._({
     required this.activityDao,
@@ -174,5 +176,17 @@ class ActivityWorkflowFacade {
     int limit = 20,
   }) {
     return submissionDao.getRecentResults(limit: limit);
+  }
+
+  /// Sincroniza submissões pendentes ou com falha.
+  ///
+  /// Usa o padrão Command para encapsular cada operação de sincronização.
+  Future<SyncCommandResult> syncPendingSubmissions() async {
+    final command = SyncPendingSubmissionsCommand(
+      apiService: DailyTalkApiService(),
+      submissionDao: submissionDao,
+    );
+
+    return command.execute();
   }
 }

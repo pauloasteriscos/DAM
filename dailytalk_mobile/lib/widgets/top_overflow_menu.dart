@@ -4,6 +4,8 @@ import '../screens/create_activity_page.dart';
 import '../screens/language_selection_page.dart';
 import '../screens/my_activities_page.dart';
 
+import '../data/facades/activity_workflow_facade.dart';
+
 /// Menu superior de três pontos.
 ///
 /// Este menu concentra ações globais e secundárias da aplicação.
@@ -49,14 +51,8 @@ class TopOverflowMenu extends StatelessWidget {
             break;
 
           case _TopMenuAction.sync:
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Sincronização será implementada para atualizar dados e enviar submissões pendentes.',
-                ),
-              ),
-            );
-            break;
+  _syncPendingSubmissions(context);
+  break;
 
           case _TopMenuAction.about:
             _showAboutDailyTalkDialog(context);
@@ -99,6 +95,31 @@ class TopOverflowMenu extends StatelessWidget {
       },
     );
   }
+
+  Future<void> _syncPendingSubmissions(BuildContext context) async {
+  final messenger = ScaffoldMessenger.of(context);
+
+  try {
+    final facade = await ActivityWorkflowFacade.create();
+    final result = await facade.syncPendingSubmissions();
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          '${result.message} '
+          'Sincronizadas: ${result.syncedCount}. '
+          'Falhas: ${result.failedCount}.',
+        ),
+      ),
+    );
+  } catch (error) {
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('Erro ao sincronizar: $error'),
+      ),
+    );
+  }
+}
 
   /// Mostra uma ajuda curta para o utilizador final.
   void _showHelpDialog(BuildContext context) {
