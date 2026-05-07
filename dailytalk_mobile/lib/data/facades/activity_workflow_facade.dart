@@ -1,4 +1,5 @@
 import '../../models/app_status.dart';
+import '../../state/app_event_notifier.dart';
 import '../../strategies/activity_strategy.dart';
 import '../api/dailytalk_api_service.dart';
 import '../commands/sync_command.dart';
@@ -10,8 +11,8 @@ import '../repositories/submission_repository.dart';
 
 /// Resultado do fluxo de criação/deploy de uma atividade.
 ///
-/// Este objeto evita devolver apenas uma String solta,
-/// mantendo juntos os dados necessários para abrir a atividade.
+/// Este objeto mantém juntos os dados necessários para abrir
+/// a atividade após o deploy.
 class ActivityLaunchResult {
   const ActivityLaunchResult({
     required this.activityUrl,
@@ -27,7 +28,7 @@ class ActivityLaunchResult {
 /// Facade do fluxo principal de atividades.
 ///
 /// Esta classe oferece uma interface de alto nível para a UI,
-/// escondendo os detalhes de:
+/// escondendo detalhes internos como:
 /// - abertura da base SQLite;
 /// - criação dos DAOs;
 /// - criação dos repositories;
@@ -49,7 +50,7 @@ class ActivityWorkflowFacade {
   final ActivityRepository activityRepository;
   final SubmissionRepository submissionRepository;
 
-  /// Cria uma instância da facade com todas as dependências necessárias.
+  /// Cria uma instância da Facade com todas as dependências necessárias.
   static Future<ActivityWorkflowFacade> create() async {
     final db = await AppDatabase.instance.database;
 
@@ -133,7 +134,7 @@ class ActivityWorkflowFacade {
       targetLanguageCode: targetLanguageCode,
     );
 
-    return submissionRepository.submitAnswer(
+    final result = await submissionRepository.submitAnswer(
       activityId: localActivityId,
       remoteActivityId: strategy.predefinedRemoteActivityId,
       activityType: strategy.type,
@@ -141,6 +142,10 @@ class ActivityWorkflowFacade {
       nativeLanguageCode: nativeLanguageCode,
       targetLanguageCode: targetLanguageCode,
     );
+
+    AppEventNotifier.instance.notifyResultsChanged();
+
+    return result;
   }
 
   /// Submete uma resposta de uma atividade criada/iniciada pelo fluxo de deploy.
@@ -161,7 +166,7 @@ class ActivityWorkflowFacade {
 
     final localActivityId = activity['id'] as int;
 
-    return submissionRepository.submitAnswer(
+    final result = await submissionRepository.submitAnswer(
       activityId: localActivityId,
       remoteActivityId: remoteActivityId,
       activityType: activityType,
@@ -169,12 +174,14 @@ class ActivityWorkflowFacade {
       nativeLanguageCode: nativeLanguageCode,
       targetLanguageCode: targetLanguageCode,
     );
+
+    AppEventNotifier.instance.notifyResultsChanged();
+
+    return result;
   }
 
   /// Carrega resultados recentes para o ecrã "Meus Resultados".
-  Future<List<Map<String, Object?>>> loadRecentResults({
-    int limit = 20,
-  }) {
+  Future<List<Map<String, Object?>>> loadRecentResults({int limit = 20}) {
     return submissionDao.getRecentResults(limit: limit);
   }
 
@@ -187,6 +194,14 @@ class ActivityWorkflowFacade {
       submissionDao: submissionDao,
     );
 
-    return command.execute();
+    final result = await command.execute();
+
+    AppEventNotifier.instance.notifySyncCompleted();
+
+    if (result.syncedCount > 0) {
+      AppEventNotifier.instance.notifyResultsChanged();
+    }
+
+    return result;
   }
 }

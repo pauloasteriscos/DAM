@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../data/facades/activity_workflow_facade.dart';
 import '../models/app_status.dart';
+import '../state/app_event_notifier.dart';
 
 /// Conteúdo da página "Meus Resultados".
 ///
 /// Nesta Sprint 2, a página permite carregar resultados
 /// guardados localmente após submissão de atividades.
 ///
-/// O carregamento dos resultados é delegado para ActivityWorkflowFacade,
-/// reduzindo o acoplamento desta tela com SQLite e DAO.
+/// Agora também observa eventos da aplicação:
+/// quando uma submissão ou sincronização altera os resultados,
+/// esta página recarrega automaticamente.
 class ResultsContent extends StatefulWidget {
   const ResultsContent({super.key});
 
@@ -22,7 +24,41 @@ class _ResultsContentState extends State<ResultsContent> {
   String? _errorMessage;
   List<Map<String, Object?>> _results = [];
 
+  @override
+  void initState() {
+    super.initState();
+
+    AppEventNotifier.instance.addListener(_handleAppEvent);
+
+    // Carrega automaticamente quando a página é criada.
+    Future.microtask(_loadResults);
+  }
+
+  @override
+  void dispose() {
+    AppEventNotifier.instance.removeListener(_handleAppEvent);
+    super.dispose();
+  }
+
+  /// Chamado quando algum evento global da app ocorre.
+  ///
+  /// Exemplo:
+  /// - submissão concluída;
+  /// - sincronização concluída;
+  /// - resultados alterados.
+  void _handleAppEvent() {
+    if (_isLoading) {
+      return;
+    }
+
+    _loadResults();
+  }
+
   Future<void> _loadResults() async {
+    if (!mounted) {
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -74,15 +110,19 @@ class _ResultsContentState extends State<ResultsContent> {
                   )
                 : const Icon(Icons.refresh),
             label: Text(
-              _isLoading ? 'A carregar...' : 'Carregar resultados',
+              _isLoading ? 'A carregar...' : 'Atualizar resultados',
               style: const TextStyle(fontSize: 17),
             ),
           ),
         ),
+
         const SizedBox(height: 18),
+
         if (_errorMessage != null) _buildErrorBox(),
+
         if (_results.isEmpty && !_isLoading && _errorMessage == null)
           _buildEmptyState(),
+
         if (_results.isNotEmpty) _buildResultsList(),
       ],
     );
@@ -98,8 +138,8 @@ class _ResultsContentState extends State<ResultsContent> {
         border: Border.all(color: Colors.white12),
       ),
       child: const Text(
-        'Ainda não há resultados carregados. '
-        'Submete uma atividade e depois volta aqui para consultar o histórico.',
+        'Ainda não há resultados disponíveis. '
+        'Submete uma atividade para consultar o histórico.',
         textAlign: TextAlign.center,
         style: TextStyle(color: Colors.white70, height: 1.4),
       ),
@@ -140,12 +180,16 @@ class _ResultsContentState extends State<ResultsContent> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
               const SizedBox(height: 8),
+
               Text(
                 'Tipo: $type',
                 style: const TextStyle(color: Colors.white70),
               ),
+
               const SizedBox(height: 6),
+
               Text(
                 'Pontuação: $score',
                 style: const TextStyle(
@@ -154,17 +198,23 @@ class _ResultsContentState extends State<ResultsContent> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+
               const SizedBox(height: 8),
+
               Text(
                 feedback,
                 style: const TextStyle(color: Colors.white70, height: 1.4),
               ),
+
               const SizedBox(height: 8),
+
               Text(
                 'Estado: $syncStatusLabel',
                 style: const TextStyle(color: Colors.white70, fontSize: 13),
               ),
+
               const SizedBox(height: 8),
+
               Text(
                 'Data: $createdAt',
                 style: const TextStyle(color: Colors.white38, fontSize: 12),
