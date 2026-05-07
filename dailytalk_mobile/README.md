@@ -2,7 +2,7 @@
 
 Aplicação móvel desenvolvida em Flutter para o projeto **Erasmus DailyTalk.pt**, no âmbito da unidade curricular **DAM - Desenvolvimento de Aplicações Móveis**.
 
-O objetivo da aplicação é apoiar alunos em mobilidade Erasmus+ na prática de comunicação em situações reais do quotidiano escolar, através de atividades gamificadas como vocabulário, áudio, diálogos, quizzes e desafios.
+O objetivo da aplicação é apoiar crianças e jovens em mobilidade escolar, normalmente entre os 11 e os 15 anos, na prática de comunicação em situações reais do quotidiano escolar, através de atividades gamificadas como vocabulário, áudio, diálogos, quizzes e desafios.
 
 Esta versão contempla a evolução até à **Sprint 2**, incluindo a estrutura inicial da aplicação, navegação, Home gamificada, base de dados local SQLite, configuração de atividades, submissão de respostas, apresentação de resultados e aplicação inicial de padrões de software para melhorar a organização e manutenção do código.
 
@@ -23,8 +23,8 @@ A aplicação já possui:
   - idioma que o aluno pretende aprender;
 - estrutura SQLite local usando sqflite;
 - página de configuração e criação de atividade;
-- simulação de integração com o endpoint /deploy;
-- fluxo de submissão de respostas com simulação do endpoint /submit;
+- simulação de integração com o endpoint de deploy;
+- fluxo de submissão de respostas com simulação do endpoint de submissão;
 - gravação local de atividades, submissões e resultados;
 - página de resultados com histórico de pontuações e estado de sincronização;
 - estrutura inicial de sincronização de submissões pendentes;
@@ -35,18 +35,28 @@ A aplicação já possui:
 
 ## Objetivo do projeto
 
-O DailyTalk.pt Mobile será gratuito e pretende disponibilizar uma experiência educativa móvel, interativa e gamificada, permitindo que os alunos pratiquem comunicação em diferentes contextos, como:
+O DailyTalk.pt Mobile será gratuito e pretende disponibilizar uma experiência educativa móvel, interativa e gamificada, permitindo que crianças e jovens pratiquem comunicação em diferentes contextos escolares e interculturais, como:
 
 - sala de aula;
-- apresentações;
+- apresentações escolares;
 - conversas informais;
-- situações de integração escolar;
+- situações de integração no colégio;
+- chegada a uma casa de acolhimento;
+- comunicação com anfitriões;
 - vocabulário do quotidiano;
 - diálogos guiados;
 - compreensão oral;
 - quizzes de reforço.
 
 A aplicação foi pensada para funcionar com apoio de um backend existente, mas também com suporte local básico através de SQLite, preparando a app para cenários de conectividade instável.
+
+---
+
+## Público-alvo
+
+O DailyTalk.pt Mobile é orientado para crianças e jovens, normalmente entre os 11 e os 15 anos, em contexto escolar ou de intercâmbio.
+
+O foco da aplicação não é o ensino superior nem o contexto universitário. A aplicação pretende apoiar situações reais que podem ocorrer no quotidiano escolar, em casa de acolhimento, em atividades do colégio ou em interações com colegas, professores e anfitriões.
 
 ---
 
@@ -69,7 +79,7 @@ A opção aparece como **Language** no menu, por ser uma designação reconhecí
 
 O DailyTalk.pt Mobile prevê disponibilizar atividades educativas de dois tipos principais: atividades criadas pela equipa da aplicação e atividades criadas pela própria comunidade de utilizadores.
 
-As atividades criadas pela equipa funcionam como conteúdos base, garantindo que o aluno tem sempre acesso a exercícios estruturados, alinhados com os objetivos pedagógicos da aplicação e adequados ao contexto de comunicação em ambiente Erasmus+.
+As atividades criadas pela equipa funcionam como conteúdos base, garantindo que o aluno tem sempre acesso a exercícios estruturados, alinhados com os objetivos pedagógicos da aplicação e adequados ao contexto de comunicação escolar e intercultural.
 
 Além disso, o aluno poderá criar as suas próprias atividades com base nas dificuldades que encontra durante a aprendizagem. Por exemplo, se tiver dificuldades em vocabulário, diálogos do quotidiano escolar, compreensão oral ou situações específicas de comunicação, poderá propor uma nova atividade para praticar esse conteúdo.
 
@@ -232,7 +242,7 @@ Nesta versão foram acrescentados:
 
 - página **Praticar** com atividade predefinida;
 - submissão de resposta através de fluxo mockado;
-- preparação para o endpoint /submit;
+- preparação para o endpoint de submissão;
 - gravação de submissões no SQLite;
 - gravação de resultados no SQLite;
 - apresentação do histórico em **Meus Resultados**;
@@ -242,7 +252,7 @@ Nesta versão foram acrescentados:
 
 O fluxo principal passou a ser:
 
-Praticar atividade → Submeter resposta → Guardar resultado → Consultar histórico
+**Praticar atividade → Submeter resposta → Guardar resultado → Consultar histórico**
 
 Além disso, a criação de atividades foi reposicionada como funcionalidade secundária, acessível pelo menu superior e pelos ajustes, reforçando que o foco principal da aplicação é a prática de atividades já existentes.
 
@@ -303,25 +313,25 @@ A integração real com o backend poderá ser ativada futuramente, mantendo a me
 
 ---
 
----
-
 ## Orientação prevista para a Sprint 3
 
 A Sprint 3 deverá focar-se na evolução da aplicação para suportar perfis diferenciados de utilização.
 
 A aplicação deverá passar a considerar três perfis principais:
 
-- **Estudante**: utiliza a aplicação para praticar a língua escolhida em situações reais, como responder a perguntas, pedir informações, compreender horários, falar sobre alimentação ou interagir no contexto academico.
-- **Anfitrião**: utiliza a aplicação para se preparar para receber estudantes Erasmus, treinando frases de acolhimento, instruções simples, perguntas úteis e comunicação inicial.
+- **Estudante**: utiliza a aplicação para praticar a língua escolhida em situações reais, como responder a perguntas, pedir informações, compreender horários, falar sobre alimentação ou interagir no contexto escolar.
+- **Anfitrião**: utiliza a aplicação para se preparar para receber alunos estrangeiros ou em mobilidade escolar, treinando frases de acolhimento, instruções simples, perguntas úteis e comunicação inicial.
 - **Professor**: perfil pedagógico previsto para acompanhar progresso, sugerir atividades, validar conteúdos e consultar dificuldades frequentes.
 
-O foco prioritário da Sprint 3 será o perfil **Anfitrião**, por representar uma dimensão importante do projeto: preparar não só o estudante Erasmus, mas também a pessoa que o recebe.
+O foco prioritário da Sprint 3 será o perfil **Anfitrião**, por representar uma dimensão importante do projeto: preparar não só o aluno visitante, mas também a pessoa que o recebe.
 
 A aplicação deverá organizar as atividades por cenários reais de comunicação, evitando questionários longos e privilegiando desafios curtos, práticos e contextualizados.
 
 Também deverá ser mantida a regra de privacidade definida no projeto: dados sensíveis, como alergias, restrições alimentares reais ou informações pessoais, não devem ser enviados ao servidor. Esses conteúdos podem aparecer como exemplos de treino linguístico, mas não devem ser tratados como dados reais do utilizador.
 
 Caso exista uma funcionalidade futura de notas privadas, estas deverão ficar apenas no dispositivo, sem sincronização e com aviso claro para o utilizador.
+
+---
 
 ## Funcionalidades ainda previstas
 
@@ -340,7 +350,7 @@ As próximas etapas do projeto poderão incluir:
 - loja de skins e itens;
 - reputação do criador de atividades;
 - moderação de atividades com apoio de IA;
-- autenticação de alunos e professores;
+- autenticação de alunos, professores e anfitriões;
 - internacionalização completa da interface.
 
 ---
@@ -376,9 +386,8 @@ Entregas contempladas:
 - histórico em Meus Resultados;
 - estados de sincronização;
 - estrutura inicial de sincronização;
+- atualização automática dos resultados;
 - aplicação dos padrões Strategy, Factory simples, Facade, Command e Observer.
-
-### Sprint 3
 
 ### Sprint 3
 
@@ -398,7 +407,8 @@ Previsto:
   - regras da casa;
   - alimentação;
   - transportes;
-  - universidade;
+  - escola;
+  - colégio;
 - desenvolvimento do perfil Anfitrião como perfil real da aplicação, e não apenas como texto explicativo;
 - adaptação da página Praticar para apresentar atividades conforme o perfil selecionado;
 - preparação de atividades para o anfitrião treinar frases de acolhimento, instruções simples e perguntas úteis;
@@ -418,4 +428,4 @@ Previsto:
 
 Esta versão ainda é um protótipo funcional inicial. Algumas funcionalidades estão implementadas de forma mockada para validar o fluxo da Sprint 2 sem depender da disponibilidade do backend real.
 
-O objetivo desta fase é garantir uma estrutura base funcional, modular e preparada para evolução, mantendo o foco principal na prática de atividades e na experiência gamificada do aluno.
+O objetivo desta fase é garantir uma estrutura base funcional, modular e preparada para evolução, mantendo o foco principal na prática de atividades e na experiência gamificada do aluno em contexto escolar.
