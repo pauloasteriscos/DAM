@@ -5,14 +5,14 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// Esta implementação usa sqflite diretamente, sem Drift.
 /// A base é usada para cache local, submissões pendentes,
-/// resultados, análises e fila de sincronização.
+/// resultados, análises, fila de sincronização e configurações locais.
 class AppDatabase {
   AppDatabase._privateConstructor();
 
   static final AppDatabase instance = AppDatabase._privateConstructor();
 
   static const String _databaseName = 'dailytalk_mobile.db';
-  static const int _databaseVersion = 1;
+  static const int _databaseVersion = 2;
 
   static Database? _database;
 
@@ -45,7 +45,7 @@ class AppDatabase {
     await db.execute('PRAGMA foreign_keys = ON');
   }
 
-  /// Cria as tabelas da versão inicial da base de dados.
+  /// Cria as tabelas da base de dados.
   Future<void> _onCreate(Database db, int version) async {
     final batch = db.batch();
 
@@ -56,17 +56,31 @@ class AppDatabase {
     await batch.commit(noResult: true);
   }
 
-  /// Ponto de evolução para versões futuras da base.
-  ///
-  /// Exemplo:
-  /// if (oldVersion < 2) { await db.execute('ALTER TABLE ...'); }
+  /// Atualiza a base quando há evolução de versão.
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Nesta versão inicial ainda não há migrações.
+    if (oldVersion < 2) {
+      final batch = db.batch();
+
+      _createLocalPrivateNotesTable(batch);
+      _createLocalPrivateNotesIndexes(batch);
+
+      final now = DateTime.now().toIso8601String();
+
+      batch.insert('app_settings', {
+        'key': 'database_version',
+        'value': newVersion.toString(),
+        'value_type': 'number',
+        'updated_at': now,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+      await batch.commit(noResult: true);
+    }
   }
 
   /// Fecha a base de dados.
   Future<void> close() async {
     final db = _database;
+
     if (db != null) {
       await db.close();
       _database = null;
@@ -208,6 +222,8 @@ class AppDatabase {
       )
     ''');
 
+    _createLocalPrivateNotesTable(batch);
+
     batch.execute('''
       CREATE TABLE IF NOT EXISTS app_settings (
         key TEXT PRIMARY KEY,
@@ -218,16 +234,70 @@ class AppDatabase {
     ''');
   }
 
+  /// Cria a tabela de notas privadas locais.
+  ///
+  /// Esta tabela não deve ser sincronizada.
+  /// Não tem remote_id, sync_status, endpoint ou qualquer ligação com sync_queue.
+  /// O objetivo é manter estes dados apenas no dispositivo.
+  void _createLocalPrivateNotesTable(Batch batch) {
+    batch.execute('''
+      CREATE TABLE IF NOT EXISTS local_private_notes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        note_text TEXT NOT NULL,
+        scenario TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+  }
+
   /// Cria índices para acelerar consultas frequentes.
   void _createIndexes(Batch batch) {
-    batch.execute('CREATE INDEX IF NOT EXISTS idx_activities_remote_activity_id ON activities(remote_activity_id)');
-    batch.execute('CREATE INDEX IF NOT EXISTS idx_activity_params_activity_id ON activity_params(activity_id)');
-    batch.execute('CREATE INDEX IF NOT EXISTS idx_students_invenira_std_id ON students(invenira_std_id)');
-    batch.execute('CREATE INDEX IF NOT EXISTS idx_submissions_activity_id ON submissions(activity_id)');
-    batch.execute('CREATE INDEX IF NOT EXISTS idx_submissions_sync_status ON submissions(sync_status)');
-    batch.execute('CREATE INDEX IF NOT EXISTS idx_submission_results_submission_id ON submission_results(submission_id)');
-    batch.execute('CREATE INDEX IF NOT EXISTS idx_analytics_records_activity_student ON analytics_records(remote_activity_id, invenira_std_id)');
-    batch.execute('CREATE INDEX IF NOT EXISTS idx_sync_queue_status ON sync_queue(sync_status)');
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_activities_remote_activity_id ON activities(remote_activity_id)',
+    );
+
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_activity_params_activity_id ON activity_params(activity_id)',
+    );
+
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_students_invenira_std_id ON students(invenira_std_id)',
+    );
+
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_submissions_activity_id ON submissions(activity_id)',
+    );
+
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_submissions_sync_status ON submissions(sync_status)',
+    );
+
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_submission_results_submission_id ON submission_results(submission_id)',
+    );
+
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_analytics_records_activity_student ON analytics_records(remote_activity_id, invenira_std_id)',
+    );
+
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_sync_queue_status ON sync_queue(sync_status)',
+    );
+
+    _createLocalPrivateNotesIndexes(batch);
+  }
+
+  /// Cria índices para as notas privadas locais.
+  void _createLocalPrivateNotesIndexes(Batch batch) {
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_local_private_notes_scenario ON local_private_notes(scenario)',
+    );
+
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_local_private_notes_updated_at ON local_private_notes(updated_at)',
+    );
   }
 
   /// Insere configurações iniciais da aplicação.

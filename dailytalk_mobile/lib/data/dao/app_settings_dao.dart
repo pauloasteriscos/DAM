@@ -1,5 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 
+import '../../models/user_profile.dart';
+
 /// DAO para configurações simples da aplicação.
 ///
 /// Não usar esta tabela para tokens, passwords ou API keys.
@@ -8,6 +10,9 @@ class AppSettingsDao {
   AppSettingsDao(this.db);
 
   final Database db;
+
+  /// Chave usada para guardar o perfil selecionado pelo utilizador.
+  static const String selectedProfileKey = 'selected_profile';
 
   /// Guarda uma configuração simples.
   Future<void> setValue({
@@ -37,7 +42,10 @@ class AppSettingsDao {
       limit: 1,
     );
 
-    if (rows.isEmpty) return null;
+    if (rows.isEmpty) {
+      return null;
+    }
+
     return rows.first['value']?.toString();
   }
 
@@ -45,7 +53,9 @@ class AppSettingsDao {
   Future<bool> getBool(String key, {bool defaultValue = false}) async {
     final value = await getString(key);
 
-    if (value == null) return defaultValue;
+    if (value == null) {
+      return defaultValue;
+    }
 
     return value == 'true' || value == '1';
   }
@@ -53,7 +63,10 @@ class AppSettingsDao {
   /// Lê uma configuração inteira.
   Future<int?> getInt(String key) async {
     final value = await getString(key);
-    if (value == null) return null;
+
+    if (value == null) {
+      return null;
+    }
 
     return int.tryParse(value);
   }
@@ -65,5 +78,28 @@ class AppSettingsDao {
       where: 'key = ?',
       whereArgs: [key],
     );
+  }
+
+  /// Guarda o perfil selecionado pelo utilizador.
+  ///
+  /// Exemplos:
+  /// - student
+  /// - host
+  /// - teacher
+  Future<void> setSelectedProfile(UserProfileType profile) async {
+    await setValue(
+      key: selectedProfileKey,
+      value: profile.databaseValue,
+      valueType: 'text',
+    );
+  }
+
+  /// Lê o perfil selecionado pelo utilizador.
+  ///
+  /// Se ainda não existir perfil guardado, assume Estudante como padrão.
+  Future<UserProfileType> getSelectedProfile() async {
+    final value = await getString(selectedProfileKey);
+
+    return UserProfileType.fromDatabase(value);
   }
 }

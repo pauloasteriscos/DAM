@@ -265,44 +265,58 @@ class HomeGamificada extends StatelessWidget {
   }
 
   /// Mapa vertical gamificado.
-  Widget _buildActivityMap(
-    BuildContext context,
-    List<LessonItem> lessons,
-  ) {
-    return Column(
-      children: List.generate(lessons.length, (index) {
-        final lesson = lessons[index];
+///
+/// No mobile, o mapa acompanha a largura disponível.
+/// Na Web/desktop, a largura máxima é limitada para evitar que os nós
+/// fiquem demasiado afastados nas extremidades do ecrã.
+Widget _buildActivityMap(
+  BuildContext context,
+  List<LessonItem> lessons,
+) {
+  return Center(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(
+        // Ajusta este valor se quiseres o mapa mais aberto ou mais compacto.
+        // 760 mantém os nós alternados, mas visualmente próximos no Web.
+        maxWidth: 760,
+      ),
+      child: Column(
+        children: List.generate(lessons.length, (index) {
+          final lesson = lessons[index];
 
-        // Alterna entre esquerda e direita para simular um percurso.
-        final alignLeft = index % 2 == 0;
+          // Alterna entre esquerda e direita para simular um percurso.
+          final alignLeft = index % 2 == 0;
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 11),
-          child: Align(
-            alignment: alignLeft ? Alignment.centerLeft : Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: alignLeft ? 52 : 0,
-                right: alignLeft ? 0 : 52,
-              ),
-              child: LessonNode(
-                lesson: lesson,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Abrir atividade: ${lesson.title}',
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Align(
+              alignment:
+                  alignLeft ? Alignment.centerLeft : Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: alignLeft ? 42 : 0,
+                  right: alignLeft ? 0 : 42,
+                ),
+                child: LessonNode(
+                  lesson: lesson,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Abrir atividade: ${lesson.title}',
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-        );
-      }),
-    );
-  }
+          );
+        }),
+      ),
+    ),
+  );
+}
 
   /// Painel compacto de atalhos e feedback.
   ///

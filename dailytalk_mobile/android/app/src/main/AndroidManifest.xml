@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="dailytalk_mobile"
+        android:label="DailyTalk"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

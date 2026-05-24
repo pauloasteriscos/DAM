@@ -12,16 +12,16 @@ void main() {
     expect(find.text('Tema: Comunicação e amizades'), findsOneWidget);
   });
 
-  testWidgets('Navega para a página Praticar', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Navega para a página Praticar', (WidgetTester tester) async {
     await tester.pumpWidget(const DailyTalkApp());
 
     await tester.tap(find.text('Praticar'));
     await tester.pumpAndSettle();
 
     expect(find.text('Praticar'), findsWidgets);
-    expect(find.textContaining('Como perguntarias'), findsOneWidget);
+    expect(find.text('Prática para Estudante'), findsOneWidget);
+    expect(find.text('Perfil: Estudante'), findsOneWidget);
+    expect(find.text('Desafio'), findsOneWidget);
     expect(find.text('Submeter resposta'), findsOneWidget);
   });
 }

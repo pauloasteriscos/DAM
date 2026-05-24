@@ -4,11 +4,14 @@ import '../data/facades/activity_workflow_facade.dart';
 import 'create_activity_page.dart';
 import 'language_selection_page.dart';
 import 'my_activities_page.dart';
+import 'profile_selection_page.dart';
+import 'private_notes_page.dart';
 
 /// Conteúdo da página de Ajustes.
 ///
-/// Concentra opções secundárias da aplicação, incluindo idioma,
-/// comunidade, criação de atividades, ajuda, sincronização e informação geral.
+/// Concentra opções secundárias da aplicação, incluindo perfil,
+/// idioma, comunidade, criação de atividades, ajuda, sincronização
+/// e informação geral.
 class SettingsContent extends StatelessWidget {
   const SettingsContent({super.key});
 
@@ -16,6 +19,22 @@ class SettingsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        _SettingsButton(
+          icon: Icons.person_pin_circle,
+          title: 'Perfil',
+          description: 'Escolher entre Estudante, Anfitrião ou Professor.',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ProfileSelectionPage(),
+              ),
+            );
+          },
+        ),
+
+        const SizedBox(height: 12),
+
         _SettingsButton(
           icon: Icons.language,
           title: 'Language',
@@ -57,13 +76,26 @@ class SettingsContent extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const MyActivitiesPage(),
-              ),
+              MaterialPageRoute(builder: (context) => const MyActivitiesPage()),
             );
           },
         ),
 
+        const SizedBox(height: 12),
+
+        _SettingsButton(
+          icon: Icons.lock,
+          title: 'Notas privadas',
+          description:
+              'Guardar notas opcionais apenas neste dispositivo, sem sincronização.',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PrivateNotesPage()),
+            );
+          },
+        ),
+        
         const SizedBox(height: 12),
 
         _SettingsButton(
@@ -122,9 +154,7 @@ class SettingsContent extends StatelessWidget {
       );
     } catch (error) {
       messenger.showSnackBar(
-        SnackBar(
-          content: Text('Erro ao sincronizar: $error'),
-        ),
+        SnackBar(content: Text('Erro ao sincronizar: $error')),
       );
     }
   }
@@ -135,20 +165,15 @@ class SettingsContent extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF14252D),
-          title: const Text(
-            'Ajuda',
-            style: TextStyle(color: Colors.white),
-          ),
+          title: const Text('Ajuda', style: TextStyle(color: Colors.white)),
           content: const Text(
             'Usa a Home para acompanhar o teu percurso.\n\n'
             'Em Praticar, responde a atividades predefinidas.\n\n'
             'Em Resultados, acompanha o teu desempenho.\n\n'
             'A criação de atividades é uma opção secundária, disponível no menu superior e nos Ajustes.\n\n'
+            'A opção Perfil permitirá adaptar atividades para Estudante, Anfitrião ou Professor.\n\n'
             'A opção Sincronizar permite enviar submissões pendentes quando existir ligação.',
-            style: TextStyle(
-              color: Colors.white70,
-              height: 1.4,
-            ),
+            style: TextStyle(color: Colors.white70, height: 1.4),
           ),
           actions: [
             TextButton(
@@ -173,19 +198,15 @@ class SettingsContent extends StatelessWidget {
           ),
           content: const SingleChildScrollView(
             child: Text(
-              'O DailyTalk.pt ajuda-te a praticar comunicação em situações reais '
-              'do quotidiano escolar, através de atividades de vocabulário, áudio, '
-              'diálogos, quizzes e desafios.\n\n'
-              'A aplicação inclui atividades criadas pela equipa DailyTalk.pt e '
-              'também poderá incluir atividades propostas pela comunidade.\n\n'
-              'Quem cria atividades úteis poderá ganhar pontos, aumentar a reputação '
-              'como ajudante da comunidade e desbloquear itens de personalização.\n\n'
-              'As atividades criadas pela comunidade poderão ser avaliadas, revistas '
-              'e aprovadas antes de ficarem disponíveis para outros utilizadores.',
-              style: TextStyle(
-                color: Colors.white70,
-                height: 1.4,
-              ),
+              'O DailyTalk.pt ajuda crianças e jovens a praticar comunicação em situações reais '
+              'do quotidiano escolar, através de atividades de vocabulário, áudio, diálogos, '
+              'quizzes e desafios.\n\n'
+              'A aplicação inclui atividades criadas pela equipa DailyTalk.pt e também poderá '
+              'incluir atividades propostas pela comunidade.\n\n'
+              'Na próxima evolução, a aplicação passará a considerar perfis como Estudante, '
+              'Anfitrião e Professor, permitindo atividades mais adequadas a cada papel no '
+              'contexto escolar.',
+              style: TextStyle(color: Colors.white70, height: 1.4),
             ),
           ),
           actions: [
@@ -230,11 +251,7 @@ class _SettingsButton extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(
-                icon,
-                color: Colors.lightBlueAccent,
-                size: 34,
-              ),
+              Icon(icon, color: Colors.lightBlueAccent, size: 34),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -259,10 +276,7 @@ class _SettingsButton extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
-                color: Colors.white54,
-              ),
+              const Icon(Icons.chevron_right, color: Colors.white54),
             ],
           ),
         ),

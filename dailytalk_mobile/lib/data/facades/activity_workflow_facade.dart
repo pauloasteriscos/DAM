@@ -1,9 +1,11 @@
 import '../../models/app_status.dart';
+import '../../models/user_profile.dart';
 import '../../state/app_event_notifier.dart';
 import '../../strategies/activity_strategy.dart';
 import '../api/dailytalk_api_service.dart';
 import '../commands/sync_command.dart';
 import '../dao/activity_dao.dart';
+import '../dao/pedagogical_analytics_dao.dart';
 import '../dao/submission_dao.dart';
 import '../database/app_database.dart';
 import '../repositories/activity_repository.dart';
@@ -36,17 +38,20 @@ class ActivityLaunchResult {
 /// - gravação local;
 /// - submissão de respostas;
 /// - carregamento de resultados;
-/// - sincronização de submissões pendentes.
+/// - sincronização de submissões pendentes;
+/// - registo de analytics pedagógicos.
 class ActivityWorkflowFacade {
   ActivityWorkflowFacade._({
     required this.activityDao,
     required this.submissionDao,
+    required this.pedagogicalAnalyticsDao,
     required this.activityRepository,
     required this.submissionRepository,
   });
 
   final ActivityDao activityDao;
   final SubmissionDao submissionDao;
+  final PedagogicalAnalyticsDao pedagogicalAnalyticsDao;
   final ActivityRepository activityRepository;
   final SubmissionRepository submissionRepository;
 
@@ -57,10 +62,12 @@ class ActivityWorkflowFacade {
     final apiService = DailyTalkApiService();
     final activityDao = ActivityDao(db);
     final submissionDao = SubmissionDao(db);
+    final pedagogicalAnalyticsDao = PedagogicalAnalyticsDao(db);
 
     return ActivityWorkflowFacade._(
       activityDao: activityDao,
       submissionDao: submissionDao,
+      pedagogicalAnalyticsDao: pedagogicalAnalyticsDao,
       activityRepository: ActivityRepository(
         apiService: apiService,
         activityDao: activityDao,
@@ -106,14 +113,21 @@ class ActivityWorkflowFacade {
   Future<int> ensurePredefinedActivity({
     required ActivityStrategy strategy,
     String targetLanguageCode = 'it-IT',
+    String? remoteActivityIdOverride,
+    String? titleOverride,
+    String? scenarioOverride,
+    String? difficultyOverride,
   }) async {
+    final remoteActivityId =
+        remoteActivityIdOverride ?? strategy.predefinedRemoteActivityId;
+
     return activityDao.upsertActivity({
-      'remote_activity_id': strategy.predefinedRemoteActivityId,
-      'title': 'Prática: ${strategy.label}',
+      'remote_activity_id': remoteActivityId,
+      'title': titleOverride ?? 'Prática: ${strategy.label}',
       'type': strategy.type,
-      'scenario': strategy.defaultScenario,
+      'scenario': scenarioOverride ?? strategy.defaultScenario,
       'language_code': targetLanguageCode,
-      'difficulty': strategy.defaultDifficulty,
+      'difficulty': difficultyOverride ?? strategy.defaultDifficulty,
       'source': ActivitySourceType.predefined.databaseValue,
       'is_cached': 1,
       'is_active': 1,
@@ -123,25 +137,49 @@ class ActivityWorkflowFacade {
   /// Submete uma resposta de uma atividade predefinida.
   ///
   /// Usado pela aba "Praticar".
+  /// Também pode registar analytics pedagógicos locais quando recebe
+  /// o perfil do utilizador e o cenário da atividade.
   Future<Map<String, dynamic>> submitPracticeAnswer({
     required ActivityStrategy strategy,
     required String answerText,
     String nativeLanguageCode = 'pt-PT',
     String targetLanguageCode = 'it-IT',
+    String? remoteActivityIdOverride,
+    String? titleOverride,
+    String? scenarioOverride,
+    String? difficultyOverride,
+    UserProfileType? userProfile,
   }) async {
+    final remoteActivityId =
+        remoteActivityIdOverride ?? strategy.predefinedRemoteActivityId;
+
     final localActivityId = await ensurePredefinedActivity(
       strategy: strategy,
       targetLanguageCode: targetLanguageCode,
+      remoteActivityIdOverride: remoteActivityId,
+      titleOverride: titleOverride,
+      scenarioOverride: scenarioOverride,
+      difficultyOverride: difficultyOverride,
     );
 
     final result = await submissionRepository.submitAnswer(
       activityId: localActivityId,
-      remoteActivityId: strategy.predefinedRemoteActivityId,
+      remoteActivityId: remoteActivityId,
       activityType: strategy.type,
       answerText: answerText,
       nativeLanguageCode: nativeLanguageCode,
       targetLanguageCode: targetLanguageCode,
     );
+
+    if (userProfile != null && scenarioOverride != null) {
+      await pedagogicalAnalyticsDao.recordPracticeAttempt(
+        profile: userProfile,
+        scenario: scenarioOverride,
+        activityType: strategy.type,
+        score: _readScore(result['score']),
+        feedbackText: result['feedback']?.toString(),
+      );
+    }
 
     AppEventNotifier.instance.notifyResultsChanged();
 
@@ -185,6 +223,15 @@ class ActivityWorkflowFacade {
     return submissionDao.getRecentResults(limit: limit);
   }
 
+  /// Carrega analytics pedagógicos locais.
+  ///
+  /// Estes dados são agregados por perfil, cenário e tipo de atividade.
+  Future<List<Map<String, Object?>>> loadPedagogicalAnalytics({
+    int limit = 30,
+  }) {
+    return pedagogicalAnalyticsDao.getPedagogicalAnalytics(limit: limit);
+  }
+
   /// Sincroniza submissões pendentes ou com falha.
   ///
   /// Usa o padrão Command para encapsular cada operação de sincronização.
@@ -203,5 +250,18 @@ class ActivityWorkflowFacade {
     }
 
     return result;
+  }
+
+  /// Lê a pontuação de forma segura a partir do resultado.
+  double? _readScore(Object? value) {
+    if (value == null) {
+      return null;
+    }
+
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(value.toString());
   }
 }

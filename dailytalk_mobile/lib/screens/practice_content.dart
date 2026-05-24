@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 
+import '../data/dao/app_settings_dao.dart';
+import '../data/database/app_database.dart';
 import '../data/facades/activity_workflow_facade.dart';
-import '../strategies/activity_strategy.dart';
+import '../models/practice_activity.dart';
+import '../models/user_profile.dart';
+import '../state/app_event_notifier.dart';
 
 /// Conteúdo da página "Praticar".
 ///
 /// Esta página representa o foco principal da aplicação:
 /// praticar atividades já existentes/predefinidas.
 ///
-/// A lógica do tipo de atividade é delegada para uma ActivityStrategy.
-/// O fluxo de submissão é delegado para ActivityWorkflowFacade.
+/// A atividade apresentada considera o perfil selecionado:
+/// - Estudante;
+/// - Anfitrião;
+/// - Professor.
 class PracticeContent extends StatefulWidget {
   const PracticeContent({super.key});
 
@@ -19,29 +25,96 @@ class PracticeContent extends StatefulWidget {
 
 class _PracticeContentState extends State<PracticeContent> {
   final _formKey = GlobalKey<FormState>();
-
   final _answerController = TextEditingController();
 
+  bool _isLoadingProfile = true;
   bool _isSubmitting = false;
+
   String? _errorMessage;
   Map<String, dynamic>? _result;
 
-  /// Estratégia atualmente usada na página Praticar.
-  ///
-  /// Nesta fase, usamos uma atividade predefinida de diálogo.
-  /// Mais tarde, esta estratégia poderá ser escolhida pelo mapa de atividades.
-  final ActivityStrategy _strategy = const DialogActivityStrategy();
+  UserProfileType _selectedProfile = UserProfileType.student;
+
+  int _lastProfileVersion = AppEventNotifier.instance.profileVersion;
+
+  @override
+  void initState() {
+    super.initState();
+
+    AppEventNotifier.instance.addListener(_handleAppEvent);
+    _loadSelectedProfile();
+  }
 
   @override
   void dispose() {
+    AppEventNotifier.instance.removeListener(_handleAppEvent);
     _answerController.dispose();
     super.dispose();
+  }
+
+  /// Recarrega o perfil quando a aplicação notifica alteração de perfil.
+  void _handleAppEvent() {
+    final currentProfileVersion = AppEventNotifier.instance.profileVersion;
+
+    if (currentProfileVersion != _lastProfileVersion) {
+      _lastProfileVersion = currentProfileVersion;
+      _loadSelectedProfile();
+    }
+  }
+
+  /// Lê o perfil atualmente guardado em app_settings.
+  Future<void> _loadSelectedProfile() async {
+    try {
+      final db = await AppDatabase.instance.database;
+      final settingsDao = AppSettingsDao(db);
+
+      final selectedProfile = await settingsDao.getSelectedProfile();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _selectedProfile = selectedProfile;
+        _isLoadingProfile = false;
+        _result = null;
+        _errorMessage = null;
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _errorMessage = error.toString();
+        _isLoadingProfile = false;
+      });
+    }
+  }
+
+  /// Atividade prática atual conforme o perfil selecionado.
+  PracticeActivity get _currentActivity {
+    return PracticeActivityBank.firstForProfile(_selectedProfile);
+  }
+
+  /// Título geral apresentado na página.
+  String get _practiceTitle {
+    switch (_selectedProfile) {
+      case UserProfileType.student:
+        return 'Prática para Estudante';
+      case UserProfileType.host:
+        return 'Prática para Anfitrião';
+      case UserProfileType.teacher:
+        return 'Prática para Professor';
+    }
   }
 
   Future<void> _submitPracticeAnswer() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+
+    final activity = _currentActivity;
 
     setState(() {
       _isSubmitting = true;
@@ -53,10 +126,15 @@ class _PracticeContentState extends State<PracticeContent> {
       final facade = await ActivityWorkflowFacade.create();
 
       final result = await facade.submitPracticeAnswer(
-        strategy: _strategy,
+        strategy: activity.strategy,
         answerText: _answerController.text.trim(),
         nativeLanguageCode: 'pt-PT',
         targetLanguageCode: 'it-IT',
+        remoteActivityIdOverride: activity.remoteActivityId,
+        titleOverride: activity.title,
+        scenarioOverride: activity.scenario.databaseValue,
+        difficultyOverride: activity.difficulty,
+        userProfile: _selectedProfile,
       );
 
       if (!mounted) {
@@ -85,6 +163,12 @@ class _PracticeContentState extends State<PracticeContent> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingProfile) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final activity = _currentActivity;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -95,9 +179,9 @@ class _PracticeContentState extends State<PracticeContent> {
       ),
       child: Column(
         children: [
-          _buildActivityHeader(),
+          _buildProfileHeader(activity),
           const SizedBox(height: 18),
-          _buildQuestionCard(),
+          _buildQuestionCard(activity),
           const SizedBox(height: 18),
           if (_errorMessage != null) _buildErrorBox(),
           if (_result != null) _buildResultBox(),
@@ -106,13 +190,17 @@ class _PracticeContentState extends State<PracticeContent> {
     );
   }
 
-  Widget _buildActivityHeader() {
+  Widget _buildProfileHeader(PracticeActivity activity) {
     return Column(
       children: [
-        Icon(_strategy.icon, color: _strategy.fillColor, size: 58),
+        Icon(
+          activity.strategy.icon,
+          color: activity.strategy.fillColor,
+          size: 58,
+        ),
         const SizedBox(height: 12),
         Text(
-          'Atividade predefinida: ${_strategy.label}',
+          _practiceTitle,
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: Colors.white,
@@ -121,22 +209,48 @@ class _PracticeContentState extends State<PracticeContent> {
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Pratica uma situação simples de comunicação no contexto escolar.',
+        Text(
+          'Perfil: ${_selectedProfile.label}',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white70, height: 1.4),
+          style: const TextStyle(
+            color: Colors.lightBlueAccent,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Cenário: ${activity.scenario.label}',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.white70, fontSize: 15),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          activity.title,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 19,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          activity.description,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.white70, height: 1.4),
         ),
       ],
     );
   }
 
-  Widget _buildQuestionCard() {
+  Widget _buildQuestionCard(PracticeActivity activity) {
     return Form(
       key: _formKey,
       child: Column(
         children: [
           const Text(
-            'Pergunta',
+            'Desafio',
             style: TextStyle(
               color: Colors.lightBlueAccent,
               fontSize: 18,
@@ -145,7 +259,7 @@ class _PracticeContentState extends State<PracticeContent> {
           ),
           const SizedBox(height: 10),
           Text(
-            _strategy.defaultQuestion,
+            activity.question,
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.white,
@@ -164,7 +278,7 @@ class _PracticeContentState extends State<PracticeContent> {
               labelText: 'A tua resposta',
               alignLabelWithHint: true,
               labelStyle: const TextStyle(color: Colors.white70),
-              hintText: _strategy.answerHint,
+              hintText: activity.answerHint,
               hintStyle: const TextStyle(color: Colors.white38),
               filled: true,
               fillColor: const Color(0xFF0D1B22),
@@ -249,10 +363,7 @@ class _PracticeContentState extends State<PracticeContent> {
           const SizedBox(height: 8),
           Text(
             'Estado: $syncStatus',
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
           const SizedBox(height: 8),
           Text(
