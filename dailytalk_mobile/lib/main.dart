@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'data/database/database_factory_config.dart';
-import 'screens/main_navigation.dart';
+import 'screens/auth_gate.dart';
 
 /// Ponto de entrada da aplicação DailyTalk.pt.
 ///
@@ -33,7 +33,7 @@ class DailyTalkApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const MainNavigation(),
+      home: const AuthGate(),
     );
   }
 }

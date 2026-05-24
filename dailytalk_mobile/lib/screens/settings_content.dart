@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/facades/activity_workflow_facade.dart';
+import 'account_page.dart';
 import 'create_activity_page.dart';
 import 'language_selection_page.dart';
 import 'my_activities_page.dart';
@@ -19,6 +20,20 @@ class SettingsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        _SettingsButton(
+          icon: Icons.account_circle_outlined,
+          title: 'Conta',
+          description: 'Ver dados do perfil autenticado e terminar sessão.',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AccountPage()),
+            );
+          },
+        ),
+
+        const SizedBox(height: 12),
+
         _SettingsButton(
           icon: Icons.person_pin_circle,
           title: 'Perfil',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../screens/account_page.dart';
 import '../screens/create_activity_page.dart';
 import '../screens/language_selection_page.dart';
 import '../screens/my_activities_page.dart';
@@ -21,6 +22,15 @@ class TopOverflowMenu extends StatelessWidget {
       color: const Color(0xFF14252D),
       onSelected: (action) {
         switch (action) {
+          case _TopMenuAction.account:
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AccountPage(),
+              ),
+            );
+            break;
+
           case _TopMenuAction.language:
             Navigator.push(
               context,
@@ -51,8 +61,8 @@ class TopOverflowMenu extends StatelessWidget {
             break;
 
           case _TopMenuAction.sync:
-  _syncPendingSubmissions(context);
-  break;
+            _syncPendingSubmissions(context);
+            break;
 
           case _TopMenuAction.about:
             _showAboutDailyTalkDialog(context);
@@ -61,6 +71,10 @@ class TopOverflowMenu extends StatelessWidget {
       },
       itemBuilder: (context) {
         return const [
+          PopupMenuItem(
+            value: _TopMenuAction.account,
+            child: _MenuItemContent(icon: Icons.account_circle_outlined, text: 'Conta'),
+          ),
           PopupMenuItem(
             value: _TopMenuAction.language,
             child: _MenuItemContent(icon: Icons.language, text: 'Language'),
@@ -97,29 +111,29 @@ class TopOverflowMenu extends StatelessWidget {
   }
 
   Future<void> _syncPendingSubmissions(BuildContext context) async {
-  final messenger = ScaffoldMessenger.of(context);
+    final messenger = ScaffoldMessenger.of(context);
 
-  try {
-    final facade = await ActivityWorkflowFacade.create();
-    final result = await facade.syncPendingSubmissions();
+    try {
+      final facade = await ActivityWorkflowFacade.create();
+      final result = await facade.syncPendingSubmissions();
 
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          '${result.message} '
-          'Sincronizadas: ${result.syncedCount}. '
-          'Falhas: ${result.failedCount}.',
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            '${result.message} '
+            'Sincronizadas: ${result.syncedCount}. '
+            'Falhas: ${result.failedCount}.',
+          ),
         ),
-      ),
-    );
-  } catch (error) {
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text('Erro ao sincronizar: $error'),
-      ),
-    );
+      );
+    } catch (error) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Erro ao sincronizar: $error'),
+        ),
+      );
+    }
   }
-}
 
   /// Mostra uma ajuda curta para o utilizador final.
   void _showHelpDialog(BuildContext context) {
@@ -193,6 +207,7 @@ class TopOverflowMenu extends StatelessWidget {
 
 /// Ações disponíveis no menu superior.
 enum _TopMenuAction {
+  account,
   language,
   createActivity,
   myActivities,

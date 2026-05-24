@@ -14,6 +14,12 @@ class AppSettingsDao {
   /// Chave usada para guardar o perfil selecionado pelo utilizador.
   static const String selectedProfileKey = 'selected_profile';
 
+  /// Idioma usado na interface/feedback da aplicação.
+  static const String nativeLanguageKey = 'native_language_code';
+
+  /// Idioma que o utilizador quer praticar/aprender.
+  static const String targetLanguageKey = 'target_language_code';
+
   /// Guarda uma configuração simples.
   Future<void> setValue({
     required String key,
@@ -101,5 +107,48 @@ class AppSettingsDao {
     final value = await getString(selectedProfileKey);
 
     return UserProfileType.fromDatabase(value);
+  }
+
+  /// Guarda o par de idiomas escolhido pelo utilizador.
+  Future<void> setLanguagePair({
+    required String nativeLanguageCode,
+    required String targetLanguageCode,
+  }) async {
+    final batch = db.batch();
+    final now = DateTime.now().toIso8601String();
+
+    batch.insert(
+      'app_settings',
+      {
+        'key': nativeLanguageKey,
+        'value': nativeLanguageCode,
+        'value_type': 'text',
+        'updated_at': now,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+    batch.insert(
+      'app_settings',
+      {
+        'key': targetLanguageKey,
+        'value': targetLanguageCode,
+        'value_type': 'text',
+        'updated_at': now,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+    await batch.commit(noResult: true);
+  }
+
+  /// Lê o idioma base da aplicação.
+  Future<String> getNativeLanguageCode() async {
+    return await getString(nativeLanguageKey) ?? 'pt-PT';
+  }
+
+  /// Lê o idioma que o utilizador quer praticar.
+  Future<String> getTargetLanguageCode() async {
+    return await getString(targetLanguageKey) ?? 'it-IT';
   }
 }

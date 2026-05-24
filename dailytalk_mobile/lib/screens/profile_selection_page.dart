@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
+import '../data/repositories/auth_repository.dart';
 import '../models/user_profile.dart';
 
 import '../state/app_event_notifier.dart';
@@ -74,6 +75,12 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
       final settingsDao = AppSettingsDao(db);
 
       await settingsDao.setSelectedProfile(_selectedProfile);
+
+      // Sincroniza também a preferência no perfil remoto do utilizador.
+      await AuthRepository().updatePreferences(
+        selectedProfile: _selectedProfile.databaseValue,
+      );
+
       AppEventNotifier.instance.notifyProfileChanged();
 
       if (!mounted) {

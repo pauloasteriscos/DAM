@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../data/dao/app_settings_dao.dart';
+import '../data/database/app_database.dart';
+import '../data/repositories/auth_repository.dart';
+
 /// Language configuration page.
 ///
 /// The app does not use only one language.
@@ -16,6 +20,32 @@ class LanguageSelectionPage extends StatefulWidget {
 class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
   String _nativeLanguageCode = 'pt-PT';
   String _targetLanguageCode = 'it-IT';
+  bool _isLoading = true;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedLanguages();
+  }
+
+  Future<void> _loadSavedLanguages() async {
+    final db = await AppDatabase.instance.database;
+    final settingsDao = AppSettingsDao(db);
+
+    final nativeLanguageCode = await settingsDao.getNativeLanguageCode();
+    final targetLanguageCode = await settingsDao.getTargetLanguageCode();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _nativeLanguageCode = nativeLanguageCode;
+      _targetLanguageCode = targetLanguageCode;
+      _isLoading = false;
+    });
+  }
 
   final List<LanguageOption> _languages = const [
     LanguageOption(
@@ -56,7 +86,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
     ),
   ];
 
-  void _saveLanguages() {
+  Future<void> _saveLanguages() async {
     if (_nativeLanguageCode == _targetLanguageCode) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -68,18 +98,57 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       return;
     }
 
-    final nativeLanguage = _languageByCode(_nativeLanguageCode);
-    final targetLanguage = _languageByCode(_targetLanguageCode);
+    setState(() {
+      _isSaving = true;
+    });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Saved: ${nativeLanguage.name} → ${targetLanguage.name}',
+    try {
+      final db = await AppDatabase.instance.database;
+      final settingsDao = AppSettingsDao(db);
+
+      await settingsDao.setLanguagePair(
+        nativeLanguageCode: _nativeLanguageCode,
+        targetLanguageCode: _targetLanguageCode,
+      );
+
+      // Tenta sincronizar as preferências com o perfil remoto.
+      // Se a API estiver em modo mock, isto também funciona sem backend.
+      await AuthRepository().updatePreferences(
+        appLanguageCode: _nativeLanguageCode,
+        learningLanguageCode: _targetLanguageCode,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      final nativeLanguage = _languageByCode(_nativeLanguageCode);
+      final targetLanguage = _languageByCode(_targetLanguageCode);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Saved: ${nativeLanguage.name} → ${targetLanguage.name}',
+          ),
         ),
-      ),
-    );
+      );
 
-    Navigator.pop(context);
+      Navigator.pop(context);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao guardar idiomas: $error')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
   }
 
   LanguageOption _languageByCode(String code) {
@@ -101,7 +170,9 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
         foregroundColor: Colors.white,
         title: const Text('Language'),
       ),
-      body: SafeArea(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(18),
           child: Column(
@@ -143,10 +214,10 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton.icon(
-                  onPressed: _saveLanguages,
+                  onPressed: _isSaving ? null : _saveLanguages,
                   icon: const Icon(Icons.check),
-                  label: const Text(
-                    'Save languages',
+                  label: Text(
+                    _isSaving ? 'Saving...' : 'Save languages',
                     style: TextStyle(fontSize: 18),
                   ),
                 ),

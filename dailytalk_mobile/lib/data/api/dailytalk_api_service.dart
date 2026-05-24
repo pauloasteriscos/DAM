@@ -3,18 +3,20 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../config/app_config.dart';
+import '../storage/auth_token_storage.dart';
 
 /// Serviço responsável pela comunicação com a API DailyTalk.
 class DailyTalkApiService {
   DailyTalkApiService({
     http.Client? client,
-  }) : _client = client ?? http.Client();
+    AuthTokenStorage? tokenStorage,
+  })  : _client = client ?? http.Client(),
+        _tokenStorage = tokenStorage ?? AuthTokenStorage();
 
   final http.Client _client;
+  final AuthTokenStorage _tokenStorage;
 
   /// Obtém parâmetros dinâmicos da atividade.
-  ///
-  /// Endpoint previsto: GET /json-params.
   Future<List<Map<String, dynamic>>> getJsonParams() async {
     if (AppConfig.useMockApi) {
       return [
@@ -26,9 +28,7 @@ class DailyTalkApiService {
 
     final uri = Uri.parse('${AppConfig.apiBaseUrl}/json-params');
 
-    final response = await _client.get(uri).timeout(
-          const Duration(seconds: 10),
-        );
+    final response = await _client.get(uri).timeout(AppConfig.apiTimeout);
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception(
@@ -48,9 +48,6 @@ class DailyTalkApiService {
   }
 
   /// Inicia/cria a atividade no backend.
-  ///
-  /// Endpoint previsto:
-  /// GET /deploy?activityID=ID_DA_ATIVIDADE&type=TIPO_DA_ATIVIDADE.
   Future<String> deployActivity({
     required String activityId,
     required String type,
@@ -66,9 +63,9 @@ class DailyTalkApiService {
       },
     );
 
-    final response = await _client.get(uri).timeout(
-          const Duration(seconds: 10),
-        );
+    final response = await _client
+        .get(uri, headers: await _authHeaders())
+        .timeout(AppConfig.apiTimeout);
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception(
@@ -87,13 +84,7 @@ class DailyTalkApiService {
 
   /// Submete as respostas da atividade.
   ///
-  /// Endpoint previsto: POST /submit.
-  ///
-  /// Payload esperado:
-  /// {
-  ///   "activityID": "...",
-  ///   "submission": {...}
-  /// }
+  /// Endpoint real: POST /api/activities/submissions.
   Future<Map<String, dynamic>> submitActivity({
     required String activityId,
     required Map<String, dynamic> submission,
@@ -121,35 +112,46 @@ class DailyTalkApiService {
       };
     }
 
-    final uri = Uri.parse('${AppConfig.apiBaseUrl}/submit');
+    final uri = Uri.parse('${AppConfig.apiBaseUrl}/activities/submissions');
 
     final response = await _client
         .post(
           uri,
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: await _authHeaders(),
           body: jsonEncode({
             'activityID': activityId,
             'submission': submission,
           }),
         )
-        .timeout(
-          const Duration(seconds: 10),
-        );
+        .timeout(AppConfig.apiTimeout);
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(
-        'Erro ao submeter atividade. Código: ${response.statusCode}',
-      );
+      final decoded = response.body.isEmpty ? null : jsonDecode(response.body);
+      final message = decoded is Map && decoded['error'] != null
+          ? decoded['error'].toString()
+          : 'Erro ao submeter atividade. Código: ${response.statusCode}';
+      throw Exception(message);
     }
 
     final decoded = jsonDecode(response.body);
 
     if (decoded is! Map) {
-      throw Exception('Formato inválido em /submit.');
+      throw Exception('Formato inválido em /activities/submissions.');
     }
 
     return Map<String, dynamic>.from(decoded);
+  }
+
+  Future<Map<String, String>> _authHeaders() async {
+    final token = await _tokenStorage.readToken();
+
+    if (token == null || token.isEmpty) {
+      throw Exception('Sessão expirada. Inicia sessão novamente.');
+    }
+
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
   }
 }

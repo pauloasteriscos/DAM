@@ -1,27 +1,45 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:dailytalk_mobile/main.dart';
 
 void main() {
-  testWidgets('Mostra a tela inicial gamificada do DailyTalk', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const DailyTalkApp());
-
-    expect(find.text('DailyTalk.pt'), findsOneWidget);
-    expect(find.text('UNIDADE 5'), findsOneWidget);
-    expect(find.text('Tema: Comunicação e amizades'), findsOneWidget);
+  setUp(() {
+    // Simula armazenamento seguro vazio.
+    // Assim o AuthGate entende que não há sessão ativa
+    // e deve apresentar a tela de login.
+    FlutterSecureStorage.setMockInitialValues(<String, String>{});
   });
 
-  testWidgets('Navega para a página Praticar', (WidgetTester tester) async {
+  testWidgets('Mostra a tela de login do DailyTalk', (tester) async {
     await tester.pumpWidget(const DailyTalkApp());
 
-    await tester.tap(find.text('Praticar'));
-    await tester.pumpAndSettle();
+    // Primeiro build.
+    await tester.pump();
 
-    expect(find.text('Praticar'), findsWidgets);
-    expect(find.text('Prática para Estudante'), findsOneWidget);
-    expect(find.text('Perfil: Estudante'), findsOneWidget);
-    expect(find.text('Desafio'), findsOneWidget);
-    expect(find.text('Submeter resposta'), findsOneWidget);
+    // Dá tempo ao AuthGate para verificar o token mockado.
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('DailyTalk.pt'), findsOneWidget);
+    expect(find.text('Entrar'), findsWidgets);
+    expect(find.text('Ainda não tenho conta'), findsOneWidget);
+  });
+
+  testWidgets('Abre a tela de criação de conta', (tester) async {
+    await tester.pumpWidget(const DailyTalkApp());
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    final createAccountButton = find.text('Ainda não tenho conta');
+
+    expect(createAccountButton, findsOneWidget);
+
+    await tester.tap(createAccountButton);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Criar conta'), findsWidgets);
+    expect(find.text('Criar perfil DailyTalk.pt'), findsOneWidget);
   });
 }
