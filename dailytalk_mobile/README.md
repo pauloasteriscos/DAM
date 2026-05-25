@@ -4,7 +4,7 @@ Aplicação móvel desenvolvida em Flutter para o projeto **Erasmus DailyTalk.pt
 
 O objetivo da aplicação é apoiar crianças e jovens em mobilidade escolar, normalmente entre os 11 e os 15 anos, na prática de comunicação em situações reais do quotidiano escolar, através de atividades gamificadas como vocabulário, áudio, diálogos, quizzes e desafios.
 
-Esta versão contempla a evolução até à **Sprint 2**, incluindo a estrutura inicial da aplicação, navegação, Home gamificada, base de dados local SQLite, configuração de atividades, submissão de respostas, apresentação de resultados e aplicação inicial de padrões de software para melhorar a organização e manutenção do código.
+Esta versão contempla a evolução até à **Sprint 3**, incluindo a estrutura inicial da aplicação, navegação, Home gamificada, base de dados local SQLite, configuração de atividades, submissão de respostas, apresentação de resultados, integração com backend real, autenticação de utilizadores, sincronização entre mobile e Web, publicação em Cloudflare e aplicação progressiva de padrões de software para melhorar a organização e manutenção do código.
 
 ---
 
@@ -21,15 +21,43 @@ A aplicação já possui:
 - página de configuração linguística com dois idiomas:
   - idioma habitual do aluno;
   - idioma que o aluno pretende aprender;
+- suporte a perfis de utilização:
+  - Estudante;
+  - Anfitrião;
+  - Professor;
 - estrutura SQLite local usando sqflite;
 - página de configuração e criação de atividade;
-- simulação de integração com o endpoint de deploy;
-- fluxo de submissão de respostas com simulação do endpoint de submissão;
+- fluxo de submissão de respostas;
 - gravação local de atividades, submissões e resultados;
 - página de resultados com histórico de pontuações e estado de sincronização;
 - estrutura inicial de sincronização de submissões pendentes;
 - atualização automática da área de resultados após submissões ou sincronizações;
+- integração com backend real em Cloudflare Workers;
+- persistência remota em Cloudflare D1;
+- autenticação básica com conta de utilizador;
+- armazenamento seguro de token na app;
+- validação de sessão contra a API;
+- preferências associadas ao utilizador autenticado;
+- submissões associadas ao utilizador autenticado;
+- possibilidade de testar escrita em mobile e leitura na Web, e vice-versa;
+- recuperação de palavra-passe em modo protótipo/debug;
 - aplicação inicial dos padrões Strategy, Factory simples, Facade, Command e Observer.
+
+---
+
+## Identidade visual e publicação
+
+Durante a Sprint 3 foi criada e adicionada uma logo para a aplicação, baseada nas letras **DTK**, representando o nome **DailyTalk.pt**.
+
+O domínio **dailytalk.pt** foi migrado do provedor anterior, Locaweb, para a Cloudflare. Esta alteração foi realizada porque a evolução do protótipo passou a exigir maior agilidade de publicação, suporte a HTTPS, menor latência e melhor controlo sobre a publicação da versão Web e da API.
+
+A versão publicada pode ser testada através de:
+
+- `https://dailytalk.pt`
+- `https://dailytalk.pt/web`
+- `https://dailytalk.pt/api/health`
+
+No LUMI foi criado um botão **Teste agora**, apontando para a versão Web da aplicação Flutter. Com isso, o fluxo de demonstração ficou mais direto: o utilizador acede à página de apresentação, clica para testar e entra na versão Web do DailyTalk.pt.
 
 ---
 
@@ -48,7 +76,7 @@ O DailyTalk.pt Mobile será gratuito e pretende disponibilizar uma experiência 
 - compreensão oral;
 - quizzes de reforço.
 
-A aplicação foi pensada para funcionar com apoio de um backend existente, mas também com suporte local básico através de SQLite, preparando a app para cenários de conectividade instável.
+A aplicação foi pensada para funcionar com apoio de um backend, mas também com suporte local básico através de SQLite, preparando a app para cenários de conectividade instável.
 
 ---
 
@@ -75,6 +103,28 @@ A opção aparece como **Language** no menu, por ser uma designação reconhecí
 
 ---
 
+## Perfis de utilização
+
+A Sprint 3 consolidou a orientação da aplicação para perfis diferenciados de utilização.
+
+### Estudante
+
+O perfil **Estudante** é orientado para crianças e jovens que pretendem praticar uma língua em situações reais, como responder a perguntas, pedir informações, compreender horários, falar sobre alimentação ou interagir no contexto escolar.
+
+### Anfitrião
+
+O perfil **Anfitrião** é orientado para pessoas que recebem estudantes em mobilidade escolar. O objetivo é apoiar a preparação de frases de acolhimento, instruções simples, perguntas úteis e comunicação inicial.
+
+Este perfil ganhou destaque porque o DailyTalk.pt não pretende apoiar apenas o aluno visitante, mas também a pessoa que o recebe.
+
+### Professor
+
+O perfil **Professor** é previsto para acompanhamento pedagógico, sugestão de atividades, validação de conteúdos e consulta de dificuldades frequentes.
+
+Nesta versão, o perfil Professor ainda é uma base funcional/prototipada, ficando a sua exploração completa para evolução futura.
+
+---
+
 ## Modelo de atividades e participação da comunidade
 
 O DailyTalk.pt Mobile prevê disponibilizar atividades educativas de dois tipos principais: atividades criadas pela equipa da aplicação e atividades criadas pela própria comunidade de utilizadores.
@@ -90,6 +140,124 @@ Depois de aprovadas, as atividades passam a poder ser utilizadas por outros joga
 O jogador que criou uma atividade bem avaliada será recompensado com pontos. Estes pontos poderão ser usados futuramente numa loja interna da aplicação, para trocar por skins, elementos visuais e outros itens de personalização. Além disso, o criador poderá subir de nível na sua reputação geral como ajudante da comunidade, incentivando a criação de conteúdos úteis e colaborativos.
 
 As atividades também poderão ser rejeitadas pela comunidade. Nestes casos, ficarão numa lista de revisão para análise da equipa mantenedora da aplicação, que poderá decidir reformular, corrigir ou excluir definitivamente a atividade. Desta forma, procura-se equilibrar a liberdade de criação da comunidade com a qualidade, segurança e utilidade pedagógica dos conteúdos disponibilizados.
+
+---
+
+## Backend e sincronização
+
+Na Sprint 3 foi realizada a integração com um backend real, permitindo que a aplicação deixe de funcionar apenas de forma local/mockada.
+
+A arquitetura atual contempla:
+
+- aplicação Flutter mobile/Web;
+- API em Cloudflare Workers;
+- base de dados remota Cloudflare D1;
+- autenticação com JWT;
+- armazenamento seguro do token na aplicação;
+- sincronização de preferências e submissões;
+- utilização de SQLite local para cache, histórico e suporte offline básico.
+
+O backend disponibiliza endpoints para:
+
+- registo de utilizador;
+- login;
+- consulta da sessão autenticada;
+- atualização de preferências;
+- envio de submissões de atividades;
+- consulta das submissões do utilizador autenticado;
+- recuperação de palavra-passe em modo protótipo/debug.
+
+Esta integração permite realizar testes de escrita na aplicação mobile e consulta na Web, ou o inverso, desde que seja utilizada a mesma conta de utilizador.
+
+Exemplo de fluxo suportado:
+
+1. o utilizador faz login no Android;
+2. realiza uma atividade;
+3. a submissão é enviada para a API;
+4. o utilizador abre a versão Web;
+5. faz login com a mesma conta;
+6. consulta as submissões associadas ao perfil autenticado.
+
+---
+
+## Controlo de utilizador e segurança
+
+Foi criado um modo básico de conta de utilizador para efeitos de teste do protótipo. Para esta implementação foram reaproveitados conceitos já explorados anteriormente no projeto Animalec, nomeadamente:
+
+- criação de utilizador;
+- autenticação;
+- sessão;
+- associação de dados a uma conta;
+- validação de acesso a rotas protegidas.
+
+Com esta evolução, a aplicação passou de uma experiência genérica para uma experiência personalizada por perfil de utilizador.
+
+A versão atual inclui:
+
+- registo de conta;
+- login;
+- validação de password no backend;
+- token JWT;
+- armazenamento seguro do token no cliente;
+- validação da sessão através do endpoint `/api/me`;
+- limpeza de sessão inválida;
+- preferências associadas ao utilizador;
+- submissões associadas ao utilizador autenticado;
+- logout;
+- recuperação de palavra-passe em modo protótipo/debug.
+
+Este ponto de controlo de utilizador deverá receber atenção especial quando o projeto sair da fase de protótipo, principalmente em questões como:
+
+- autenticação multifator;
+- integração com Authenticator;
+- verificação de email;
+- políticas de password;
+- proteção contra abuso de pedidos;
+- envio real de emails transacionais;
+- auditoria de sessão;
+- gestão de permissões por perfil.
+
+---
+
+## Recuperação de palavra-passe
+
+Foi implementado o fluxo **Esqueci a palavra-passe**.
+
+Durante a implementação, verificou-se que o **Cloudflare Email Sending**, necessário para envio programático de emails transacionais a partir de Workers, está disponível apenas no plano **Workers Paid**.
+
+Como o projeto se encontra em fase de protótipo, foi adotada uma solução de debug:
+
+1. a API recebe o pedido de recuperação;
+2. gera um código temporário;
+3. guarda o hash do código na D1;
+4. define uma validade temporária;
+5. quando `PASSWORD_RESET_DEBUG=true`, devolve o código à aplicação;
+6. a aplicação permite introduzir o código e definir nova palavra-passe.
+
+Esta solução permite demonstrar todo o fluxo de recuperação de palavra-passe, mas não substitui uma recuperação real por email em produção.
+
+Numa versão futura, este fluxo deverá ser substituído por:
+
+- Cloudflare Email Sending com Workers Paid; ou
+- serviço externo de email transacional, como Resend, Brevo, SendGrid ou equivalente.
+
+---
+
+## Usabilidade e feedback de testes
+
+Durante os testes da Sprint 3 foram identificados ajustes de usabilidade.
+
+Um dos pontos observados foi a ausência do ícone de visualização da palavra-passe nos ecrãs de login e criação de conta. Para resolver isto, foi implementado um botão com ícone de “olhinho”, permitindo alternar entre mostrar e ocultar a palavra-passe.
+
+Também foram ajustados:
+
+- mensagens de erro de login;
+- comportamento de sessão inválida;
+- navegação entre login e registo;
+- fluxo de recuperação de palavra-passe;
+- retorno para o ecrã de login após logout;
+- validação de token antes de abrir a navegação principal;
+- comportamento de conta quando a sessão não existe.
 
 ---
 
@@ -163,7 +331,10 @@ A prioridade foi manter o código funcional e compreensível, mas preparado para
 - resultados e métricas;
 - sincronização offline;
 - atualização automática da interface;
-- integração futura com backend real.
+- integração com backend real;
+- autenticação e perfis;
+- sincronização entre mobile e Web;
+- segurança e validação de sessão.
 
 Desta forma, a aplicação mantém uma estrutura modular, com melhor separação de responsabilidades entre interface, dados, lógica de negócio e fluxos de utilização.
 
@@ -258,6 +429,95 @@ Além disso, a criação de atividades foi reposicionada como funcionalidade sec
 
 ---
 
+## Funcionalidades da Sprint 3
+
+A Sprint 3 tinha como previsão a tela de análises, finalização da UI e usabilidade, cobertura de testes unitários/widget e ajustes de performance e segurança.
+
+O objetivo desta sprint foi estabilizar o protótipo antes da fase final, permitindo que a etapa seguinte seja dedicada à correção final, melhoria da experiência de utilização e preparação da entrega.
+
+Durante esta sprint foi implementado mais do que o previsto inicialmente.
+
+### Identidade visual
+
+- criação e integração da logo baseada nas letras **DTK**;
+- reforço da identidade visual do DailyTalk.pt.
+
+### Publicação e infraestrutura
+
+- migração do DNS de Locaweb para Cloudflare;
+- ativação de acesso HTTPS;
+- publicação do domínio `dailytalk.pt`;
+- publicação da API em `dailytalk.pt/api`;
+- preparação da versão Web em `dailytalk.pt/web`;
+- criação de botão **Teste agora** no LUMI apontando para a versão Web Flutter.
+
+### Backend e persistência
+
+- integração real com backend;
+- criação de API em Cloudflare Workers;
+- criação de persistência remota em Cloudflare D1;
+- endpoints de autenticação;
+- endpoints de preferências;
+- endpoints de submissões;
+- sincronização entre mobile e Web.
+
+### Conta de utilizador
+
+- registo de conta;
+- login;
+- logout;
+- validação de sessão contra a API;
+- armazenamento seguro de token;
+- limpeza de sessão inválida;
+- associação de preferências ao utilizador;
+- associação de submissões ao utilizador autenticado.
+
+### Usabilidade
+
+- implementação do ícone de visualização de palavra-passe;
+- melhoria do fluxo de login;
+- melhoria do fluxo de registo;
+- melhoria da tela Conta;
+- melhoria das mensagens de sessão inválida;
+- implementação do fluxo de recuperação de palavra-passe em modo protótipo/debug.
+
+### Segurança
+
+- autenticação com JWT;
+- `JWT_SECRET` configurado como secret na Cloudflare;
+- hash de password com PBKDF2;
+- ajuste de iterações PBKDF2 para compatibilidade com Cloudflare Workers;
+- CORS configurado para o domínio do projeto;
+- validação de sessão com `/api/me`;
+- tokens de recuperação de palavra-passe guardados na D1 apenas como hash;
+- expiração de código de recuperação;
+- separação entre dados locais e dados sincronizados.
+
+### Testes
+
+Foram executados:
+
+```bash
+flutter analyze
+flutter test
+```
+
+A aplicação ficou sem problemas de análise estática e com os testes automatizados a passar.
+
+A cobertura de testes foi reforçada ao nível dos widgets e do fluxo inicial da aplicação. Fica identificada para a próxima etapa a possibilidade de aumentar a cobertura unitária de componentes específicos, como repositórios, serviços de autenticação, serviços de sincronização e modelos de dados.
+
+### Decisão sobre recuperação de palavra-passe
+
+Durante a implementação da recuperação de palavra-passe, verificou-se que o Cloudflare Email Sending, necessário para envio programático de emails transacionais a partir de Workers, está disponível apenas no plano Workers Paid.
+
+Como alternativa para protótipo/debug, o sistema gera um código temporário, guarda o respetivo hash na D1 e, quando `PASSWORD_RESET_DEBUG=true`, devolve o código à app. Esta solução permite demonstrar o fluxo de recuperação, mas não substitui uma recuperação real por email em produção.
+
+### Resultado da Sprint 3
+
+Considera-se que a Sprint 3 cumpriu o previsto e avançou além do inicialmente planeado. Para além da tela de análises, ajustes de UI/usabilidade, testes e melhorias de segurança, foi criada a base técnica para autenticação, sincronização Web/mobile, persistência em backend, recuperação de palavra-passe em modo protótipo e publicação em Cloudflare.
+
+---
+
 ## Base de dados local
 
 A aplicação usa SQLite local através do pacote sqflite.
@@ -270,13 +530,15 @@ A base local foi pensada para suportar:
 - sincronização posterior;
 - histórico de resultados;
 - dados analíticos;
-- configurações locais da app.
+- configurações locais da app;
+- preferências locais;
+- apoio à navegação offline.
 
 As principais áreas de dados previstas são:
 
 - atividades;
 - parâmetros de atividades;
-- alunos;
+- alunos/utilizadores;
 - submissões;
 - resultados de submissões;
 - definições analíticas;
@@ -286,50 +548,126 @@ As principais áreas de dados previstas são:
 
 ---
 
+## Base de dados remota
+
+A Sprint 3 introduziu persistência remota através de Cloudflare D1.
+
+A base remota suporta:
+
+- utilizadores;
+- preferências de utilizador;
+- submissões de atividades;
+- tokens de recuperação de palavra-passe.
+
+A base remota não substitui totalmente o SQLite local. A estratégia adotada é híbrida:
+
+- SQLite para funcionamento local, cache e apoio offline;
+- D1 para persistência remota, autenticação e sincronização entre dispositivos.
+
+---
+
 ## Integração com backend
 
-Nesta fase, a integração com o backend está preparada de forma simulada.
+A integração com backend deixou de ser apenas simulada e passou a contar com uma API real em Cloudflare Workers.
 
-A aplicação já prevê os seguintes fluxos:
+Principais endpoints:
 
-- deploy de atividade;
-- submissão de resposta;
-- sincronização de submissões pendentes;
-- carregamento de resultados locais.
+```text
+GET  /api/health
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/forgot-password
+POST /api/auth/reset-password
+GET  /api/me
+PUT  /api/me/preferences
+POST /api/activities/submissions
+GET  /api/activities/submissions/mine
+```
 
-A integração real com o backend poderá ser ativada futuramente, mantendo a mesma organização geral dos fluxos.
+A app pode ser executada em modo mock ou modo real.
+
+### Modo real
+
+```bash
+flutter run -d chrome \
+  --web-port 5173 \
+  --dart-define=DAILYTALK_USE_MOCK_API=false \
+  --dart-define=DAILYTALK_API_BASE_URL=https://dailytalk.pt/api
+```
+
+### Modo mock
+
+```bash
+flutter run -d chrome \
+  --dart-define=DAILYTALK_USE_MOCK_API=true
+```
+
+---
+
+## Build e execução
+
+### Instalar dependências
+
+```bash
+flutter pub get
+```
+
+### Análise estática
+
+```bash
+flutter analyze
+```
+
+### Testes
+
+```bash
+flutter test
+```
+
+### Executar em Chrome com API real
+
+```bash
+flutter run -d chrome \
+  --web-port 5173 \
+  --dart-define=DAILYTALK_USE_MOCK_API=false \
+  --dart-define=DAILYTALK_API_BASE_URL=https://dailytalk.pt/api
+```
+
+### Gerar APK Android com API real
+
+```bash
+flutter build apk --release \
+  --dart-define=DAILYTALK_USE_MOCK_API=false \
+  --dart-define=DAILYTALK_API_BASE_URL=https://dailytalk.pt/api
+```
+
+### Gerar Web release
+
+```bash
+flutter build web --release \
+  --base-href /web/ \
+  --dart-define=DAILYTALK_USE_MOCK_API=false \
+  --dart-define=DAILYTALK_API_BASE_URL=https://dailytalk.pt/api
+```
 
 ---
 
 ## Tecnologias utilizadas
 
 - Flutter;
+- Dart;
 - SQLite;
 - sqflite;
 - Material Design;
 - Android SDK;
+- Cloudflare DNS;
+- Cloudflare Workers;
+- Cloudflare D1;
+- JWT;
+- PBKDF2;
+- flutter_secure_storage;
 - arquitetura em camadas;
 - padrões de software aplicados de forma incremental.
-
----
-
-## Orientação prevista para a Sprint 3
-
-A Sprint 3 deverá focar-se na evolução da aplicação para suportar perfis diferenciados de utilização.
-
-A aplicação deverá passar a considerar três perfis principais:
-
-- **Estudante**: utiliza a aplicação para praticar a língua escolhida em situações reais, como responder a perguntas, pedir informações, compreender horários, falar sobre alimentação ou interagir no contexto escolar.
-- **Anfitrião**: utiliza a aplicação para se preparar para receber alunos estrangeiros ou em mobilidade escolar, treinando frases de acolhimento, instruções simples, perguntas úteis e comunicação inicial.
-- **Professor**: perfil pedagógico previsto para acompanhar progresso, sugerir atividades, validar conteúdos e consultar dificuldades frequentes.
-
-O foco prioritário da Sprint 3 será o perfil **Anfitrião**, por representar uma dimensão importante do projeto: preparar não só o aluno visitante, mas também a pessoa que o recebe.
-
-A aplicação deverá organizar as atividades por cenários reais de comunicação, evitando questionários longos e privilegiando desafios curtos, práticos e contextualizados.
-
-Também deverá ser mantida a regra de privacidade definida no projeto: dados sensíveis, como alergias, restrições alimentares reais ou informações pessoais, não devem ser enviados ao servidor. Esses conteúdos podem aparecer como exemplos de treino linguístico, mas não devem ser tratados como dados reais do utilizador.
-
-Caso exista uma funcionalidade futura de notas privadas, estas deverão ficar apenas no dispositivo, sem sincronização e com aviso claro para o utilizador.
 
 ---
 
@@ -337,12 +675,14 @@ Caso exista uma funcionalidade futura de notas privadas, estas deverão ficar ap
 
 As próximas etapas do projeto poderão incluir:
 
-- integração real com o backend DailyTalk.pt;
+- reforço da tela de análises para professores;
+- dashboards pedagógicos;
+- aumento da cobertura de testes unitários;
+- envio real de emails transacionais para recuperação de palavra-passe;
+- autenticação multifator;
+- verificação de email;
 - abertura da atividade em WebView;
-- envio real de respostas para o backend;
-- página real de resultados;
-- página real de análises para professores;
-- sincronização real de submissões pendentes;
+- melhoria da sincronização offline-first;
 - criação de atividades pela comunidade;
 - sistema de likes;
 - ranking de atividades;
@@ -350,8 +690,8 @@ As próximas etapas do projeto poderão incluir:
 - loja de skins e itens;
 - reputação do criador de atividades;
 - moderação de atividades com apoio de IA;
-- autenticação de alunos, professores e anfitriões;
-- internacionalização completa da interface.
+- internacionalização completa da interface;
+- reforço da documentação técnica e de utilização.
 
 ---
 
@@ -391,41 +731,37 @@ Entregas contempladas:
 
 ### Sprint 3
 
-Previsto:
+Estado: implementada e expandida.
 
-- implementação do suporte a perfis de utilização:
-  - Estudante;
-  - Anfitrião;
-  - Professor;
-- criação de atividades específicas por perfil;
-- estruturação de cenários reais de comunicação, como:
-  - chegada à casa;
-  - quarto;
-  - casa de banho;
-  - pequeno-almoço;
-  - horários;
-  - regras da casa;
-  - alimentação;
-  - transportes;
-  - escola;
-  - colégio;
-- desenvolvimento do perfil Anfitrião como perfil real da aplicação, e não apenas como texto explicativo;
-- adaptação da página Praticar para apresentar atividades conforme o perfil selecionado;
-- preparação de atividades para o anfitrião treinar frases de acolhimento, instruções simples e perguntas úteis;
-- preparação de atividades para o estudante treinar respostas e perguntas em situações reais;
-- melhoria da lógica de personalização com base no desempenho do utilizador;
-- reforço da separação entre dados pedagógicos e dados sensíveis;
-- criação ou preparação de notas privadas locais, sem sincronização com servidor;
-- evolução da estrutura SQLite para suportar perfis, cenários, atividades por perfil, analytics e notas locais;
-- refinamento da experiência de utilização;
-- testes adicionais;
-- documentação final;
-- integração mais próxima com backend real.
+Entregas contempladas:
+
+- tela de análises/resultados;
+- finalização e refinamento de UI;
+- ajustes de usabilidade;
+- criação da logo DTK;
+- migração DNS para Cloudflare;
+- publicação do domínio com HTTPS;
+- botão **Teste agora** no LUMI;
+- integração com backend real;
+- API em Cloudflare Workers;
+- base remota Cloudflare D1;
+- conta de utilizador;
+- autenticação com JWT;
+- armazenamento seguro de token;
+- validação de sessão;
+- preferências por utilizador;
+- submissões associadas ao utilizador;
+- sincronização mobile/Web;
+- recuperação de palavra-passe em modo protótipo/debug;
+- testes com `flutter analyze` e `flutter test`;
+- documentação do código e do estado da sprint.
 
 ---
 
 ## Observações
 
-Esta versão ainda é um protótipo funcional inicial. Algumas funcionalidades estão implementadas de forma mockada para validar o fluxo da Sprint 2 sem depender da disponibilidade do backend real.
+Esta versão continua a ser um protótipo funcional, mas já ultrapassa o fluxo local/mockado da Sprint 2.
 
-O objetivo desta fase é garantir uma estrutura base funcional, modular e preparada para evolução, mantendo o foco principal na prática de atividades e na experiência gamificada do aluno em contexto escolar.
+A aplicação passou a ter backend real, autenticação, persistência remota e sincronização entre plataformas. Ainda assim, algumas funcionalidades continuam em modo de protótipo, principalmente a recuperação de palavra-passe, que nesta fase utiliza código devolvido pela app em modo debug por limitação do plano de envio de email transacional.
+
+A organização em três sprints permitiu testar progressivamente as funcionalidades principais. A Sprint 3 foi usada para consolidar UI, usabilidade, segurança, testes e infraestrutura. A próxima etapa deverá concentrar-se na correção final, melhoria da experiência, reforço dos testes unitários e substituição de mecanismos temporários por serviços definitivos quando a infraestrutura permitir.

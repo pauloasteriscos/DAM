@@ -4,7 +4,8 @@ import '../storage/auth_token_storage.dart';
 
 /// Repository de autenticação.
 ///
-/// Centraliza login, registo, validação de sessão e logout.
+/// Centraliza login, registo, validação de sessão, recuperação de palavra-passe
+/// e logout.
 class AuthRepository {
   AuthRepository({
     AuthApiService? apiService,
@@ -51,6 +52,24 @@ class AuthRepository {
     );
     await _tokenStorage.saveToken(session.token);
     return session.user;
+  }
+
+  Future<PasswordResetRequestResult> requestPasswordReset({
+    required String email,
+  }) {
+    return _apiService.requestPasswordReset(email: email);
+  }
+
+  Future<void> resetPassword({
+    required String email,
+    required String resetToken,
+    required String newPassword,
+  }) {
+    return _apiService.resetPassword(
+      email: email,
+      resetToken: resetToken,
+      newPassword: newPassword,
+    );
   }
 
   Future<AuthUser> updatePreferences({

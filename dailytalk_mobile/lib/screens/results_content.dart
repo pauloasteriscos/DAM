@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../data/api/dailytalk_api_service.dart';
 import '../data/facades/activity_workflow_facade.dart';
 import '../models/app_status.dart';
 import '../state/app_event_notifier.dart';
 
 /// Conteúdo da página "Meus Resultados".
 ///
-/// Nesta Sprint 2, a página permite carregar resultados
-/// guardados localmente após submissão de atividades.
-///
-/// Agora também observa eventos da aplicação:
-/// quando uma submissão ou sincronização altera os resultados,
-/// esta página recarrega automaticamente.
+/// A página carrega resultados locais e também o histórico remoto associado
+/// ao utilizador autenticado. Assim, uma atividade feita na Web pode aparecer
+/// no Android, e vice-versa, desde que ambos usem a mesma conta e API.
 class ResultsContent extends StatefulWidget {
   const ResultsContent({super.key});
 
@@ -66,15 +64,22 @@ class _ResultsContentState extends State<ResultsContent> {
 
     try {
       final facade = await ActivityWorkflowFacade.create();
+      final localResults = await facade.loadRecentResults();
+      final remoteResults = await DailyTalkApiService().getMySubmissions();
 
-      final results = await facade.loadRecentResults();
+      final normalizedRemoteResults = remoteResults
+          .map(_normalizeRemoteSubmission)
+          .toList();
 
       if (!mounted) {
         return;
       }
 
       setState(() {
-        _results = results;
+        _results = [
+          ...normalizedRemoteResults,
+          ...localResults.map(_normalizeLocalResult),
+        ];
       });
     } catch (error) {
       if (!mounted) {
@@ -91,6 +96,33 @@ class _ResultsContentState extends State<ResultsContent> {
         });
       }
     }
+  }
+
+  Map<String, Object?> _normalizeRemoteSubmission(Map<String, dynamic> item) {
+    final remoteActivityId = item['remote_activity_id']?.toString();
+
+    return <String, Object?>{
+      'title': remoteActivityId == null || remoteActivityId.isEmpty
+          ? 'Atividade remota'
+          : 'Atividade remota: $remoteActivityId',
+      'type': item['activity_type']?.toString() ?? '-',
+      'score': item['score'],
+      'feedback_text': item['feedback']?.toString() ?? 'Sem feedback.',
+      'created_at': item['created_at']?.toString() ?? '-',
+      'sync_status': SubmissionSyncStatus.synced.databaseValue,
+      'origin': 'Cloud/API',
+      'remote_activity_id': remoteActivityId,
+      'answer_text': item['answer_text']?.toString(),
+      'native_language_code': item['native_language_code']?.toString(),
+      'target_language_code': item['target_language_code']?.toString(),
+    };
+  }
+
+  Map<String, Object?> _normalizeLocalResult(Map<String, Object?> item) {
+    return <String, Object?>{
+      ...item,
+      'origin': 'Local',
+    };
   }
 
   @override
@@ -139,7 +171,7 @@ class _ResultsContentState extends State<ResultsContent> {
       ),
       child: const Text(
         'Ainda não há resultados disponíveis. '
-        'Submete uma atividade para consultar o histórico.',
+        'Submete uma atividade para consultar o histórico sincronizado.',
         textAlign: TextAlign.center,
         style: TextStyle(color: Colors.white70, height: 1.4),
       ),
@@ -154,6 +186,10 @@ class _ResultsContentState extends State<ResultsContent> {
         final score = result['score']?.toString() ?? '-';
         final feedback = result['feedback_text']?.toString() ?? 'Sem feedback.';
         final createdAt = result['created_at']?.toString() ?? '-';
+        final origin = result['origin']?.toString() ?? 'Local';
+        final answerText = result['answer_text']?.toString();
+        final nativeLanguageCode = result['native_language_code']?.toString();
+        final targetLanguageCode = result['target_language_code']?.toString();
 
         final syncStatus = SubmissionSyncStatus.tryFromDatabase(
           result['sync_status']?.toString(),
@@ -172,13 +208,21 @@ class _ResultsContentState extends State<ResultsContent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  _OriginChip(label: origin),
+                ],
               ),
 
               const SizedBox(height: 8),
@@ -187,6 +231,14 @@ class _ResultsContentState extends State<ResultsContent> {
                 'Tipo: $type',
                 style: const TextStyle(color: Colors.white70),
               ),
+
+              if (nativeLanguageCode != null || targetLanguageCode != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  'Idiomas: ${nativeLanguageCode ?? '-'} → ${targetLanguageCode ?? '-'}',
+                  style: const TextStyle(color: Colors.white70),
+                ),
+              ],
 
               const SizedBox(height: 6),
 
@@ -205,6 +257,14 @@ class _ResultsContentState extends State<ResultsContent> {
                 feedback,
                 style: const TextStyle(color: Colors.white70, height: 1.4),
               ),
+
+              if (answerText != null && answerText.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Resposta: $answerText',
+                  style: const TextStyle(color: Colors.white60, height: 1.4),
+                ),
+              ],
 
               const SizedBox(height: 8),
 
@@ -229,6 +289,7 @@ class _ResultsContentState extends State<ResultsContent> {
   Widget _buildErrorBox() {
     return Container(
       width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.15),
@@ -238,6 +299,32 @@ class _ResultsContentState extends State<ResultsContent> {
       child: Text(
         _errorMessage!,
         style: const TextStyle(color: Colors.redAccent),
+      ),
+    );
+  }
+}
+
+class _OriginChip extends StatelessWidget {
+  const _OriginChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white70,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

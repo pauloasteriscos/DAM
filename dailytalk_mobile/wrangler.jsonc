@@ -1,0 +1,15 @@
+﻿{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dailytalk-site",
+  "compatibility_date": "2026-05-24",
+  "assets": {
+    "directory": "./cloudflare_dist",
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    {
+      "pattern": "dailytalk.pt/*",
+      "zone_name": "dailytalk.pt"
+    }
+  ]
+}

@@ -20,10 +20,32 @@ class _AccountPageState extends State<AccountPage> {
   @override
   void initState() {
     super.initState();
-    _userFuture = _authRepository.getCurrentUser();
+    _userFuture = _loadCurrentUser();
+  }
+
+  Future<AuthUser?> _loadCurrentUser() async {
+    try {
+      return await _authRepository.getCurrentUser();
+    } catch (_) {
+      await _authRepository.logout();
+      return null;
+    }
   }
 
   Future<void> _logout() async {
+    await _authRepository.logout();
+
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const AuthGate()),
+      (route) => false,
+    );
+  }
+
+  Future<void> _goToLogin() async {
     await _authRepository.logout();
 
     if (!mounted) {
@@ -55,10 +77,42 @@ class _AccountPageState extends State<AccountPage> {
           final user = snapshot.data;
 
           if (user == null) {
-            return const Center(
-              child: Text(
-                'Sessão não encontrada.',
-                style: TextStyle(color: Colors.white70),
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.lock_outline,
+                      color: Colors.white70,
+                      size: 56,
+                    ),
+                    const SizedBox(height: 14),
+                    const Text(
+                      'Sessão não encontrada.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'A sessão guardada neste dispositivo não é válida. '
+                      'Inicia sessão novamente.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white70, height: 1.4),
+                    ),
+                    const SizedBox(height: 18),
+                    ElevatedButton.icon(
+                      onPressed: _goToLogin,
+                      icon: const Icon(Icons.login),
+                      label: const Text('Ir para login'),
+                    ),
+                  ],
+                ),
               ),
             );
           }
@@ -78,7 +132,11 @@ class _AccountPageState extends State<AccountPage> {
                     ),
                     child: Column(
                       children: [
-                        const Icon(Icons.account_circle, color: Colors.lightBlueAccent, size: 72),
+                        const Icon(
+                          Icons.account_circle,
+                          color: Colors.lightBlueAccent,
+                          size: 72,
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           user.name,
@@ -89,11 +147,23 @@ class _AccountPageState extends State<AccountPage> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(user.email, style: const TextStyle(color: Colors.white70)),
+                        Text(
+                          user.email,
+                          style: const TextStyle(color: Colors.white70),
+                        ),
                         const SizedBox(height: 16),
-                        _InfoRow(label: 'Perfil', value: user.preferences.selectedProfile),
-                        _InfoRow(label: 'Idioma da app', value: user.preferences.appLanguageCode),
-                        _InfoRow(label: 'Idioma de aprendizagem', value: user.preferences.learningLanguageCode),
+                        _InfoRow(
+                          label: 'Perfil',
+                          value: user.preferences.selectedProfile,
+                        ),
+                        _InfoRow(
+                          label: 'Idioma da app',
+                          value: user.preferences.appLanguageCode,
+                        ),
+                        _InfoRow(
+                          label: 'Idioma de aprendizagem',
+                          value: user.preferences.learningLanguageCode,
+                        ),
                       ],
                     ),
                   ),

@@ -88,6 +88,56 @@ class AuthApiService {
     return _parseAuthSession(response);
   }
 
+  Future<PasswordResetRequestResult> requestPasswordReset({
+    required String email,
+  }) async {
+    if (AppConfig.useMockApi) {
+      return const PasswordResetRequestResult(
+        message: 'Modo mock: usa o código mock-reset-token para testar.',
+        debugResetToken: 'mock-reset-token',
+      );
+    }
+
+    final response = await _client
+        .post(
+          Uri.parse('${AppConfig.apiBaseUrl}/auth/forgot-password'),
+          headers: const {'Content-Type': 'application/json'},
+          body: jsonEncode({'email': email}),
+        )
+        .timeout(AppConfig.apiTimeout);
+
+    final decoded = _decodeResponse(response);
+    return PasswordResetRequestResult(
+      message: decoded['message']?.toString() ??
+          'Se o email existir, serão enviadas instruções de recuperação.',
+      debugResetToken: decoded['resetToken']?.toString(),
+    );
+  }
+
+  Future<void> resetPassword({
+    required String email,
+    required String resetToken,
+    required String newPassword,
+  }) async {
+    if (AppConfig.useMockApi) {
+      return;
+    }
+
+    final response = await _client
+        .post(
+          Uri.parse('${AppConfig.apiBaseUrl}/auth/reset-password'),
+          headers: const {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'email': email,
+            'token': resetToken,
+            'newPassword': newPassword,
+          }),
+        )
+        .timeout(AppConfig.apiTimeout);
+
+    _decodeResponse(response);
+  }
+
   Future<AuthUser> getCurrentUser() async {
     if (AppConfig.useMockApi) {
       return const AuthUser(
@@ -216,4 +266,18 @@ class AuthSession {
 
   final String token;
   final AuthUser user;
+}
+
+/// Resultado do pedido de recuperação de palavra-passe.
+class PasswordResetRequestResult {
+  const PasswordResetRequestResult({
+    required this.message,
+    this.debugResetToken,
+  });
+
+  final String message;
+
+  /// Token devolvido apenas em modo de protótipo/debug.
+  /// Em produção real, este valor deve ser enviado por email e não pela API.
+  final String? debugResetToken;
 }

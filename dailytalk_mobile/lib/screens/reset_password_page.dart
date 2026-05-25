@@ -2,40 +2,48 @@ import 'package:flutter/material.dart';
 
 import '../data/repositories/auth_repository.dart';
 
-/// Página de criação de conta do DailyTalk.pt.
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({
+/// Página final do fluxo de recuperação de palavra-passe.
+class ResetPasswordPage extends StatefulWidget {
+  const ResetPasswordPage({
     super.key,
-    required this.onAuthenticated,
+    required this.email,
+    this.initialResetToken,
   });
 
-  final VoidCallback onAuthenticated;
+  final String email;
+  final String? initialResetToken;
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<ResetPasswordPage> createState() => _ResetPasswordPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
+  final _tokenController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _authRepository = AuthRepository();
 
-  String _selectedRole = 'student';
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    _tokenController.text = widget.initialResetToken ?? '';
+  }
+
+  @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
+    _tokenController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _register() async {
+  Future<void> _resetPassword() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -46,19 +54,21 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     try {
-      await _authRepository.register(
-        name: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        role: _selectedRole,
+      await _authRepository.resetPassword(
+        email: widget.email,
+        resetToken: _tokenController.text.trim(),
+        newPassword: _passwordController.text,
       );
 
       if (!mounted) {
         return;
       }
 
-      widget.onAuthenticated();
-      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Palavra-passe alterada com sucesso. Inicia sessão novamente.')),
+      );
+
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } catch (error) {
       if (!mounted) {
         return;
@@ -78,12 +88,14 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final debugToken = widget.initialResetToken;
+
     return Scaffold(
       backgroundColor: const Color(0xFF0D1B22),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0D1B22),
         foregroundColor: Colors.white,
-        title: const Text('Criar conta'),
+        title: const Text('Nova palavra-passe'),
       ),
       body: SafeArea(
         child: Center(
@@ -96,10 +108,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Icon(Icons.person_add_alt_1, color: Colors.lightBlueAccent, size: 64),
-                    const SizedBox(height: 14),
+                    const Icon(Icons.password_outlined, color: Colors.lightBlueAccent, size: 72),
+                    const SizedBox(height: 18),
                     const Text(
-                      'Criar perfil DailyTalk.pt',
+                      'Define uma nova palavra-passe',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
@@ -107,27 +119,35 @@ class _RegisterPageState extends State<RegisterPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 22),
-                    _buildTextField(
-                      controller: _nameController,
-                      label: 'Nome',
-                      icon: Icons.person_outline,
-                      validator: (value) {
-                        if (value == null || value.trim().length < 2) {
-                          return 'Indica o nome.';
-                        }
-                        return null;
-                      },
+                    const SizedBox(height: 8),
+                    Text(
+                      'Conta: ${widget.email}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white70, height: 1.4),
                     ),
-                    const SizedBox(height: 14),
+                    if (debugToken != null && debugToken.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.orangeAccent),
+                        ),
+                        child: SelectableText(
+                          'Código temporário do protótipo:\n$debugToken',
+                          style: const TextStyle(color: Colors.orangeAccent),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 24),
                     _buildTextField(
-                      controller: _emailController,
-                      label: 'Email',
-                      icon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
+                      controller: _tokenController,
+                      label: 'Código de recuperação',
+                      icon: Icons.pin_outlined,
                       validator: (value) {
-                        if (value == null || !value.contains('@')) {
-                          return 'Indica um email válido.';
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Indica o código de recuperação.';
                         }
                         return null;
                       },
@@ -135,7 +155,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 14),
                     _buildTextField(
                       controller: _passwordController,
-                      label: 'Password',
+                      label: 'Nova password',
                       icon: Icons.lock_outline,
                       obscureText: _obscurePassword,
                       suffixIcon: IconButton(
@@ -162,30 +182,32 @@ class _RegisterPageState extends State<RegisterPage> {
                       },
                     ),
                     const SizedBox(height: 14),
-                    DropdownButtonFormField<String>(
-                      initialValue: _selectedRole,
-                      dropdownColor: const Color(0xFF14252D),
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        labelText: 'Perfil inicial',
-                        labelStyle: const TextStyle(color: Colors.white70),
-                        prefixIcon: const Icon(Icons.person_pin_circle, color: Colors.white70),
-                        filled: true,
-                        fillColor: const Color(0xFF14252D),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                    _buildTextField(
+                      controller: _confirmPasswordController,
+                      label: 'Confirmar password',
+                      icon: Icons.lock_reset_outlined,
+                      obscureText: _obscureConfirmPassword,
+                      suffixIcon: IconButton(
+                        tooltip: _obscureConfirmPassword
+                            ? 'Mostrar password'
+                            : 'Ocultar password',
+                        icon: Icon(
+                          _obscureConfirmPassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: Colors.white70,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
                       ),
-                      items: const [
-                        DropdownMenuItem(value: 'student', child: Text('Estudante')),
-                        DropdownMenuItem(value: 'host', child: Text('Anfitrião')),
-                        DropdownMenuItem(value: 'teacher', child: Text('Professor')),
-                      ],
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
+                      validator: (value) {
+                        if (value != _passwordController.text) {
+                          return 'As passwords não coincidem.';
                         }
-                        setState(() {
-                          _selectedRole = value;
-                        });
+                        return null;
                       },
                     ),
                     if (_errorMessage != null) ...[
@@ -196,15 +218,15 @@ class _RegisterPageState extends State<RegisterPage> {
                     SizedBox(
                       height: 52,
                       child: ElevatedButton.icon(
-                        onPressed: _isLoading ? null : _register,
+                        onPressed: _isLoading ? null : _resetPassword,
                         icon: _isLoading
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Icon(Icons.check),
-                        label: Text(_isLoading ? 'A criar...' : 'Criar conta'),
+                            : const Icon(Icons.save_outlined),
+                        label: Text(_isLoading ? 'A guardar...' : 'Alterar palavra-passe'),
                       ),
                     ),
                   ],
@@ -221,14 +243,12 @@ class _RegisterPageState extends State<RegisterPage> {
     required TextEditingController controller,
     required String label,
     required IconData icon,
-    TextInputType? keyboardType,
     bool obscureText = false,
     Widget? suffixIcon,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
       controller: controller,
-      keyboardType: keyboardType,
       obscureText: obscureText,
       validator: validator,
       style: const TextStyle(color: Colors.white),

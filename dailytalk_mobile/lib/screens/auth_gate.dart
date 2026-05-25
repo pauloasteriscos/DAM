@@ -5,6 +5,10 @@ import 'login_page.dart';
 import 'main_navigation.dart';
 
 /// Decide se a app abre no login ou na navegação principal.
+///
+/// Não basta existir um token guardado no dispositivo.
+/// O token pode ser antigo, de outro ambiente ou de modo mock.
+/// Por isso, na abertura da app, validamos a sessão contra a API através do /me.
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
 
@@ -25,7 +29,16 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   Future<void> _checkSession() async {
-    final authenticated = await _authRepository.isLoggedIn();
+    var authenticated = false;
+
+    try {
+      final user = await _authRepository.getCurrentUser();
+      authenticated = user != null;
+    } catch (_) {
+      // Se o token existir mas não for aceite pela API, removemos a sessão local.
+      await _authRepository.logout();
+      authenticated = false;
+    }
 
     if (!mounted) {
       return;

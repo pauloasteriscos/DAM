@@ -6,7 +6,7 @@ class AppConfig {
   /// flutter run --dart-define=DAILYTALK_USE_MOCK_API=false
   static const bool useMockApi = bool.fromEnvironment(
     'DAILYTALK_USE_MOCK_API',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   /// URL base da API.

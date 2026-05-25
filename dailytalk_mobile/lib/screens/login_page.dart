@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/repositories/auth_repository.dart';
+import 'forgot_password_page.dart';
 import 'register_page.dart';
 
 /// Página de login do DailyTalk.pt.
@@ -23,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   final _authRepository = AuthRepository();
 
   bool _isLoading = false;
+  bool _obscurePassword = true;
   String? _errorMessage;
 
   @override
@@ -75,6 +77,19 @@ class _LoginPageState extends State<LoginPage> {
       context,
       MaterialPageRoute(
         builder: (context) => RegisterPage(onAuthenticated: widget.onAuthenticated),
+      ),
+    );
+  }
+
+  void _openForgotPassword() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ForgotPasswordPage(
+          initialEmail: _emailController.text.trim().isEmpty
+              ? null
+              : _emailController.text.trim(),
+        ),
       ),
     );
   }
@@ -132,13 +147,36 @@ class _LoginPageState extends State<LoginPage> {
                       controller: _passwordController,
                       label: 'Password',
                       icon: Icons.lock_outline,
-                      obscureText: true,
+                      obscureText: _obscurePassword,
+                      suffixIcon: IconButton(
+                        tooltip: _obscurePassword
+                            ? 'Mostrar password'
+                            : 'Ocultar password',
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: Colors.white70,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Indica a password.';
                         }
                         return null;
                       },
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: _isLoading ? null : _openForgotPassword,
+                        child: const Text('Esqueci a palavra-passe'),
+                      ),
                     ),
                     if (_errorMessage != null) ...[
                       const SizedBox(height: 14),
@@ -180,6 +218,7 @@ class _LoginPageState extends State<LoginPage> {
     required IconData icon,
     TextInputType? keyboardType,
     bool obscureText = false,
+    Widget? suffixIcon,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
@@ -192,6 +231,7 @@ class _LoginPageState extends State<LoginPage> {
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white70),
         prefixIcon: Icon(icon, color: Colors.white70),
+        suffixIcon: suffixIcon,
         filled: true,
         fillColor: const Color(0xFF14252D),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
