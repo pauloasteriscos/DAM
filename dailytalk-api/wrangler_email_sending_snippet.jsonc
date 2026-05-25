@@ -1,0 +1,16 @@
+{
+  "vars": {
+    "JWT_EXPIRES_SECONDS": "7200",
+    "CORS_ORIGIN": "https://dailytalk.pt",
+    "PASSWORD_RESET_FROM_EMAIL": "no-reply@dailytalk.pt",
+    "PASSWORD_RESET_FROM_NAME": "DailyTalk.pt"
+  },
+  "send_email": [
+    {
+      "name": "EMAIL",
+      "allowed_sender_addresses": [
+        "no-reply@dailytalk.pt"
+      ]
+    }
+  ]
+}

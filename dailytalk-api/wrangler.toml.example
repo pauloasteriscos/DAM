@@ -1,0 +1,13 @@
+name = "dailytalk-api"
+main = "src/index.ts"
+compatibility_date = "2026-05-24"
+
+[vars]
+JWT_SECRET = "trocar-por-um-segredo-longo-e-aleatorio"
+CORS_ORIGIN = "http://localhost:5173"
+JWT_EXPIRES_SECONDS = "7200"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dailytalk-db"
+database_id = "COLOCAR_AQUI_O_DATABASE_ID"

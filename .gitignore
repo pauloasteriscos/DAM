@@ -1,0 +1,18 @@
+﻿# Node / backend
+node_modules/
+.wrangler/
+.dev.vars
+*.log
+
+# Flutter / Dart
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+cloudflare_dist/
+
+# IDE / sistema
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
