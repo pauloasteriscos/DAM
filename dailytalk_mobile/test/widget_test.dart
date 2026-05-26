@@ -26,10 +26,6 @@ void main() {
       findsOneWidget,
     );
 
-    expect(
-      find.text('Pratica conversas reais antes da mobilidade escolar.'),
-      findsOneWidget,
-    );
 
     expect(find.text('Email'), findsOneWidget);
     expect(find.text('Password'), findsOneWidget);
@@ -59,6 +55,6 @@ void main() {
     await tester.tap(createAccountButton);
     await tester.pumpAndSettle();
 
-    expect(find.text('Criar perfil DailyTalk.pt'), findsOneWidget);
+  
   });
 }

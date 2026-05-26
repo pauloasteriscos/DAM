@@ -10,16 +10,20 @@ import 'private_notes_page.dart';
 
 /// Conteúdo da página de Ajustes.
 ///
-/// Concentra opções secundárias da aplicação, incluindo perfil,
-/// idioma, comunidade, criação de atividades, ajuda, sincronização
-/// e informação geral.
+/// Concentra opções secundárias da aplicação, mantendo a navegação simples
+/// e agrupando funcionalidades por intenção: perfil, aprendizagem,
+/// privacidade/sincronização e apoio.
 class SettingsContent extends StatelessWidget {
   const SettingsContent({super.key});
 
+  static const Color _cardColor = Color(0xFF071D2A);
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        _buildSectionTitle('Conta e preferências'),
+
         _SettingsButton(
           icon: Icons.account_circle_outlined,
           title: 'Conta',
@@ -35,7 +39,7 @@ class SettingsContent extends StatelessWidget {
         const SizedBox(height: 12),
 
         _SettingsButton(
-          icon: Icons.person_pin_circle,
+          icon: Icons.person_pin_circle_outlined,
           title: 'Perfil',
           description: 'Escolher entre Estudante, Anfitrião ou Professor.',
           onTap: () {
@@ -51,7 +55,7 @@ class SettingsContent extends StatelessWidget {
         const SizedBox(height: 12),
 
         _SettingsButton(
-          icon: Icons.language,
+          icon: Icons.translate,
           title: 'Language',
           description:
               'Choose your language and the language you want to learn.',
@@ -65,7 +69,8 @@ class SettingsContent extends StatelessWidget {
           },
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 22),
+        _buildSectionTitle('Atividades'),
 
         _SettingsButton(
           icon: Icons.add_circle_outline,
@@ -96,10 +101,11 @@ class SettingsContent extends StatelessWidget {
           },
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 22),
+        _buildSectionTitle('Privacidade e dados'),
 
         _SettingsButton(
-          icon: Icons.lock,
+          icon: Icons.lock_outline,
           title: 'Notas privadas',
           description:
               'Guardar notas opcionais apenas neste dispositivo, sem sincronização.',
@@ -110,7 +116,7 @@ class SettingsContent extends StatelessWidget {
             );
           },
         ),
-        
+
         const SizedBox(height: 12),
 
         _SettingsButton(
@@ -123,7 +129,8 @@ class SettingsContent extends StatelessWidget {
           },
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 22),
+        _buildSectionTitle('Apoio'),
 
         _SettingsButton(
           icon: Icons.help_outline,
@@ -145,6 +152,21 @@ class SettingsContent extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10, left: 4),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.74),
+          fontSize: 14,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.4,
+        ),
+      ),
     );
   }
 
@@ -179,14 +201,23 @@ class SettingsContent extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF14252D),
-          title: const Text('Ajuda', style: TextStyle(color: Colors.white)),
+          backgroundColor: _cardColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          title: const Text(
+            'Ajuda',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           content: const Text(
             'Usa a Home para acompanhar o teu percurso.\n\n'
             'Em Praticar, responde a atividades predefinidas.\n\n'
             'Em Resultados, acompanha o teu desempenho.\n\n'
             'A criação de atividades é uma opção secundária, disponível no menu superior e nos Ajustes.\n\n'
-            'A opção Perfil permitirá adaptar atividades para Estudante, Anfitrião ou Professor.\n\n'
+            'A opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.\n\n'
             'A opção Sincronizar permite enviar submissões pendentes quando existir ligação.',
             style: TextStyle(color: Colors.white70, height: 1.4),
           ),
@@ -206,10 +237,16 @@ class SettingsContent extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF14252D),
+          backgroundColor: _cardColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
           title: const Text(
             'Sobre o DailyTalk.pt',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
           ),
           content: const SingleChildScrollView(
             child: Text(
@@ -218,9 +255,8 @@ class SettingsContent extends StatelessWidget {
               'quizzes e desafios.\n\n'
               'A aplicação inclui atividades criadas pela equipa DailyTalk.pt e também poderá '
               'incluir atividades propostas pela comunidade.\n\n'
-              'Na próxima evolução, a aplicação passará a considerar perfis como Estudante, '
-              'Anfitrião e Professor, permitindo atividades mais adequadas a cada papel no '
-              'contexto escolar.',
+              'A aplicação considera perfis como Estudante, Anfitrião e Professor, permitindo '
+              'atividades mais adequadas a cada papel no contexto escolar.',
               style: TextStyle(color: Colors.white70, height: 1.4),
             ),
           ),
@@ -249,25 +285,51 @@ class _SettingsButton extends StatelessWidget {
   final String description;
   final VoidCallback onTap;
 
+  static const Color _cardColor = Color(0xFF071D2A);
+  static const Color _accentColor = Color(0xFF35C8FF);
+  
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFF14252D),
-      borderRadius: BorderRadius.circular(18),
+      color: _cardColor.withValues(alpha: 0.82),
+      borderRadius: BorderRadius.circular(22),
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
         onTap: onTap,
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white12),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.14),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 14,
+                offset: const Offset(0, 7),
+              ),
+            ],
           ),
           child: Row(
             children: [
-              Icon(icon, color: Colors.lightBlueAccent, size: 34),
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: _accentColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: _accentColor.withValues(alpha: 0.26),
+                  ),
+                ),
+                child: Icon(icon, color: _accentColor, size: 29),
+              ),
+
               const SizedBox(width: 14),
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,21 +339,25 @@ class _SettingsButton extends StatelessWidget {
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 17,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       description,
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.70),
                         height: 1.3,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Colors.white54),
+
+              Icon(
+                Icons.chevron_right,
+                color: Colors.white.withValues(alpha: 0.46),
+              ),
             ],
           ),
         ),

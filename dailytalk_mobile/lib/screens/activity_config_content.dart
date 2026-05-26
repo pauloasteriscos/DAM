@@ -8,6 +8,9 @@ import 'activity_display_page.dart';
 ///
 /// Este widget é colocado dentro do PlaceholderPage,
 /// para manter a estrutura visual já existente e apenas acrescentar funcionalidade.
+///
+/// Nesta versão, a configuração foi redesenhada para ficar coerente com a
+/// identidade visual aplicada ao login, criação de conta e seleção de idiomas.
 class ActivityConfigContent extends StatefulWidget {
   const ActivityConfigContent({super.key});
 
@@ -26,6 +29,10 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
 
   bool _isLoading = false;
   String? _errorMessage;
+
+  static const Color _cardColor = Color(0xFF071D2A);
+  static const Color _fieldColor = Color(0xFF061823);
+  static const Color _accentColor = Color(0xFF35C8FF);
 
   @override
   void dispose() {
@@ -95,17 +102,17 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: const Color(0xFF14252D),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white12),
-      ),
+      decoration: _cardDecoration(),
       child: Form(
         key: _formKey,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _buildHeader(),
+            const SizedBox(height: 20),
+
             _buildTextField(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             _buildDropdown(
               label: 'Idioma a praticar',
@@ -120,69 +127,139 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
                 'de-DE': 'Deutsch',
               },
               onChanged: (value) {
+                if (value == null) {
+                  return;
+                }
+
                 setState(() {
-                  _languageCode = value!;
+                  _languageCode = value;
                 });
               },
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             _buildDropdown(
               label: 'Dificuldade',
               value: _difficulty,
-              icon: Icons.speed,
+              icon: Icons.speed_outlined,
               items: const {
                 'Inicial': 'Inicial',
                 'Média': 'Média',
                 'Avançada': 'Avançada',
               },
               onChanged: (value) {
+                if (value == null) {
+                  return;
+                }
+
                 setState(() {
-                  _difficulty = value!;
+                  _difficulty = value;
                 });
               },
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             _buildDropdown(
               label: 'Tipo de atividade',
               value: _activityType,
-              icon: Icons.category,
+              icon: Icons.category_outlined,
               items: ActivityStrategyFactory.creationOptions,
               onChanged: (value) {
+                if (value == null) {
+                  return;
+                }
+
                 setState(() {
-                  _activityType = value!;
+                  _activityType = value;
                 });
               },
             ),
 
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 16),
+              _buildErrorBox(),
+            ],
+
             const SizedBox(height: 22),
 
-            if (_errorMessage != null) _buildErrorBox(),
-
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton.icon(
-                onPressed: _isLoading ? null : _startActivity,
-                icon: _isLoading
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.play_arrow),
-                label: Text(
-                  _isLoading ? 'A iniciar...' : 'Iniciar atividade',
-                  style: const TextStyle(fontSize: 18),
-                ),
-              ),
-            ),
+            _buildPrimaryButton(),
           ],
         ),
       ),
+    );
+  }
+
+  /// Cabeçalho do cartão de configuração.
+  ///
+  /// Explica rapidamente o objetivo do formulário antes de o utilizador
+  /// preencher o cenário e as opções da atividade.
+  Widget _buildHeader() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF52D8FF),
+                Color(0xFF168CFF),
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: _accentColor.withValues(alpha: 0.24),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Container(
+            margin: const EdgeInsets.all(5),
+            decoration: const BoxDecoration(
+              color: Color(0xFF092333),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.tune_outlined,
+              color: _accentColor,
+              size: 30,
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Configura o desafio',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  height: 1.15,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Escolhe o contexto, o idioma, a dificuldade e o tipo de atividade antes de começar.',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.70),
+                  fontSize: 14,
+                  height: 1.35,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -190,15 +267,20 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
   Widget _buildTextField() {
     return TextFormField(
       controller: _scenarioController,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 17,
+        fontWeight: FontWeight.w500,
+      ),
+      cursorColor: _accentColor,
       decoration: _inputDecoration(
         label: 'Cenário',
         hint: 'Ex.: sala de aula',
-        icon: Icons.edit,
+        icon: Icons.edit_outlined,
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Informe o cenário da atividade.';
+          return 'Indica o cenário da atividade.';
         }
 
         return null;
@@ -216,8 +298,13 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
   }) {
     return DropdownButtonFormField<String>(
       initialValue: value,
-      dropdownColor: const Color(0xFF14252D),
-      style: const TextStyle(color: Colors.white),
+      dropdownColor: const Color(0xFF102A38),
+      iconEnabledColor: Colors.white.withValues(alpha: 0.74),
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 17,
+        fontWeight: FontWeight.w500,
+      ),
       decoration: _inputDecoration(label: label, icon: icon),
       items: items.entries.map((entry) {
         return DropdownMenuItem<String>(
@@ -238,16 +325,133 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
     return InputDecoration(
       labelText: label,
       hintText: hint,
-      prefixIcon: Icon(icon),
-      labelStyle: const TextStyle(color: Colors.white70),
-      hintStyle: const TextStyle(color: Colors.white38),
-      prefixIconColor: Colors.lightBlue,
+      labelStyle: TextStyle(
+        color: Colors.white.withValues(alpha: 0.66),
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
+      hintStyle: TextStyle(
+        color: Colors.white.withValues(alpha: 0.34),
+      ),
+      prefixIcon: Padding(
+        padding: const EdgeInsets.only(left: 14, right: 8),
+        child: Icon(
+          icon,
+          color: Colors.white.withValues(alpha: 0.72),
+          size: 25,
+        ),
+      ),
+      prefixIconConstraints: const BoxConstraints(
+        minWidth: 56,
+        minHeight: 56,
+      ),
       filled: true,
-      fillColor: const Color(0xFF0D1B22),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+      fillColor: _fieldColor.withValues(alpha: 0.78),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 17,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Colors.white24),
+        borderRadius: BorderRadius.circular(24),
+        borderSide: BorderSide(
+          color: Colors.white.withValues(alpha: 0.18),
+          width: 1.25,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(24),
+        borderSide: const BorderSide(
+          color: _accentColor,
+          width: 1.8,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(24),
+        borderSide: const BorderSide(
+          color: Colors.redAccent,
+          width: 1.35,
+        ),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(24),
+        borderSide: const BorderSide(
+          color: Colors.redAccent,
+          width: 1.8,
+        ),
+      ),
+    );
+  }
+
+  /// Botão principal para iniciar a atividade configurada.
+  Widget _buildPrimaryButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 58,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          gradient: _isLoading
+              ? LinearGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.22),
+                    Colors.white.withValues(alpha: 0.14),
+                  ],
+                )
+              : const LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Color(0xFF49D7FF),
+                    Color(0xFF168CFF),
+                  ],
+                ),
+          boxShadow: _isLoading
+              ? []
+              : [
+                  BoxShadow(
+                    color: const Color(0xFF168CFF).withValues(alpha: 0.30),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+        ),
+        child: ElevatedButton.icon(
+          onPressed: _isLoading ? null : _startActivity,
+          icon: _isLoading
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.4,
+                    color: Colors.white,
+                  ),
+                )
+              : const Icon(
+                  Icons.play_arrow,
+                  size: 25,
+                ),
+          label: Text(
+            _isLoading ? 'A iniciar...' : 'Iniciar atividade',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            backgroundColor: Colors.transparent,
+            disabledBackgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            disabledForegroundColor: Colors.white70,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -256,17 +460,39 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
   Widget _buildErrorBox() {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 18),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.redAccent),
+        color: Colors.red.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.redAccent.withValues(alpha: 0.85),
+        ),
       ),
       child: Text(
         _errorMessage!,
-        style: const TextStyle(color: Colors.redAccent),
+        style: const TextStyle(
+          color: Colors.redAccent,
+          fontWeight: FontWeight.w600,
+        ),
       ),
+    );
+  }
+
+  BoxDecoration _cardDecoration() {
+    return BoxDecoration(
+      color: _cardColor.withValues(alpha: 0.86),
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(
+        color: Colors.white.withValues(alpha: 0.14),
+        width: 1.2,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.18),
+          blurRadius: 18,
+          offset: const Offset(0, 9),
+        ),
+      ],
     );
   }
 }

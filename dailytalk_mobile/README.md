@@ -4,7 +4,7 @@ Aplicação móvel desenvolvida em Flutter para o projeto **Erasmus DailyTalk.pt
 
 O objetivo da aplicação é apoiar crianças e jovens em mobilidade escolar, normalmente entre os 11 e os 15 anos, na prática de comunicação em situações reais do quotidiano escolar, através de atividades gamificadas como vocabulário, áudio, diálogos, quizzes e desafios.
 
-Esta versão contempla a evolução até à **Sprint 3**, incluindo a estrutura inicial da aplicação, navegação, Home gamificada, base de dados local SQLite, configuração de atividades, submissão de respostas, apresentação de resultados, integração com backend real, autenticação de utilizadores, sincronização entre mobile e Web, publicação em Cloudflare e aplicação progressiva de padrões de software para melhorar a organização e manutenção do código.
+Esta versão contempla a evolução até à **Sprint 4**, incluindo a estrutura inicial da aplicação, navegação, Home gamificada, base de dados local SQLite, configuração de atividades, submissão de respostas, apresentação de resultados, integração com backend real, autenticação de utilizadores, sincronização entre mobile e Web, publicação em Cloudflare, aplicação progressiva de padrões de software e refinamento visual/UX dos principais fluxos da aplicação.
 
 ---
 
@@ -41,13 +41,24 @@ A aplicação já possui:
 - submissões associadas ao utilizador autenticado;
 - possibilidade de testar escrita em mobile e leitura na Web, e vice-versa;
 - recuperação de palavra-passe em modo protótipo/debug;
+- reformulação visual dos ecrãs de entrada, criação de conta, recuperação de palavra-passe, seleção de idioma, configuração de atividade, atividade/desafio, resultados/análises, conta, ajustes e notas privadas;
 - aplicação inicial dos padrões Strategy, Factory simples, Facade, Command e Observer.
 
 ---
 
 ## Identidade visual e publicação
 
-Durante a Sprint 3 foi criada e adicionada uma logo para a aplicação, baseada nas letras **DTK**, representando o nome **DailyTalk.pt**.
+Durante a Sprint 3 foi criada e adicionada uma logo inicial para a aplicação, baseada nas letras **DTK**, representando o nome **DailyTalk.pt**.
+
+Na Sprint 4, a identidade visual foi revista para melhorar a perceção inicial do produto nos primeiros segundos de utilização. O ecrã de entrada deixou de ter um aspeto genérico e passou a apresentar uma composição visual própria, com marca DailyTalk.pt, mascote, elementos de fala, livro e rodapé decorativo. Esta alteração teve como objetivo comunicar de forma imediata que a aplicação é um serious game para aprendizagem de idiomas em contexto de mobilidade escolar.
+
+Foram adicionados ou consolidados assets visuais em `assets/branding/`, nomeadamente:
+
+- `dailytalk_login_hero.png`;
+- `dailytalk_login_footer.png`;
+- `dailytalk_mascot.png`.
+
+A mesma linguagem visual foi depois aplicada progressivamente a outros ecrãs, mantendo ícones neutros nos campos de formulário e reservando o azul para marca, foco e ações principais.
 
 O domínio **dailytalk.pt** foi migrado do provedor anterior, Locaweb, para a Cloudflare. Esta alteração foi realizada porque a evolução do protótipo passou a exigir maior agilidade de publicação, suporte a HTTPS, menor latência e melhor controlo sobre a publicação da versão Web e da API.
 
@@ -258,6 +269,25 @@ Também foram ajustados:
 - retorno para o ecrã de login após logout;
 - validação de token antes de abrir a navegação principal;
 - comportamento de conta quando a sessão não existe.
+
+Na Sprint 4 foi realizado um refinamento visual e de interação nos principais fluxos da aplicação. O objetivo foi tornar a interface mais consistente, reduzir ambiguidades visuais e reforçar a comunicação da proposta de valor.
+
+Foram revistos:
+
+- ecrã de login, com reforço da identidade visual e proposta de valor;
+- ecrã de criação de conta, com título mais direto e mascote compacta;
+- recuperação e redefinição de palavra-passe;
+- seleção de idioma;
+- seleção de perfil;
+- configuração de atividade;
+- tela de atividade/desafio;
+- resultados e análises;
+- conta do utilizador;
+- ajustes;
+- notas privadas;
+- estrutura visual de páginas internas.
+
+A Home gamificada foi mantida sem alteração estrutural significativa, por já possuir identidade própria e comunicar bem a progressão por atividades.
 
 ---
 
@@ -518,6 +548,54 @@ Considera-se que a Sprint 3 cumpriu o previsto e avançou além do inicialmente 
 
 ---
 
+## Funcionalidades da Sprint 4
+
+A Sprint 4 teve como foco principal o refinamento da experiência de utilização, a consistência visual entre ecrãs e a preparação da aplicação para uma apresentação mais madura do protótipo.
+
+O ponto de partida foi a análise do ecrã de entrada a partir da perspetiva dos primeiros segundos de utilização: o utilizador devia conseguir perceber rapidamente o que é o DailyTalk.pt, para que serve e qual a ação principal disponível.
+
+### Identidade visual e primeira impressão
+
+- reformulação do ecrã de login;
+- integração de uma composição visual com mascote, livro, balões de fala e marca DailyTalk.pt;
+- reforço da proposta de valor: **Serious game para aprendizagem de idiomas**;
+- remoção de elementos que pareciam botões, mas não eram interativos;
+- destaque das ações **Entrar** e **Criar conta**;
+- utilização de rodapé decorativo com ambiente associado à mobilidade escolar.
+
+### Coerência entre fluxos de autenticação
+
+Foram alinhados visualmente os ecrãs ligados à autenticação:
+
+- login;
+- criação de conta;
+- recuperação de palavra-passe;
+- redefinição de palavra-passe;
+- conta do utilizador.
+
+O azul passou a ser usado prioritariamente para marca, foco e ação principal, evitando que ícones de campos inativos parecessem elementos selecionados.
+
+### Ajustes em ecrãs internos
+
+Também foram ajustados ecrãs internos para manter uma experiência mais consistente:
+
+- seleção de idioma;
+- seleção de perfil;
+- configuração de atividade;
+- execução de atividade/desafio;
+- resultados e análises;
+- ajustes;
+- notas privadas;
+- páginas internas com estrutura genérica.
+
+A Home gamificada foi preservada, por já cumprir bem a função de orientar a progressão do utilizador dentro da aplicação.
+
+### Resultado da Sprint 4
+
+A Sprint 4 consolidou a aplicação como um protótipo mais coerente do ponto de vista visual e de experiência de utilização. A aplicação passou a comunicar melhor a sua identidade, o seu propósito educativo e as ações principais esperadas em cada fluxo.
+
+---
+
 ## Base de dados local
 
 A aplicação usa SQLite local através do pacote sqflite.
@@ -691,7 +769,9 @@ As próximas etapas do projeto poderão incluir:
 - reputação do criador de atividades;
 - moderação de atividades com apoio de IA;
 - internacionalização completa da interface;
-- reforço da documentação técnica e de utilização.
+- reforço da documentação técnica e de utilização;
+- validação final dos ecrãs refinados na Sprint 4 em Android e Web;
+- revisão final de acessibilidade visual, contraste e tamanhos de toque.
 
 ---
 
@@ -756,6 +836,28 @@ Entregas contempladas:
 - testes com `flutter analyze` e `flutter test`;
 - documentação do código e do estado da sprint.
 
+### Sprint 4
+
+Estado: implementada como refinamento visual e de experiência de utilização.
+
+Entregas contempladas:
+
+- redesign do ecrã de login;
+- criação/reforço de assets de branding;
+- integração de mascote e rodapé decorativo;
+- melhoria do ecrã de criação de conta;
+- melhoria do fluxo de recuperação e redefinição de palavra-passe;
+- melhoria da seleção de idioma;
+- melhoria da seleção de perfil;
+- melhoria da configuração de atividade;
+- melhoria da tela de atividade/desafio;
+- melhoria de resultados e análises;
+- melhoria da tela Conta;
+- melhoria dos Ajustes;
+- melhoria das Notas privadas;
+- alinhamento visual de páginas internas;
+- manutenção da Home gamificada como ecrã principal já consolidado.
+
 ---
 
 ## Observações
@@ -764,4 +866,6 @@ Esta versão continua a ser um protótipo funcional, mas já ultrapassa o fluxo 
 
 A aplicação passou a ter backend real, autenticação, persistência remota e sincronização entre plataformas. Ainda assim, algumas funcionalidades continuam em modo de protótipo, principalmente a recuperação de palavra-passe, que nesta fase utiliza código devolvido pela app em modo debug por limitação do plano de envio de email transacional.
 
-A organização em três sprints permitiu testar progressivamente as funcionalidades principais. A Sprint 3 foi usada para consolidar UI, usabilidade, segurança, testes e infraestrutura. A próxima etapa deverá concentrar-se na correção final, melhoria da experiência, reforço dos testes unitários e substituição de mecanismos temporários por serviços definitivos quando a infraestrutura permitir.
+A organização em quatro sprints permitiu testar progressivamente as funcionalidades principais. A Sprint 3 foi usada para consolidar autenticação, backend, segurança, testes e infraestrutura. A Sprint 4 foi usada para melhorar a comunicação visual, reforçar a identidade do DailyTalk.pt e tornar os fluxos principais mais consistentes do ponto de vista de usabilidade.
+
+A próxima etapa deverá concentrar-se na validação final em Android e Web, reforço dos testes unitários, substituição de mecanismos temporários por serviços definitivos quando a infraestrutura permitir e preparação da entrega final.

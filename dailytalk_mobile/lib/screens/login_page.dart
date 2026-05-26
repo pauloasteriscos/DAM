@@ -126,17 +126,21 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
+          /// Rodapé decorativo.
+          ///
+          /// Mantém a composição visual do ecrã, mas não interfere com
+          /// campos, botões ou navegação.
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            height: isCompact ? 92 : 130,
+            height: isCompact ? 220 : 180,
             child: IgnorePointer(
               child: Opacity(
-                opacity: 0.55,
+                opacity: isCompact ? 0.78 : 0.62,
                 child: Image.asset(
                   'assets/branding/dailytalk_login_footer.png',
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fitWidth,
                   alignment: Alignment.bottomCenter,
                   errorBuilder: (context, error, stackTrace) {
                     return const SizedBox.shrink();
@@ -151,9 +155,9 @@ class _LoginPageState extends State<LoginPage> {
               child: SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(
                   24,
-                  isCompact ? 10 : 20,
+                  isCompact ? 0 : 8,
                   24,
-                  isCompact ? 20 : 32,
+                  isCompact ? 88 : 64,
                 ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 460),
@@ -184,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                           },
                         ),
 
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
 
                         _buildTextField(
                           controller: _passwordController,
@@ -277,21 +281,26 @@ class _LoginPageState extends State<LoginPage> {
 
         SizedBox(height: isCompact ? 4 : 8),
 
-        const Text(
-          'Serious game para aprendizagem de idiomas',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Color(0xFF35C8FF),
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            height: 1.25,
+        /// FittedBox evita a quebra desta frase em telemóveis estreitos.
+        const FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            'Serious game para aprendizagem de idiomas',
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            style: TextStyle(
+              color: Color(0xFF35C8FF),
+              fontSize: 16.5,
+              fontWeight: FontWeight.w800,
+              height: 1.25,
+            ),
           ),
         ),
 
         const SizedBox(height: 8),
 
         Text(
-          'Pratica conversas reais antes da mobilidade escolar.',
+          'Pratica diálogos antes da mobilidade escolar',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.76),
@@ -336,19 +345,19 @@ class _LoginPageState extends State<LoginPage> {
           child: Icon(
             icon,
             color: Colors.white.withValues(alpha: 0.76),
-            size: 28,
+            size: 25,
           ),
         ),
         prefixIconConstraints: const BoxConstraints(
-          minWidth: 58,
-          minHeight: 58,
+          minWidth: 54,
+          minHeight: 52,
         ),
         suffixIcon: suffixIcon,
         filled: true,
         fillColor: const Color(0xFF071D2A).withValues(alpha: 0.78),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 22,
+          horizontal: 16,
+          vertical: 16,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
@@ -387,7 +396,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildPrimaryButton() {
     return SizedBox(
-      height: 64,
+      height: 56,
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
@@ -429,7 +438,7 @@ class _LoginPageState extends State<LoginPage> {
                 )
               : const Icon(
                   Icons.login,
-                  size: 26,
+                  size: 24,
                 ),
           label: Text(
             _isLoading ? 'A entrar...' : 'Entrar',
@@ -456,12 +465,12 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildSecondaryButton() {
     return SizedBox(
-      height: 58,
+      height: 52,
       child: OutlinedButton.icon(
         onPressed: _isLoading ? null : _openRegister,
         icon: const Icon(
           Icons.person_add_alt_1_outlined,
-          size: 24,
+          size: 22,
         ),
         label: const Text(
           'Criar conta',

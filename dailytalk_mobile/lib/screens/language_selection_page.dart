@@ -4,12 +4,15 @@ import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
 import '../data/repositories/auth_repository.dart';
 
-/// Language configuration page.
+/// Página de configuração dos idiomas do DailyTalk.pt.
 ///
-/// The app does not use only one language.
-/// The student chooses:
-/// - the language they normally use;
-/// - the language they want to learn/practice.
+/// Esta tela mantém o título "Language" no topo para facilitar o regresso
+/// ao idioma da aplicação, mesmo quando o utilizador escolhe outro idioma
+/// por engano.
+///
+/// O utilizador escolhe:
+/// - o idioma que normalmente utiliza na aplicação;
+/// - o idioma que quer aprender/praticar nas atividades.
 class LanguageSelectionPage extends StatefulWidget {
   const LanguageSelectionPage({super.key});
 
@@ -23,29 +26,9 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
   bool _isLoading = true;
   bool _isSaving = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadSavedLanguages();
-  }
-
-  Future<void> _loadSavedLanguages() async {
-    final db = await AppDatabase.instance.database;
-    final settingsDao = AppSettingsDao(db);
-
-    final nativeLanguageCode = await settingsDao.getNativeLanguageCode();
-    final targetLanguageCode = await settingsDao.getTargetLanguageCode();
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _nativeLanguageCode = nativeLanguageCode;
-      _targetLanguageCode = targetLanguageCode;
-      _isLoading = false;
-    });
-  }
+  static const Color _backgroundColor = Color(0xFF061823);
+  static const Color _cardColor = Color(0xFF071D2A);
+  static const Color _accentColor = Color(0xFF35C8FF);
 
   final List<LanguageOption> _languages = const [
     LanguageOption(
@@ -86,12 +69,36 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
     ),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedLanguages();
+  }
+
+  Future<void> _loadSavedLanguages() async {
+    final db = await AppDatabase.instance.database;
+    final settingsDao = AppSettingsDao(db);
+
+    final nativeLanguageCode = await settingsDao.getNativeLanguageCode();
+    final targetLanguageCode = await settingsDao.getTargetLanguageCode();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _nativeLanguageCode = nativeLanguageCode;
+      _targetLanguageCode = targetLanguageCode;
+      _isLoading = false;
+    });
+  }
+
   Future<void> _saveLanguages() async {
     if (_nativeLanguageCode == _targetLanguageCode) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Please choose two different languages.',
+            'Escolhe dois idiomas diferentes.',
           ),
         ),
       );
@@ -111,8 +118,8 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
         targetLanguageCode: _targetLanguageCode,
       );
 
-      // Tenta sincronizar as preferências com o perfil remoto.
-      // Se a API estiver em modo mock, isto também funciona sem backend.
+      /// Tenta sincronizar as preferências com o perfil remoto.
+      /// Se a API estiver em modo mock, também funciona sem backend real.
       await AuthRepository().updatePreferences(
         appLanguageCode: _nativeLanguageCode,
         learningLanguageCode: _targetLanguageCode,
@@ -128,7 +135,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Saved: ${nativeLanguage.name} → ${targetLanguage.name}',
+            'Guardado: ${nativeLanguage.name} → ${targetLanguage.name}',
           ),
         ),
       );
@@ -163,111 +170,217 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
     final nativeLanguage = _languageByCode(_nativeLanguageCode);
     final targetLanguage = _languageByCode(_targetLanguageCode);
 
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final isCompact = screenHeight < 760;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1B22),
+      backgroundColor: _backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1B22),
+        backgroundColor: _backgroundColor,
         foregroundColor: Colors.white,
-        title: const Text('Language'),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            children: [
-              _buildIntroCard(),
-              const SizedBox(height: 18),
-              _buildLanguageSelector(
-                title: 'My language',
-                description:
-                    'Choose the language you normally use. This may also be used as the app interface language.',
-                selectedCode: _nativeLanguageCode,
-                selectedLanguage: nativeLanguage,
-                onChanged: (value) {
-                  setState(() {
-                    _nativeLanguageCode = value!;
-                  });
-                },
-              ),
-              const SizedBox(height: 18),
-              _buildLanguageSelector(
-                title: 'I want to learn',
-                description:
-                    'Choose the language you want to practice in activities, dialogues, audio exercises, quizzes and challenges.',
-                selectedCode: _targetLanguageCode,
-                selectedLanguage: targetLanguage,
-                onChanged: (value) {
-                  setState(() {
-                    _targetLanguageCode = value!;
-                  });
-                },
-              ),
-              const SizedBox(height: 22),
-              _buildLearningPathCard(
-                nativeLanguage: nativeLanguage,
-                targetLanguage: targetLanguage,
-              ),
-              const SizedBox(height: 22),
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton.icon(
-                  onPressed: _isSaving ? null : _saveLanguages,
-                  icon: const Icon(Icons.check),
-                  label: Text(
-                    _isSaving ? 'Saving...' : 'Save languages',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-              ),
-            ],
+        elevation: 0,
+        titleSpacing: 0,
+        title: const Text(
+          'Language',
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w500,
           ),
         ),
+      ),
+      body: Stack(
+        children: [
+          const Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.topCenter,
+                  radius: 1.25,
+                  colors: [
+                    Color(0xFF103653),
+                    Color(0xFF061823),
+                    Color(0xFF041019),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: isCompact ? 160 : 205,
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: isCompact ? 0.46 : 0.58,
+                child: Image.asset(
+                  'assets/branding/dailytalk_login_footer.png',
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment.bottomCenter,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ),
+          ),
+
+          _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: _accentColor,
+                  ),
+                )
+              : SafeArea(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(
+                        22,
+                        isCompact ? 10 : 18,
+                        22,
+                        isCompact ? 38 : 52,
+                      ),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 460),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildIntroCard(isCompact: isCompact),
+
+                            SizedBox(height: isCompact ? 14 : 18),
+
+                            _buildLanguageSelector(
+                              title: 'Idioma da aplicação',
+                              description:
+                                  'Escolhe o idioma que usas normalmente. Este idioma pode ser usado para menus, mensagens e feedback.',
+                              selectedCode: _nativeLanguageCode,
+                              selectedLanguage: nativeLanguage,
+                              onChanged: (value) {
+                                if (value == null) {
+                                  return;
+                                }
+
+                                setState(() {
+                                  _nativeLanguageCode = value;
+                                });
+                              },
+                            ),
+
+                            SizedBox(height: isCompact ? 14 : 18),
+
+                            _buildLanguageSelector(
+                              title: 'Idioma a praticar',
+                              description:
+                                  'Escolhe o idioma que queres treinar em diálogos, áudios, quizzes e desafios.',
+                              selectedCode: _targetLanguageCode,
+                              selectedLanguage: targetLanguage,
+                              onChanged: (value) {
+                                if (value == null) {
+                                  return;
+                                }
+
+                                setState(() {
+                                  _targetLanguageCode = value;
+                                });
+                              },
+                            ),
+
+                            SizedBox(height: isCompact ? 16 : 20),
+
+                            _buildLearningPathCard(
+                              nativeLanguage: nativeLanguage,
+                              targetLanguage: targetLanguage,
+                            ),
+
+                            SizedBox(height: isCompact ? 20 : 26),
+
+                            _buildPrimaryButton(),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+        ],
       ),
     );
   }
 
-  Widget _buildIntroCard() {
+  Widget _buildIntroCard({required bool isCompact}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: const Color(0xFF14252D),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.white12,
-        ),
-      ),
-      child: const Column(
+      padding: EdgeInsets.all(isCompact ? 16 : 18),
+      decoration: _cardDecoration(),
+      child: Column(
         children: [
-          Icon(
-            Icons.language,
-            color: Colors.lightBlueAccent,
-            size: 50,
-          ),
-          SizedBox(height: 12),
-          Text(
-            'Language settings',
+          _buildLanguageBadge(isCompact: isCompact),
+
+          const SizedBox(height: 12),
+
+          const Text(
+            'Escolhe os teus idiomas',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,
-              fontSize: 23,
-              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              height: 1.15,
             ),
           ),
-          SizedBox(height: 8),
+
+          const SizedBox(height: 8),
+
           Text(
-            'Select your usual language and the language you want to learn. '
-            'DailyTalk.pt will use this pair to suggest and prepare activities.',
+            'O DailyTalk.pt adapta as atividades ao idioma que já conheces e ao idioma que queres praticar.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white70,
-              height: 1.4,
+              color: Colors.white.withValues(alpha: 0.74),
+              fontSize: 14.5,
+              fontWeight: FontWeight.w500,
+              height: 1.35,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageBadge({required bool isCompact}) {
+    final badgeSize = isCompact ? 70.0 : 82.0;
+
+    return Container(
+      width: badgeSize,
+      height: badgeSize,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF52D8FF),
+            Color(0xFF168CFF),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _accentColor.withValues(alpha: 0.26),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Container(
+        margin: const EdgeInsets.all(5),
+        decoration: const BoxDecoration(
+          color: Color(0xFF092333),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.translate,
+          color: _accentColor,
+          size: 40,
+        ),
       ),
     );
   }
@@ -282,63 +395,85 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: const Color(0xFF14252D),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.white12,
-        ),
-      ),
+      decoration: _cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(
-                selectedLanguage.flag,
-                style: const TextStyle(fontSize: 34),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 21,
-                    fontWeight: FontWeight.bold,
+              Container(
+                width: 48,
+                height: 48,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.07),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.12),
                   ),
+                ),
+                child: Text(
+                  selectedLanguage.flag,
+                  style: const TextStyle(fontSize: 28),
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      selectedLanguage.description,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.58),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+
+          const SizedBox(height: 10),
+
           Text(
             description,
-            style: const TextStyle(
-              color: Colors.white70,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.70),
+              fontSize: 14,
               height: 1.35,
             ),
           ),
+
           const SizedBox(height: 14),
+
           DropdownButtonFormField<String>(
             initialValue: selectedCode,
-            dropdownColor: const Color(0xFF14252D),
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: const Color(0xFF0D1B22),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Colors.white24),
-              ),
+            dropdownColor: const Color(0xFF102A38),
+            iconEnabledColor: Colors.white.withValues(alpha: 0.74),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
             ),
+            decoration: _dropdownDecoration(),
             items: _languages.map((language) {
               return DropdownMenuItem<String>(
                 value: language.code,
-                child: Text('${language.flag} ${language.name}'),
+                child: Text('${language.flag}  ${language.name}'),
               );
             }).toList(),
             onChanged: onChanged,
@@ -352,27 +487,35 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
     required LanguageOption nativeLanguage,
     required LanguageOption targetLanguage,
   }) {
+    final hasSameLanguage = nativeLanguage.code == targetLanguage.code;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.lightBlue.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(18),
+        color: hasSameLanguage
+            ? Colors.orange.withValues(alpha: 0.12)
+            : _accentColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: Colors.lightBlueAccent.withValues(alpha: 0.45),
+          color: hasSameLanguage
+              ? Colors.orangeAccent.withValues(alpha: 0.56)
+              : _accentColor.withValues(alpha: 0.48),
         ),
       ),
       child: Column(
         children: [
-          const Text(
-            'Learning path',
+          Text(
+            hasSameLanguage ? 'Atenção' : 'Percurso de aprendizagem',
             style: TextStyle(
-              color: Colors.lightBlueAccent,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+              color: hasSameLanguage ? Colors.orangeAccent : _accentColor,
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 14),
+
+          const SizedBox(height: 13),
+
           Text(
             '${nativeLanguage.flag} ${nativeLanguage.name}  →  '
             '${targetLanguage.flag} ${targetLanguage.name}',
@@ -380,15 +523,20 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
             style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
             ),
           ),
+
           const SizedBox(height: 10),
-          const Text(
-            'Activities will be prepared based on the language you know and the language you want to practice.',
+
+          Text(
+            hasSameLanguage
+                ? 'Escolhe idiomas diferentes para que as atividades tenham um objetivo de aprendizagem claro.'
+                : 'As atividades serão preparadas com base no idioma que conheces e no idioma que queres praticar.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white70,
+              color: Colors.white.withValues(alpha: 0.72),
+              fontSize: 14,
               height: 1.35,
             ),
           ),
@@ -396,9 +544,124 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       ),
     );
   }
+
+  Widget _buildPrimaryButton() {
+    return SizedBox(
+      height: 60,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          gradient: _isSaving
+              ? LinearGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.22),
+                    Colors.white.withValues(alpha: 0.14),
+                  ],
+                )
+              : const LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Color(0xFF49D7FF),
+                    Color(0xFF168CFF),
+                  ],
+                ),
+          boxShadow: _isSaving
+              ? []
+              : [
+                  BoxShadow(
+                    color: const Color(0xFF168CFF).withValues(alpha: 0.34),
+                    blurRadius: 22,
+                    offset: const Offset(0, 9),
+                  ),
+                ],
+        ),
+        child: ElevatedButton.icon(
+          onPressed: _isSaving ? null : _saveLanguages,
+          icon: _isSaving
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.4,
+                    color: Colors.white,
+                  ),
+                )
+              : const Icon(
+                  Icons.check,
+                  size: 25,
+                ),
+          label: Text(
+            _isSaving ? 'A guardar...' : 'Guardar idiomas',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            backgroundColor: Colors.transparent,
+            disabledBackgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            disabledForegroundColor: Colors.white70,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  BoxDecoration _cardDecoration() {
+    return BoxDecoration(
+      color: _cardColor.withValues(alpha: 0.82),
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(
+        color: Colors.white.withValues(alpha: 0.14),
+        width: 1.2,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.18),
+          blurRadius: 18,
+          offset: const Offset(0, 9),
+        ),
+      ],
+    );
+  }
+
+  InputDecoration _dropdownDecoration() {
+    return InputDecoration(
+      filled: true,
+      fillColor: _backgroundColor.withValues(alpha: 0.76),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 16,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide(
+          color: Colors.white.withValues(alpha: 0.20),
+          width: 1.25,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(
+          color: _accentColor,
+          width: 1.8,
+        ),
+      ),
+    );
+  }
 }
 
-/// Represents an available language option.
+/// Representa uma opção de idioma disponível na aplicação.
 class LanguageOption {
   const LanguageOption({
     required this.code,
