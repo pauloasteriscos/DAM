@@ -5,6 +5,11 @@ import 'forgot_password_page.dart';
 import 'register_page.dart';
 
 /// Página de login do DailyTalk.pt.
+///
+/// Esta versão reforça a identidade visual da aplicação logo no ecrã inicial:
+/// - apresenta a marca DailyTalk.pt com mascote e ícones associados à fala;
+/// - comunica rapidamente que é um serious game de aprendizagem de idiomas;
+/// - mantém a ação principal de entrada visível e a criação de conta destacada.
 class LoginPage extends StatefulWidget {
   const LoginPage({
     super.key,
@@ -76,7 +81,9 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => RegisterPage(onAuthenticated: widget.onAuthenticated),
+        builder: (context) => RegisterPage(
+          onAuthenticated: widget.onAuthenticated,
+        ),
       ),
     );
   }
@@ -96,119 +103,204 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final isCompact = screenHeight < 720;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1B22),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(22),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 460),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Icon(Icons.record_voice_over, color: Colors.lightBlueAccent, size: 72),
-                    const SizedBox(height: 18),
-                    const Text(
-                      'DailyTalk.pt',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Inicia sessão para guardar preferências, progresso e atividades no teu perfil.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white70, height: 1.4),
-                    ),
-                    const SizedBox(height: 24),
-                    _buildTextField(
-                      controller: _emailController,
-                      label: 'Email',
-                      icon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Indica o email.';
-                        }
-                        if (!value.contains('@')) {
-                          return 'Indica um email válido.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 14),
-                    _buildTextField(
-                      controller: _passwordController,
-                      label: 'Password',
-                      icon: Icons.lock_outline,
-                      obscureText: _obscurePassword,
-                      suffixIcon: IconButton(
-                        tooltip: _obscurePassword
-                            ? 'Mostrar password'
-                            : 'Ocultar password',
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                          color: Colors.white70,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Indica a password.';
-                        }
-                        return null;
-                      },
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: _isLoading ? null : _openForgotPassword,
-                        child: const Text('Esqueci a palavra-passe'),
-                      ),
-                    ),
-                    if (_errorMessage != null) ...[
-                      const SizedBox(height: 14),
-                      _buildErrorBox(_errorMessage!),
-                    ],
-                    const SizedBox(height: 22),
-                    SizedBox(
-                      height: 52,
-                      child: ElevatedButton.icon(
-                        onPressed: _isLoading ? null : _login,
-                        icon: _isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.login),
-                        label: Text(_isLoading ? 'A entrar...' : 'Entrar'),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextButton(
-                      onPressed: _isLoading ? null : _openRegister,
-                      child: const Text('Ainda não tenho conta'),
-                    ),
+      backgroundColor: const Color(0xFF061823),
+      body: Stack(
+        children: [
+          const Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.topCenter,
+                  radius: 1.25,
+                  colors: [
+                    Color(0xFF103653),
+                    Color(0xFF061823),
+                    Color(0xFF041019),
                   ],
                 ),
               ),
             ),
           ),
-        ),
+
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: isCompact ? 92 : 130,
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0.55,
+                child: Image.asset(
+                  'assets/branding/dailytalk_login_footer.png',
+                  fit: BoxFit.cover,
+                  alignment: Alignment.bottomCenter,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ),
+          ),
+
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  24,
+                  isCompact ? 10 : 20,
+                  24,
+                  isCompact ? 20 : 32,
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 460),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildBrandHeader(isCompact: isCompact),
+
+                        SizedBox(height: isCompact ? 18 : 28),
+
+                        _buildTextField(
+                          controller: _emailController,
+                          label: 'Email',
+                          icon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Indica o email.';
+                            }
+
+                            if (!value.contains('@')) {
+                              return 'Indica um email válido.';
+                            }
+
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        _buildTextField(
+                          controller: _passwordController,
+                          label: 'Password',
+                          icon: Icons.lock_outline,
+                          obscureText: _obscurePassword,
+                          suffixIcon: IconButton(
+                            tooltip: _obscurePassword
+                                ? 'Mostrar password'
+                                : 'Ocultar password',
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: Colors.white.withValues(alpha: 0.78),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Indica a password.';
+                            }
+
+                            return null;
+                          },
+                        ),
+
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: _isLoading ? null : _openForgotPassword,
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color(0xFF35B9FF),
+                            ),
+                            child: const Text('Esqueci a palavra-passe'),
+                          ),
+                        ),
+
+                        if (_errorMessage != null) ...[
+                          const SizedBox(height: 10),
+                          _buildErrorBox(_errorMessage!),
+                        ],
+
+                        SizedBox(height: isCompact ? 14 : 22),
+
+                        _buildPrimaryButton(),
+
+                        const SizedBox(height: 16),
+
+                        _buildSecondaryButton(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  /// Cabeçalho visual do login.
+  ///
+  /// Usa um asset único para manter a identidade visual consistente entre
+  /// Android e Web, enquanto o texto principal continua acessível e editável
+  /// diretamente no Flutter.
+  Widget _buildBrandHeader({required bool isCompact}) {
+    return Column(
+      children: [
+        SizedBox(
+          height: isCompact ? 215 : 275,
+          width: double.infinity,
+          child: Image.asset(
+            'assets/branding/dailytalk_login_hero.png',
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(
+                Icons.record_voice_over,
+                color: Color(0xFF35B9FF),
+                size: 82,
+              );
+            },
+          ),
+        ),
+
+        SizedBox(height: isCompact ? 4 : 8),
+
+        const Text(
+          'Serious game para aprendizagem de idiomas',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Color(0xFF35C8FF),
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            height: 1.25,
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        Text(
+          'Pratica conversas reais antes da mobilidade escolar.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.76),
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            height: 1.35,
+          ),
+        ),
+      ],
     );
   }
 
@@ -226,28 +318,191 @@ class _LoginPageState extends State<LoginPage> {
       keyboardType: keyboardType,
       obscureText: obscureText,
       validator: validator,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 18,
+        fontWeight: FontWeight.w500,
+      ),
+      cursorColor: const Color(0xFF35C8FF),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
-        prefixIcon: Icon(icon, color: Colors.white70),
+        labelStyle: TextStyle(
+          color: Colors.white.withValues(alpha: 0.68),
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(left: 14, right: 8),
+          child: Icon(
+            icon,
+            color: Colors.white.withValues(alpha: 0.76),
+            size: 28,
+          ),
+        ),
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 58,
+          minHeight: 58,
+        ),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: const Color(0xFF14252D),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+        fillColor: const Color(0xFF071D2A).withValues(alpha: 0.78),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 22,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: BorderSide(
+            color: Colors.white.withValues(alpha: 0.20),
+            width: 1.35,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: const BorderSide(
+            color: Color(0xFF35C8FF),
+            width: 1.8,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: const BorderSide(
+            color: Colors.redAccent,
+            width: 1.35,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: const BorderSide(
+            color: Colors.redAccent,
+            width: 1.8,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrimaryButton() {
+    return SizedBox(
+      height: 64,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          gradient: _isLoading
+              ? LinearGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.22),
+                    Colors.white.withValues(alpha: 0.14),
+                  ],
+                )
+              : const LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Color(0xFF49D7FF),
+                    Color(0xFF168CFF),
+                  ],
+                ),
+          boxShadow: _isLoading
+              ? []
+              : [
+                  BoxShadow(
+                    color: const Color(0xFF168CFF).withValues(alpha: 0.34),
+                    blurRadius: 22,
+                    offset: const Offset(0, 9),
+                  ),
+                ],
+        ),
+        child: ElevatedButton.icon(
+          onPressed: _isLoading ? null : _login,
+          icon: _isLoading
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.4,
+                    color: Colors.white,
+                  ),
+                )
+              : const Icon(
+                  Icons.login,
+                  size: 26,
+                ),
+          label: Text(
+            _isLoading ? 'A entrar...' : 'Entrar',
+            style: const TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            backgroundColor: Colors.transparent,
+            disabledBackgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            disabledForegroundColor: Colors.white70,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSecondaryButton() {
+    return SizedBox(
+      height: 58,
+      child: OutlinedButton.icon(
+        onPressed: _isLoading ? null : _openRegister,
+        icon: const Icon(
+          Icons.person_add_alt_1_outlined,
+          size: 24,
+        ),
+        label: const Text(
+          'Criar conta',
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF35C8FF),
+          disabledForegroundColor: Colors.white38,
+          backgroundColor: const Color(0xFF061823).withValues(alpha: 0.42),
+          side: BorderSide(
+            color: const Color(0xFF35C8FF).withValues(alpha: 0.95),
+            width: 1.5,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(999),
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildErrorBox(String message) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.redAccent),
+        color: Colors.red.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.redAccent.withValues(alpha: 0.85),
+        ),
       ),
-      child: Text(message, style: const TextStyle(color: Colors.redAccent)),
+      child: Text(
+        message,
+        style: const TextStyle(
+          color: Colors.redAccent,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }

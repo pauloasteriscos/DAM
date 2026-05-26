@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,9 +21,21 @@ void main() {
     // Dá tempo ao AuthGate para verificar o token mockado.
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('DailyTalk.pt'), findsOneWidget);
+    expect(
+      find.text('Serious game para aprendizagem de idiomas'),
+      findsOneWidget,
+    );
+
+    expect(
+      find.text('Pratica conversas reais antes da mobilidade escolar.'),
+      findsOneWidget,
+    );
+
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Password'), findsOneWidget);
+    expect(find.text('Esqueci a palavra-passe'), findsOneWidget);
     expect(find.text('Entrar'), findsWidgets);
-    expect(find.text('Ainda não tenho conta'), findsOneWidget);
+    expect(find.text('Criar conta'), findsOneWidget);
   });
 
   testWidgets('Abre a tela de criação de conta', (tester) async {
@@ -31,15 +44,21 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    final createAccountButton = find.text('Ainda não tenho conta');
+    final createAccountButton = find.widgetWithText(
+      OutlinedButton,
+      'Criar conta',
+    );
 
     expect(createAccountButton, findsOneWidget);
 
-    await tester.tap(createAccountButton);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    // Garante que o botão está visível antes do clique.
+    // No teste, a janela padrão é pequena e o botão pode ficar abaixo da área visível.
+    await tester.ensureVisible(createAccountButton);
+    await tester.pumpAndSettle();
 
-    expect(find.text('Criar conta'), findsWidgets);
+    await tester.tap(createAccountButton);
+    await tester.pumpAndSettle();
+
     expect(find.text('Criar perfil DailyTalk.pt'), findsOneWidget);
   });
 }
