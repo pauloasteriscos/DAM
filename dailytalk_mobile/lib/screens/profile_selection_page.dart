@@ -178,35 +178,37 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
                         22,
                         isCompact ? 40 : 54,
                       ),
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 460),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildIntroCard(isCompact: isCompact),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 460),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _buildIntroCard(isCompact: isCompact),
 
-                            SizedBox(height: isCompact ? 14 : 18),
+                              SizedBox(height: isCompact ? 14 : 18),
 
-                            for (final profile in UserProfileType.values) ...[
-                              _ProfileOptionCard(
-                                profile: profile,
-                                selected: profile == _selectedProfile,
-                                icon: _iconForProfile(profile),
-                                onTap: () {
-                                  setState(() {
-                                    _selectedProfile = profile;
-                                  });
-                                },
-                              ),
-                              const SizedBox(height: 12),
+                              for (final profile in UserProfileType.values) ...[
+                                _ProfileOptionCard(
+                                  profile: profile,
+                                  selected: profile == _selectedProfile,
+                                  icon: _iconForProfile(profile),
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedProfile = profile;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(height: 12),
+                              ],
+
+                              if (_errorMessage != null) _buildErrorBox(),
+
+                              SizedBox(height: isCompact ? 8 : 12),
+
+                              _buildPrimaryButton(),
                             ],
-
-                            if (_errorMessage != null) _buildErrorBox(),
-
-                            SizedBox(height: isCompact ? 8 : 12),
-
-                            _buildPrimaryButton(),
-                          ],
+                          ),
                         ),
                       ),
                     ),

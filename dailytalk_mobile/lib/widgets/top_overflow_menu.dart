@@ -6,6 +6,7 @@ import '../screens/language_selection_page.dart';
 import '../screens/my_activities_page.dart';
 
 import '../data/facades/activity_workflow_facade.dart';
+import 'dailytalk_support_dialogs.dart';
 
 /// Menu superior de três pontos.
 ///
@@ -57,7 +58,7 @@ class TopOverflowMenu extends StatelessWidget {
             break;
 
           case _TopMenuAction.help:
-            _showHelpDialog(context);
+            DailyTalkSupportDialogs.showHelp(context);
             break;
 
           case _TopMenuAction.sync:
@@ -65,7 +66,7 @@ class TopOverflowMenu extends StatelessWidget {
             break;
 
           case _TopMenuAction.about:
-            _showAboutDailyTalkDialog(context);
+            DailyTalkSupportDialogs.showAbout(context);
             break;
         }
       },
@@ -135,74 +136,6 @@ class TopOverflowMenu extends StatelessWidget {
     }
   }
 
-  /// Mostra uma ajuda curta para o utilizador final.
-  void _showHelpDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF14252D),
-          title: const Text('Ajuda', style: TextStyle(color: Colors.white)),
-          content: const Text(
-            'Usa a Home para acompanhar o teu percurso.\n\n'
-            'Em Praticar, responde a atividades predefinidas e melhora a tua comunicação.\n\n'
-            'Em Resultados, acompanha o teu desempenho.\n\n'
-            'A opção Criar atividade está no menu superior e também nos Ajustes. '
-            'Ela deve ser usada quando quiseres propor atividades com base nas tuas dificuldades.',
-            style: TextStyle(color: Colors.white70, height: 1.4),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Fechar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  /// Mostra informação sobre a aplicação para o utilizador final.
-  void _showAboutDailyTalkDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF14252D),
-          title: const Text(
-            'Sobre o DailyTalk.pt',
-            style: TextStyle(color: Colors.white),
-          ),
-          content: const SingleChildScrollView(
-            child: Text(
-              'O DailyTalk.pt ajuda-te a praticar comunicação em situações reais '
-              'do quotidiano escolar, através de atividades de vocabulário, áudio, '
-              'diálogos, quizzes e desafios.\n\n'
-              'A aplicação inclui atividades criadas pela equipa DailyTalk.pt e, '
-              'progressivamente, também poderá incluir atividades criadas pela comunidade.\n\n'
-              'Cada jogador pode propor atividades com base nas suas próprias dificuldades. '
-              'Essas atividades poderão ser analisadas antes de ficarem disponíveis para '
-              'outros utilizadores, garantindo que são úteis, seguras e adequadas.\n\n'
-              'As atividades bem avaliadas pela comunidade podem ganhar destaque, subir '
-              'no topo das recomendações e ajudar mais jogadores.\n\n'
-              'Quem cria atividades úteis poderá ganhar pontos, aumentar a sua reputação '
-              'como ajudante da comunidade e desbloquear itens de personalização, como '
-              'skins e outros elementos visuais.\n\n'
-              'Atividades rejeitadas ou sinalizadas poderão ser revistas pela equipa '
-              'mantenedora, podendo ser corrigidas, reformuladas ou removidas.',
-              style: TextStyle(color: Colors.white70, height: 1.4),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Fechar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
 
 /// Ações disponíveis no menu superior.

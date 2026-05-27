@@ -165,22 +165,24 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
                 22,
                 isCompact ? 40 : 54,
               ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 520),
-                child: Column(
-                  children: [
-                    _buildActivityInfoCard(isCompact: isCompact),
-                    const SizedBox(height: 16),
-                    _buildSubmissionCard(),
-                    if (_errorMessage != null) ...[
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 520),
+                  child: Column(
+                    children: [
+                      _buildActivityInfoCard(isCompact: isCompact),
                       const SizedBox(height: 16),
-                      _buildErrorBox(),
+                      _buildSubmissionCard(),
+                      if (_errorMessage != null) ...[
+                        const SizedBox(height: 16),
+                        _buildErrorBox(),
+                      ],
+                      if (_result != null) ...[
+                        const SizedBox(height: 16),
+                        _buildResultCard(),
+                      ],
                     ],
-                    if (_result != null) ...[
-                      const SizedBox(height: 16),
-                      _buildResultCard(),
-                    ],
-                  ],
+                  ),
                 ),
               ),
             ),

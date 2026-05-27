@@ -166,9 +166,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   22,
                   isCompact ? 42 : 56,
                 ),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 460),
-                  child: Form(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 460),
+                    child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -279,6 +280,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
                         _buildPrimaryButton(),
                       ],
+                    ),
                     ),
                   ),
                 ),

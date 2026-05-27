@@ -87,12 +87,12 @@ class HomeGamificada extends StatelessWidget {
   /// Cabeçalho superior com logo, nome da app e menu.
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 10, 8),
+      padding: const EdgeInsets.fromLTRB(16, 8, 10, 8),
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
               color: const Color(0xFF06345C),
               borderRadius: BorderRadius.circular(12),
@@ -103,7 +103,7 @@ class HomeGamificada extends StatelessWidget {
             child: const Icon(
               Icons.menu_book,
               color: Colors.amber,
-              size: 30,
+              size: 28,
             ),
           ),
 
@@ -112,10 +112,12 @@ class HomeGamificada extends StatelessWidget {
           const Expanded(
             child: Text(
               'DailyTalk.pt',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 30,
-                fontWeight: FontWeight.w700,
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),

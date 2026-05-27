@@ -7,6 +7,7 @@ import 'language_selection_page.dart';
 import 'my_activities_page.dart';
 import 'profile_selection_page.dart';
 import 'private_notes_page.dart';
+import '../widgets/dailytalk_support_dialogs.dart';
 
 /// Conteúdo da página de Ajustes.
 ///
@@ -16,7 +17,6 @@ import 'private_notes_page.dart';
 class SettingsContent extends StatelessWidget {
   const SettingsContent({super.key});
 
-  static const Color _cardColor = Color(0xFF071D2A);
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -137,7 +137,7 @@ class SettingsContent extends StatelessWidget {
           title: 'Ajuda',
           description: 'Ver instruções rápidas de utilização.',
           onTap: () {
-            _showHelpDialog(context);
+            DailyTalkSupportDialogs.showHelp(context);
           },
         ),
 
@@ -148,7 +148,7 @@ class SettingsContent extends StatelessWidget {
           title: 'Sobre',
           description: 'Informação sobre o DailyTalk.pt.',
           onTap: () {
-            _showAboutDialog(context);
+            DailyTalkSupportDialogs.showAbout(context);
           },
         ),
       ],
@@ -195,81 +195,6 @@ class SettingsContent extends StatelessWidget {
       );
     }
   }
-
-  void _showHelpDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: _cardColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(22),
-          ),
-          title: const Text(
-            'Ajuda',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          content: const Text(
-            'Usa a Home para acompanhar o teu percurso.\n\n'
-            'Em Praticar, responde a atividades predefinidas.\n\n'
-            'Em Resultados, acompanha o teu desempenho.\n\n'
-            'A criação de atividades é uma opção secundária, disponível no menu superior e nos Ajustes.\n\n'
-            'A opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.\n\n'
-            'A opção Sincronizar permite enviar submissões pendentes quando existir ligação.',
-            style: TextStyle(color: Colors.white70, height: 1.4),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Fechar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showAboutDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: _cardColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(22),
-          ),
-          title: const Text(
-            'Sobre o DailyTalk.pt',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          content: const SingleChildScrollView(
-            child: Text(
-              'O DailyTalk.pt ajuda crianças e jovens a praticar comunicação em situações reais '
-              'do quotidiano escolar, através de atividades de vocabulário, áudio, diálogos, '
-              'quizzes e desafios.\n\n'
-              'A aplicação inclui atividades criadas pela equipa DailyTalk.pt e também poderá '
-              'incluir atividades propostas pela comunidade.\n\n'
-              'A aplicação considera perfis como Estudante, Anfitrião e Professor, permitindo '
-              'atividades mais adequadas a cada papel no contexto escolar.',
-              style: TextStyle(color: Colors.white70, height: 1.4),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Fechar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
 
 class _SettingsButton extends StatelessWidget {
@@ -287,7 +212,7 @@ class _SettingsButton extends StatelessWidget {
 
   static const Color _cardColor = Color(0xFF071D2A);
   static const Color _accentColor = Color(0xFF35C8FF);
-  
+
   @override
   Widget build(BuildContext context) {
     return Material(

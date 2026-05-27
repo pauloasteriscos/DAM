@@ -241,62 +241,64 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                         22,
                         isCompact ? 38 : 52,
                       ),
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 460),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildIntroCard(isCompact: isCompact),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 460),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _buildIntroCard(isCompact: isCompact),
 
-                            SizedBox(height: isCompact ? 14 : 18),
+                              SizedBox(height: isCompact ? 14 : 18),
 
-                            _buildLanguageSelector(
-                              title: 'Idioma da aplicação',
-                              description:
-                                  'Escolhe o idioma que usas normalmente. Este idioma pode ser usado para menus, mensagens e feedback.',
-                              selectedCode: _nativeLanguageCode,
-                              selectedLanguage: nativeLanguage,
-                              onChanged: (value) {
-                                if (value == null) {
-                                  return;
-                                }
+                              _buildLanguageSelector(
+                                title: 'Idioma da aplicação',
+                                description:
+                                    'Escolhe o idioma que usas normalmente. Este idioma pode ser usado para menus, mensagens e feedback.',
+                                selectedCode: _nativeLanguageCode,
+                                selectedLanguage: nativeLanguage,
+                                onChanged: (value) {
+                                  if (value == null) {
+                                    return;
+                                  }
 
-                                setState(() {
-                                  _nativeLanguageCode = value;
-                                });
-                              },
-                            ),
+                                  setState(() {
+                                    _nativeLanguageCode = value;
+                                  });
+                                },
+                              ),
 
-                            SizedBox(height: isCompact ? 14 : 18),
+                              SizedBox(height: isCompact ? 14 : 18),
 
-                            _buildLanguageSelector(
-                              title: 'Idioma a praticar',
-                              description:
-                                  'Escolhe o idioma que queres treinar em diálogos, áudios, quizzes e desafios.',
-                              selectedCode: _targetLanguageCode,
-                              selectedLanguage: targetLanguage,
-                              onChanged: (value) {
-                                if (value == null) {
-                                  return;
-                                }
+                              _buildLanguageSelector(
+                                title: 'Idioma a praticar',
+                                description:
+                                    'Escolhe o idioma que queres treinar em diálogos, áudios, quizzes e desafios.',
+                                selectedCode: _targetLanguageCode,
+                                selectedLanguage: targetLanguage,
+                                onChanged: (value) {
+                                  if (value == null) {
+                                    return;
+                                  }
 
-                                setState(() {
-                                  _targetLanguageCode = value;
-                                });
-                              },
-                            ),
+                                  setState(() {
+                                    _targetLanguageCode = value;
+                                  });
+                                },
+                              ),
 
-                            SizedBox(height: isCompact ? 16 : 20),
+                              SizedBox(height: isCompact ? 16 : 20),
 
-                            _buildLearningPathCard(
-                              nativeLanguage: nativeLanguage,
-                              targetLanguage: targetLanguage,
-                            ),
+                              _buildLearningPathCard(
+                                nativeLanguage: nativeLanguage,
+                                targetLanguage: targetLanguage,
+                              ),
 
-                            SizedBox(height: isCompact ? 20 : 26),
+                              SizedBox(height: isCompact ? 20 : 26),
 
-                            _buildPrimaryButton(),
-                          ],
+                              _buildPrimaryButton(),
+                            ],
+                          ),
                         ),
                       ),
                     ),

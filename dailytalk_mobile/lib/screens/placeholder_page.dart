@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/top_overflow_menu.dart';
+
 /// Página-base usada por áreas que partilham a mesma estrutura visual.
 ///
 /// Quando [child] é informado, a página funciona como contentor para uma
 /// funcionalidade real. Sem [child], apresenta apenas uma mensagem temporária.
+///
+/// Esta versão garante:
+/// - cabeçalho superior consistente com marca e menu de três pontos;
+/// - botão de voltar em páginas abertas por Navigator.push;
+/// - conteúdo centrado em Web/desktop;
+/// - largura máxima controlada para evitar alinhamento à esquerda.
 class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({
     super.key,
@@ -73,9 +81,69 @@ class PlaceholderPage extends StatelessWidget {
             ),
           ),
 
-          child == null
-              ? _buildSimplePlaceholder(context)
-              : _buildPlaceholderWithContent(context),
+          SafeArea(
+            child: Column(
+              children: [
+                _buildTopBar(context),
+                Expanded(
+                  child: child == null
+                      ? _buildSimplePlaceholder(context)
+                      : _buildPlaceholderWithContent(context),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Cabeçalho superior com marca, botão de voltar opcional e menu.
+  Widget _buildTopBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 10, 8),
+      child: Row(
+        children: [
+          if (showBackButton)
+            IconButton(
+              tooltip: 'Voltar',
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+            )
+          else
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: const Color(0xFF06345C),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _accentColor.withValues(alpha: 0.35),
+                ),
+              ),
+              child: const Icon(
+                Icons.menu_book,
+                color: Colors.amber,
+                size: 28,
+              ),
+            ),
+
+          const SizedBox(width: 12),
+
+          const Expanded(
+            child: Text(
+              'DailyTalk.pt',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+
+          const TopOverflowMenu(),
         ],
       ),
     );
@@ -83,19 +151,17 @@ class PlaceholderPage extends StatelessWidget {
 
   /// Mantém uma composição simples para páginas ainda temporárias.
   Widget _buildSimplePlaceholder(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            if (showBackButton) _buildBackButton(context),
-
-            const SizedBox(height: 24),
-
-            _buildHeaderCard(iconSize: 82, titleSize: 30, messageSize: 20),
-
-            const Spacer(),
-          ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 18, 24, 42),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildHeaderCard(iconSize: 82, titleSize: 30, messageSize: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -103,19 +169,15 @@ class PlaceholderPage extends StatelessWidget {
 
   /// Usa a mesma identidade visual, mas permite acrescentar conteúdo real.
   Widget _buildPlaceholderWithContent(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 20, 24, 42),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 42),
+      child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
           child: Column(
             children: [
-              if (showBackButton) _buildBackButton(context),
-
               _buildHeaderCard(iconSize: 64, titleSize: 29, messageSize: 17),
-
               const SizedBox(height: 26),
-
               child!,
             ],
           ),
@@ -210,17 +272,6 @@ class PlaceholderPage extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  /// Botão de voltar usado quando a página é aberta fora da navegação principal.
-  Widget _buildBackButton(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: IconButton(
-        onPressed: () => Navigator.pop(context),
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
       ),
     );
   }

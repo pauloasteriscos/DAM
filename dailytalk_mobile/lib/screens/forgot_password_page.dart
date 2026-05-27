@@ -163,54 +163,56 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   22,
                   isCompact ? 42 : 56,
                 ),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 460),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildRecoveryBadge(isCompact: isCompact),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 460),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildRecoveryBadge(isCompact: isCompact),
 
-                        SizedBox(height: isCompact ? 18 : 22),
+                          SizedBox(height: isCompact ? 18 : 22),
 
-                        const Text(
-                          'Esqueceste a palavra-passe?',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 27,
-                            fontWeight: FontWeight.w800,
-                            height: 1.15,
+                          const Text(
+                            'Esqueceste a palavra-passe?',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 27,
+                              fontWeight: FontWeight.w800,
+                              height: 1.15,
+                            ),
                           ),
-                        ),
 
-                        const SizedBox(height: 10),
+                          const SizedBox(height: 10),
 
-                        Text(
-                          'Indica o email da tua conta para receberes um código temporário e redefinires o acesso.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.74),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            height: 1.35,
+                          Text(
+                            'Indica o email da tua conta para receberes um código temporário e redefinires o acesso.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.74),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              height: 1.35,
+                            ),
                           ),
-                        ),
 
-                        SizedBox(height: isCompact ? 24 : 30),
+                          SizedBox(height: isCompact ? 24 : 30),
 
-                        _buildEmailField(),
+                          _buildEmailField(),
 
-                        if (_errorMessage != null) ...[
-                          const SizedBox(height: 14),
-                          _buildErrorBox(_errorMessage!),
+                          if (_errorMessage != null) ...[
+                            const SizedBox(height: 14),
+                            _buildErrorBox(_errorMessage!),
+                          ],
+
+                          SizedBox(height: isCompact ? 22 : 28),
+
+                          _buildPrimaryButton(),
                         ],
-
-                        SizedBox(height: isCompact ? 22 : 28),
-
-                        _buildPrimaryButton(),
-                      ],
+                      ),
                     ),
                   ),
                 ),

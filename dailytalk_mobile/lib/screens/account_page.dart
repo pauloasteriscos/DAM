@@ -149,15 +149,17 @@ class _AccountPageState extends State<AccountPage> {
                     22,
                     isCompact ? 40 : 54,
                   ),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 520),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildProfileCard(user: user, isCompact: isCompact),
-                        const SizedBox(height: 18),
-                        _buildLogoutButton(),
-                      ],
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildProfileCard(user: user, isCompact: isCompact),
+                          const SizedBox(height: 18),
+                          _buildLogoutButton(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
