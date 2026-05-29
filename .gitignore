@@ -1,18 +1,63 @@
-﻿# Node / backend
-node_modules/
-.wrangler/
-.dev.vars
+﻿# Miscellaneous
+*.class
 *.log
-
-# Flutter / Dart
-.dart_tool/
-build/
-.flutter-plugins
-.flutter-plugins-dependencies
-cloudflare_dist/
-
-# IDE / sistema
-.idea/
-.vscode/
+*.pyc
+*.swp
 .DS_Store
 Thumbs.db
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+
+# Flutter / Dart / Pub
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+coverage/
+
+# Symbolication / obfuscation
+app.*.symbols
+app.*.map.json
+
+# Android build artifacts
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+# Node / npm
+node_modules/
+
+# Cloudflare / Wrangler local
+.wrangler/
+
+# Distribuição/build local
+cloudflare_dist/
+
+# Backups temporários
+*.bak
+*.backup
+*.old
+*.tmp
+
+# Ambientes e segredos locais
+.env
+.env.*
+.dev.vars

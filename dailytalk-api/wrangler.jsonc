@@ -10,21 +10,18 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "dev": {
+    "ip": "localhost",
+    "port": 8787,
+    "local_protocol": "http"
+  },
   "vars": {
     "JWT_EXPIRES_SECONDS": "7200",
-    "CORS_ORIGIN": "https://dailytalk.pt",
+    "CORS_ORIGIN": "https://dailytalk.pt,https://www.dailytalk.pt,http://localhost:5555,http://127.0.0.1:5555",
     "PASSWORD_RESET_FROM_EMAIL": "no-reply@dailytalk.pt",
     "PASSWORD_RESET_FROM_NAME": "DailyTalk.pt",
     "PASSWORD_RESET_DEBUG": "true"
   },
-  "send_email": [
-    {
-      "name": "EMAIL",
-      "allowed_sender_addresses": [
-        "no-reply@dailytalk.pt"
-      ]
-    }
-  ],
   "d1_databases": [
     {
       "binding": "DB",

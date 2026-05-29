@@ -4,6 +4,11 @@ import '../models/lesson_item.dart';
 import '../widgets/lesson_node.dart';
 import '../widgets/top_overflow_menu.dart';
 
+import 'vocabulary_pairs_page.dart';
+import 'dialogue_page.dart';
+import 'revision_page.dart';
+import 'quiz_page.dart';
+
 /// Tela inicial gamificada do DailyTalk.pt.
 ///
 /// Esta tela dá prioridade ao percurso de prática do utilizador.
@@ -302,6 +307,42 @@ Widget _buildActivityMap(
                 child: LessonNode(
                   lesson: lesson,
                   onTap: () {
+                    if (lesson.type == LessonType.vocabulario) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const VocabularyPairsPage(),
+                        ),
+                      );
+                      return;
+                    }
+
+                    if (lesson.type == LessonType.dialogo) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const DialoguePage(),
+                        ),
+                      );
+                      return;
+                    }
+
+                    if (lesson.type == LessonType.quiz) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const QuizPage(),
+                        ),
+                      );
+                      return;
+                    }
+
+                    if (lesson.type == LessonType.revisao) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const RevisionPage(),
+                        ),
+                      );
+                      return;
+                    }
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(

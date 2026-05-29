@@ -4,7 +4,7 @@ Aplicação móvel desenvolvida em Flutter para o projeto **Erasmus DailyTalk.pt
 
 O objetivo da aplicação é apoiar crianças e jovens em mobilidade escolar, normalmente entre os 11 e os 15 anos, na prática de comunicação em situações reais do quotidiano escolar, através de atividades gamificadas como vocabulário, áudio, diálogos, quizzes e desafios.
 
-Esta versão contempla a evolução até à **Sprint 4**, incluindo a estrutura inicial da aplicação, navegação, Home gamificada, base de dados local SQLite, configuração de atividades, submissão de respostas, apresentação de resultados, integração com backend real, autenticação de utilizadores, sincronização entre mobile e Web, publicação em Cloudflare, aplicação progressiva de padrões de software e refinamento visual/UX dos principais fluxos da aplicação.
+Esta versão contempla a evolução até à **Sprint 4**, incluindo a estrutura inicial da aplicação, navegação, Home gamificada, base de dados local SQLite, configuração de atividades, submissão de respostas, apresentação de resultados, integração com backend real, autenticação de utilizadores, sincronização entre mobile e Web, publicação em Cloudflare, aplicação progressiva de padrões de software, refinamento visual/UX dos principais fluxos e implementação inicial de atividades gamificadas concretas para vocabulário, quiz, diálogo e revisão.
 
 ---
 
@@ -16,11 +16,17 @@ A aplicação já possui:
 - navegação inferior entre páginas principais;
 - Home gamificada inspirada em progressão por atividades;
 - mapa de atividades com diferentes tipos e formas geométricas;
+- ligação dos nós da Home gamificada a ecrãs específicos de atividade;
+- ecrã de vocabulário no formato **Combina pares**;
+- ecrã de **Quiz** contextualizado com perguntas e alternativas;
+- ecrã de **Diálogo** guiado para simulação de conversas;
+- ecrã de **Revisão** para reforço de conteúdos já praticados;
 - separação entre o fluxo principal de prática e a criação secundária de atividades;
 - menu superior com opções como Language, criar atividade, minhas atividades, sincronizar, ajuda e sobre;
 - página de configuração linguística com dois idiomas:
   - idioma habitual do aluno;
   - idioma que o aluno pretende aprender;
+- utilização automática dos idiomas definidos no perfil nos ecrãs de prática;
 - suporte a perfis de utilização:
   - Estudante;
   - Anfitrião;
@@ -42,6 +48,7 @@ A aplicação já possui:
 - possibilidade de testar escrita em mobile e leitura na Web, e vice-versa;
 - recuperação de palavra-passe em modo protótipo/debug;
 - reformulação visual dos ecrãs de entrada, criação de conta, recuperação de palavra-passe, seleção de idioma, configuração de atividade, atividade/desafio, resultados/análises, conta, ajustes e notas privadas;
+- aplicação da identidade visual escura/azul do DailyTalk.pt aos novos ecrãs de atividade;
 - aplicação inicial dos padrões Strategy, Factory simples, Facade, Command e Observer.
 
 ---
@@ -58,7 +65,7 @@ Foram adicionados ou consolidados assets visuais em `assets/branding/`, nomeadam
 - `dailytalk_login_footer.png`;
 - `dailytalk_mascot.png`.
 
-A mesma linguagem visual foi depois aplicada progressivamente a outros ecrãs, mantendo ícones neutros nos campos de formulário e reservando o azul para marca, foco e ações principais.
+A mesma linguagem visual foi depois aplicada progressivamente a outros ecrãs, mantendo ícones neutros nos campos de formulário e reservando o azul para marca, foco e ações principais. Essa coerência visual foi também usada nos ecrãs de prática, nomeadamente vocabulário, quiz, diálogo e revisão, com fundo escuro, cartões arredondados, destaques em azul/ciano, feedback imediato e organização adequada a dispositivos móveis e Web.
 
 O domínio **dailytalk.pt** foi migrado do provedor anterior, Locaweb, para a Cloudflare. Esta alteração foi realizada porque a evolução do protótipo passou a exigir maior agilidade de publicação, suporte a HTTPS, menor latência e melhor controlo sobre a publicação da versão Web e da API.
 
@@ -111,6 +118,43 @@ Por exemplo, um aluno pode usar Português como idioma habitual e escolher Itali
 Esta separação é importante porque os exercícios, diálogos e atividades podem ser preparados considerando a relação entre o idioma conhecido pelo aluno e o idioma que pretende praticar.
 
 A opção aparece como **Language** no menu, por ser uma designação reconhecível internacionalmente mesmo para alunos de diferentes países.
+
+Nos ecrãs de prática foi adotada a seguinte regra:
+
+- interface, instruções, cenários, perguntas e feedback aparecem no idioma habitual do aluno;
+- respostas, falas, cartões principais e alternativas aparecem no idioma que o aluno pretende aprender ou praticar.
+
+Desta forma, se o aluno escolher Português como idioma habitual e Italiano como idioma de aprendizagem, o contexto e a pergunta surgem em Português, enquanto as respostas ou frases de prática surgem em Italiano.
+
+---
+
+## Atividades gamificadas implementadas
+
+A aplicação passou a incluir ecrãs próprios para algumas atividades centrais do mapa gamificado. Estes ecrãs foram desenhados para funcionar como protótipos jogáveis, mantendo a identidade visual do DailyTalk.pt e usando os idiomas definidos pelo utilizador no perfil.
+
+### Vocabulário — Combina pares
+
+A atividade de vocabulário apresenta um exercício de associação de pares. O objetivo é ligar palavras ou expressões do DailyTalk.pt no idioma habitual do aluno às respetivas equivalências no idioma que está a aprender.
+
+O conteúdo foi pensado para situações do quotidiano escolar e intercultural, evitando palavras soltas sem relação com o propósito da aplicação.
+
+### Quiz
+
+A atividade de Quiz apresenta perguntas contextualizadas em situações reais, como pedir ajuda na escola, comunicar com colegas, compreender instruções ou responder em contexto de acolhimento.
+
+A pergunta e o cenário são apresentados no idioma habitual do aluno. As alternativas de resposta são apresentadas no idioma a praticar, reforçando a aprendizagem ativa.
+
+### Diálogo
+
+A atividade de Diálogo simula pequenas conversas guiadas, com foco em situações de comunicação prática. O aluno acompanha o contexto no seu idioma habitual e pratica as falas no idioma de aprendizagem.
+
+Esta abordagem prepara o aluno para interações reais com colegas, professores ou anfitriões.
+
+### Revisão
+
+A atividade de Revisão funciona como reforço dos conteúdos trabalhados. Apresenta cartões e exercícios curtos para consolidar vocabulário, frases úteis e expressões frequentes.
+
+O cartão principal surge no idioma a praticar, enquanto o apoio, significado ou feedback aparecem no idioma habitual do aluno.
 
 ---
 
@@ -590,9 +634,20 @@ Também foram ajustados ecrãs internos para manter uma experiência mais consis
 
 A Home gamificada foi preservada, por já cumprir bem a função de orientar a progressão do utilizador dentro da aplicação.
 
+### Atividades gamificadas
+
+Foram ainda criados e integrados ecrãs específicos para atividades do percurso gamificado:
+
+- **Vocabulário**, com exercício de associação de pares;
+- **Quiz**, com perguntas contextualizadas e alternativas no idioma a praticar;
+- **Diálogo**, com simulação guiada de conversa;
+- **Revisão**, com cartões de reforço e consolidação.
+
+Estes ecrãs leem os idiomas definidos pelo utilizador no perfil, mantendo a separação entre o idioma de apoio/interface e o idioma de aprendizagem.
+
 ### Resultado da Sprint 4
 
-A Sprint 4 consolidou a aplicação como um protótipo mais coerente do ponto de vista visual e de experiência de utilização. A aplicação passou a comunicar melhor a sua identidade, o seu propósito educativo e as ações principais esperadas em cada fluxo.
+A Sprint 4 consolidou a aplicação como um protótipo mais coerente do ponto de vista visual e de experiência de utilização. A aplicação passou a comunicar melhor a sua identidade, o seu propósito educativo e as ações principais esperadas em cada fluxo. Além disso, o mapa gamificado deixou de funcionar apenas como navegação visual e passou a abrir atividades concretas de prática.
 
 ---
 
@@ -702,7 +757,37 @@ flutter analyze
 flutter test
 ```
 
-### Executar em Chrome com API real
+### Execução local simplificada
+
+Para desenvolvimento local, a API pode ser executada em `localhost:8787` e a aplicação Flutter Web em `localhost:5555`.
+
+Numa janela PowerShell, executar a API:
+
+```powershell
+cd C:\DEV\Flutter\dailytalk-api
+npm run dev
+```
+
+Resultado esperado:
+
+```text
+http://localhost:8787
+```
+
+Noutra janela PowerShell, executar a aplicação Flutter Web:
+
+```powershell
+cd C:\DEV\Flutter\dailytalk_mobile
+flutter run -d chrome --web-port 5555
+```
+
+Resultado esperado:
+
+```text
+http://localhost:5555
+```
+
+### Executar em Chrome com API real publicada
 
 ```bash
 flutter run -d chrome \
@@ -770,7 +855,9 @@ As próximas etapas do projeto poderão incluir:
 - moderação de atividades com apoio de IA;
 - internacionalização completa da interface;
 - reforço da documentação técnica e de utilização;
-- validação final dos ecrãs refinados na Sprint 4 em Android e Web;
+- validação final dos ecrãs gamificados em Android e Web;
+- reforço das atividades de áudio e desafio final;
+- persistência detalhada de progresso por atividade;
 - revisão final de acessibilidade visual, contraste e tamanhos de toque.
 
 ---
@@ -856,7 +943,11 @@ Entregas contempladas:
 - melhoria dos Ajustes;
 - melhoria das Notas privadas;
 - alinhamento visual de páginas internas;
-- manutenção da Home gamificada como ecrã principal já consolidado.
+- manutenção da Home gamificada como ecrã principal já consolidado;
+- criação de ecrãs próprios para Vocabulário, Quiz, Diálogo e Revisão;
+- ligação dos nós da Home gamificada aos novos ecrãs de atividade;
+- utilização dos idiomas definidos no perfil nos ecrãs de prática;
+- aplicação da identidade visual do DailyTalk.pt às atividades gamificadas.
 
 ---
 
@@ -866,6 +957,6 @@ Esta versão continua a ser um protótipo funcional, mas já ultrapassa o fluxo 
 
 A aplicação passou a ter backend real, autenticação, persistência remota e sincronização entre plataformas. Ainda assim, algumas funcionalidades continuam em modo de protótipo, principalmente a recuperação de palavra-passe, que nesta fase utiliza código devolvido pela app em modo debug por limitação do plano de envio de email transacional.
 
-A organização em quatro sprints permitiu testar progressivamente as funcionalidades principais. A Sprint 3 foi usada para consolidar autenticação, backend, segurança, testes e infraestrutura. A Sprint 4 foi usada para melhorar a comunicação visual, reforçar a identidade do DailyTalk.pt e tornar os fluxos principais mais consistentes do ponto de vista de usabilidade.
+A organização em quatro sprints permitiu testar progressivamente as funcionalidades principais. A Sprint 3 foi usada para consolidar autenticação, backend, segurança, testes e infraestrutura. A Sprint 4 foi usada para melhorar a comunicação visual, reforçar a identidade do DailyTalk.pt, tornar os fluxos principais mais consistentes do ponto de vista de usabilidade e transformar parte do mapa gamificado em atividades jogáveis.
 
-A próxima etapa deverá concentrar-se na validação final em Android e Web, reforço dos testes unitários, substituição de mecanismos temporários por serviços definitivos quando a infraestrutura permitir e preparação da entrega final.
+A próxima etapa deverá concentrar-se na validação final em Android e Web, reforço dos testes unitários, persistência mais completa do progresso das novas atividades, substituição de mecanismos temporários por serviços definitivos quando a infraestrutura permitir e preparação da entrega final.

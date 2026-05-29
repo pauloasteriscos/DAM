@@ -93,8 +93,10 @@ class AuthApiService {
   }) async {
     if (AppConfig.useMockApi) {
       return const PasswordResetRequestResult(
-        message: 'Modo mock: usa o código mock-reset-token para testar.',
+        message:
+            'Modo protótipo: usa o código apresentado para testar a recuperação.',
         debugResetToken: 'mock-reset-token',
+        isPrototypeDebug: true,
       );
     }
 
@@ -107,10 +109,14 @@ class AuthApiService {
         .timeout(AppConfig.apiTimeout);
 
     final decoded = _decodeResponse(response);
+    final isPrototypeDebug = decoded['debug'] == true;
+
     return PasswordResetRequestResult(
       message: decoded['message']?.toString() ??
-          'Se o email existir, serão enviadas instruções de recuperação.',
+          'Se o email existir, serão disponibilizadas instruções de recuperação.',
       debugResetToken: decoded['resetToken']?.toString(),
+      isPrototypeDebug: isPrototypeDebug,
+      expiresAt: decoded['expiresAt']?.toString(),
     );
   }
 
@@ -241,9 +247,23 @@ class AuthApiService {
   }
 
   Map<String, dynamic> _decodeResponse(http.Response response) {
-    final decoded = response.body.isEmpty
-        ? <String, dynamic>{}
-        : jsonDecode(response.body);
+    final Object decoded;
+
+    try {
+      decoded = response.body.isEmpty
+          ? <String, dynamic>{}
+          : jsonDecode(response.body);
+    } on FormatException {
+      final status = response.statusCode;
+      final bodyPreview = response.body.trim();
+      final hasBodyPreview = bodyPreview.isNotEmpty;
+
+      throw Exception(
+        hasBodyPreview
+            ? 'A API devolveu uma resposta inválida em JSON (HTTP $status): $bodyPreview'
+            : 'A API devolveu uma resposta inválida em JSON (HTTP $status).',
+      );
+    }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       final message = decoded is Map && decoded['error'] != null
@@ -273,6 +293,8 @@ class PasswordResetRequestResult {
   const PasswordResetRequestResult({
     required this.message,
     this.debugResetToken,
+    this.isPrototypeDebug = false,
+    this.expiresAt,
   });
 
   final String message;
@@ -280,4 +302,11 @@ class PasswordResetRequestResult {
   /// Token devolvido apenas em modo de protótipo/debug.
   /// Em produção real, este valor deve ser enviado por email e não pela API.
   final String? debugResetToken;
+
+  /// Indica que a API está em modo de protótipo/debug e que o código deve
+  /// ser apresentado na interface para permitir testar o fluxo sem email.
+  final bool isPrototypeDebug;
+
+  /// Data/hora de expiração do código, quando a API a devolver.
+  final String? expiresAt;
 }

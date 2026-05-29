@@ -17,12 +17,52 @@ const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
+function isLocalDevelopmentOrigin(origin: string): boolean {
+  return /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+}
+
+function configuredCorsOrigins(c: AppContext): string[] {
+  return (c.env.CORS_ORIGIN ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+}
+
+function resolveCorsOrigin(origin: string, c: AppContext): string {
+  const configuredOrigins = configuredCorsOrigins(c);
+
+  if (!origin) {
+    return configuredOrigins[0] ?? "*";
+  }
+
+  // Ambiente de desenvolvimento local.
+  // O Flutter Web costuma correr em http://localhost:5555, enquanto a API
+  // local do Wrangler corre em http://localhost:8787. Se CORS_ORIGIN estiver
+  // definido apenas para https://dailytalk.pt, o browser bloqueia o POST após
+  // o OPTIONS e a app mostra "ClientFailed to fetch".
+  if (isLocalDevelopmentOrigin(origin)) {
+    return origin;
+  }
+
+  // Ambientes públicos do DailyTalk.pt.
+  if (origin === "https://dailytalk.pt" || origin === "https://www.dailytalk.pt") {
+    return origin;
+  }
+
+  if (configuredOrigins.includes(origin)) {
+    return origin;
+  }
+
+  return configuredOrigins[0] ?? origin;
+}
+
 app.use(
   "*",
   cors({
-    origin: (origin, c) => c.env.CORS_ORIGIN || origin || "*",
+    origin: resolveCorsOrigin,
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "OPTIONS"],
+    maxAge: 86400,
   }),
 );
 
@@ -148,7 +188,7 @@ app.post("/api/auth/forgot-password", async (c) => {
   }
 
   const genericMessage =
-    "Se existir uma conta associada a este email, enviaremos instruções de recuperação.";
+    "Se existir uma conta associada a este email, serão disponibilizadas instruções de recuperação.";
 
   const row = await c.env.DB.prepare(
     `SELECT id, name, email, active
@@ -158,8 +198,22 @@ app.post("/api/auth/forgot-password", async (c) => {
     .bind(parsed.data.email)
     .first<{ id: string; name: string; email: string; active: number }>();
 
+  const isPasswordResetDebug = c.env.PASSWORD_RESET_DEBUG === "true";
+
   if (!row || row.active !== 1) {
-    // Não revelamos se o email existe ou não.
+    // Em produção, não revelamos se o email existe ou não.
+    // Em modo protótipo/debug, damos feedback explícito para evitar avançar
+    // para a tela seguinte sem código de recuperação.
+    if (isPasswordResetDebug) {
+      return c.json({
+        success: true,
+        debug: true,
+        message:
+          "Modo protótipo ativo, mas este email não corresponde a uma conta ativa neste ambiente. Cria uma conta primeiro ou usa o email de uma conta já registada nesta base de dados.",
+        resetToken: null,
+      });
+    }
+
     return c.json({
       success: true,
       message: genericMessage,
@@ -171,6 +225,8 @@ app.post("/api/auth/forgot-password", async (c) => {
   const resetToken = randomNumericCode(6);
   const tokenHash = await hashResetToken(resetToken);
   const id = crypto.randomUUID();
+
+  await ensurePasswordResetSchema(c);
 
   await c.env.DB.batch([
     c.env.DB.prepare(
@@ -188,12 +244,12 @@ app.post("/api/auth/forgot-password", async (c) => {
   // O Cloudflare Email Sending exige plano Workers Paid.
   // Por isso, neste modo, não tentamos enviar email.
   // Apenas devolvemos o código para a app demonstrar o fluxo.
-  if (c.env.PASSWORD_RESET_DEBUG === "true") {
+  if (isPasswordResetDebug) {
     return c.json({
       success: true,
       debug: true,
       message:
-        "Modo protótipo/debug: utiliza o código apresentado para redefinir a palavra-passe.",
+        "Modo protótipo: o plano gratuito da Cloudflare não envia emails. Utiliza o código apresentado para redefinir a palavra-passe.",
       resetToken,
       expiresAt,
     });
@@ -265,6 +321,9 @@ app.post("/api/auth/reset-password", async (c) => {
 
   const now = new Date().toISOString();
   const tokenHash = await hashResetToken(token);
+
+  await ensurePasswordResetSchema(c);
+
   const reset = await c.env.DB.prepare(
     `SELECT id
      FROM password_reset_tokens
@@ -426,6 +485,31 @@ app.get("/api/activities/submissions/mine", requireAuth, async (c) => {
 
   return c.json({ success: true, submissions: rows.results ?? [] });
 });
+
+
+async function ensurePasswordResetSchema(c: AppContext) {
+  await c.env.DB.batch([
+    c.env.DB.prepare(
+      `CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        token_hash TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        used_at TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )`,
+    ),
+    c.env.DB.prepare(
+      `CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id
+       ON password_reset_tokens(user_id)`,
+    ),
+    c.env.DB.prepare(
+      `CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_token_hash
+       ON password_reset_tokens(token_hash)`,
+    ),
+  ]);
+}
 
 async function requireAuth(c: AppContext, next: Next) {
   const header = c.req.header("Authorization") ?? "";

@@ -16,7 +16,7 @@ class AppConfig {
   ///
   /// Exemplo:
   /// flutter run -d chrome \
-  ///   --dart-define=DAILYTALK_API_BASE_URL=http://127.0.0.1:8787/api
+  ///   --dart-define=DAILYTALK_API_BASE_URL=http://localhost:8787/api
   static const String _apiBaseUrlOverride = String.fromEnvironment(
     'DAILYTALK_API_BASE_URL',
     defaultValue: '',
@@ -35,7 +35,7 @@ class AppConfig {
   /// Regras:
   /// - se `DAILYTALK_API_BASE_URL` for definido, usa esse valor;
   /// - se a app estiver em `dailytalk.pt`, usa a API de produção;
-  /// - se a app Web estiver em `localhost` ou `127.0.0.1`, usa a API local;
+  /// - se a app Web estiver em `localhost` ou `localhost`, usa a API local;
   /// - se estiver noutro domínio Web, usa o mesmo domínio com `/api`;
   /// - em Android/desktop, onde não existe host Web, usa produção por defeito.
   static String get apiBaseUrl {
@@ -51,7 +51,7 @@ class AppConfig {
       return 'https://dailytalk.pt/api';
     }
 
-    if (host == 'localhost' || host == '127.0.0.1') {
+    if (host == 'localhost' || host == 'localhost') {
       return '$scheme://$host:$_localApiPort/api';
     }
 

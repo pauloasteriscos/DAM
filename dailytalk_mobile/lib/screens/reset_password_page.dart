@@ -192,7 +192,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         const SizedBox(height: 10),
 
                         Text(
-                          'Conta: ${widget.email}',
+                          debugToken != null && debugToken.isNotEmpty
+                              ? 'Conta: ${widget.email}\nUsa o código temporário abaixo para concluir o teste de recuperação.'
+                              : 'Conta: ${widget.email}',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.72),
@@ -344,7 +346,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         ),
       ),
       child: SelectableText(
-        'Código temporário do protótipo:\n$debugToken',
+        'Versão de protótipo\n'
+        'No plano gratuito da Cloudflare, o servidor não envia emails de '
+        'recuperação. Para permitir testar o fluxo, o código temporário é '
+        'apresentado aqui.\n\n'
+        'Código: $debugToken',
         textAlign: TextAlign.center,
         style: const TextStyle(
           color: Colors.orangeAccent,

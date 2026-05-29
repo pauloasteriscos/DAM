@@ -53,3 +53,6 @@ build/
 # Cloudflare / deploy local
 .wrangler/
 cloudflare_dist/
+
+
+DAM_instrucoes_github_cloudflare.txt

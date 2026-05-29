@@ -79,8 +79,37 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
     final db = await AppDatabase.instance.database;
     final settingsDao = AppSettingsDao(db);
 
-    final nativeLanguageCode = await settingsDao.getNativeLanguageCode();
-    final targetLanguageCode = await settingsDao.getTargetLanguageCode();
+    // Primeiro lê a cache local para manter a aplicação funcional mesmo sem rede.
+    var nativeLanguageCode = await settingsDao.getNativeLanguageCode();
+    var targetLanguageCode = await settingsDao.getTargetLanguageCode();
+
+    try {
+      // Depois tenta obter o perfil remoto. Isto resolve o caso em que os
+      // idiomas foram alterados noutro dispositivo, por exemplo no Android,
+      // e a versão Web ainda tem uma cache local antiga.
+      final currentUser = await AuthRepository().getCurrentUser();
+
+      if (currentUser != null) {
+        nativeLanguageCode = _normalizeLanguageCode(
+          currentUser.preferences.appLanguageCode,
+          fallbackCode: nativeLanguageCode,
+        );
+        targetLanguageCode = _normalizeLanguageCode(
+          currentUser.preferences.learningLanguageCode,
+          fallbackCode: targetLanguageCode,
+        );
+
+        // Atualiza a cache local para que as próximas aberturas da página
+        // apresentem os mesmos idiomas que aparecem em Conta.
+        await settingsDao.setLanguagePair(
+          nativeLanguageCode: nativeLanguageCode,
+          targetLanguageCode: targetLanguageCode,
+        );
+      }
+    } catch (_) {
+      // Se a sessão ou a API não estiverem disponíveis, mantém a cache local.
+      // Isto evita bloquear o ecrã Language em modo offline ou durante testes.
+    }
 
     if (!mounted) {
       return;
@@ -120,17 +149,38 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
 
       /// Tenta sincronizar as preferências com o perfil remoto.
       /// Se a API estiver em modo mock, também funciona sem backend real.
-      await AuthRepository().updatePreferences(
+      final updatedUser = await AuthRepository().updatePreferences(
         appLanguageCode: _nativeLanguageCode,
         learningLanguageCode: _targetLanguageCode,
+      );
+
+      final savedNativeLanguageCode = _normalizeLanguageCode(
+        updatedUser.preferences.appLanguageCode,
+        fallbackCode: _nativeLanguageCode,
+      );
+      final savedTargetLanguageCode = _normalizeLanguageCode(
+        updatedUser.preferences.learningLanguageCode,
+        fallbackCode: _targetLanguageCode,
+      );
+
+      // Garante que a cache local fica igual ao valor efetivamente devolvido
+      // pela API, evitando divergência entre Conta e Language.
+      await settingsDao.setLanguagePair(
+        nativeLanguageCode: savedNativeLanguageCode,
+        targetLanguageCode: savedTargetLanguageCode,
       );
 
       if (!mounted) {
         return;
       }
 
-      final nativeLanguage = _languageByCode(_nativeLanguageCode);
-      final targetLanguage = _languageByCode(_targetLanguageCode);
+      setState(() {
+        _nativeLanguageCode = savedNativeLanguageCode;
+        _targetLanguageCode = savedTargetLanguageCode;
+      });
+
+      final nativeLanguage = _languageByCode(savedNativeLanguageCode);
+      final targetLanguage = _languageByCode(savedTargetLanguageCode);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -156,6 +206,19 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
         });
       }
     }
+  }
+
+  String _normalizeLanguageCode(
+    String? code, {
+    required String fallbackCode,
+  }) {
+    final hasLanguage = _languages.any((language) => language.code == code);
+
+    if (hasLanguage) {
+      return code!;
+    }
+
+    return fallbackCode;
   }
 
   LanguageOption _languageByCode(String code) {

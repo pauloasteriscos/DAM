@@ -48,6 +48,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     super.dispose();
   }
 
+
+  String _friendlyErrorMessage(Object error) {
+    final message = error.toString();
+
+    return message
+        .replaceFirst('Exception: ', '')
+        .replaceFirst('FormatException: ', '')
+        .trim();
+  }
+
   Future<void> _requestReset() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -66,8 +76,28 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         return;
       }
 
+      final debugResetToken = result.debugResetToken?.trim();
+      final hasDebugResetToken =
+          debugResetToken != null && debugResetToken.isNotEmpty;
+
+      if (result.isPrototypeDebug && !hasDebugResetToken) {
+        setState(() {
+          _errorMessage =
+              '${result.message}\n\n'
+              'Nota: Se estiver em ambiente de DEV, o e-mail deve existir neste ambiente. '
+              'Não há sincronismo híbrido entre DEV e PRD. Ou só DEV ou só PRD.';
+        });
+        return;
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.message)),
+        SnackBar(
+          content: Text(
+            hasDebugResetToken
+                ? 'Modo protótipo: o código foi gerado e será apresentado no ecrã seguinte.'
+                : result.message,
+          ),
+        ),
       );
 
       Navigator.pushReplacement(
@@ -75,7 +105,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         MaterialPageRoute(
           builder: (context) => ResetPasswordPage(
             email: email,
-            initialResetToken: result.debugResetToken,
+            initialResetToken: hasDebugResetToken ? debugResetToken : null,
           ),
         ),
       );
@@ -85,7 +115,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       }
 
       setState(() {
-        _errorMessage = error.toString();
+        _errorMessage = _friendlyErrorMessage(error);
       });
     } finally {
       if (mounted) {
@@ -189,7 +219,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           const SizedBox(height: 10),
 
                           Text(
-                            'Indica o email da tua conta para receberes um código temporário e redefinires o acesso.',
+                            'Indica o email da tua conta. Nesta versão de protótipo, alojada no plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário será apresentado no ecrã seguinte.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.74),
@@ -393,7 +423,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   size: 24,
                 ),
           label: Text(
-            _isLoading ? 'A enviar...' : 'Enviar código por email',
+            _isLoading ? 'A preparar...' : 'Gerar código de recuperação',
             style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w800,
