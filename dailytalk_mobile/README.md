@@ -4,7 +4,7 @@ Aplicação móvel desenvolvida em Flutter para o projeto **Erasmus DailyTalk.pt
 
 O objetivo da aplicação é apoiar crianças e jovens em mobilidade escolar, normalmente entre os 11 e os 15 anos, na prática de comunicação em situações reais do quotidiano escolar, através de atividades gamificadas como vocabulário, áudio, diálogos, quizzes e desafios.
 
-Esta versão contempla a evolução até à **Sprint 4**, incluindo a estrutura inicial da aplicação, navegação, Home gamificada, base de dados local SQLite, configuração de atividades, submissão de respostas, apresentação de resultados, integração com backend real, autenticação de utilizadores, sincronização entre mobile e Web, publicação em Cloudflare, aplicação progressiva de padrões de software, refinamento visual/UX dos principais fluxos e implementação inicial de atividades gamificadas concretas para vocabulário, quiz, diálogo e revisão.
+Esta versão contempla a evolução até à **Sprint 4**, incluindo a estrutura inicial da aplicação, navegação, Home gamificada, base de dados local SQLite, configuração de atividades, submissão de respostas, apresentação de resultados, integração com backend real, autenticação de utilizadores, sincronização entre mobile e Web, publicação em Cloudflare, aplicação progressiva de padrões de software, refinamento visual/UX dos principais fluxos, implementação inicial de atividades gamificadas concretas para vocabulário, quiz, diálogo e revisão, introdução do **modo teste sem conta**, reorganização do fluxo de início de sessão e aplicação de um controlador global de sessão baseado no padrão **Observer**.
 
 ---
 
@@ -41,6 +41,11 @@ A aplicação já possui:
 - integração com backend real em Cloudflare Workers;
 - persistência remota em Cloudflare D1;
 - autenticação básica com conta de utilizador;
+- ecrã inicial simplificado com três ações principais: **Testar agora**, **Entrar** e **Criar conta**;
+- ecrã próprio para início de sessão, separado do primeiro contacto com a aplicação;
+- botão de autenticação com Conta Google previsto no protótipo como funcionalidade futura;
+- modo teste para experimentar a aplicação sem registo e sem sincronização de progresso;
+- controlador global de sessão baseado em Observer para distinguir modo teste, sessão autenticada e ausência de sessão;
 - armazenamento seguro de token na app;
 - validação de sessão contra a API;
 - preferências associadas ao utilizador autenticado;
@@ -49,7 +54,9 @@ A aplicação já possui:
 - recuperação de palavra-passe em modo protótipo/debug;
 - reformulação visual dos ecrãs de entrada, criação de conta, recuperação de palavra-passe, seleção de idioma, configuração de atividade, atividade/desafio, resultados/análises, conta, ajustes e notas privadas;
 - aplicação da identidade visual escura/azul do DailyTalk.pt aos novos ecrãs de atividade;
-- aplicação inicial dos padrões Strategy, Factory simples, Facade, Command e Observer.
+- aplicação inicial dos padrões Strategy, Factory simples, Facade, Command e Observer;
+- ecrã de vocabulário com seleção compacta dos idiomas na mesma linha;
+- separador **Praticar** com abertura aleatória de uma atividade entre Vocabulário, Diálogo e Quiz.
 
 ---
 
@@ -128,9 +135,29 @@ Desta forma, se o aluno escolher Português como idioma habitual e Italiano como
 
 ---
 
+## Modo teste e início sem conta
+
+Na Sprint 4 foi introduzido um fluxo de entrada mais flexível. O primeiro ecrã deixa de ser apenas um formulário de início de sessão e passa a funcionar como um ecrã de decisão inicial, com três ações principais:
+
+- **Testar agora**;
+- **Entrar**;
+- **Criar conta**.
+
+A opção **Testar agora** permite que um novo utilizador experimente a aplicação sem criar conta. Este fluxo é útil para reduzir a barreira inicial, sobretudo porque o público-alvo inclui crianças e jovens que podem querer perceber rapidamente o valor da aplicação antes de se registarem.
+
+Em modo teste, o utilizador pode navegar pela aplicação, experimentar atividades e alterar preferências locais, como idioma da aplicação, idioma a praticar e perfil. No entanto, o progresso não é sincronizado com o backend nem associado a uma conta.
+
+A Home gamificada apresenta um aviso compacto de modo teste, com a indicação de que o progresso não será guardado e com a opção **Entrar**. Esta opção encaminha o utilizador para o ecrã de início de sessão, onde pode autenticar-se ou criar conta para passar a guardar e sincronizar os dados.
+
+O ecrã de início de sessão foi separado do ecrã inicial. Nele ficam concentrados os campos de e-mail e palavra-passe, a recuperação de palavra-passe e a previsão de integração futura com serviços de autenticação padrão, como Conta Google. Nesta versão de protótipo, o botão da Conta Google apresenta feedback informativo indicando que a funcionalidade será implementada numa versão futura.
+
+---
+
 ## Atividades gamificadas implementadas
 
 A aplicação passou a incluir ecrãs próprios para algumas atividades centrais do mapa gamificado. Estes ecrãs foram desenhados para funcionar como protótipos jogáveis, mantendo a identidade visual do DailyTalk.pt e usando os idiomas definidos pelo utilizador no perfil.
+
+O separador **Praticar** foi ajustado para abrir aleatoriamente uma das atividades principais já implementadas: Vocabulário, Diálogo ou Quiz. Esta decisão reforça a ideia de prática rápida e variada, evitando que o botão leve sempre ao mesmo tipo de exercício.
 
 ### Vocabulário — Combina pares
 
@@ -215,7 +242,7 @@ A arquitetura atual contempla:
 O backend disponibiliza endpoints para:
 
 - registo de utilizador;
-- login;
+- início de sessão;
 - consulta da sessão autenticada;
 - atualização de preferências;
 - envio de submissões de atividades;
@@ -226,12 +253,14 @@ Esta integração permite realizar testes de escrita na aplicação mobile e con
 
 Exemplo de fluxo suportado:
 
-1. o utilizador faz login no Android;
+1. o utilizador inicia sessão no Android;
 2. realiza uma atividade;
 3. a submissão é enviada para a API;
 4. o utilizador abre a versão Web;
-5. faz login com a mesma conta;
+5. inicia sessão com a mesma conta;
 6. consulta as submissões associadas ao perfil autenticado.
+
+Em modo teste, a aplicação não tenta sincronizar dados que dependam de autenticação. As preferências podem ser alteradas localmente para permitir a experimentação, mas submissões, resultados persistentes e análises personalizadas ficam associados apenas a uma sessão autenticada.
 
 ---
 
@@ -250,8 +279,8 @@ Com esta evolução, a aplicação passou de uma experiência genérica para uma
 A versão atual inclui:
 
 - registo de conta;
-- login;
-- validação de password no backend;
+- início de sessão;
+- validação de palavra-passe no backend;
 - token JWT;
 - armazenamento seguro do token no cliente;
 - validação da sessão através do endpoint `/api/me`;
@@ -266,7 +295,7 @@ Este ponto de controlo de utilizador deverá receber atenção especial quando o
 - autenticação multifator;
 - integração com Authenticator;
 - verificação de email;
-- políticas de password;
+- políticas de palavra-passe;
 - proteção contra abuso de pedidos;
 - envio real de emails transacionais;
 - auditoria de sessão;
@@ -302,29 +331,32 @@ Numa versão futura, este fluxo deverá ser substituído por:
 
 Durante os testes da Sprint 3 foram identificados ajustes de usabilidade.
 
-Um dos pontos observados foi a ausência do ícone de visualização da palavra-passe nos ecrãs de login e criação de conta. Para resolver isto, foi implementado um botão com ícone de “olhinho”, permitindo alternar entre mostrar e ocultar a palavra-passe.
+Um dos pontos observados foi a ausência do ícone de visualização da palavra-passe nos ecrãs de início de sessão e criação de conta. Para resolver isto, foi implementado um botão com ícone de “olhinho”, permitindo alternar entre mostrar e ocultar a palavra-passe.
 
 Também foram ajustados:
 
-- mensagens de erro de login;
+- mensagens de erro de início de sessão;
 - comportamento de sessão inválida;
-- navegação entre login e registo;
+- navegação entre início de sessão e registo;
 - fluxo de recuperação de palavra-passe;
-- retorno para o ecrã de login após logout;
+- retorno para o ecrã de início de sessão após terminar sessão;
 - validação de token antes de abrir a navegação principal;
 - comportamento de conta quando a sessão não existe.
 
 Na Sprint 4 foi realizado um refinamento visual e de interação nos principais fluxos da aplicação. O objetivo foi tornar a interface mais consistente, reduzir ambiguidades visuais e reforçar a comunicação da proposta de valor.
 
+A revisão do primeiro ecrã passou também a responder às questões de visibilidade e recuperação de erro: a ação principal **Testar agora** fica visível sem scroll, **Entrar** mantém o acesso ao utilizador autenticado e **Criar conta** continua disponível para novos registos. Se o utilizador escolher o modo teste por engano, pode regressar ou iniciar sessão a partir da própria Home gamificada.
+
 Foram revistos:
 
-- ecrã de login, com reforço da identidade visual e proposta de valor;
+- ecrã inicial, com reforço da identidade visual, proposta de valor e ações **Testar agora**, **Entrar** e **Criar conta**;
+- ecrã de início de sessão, separado do primeiro contacto com a aplicação;
 - ecrã de criação de conta, com título mais direto e mascote compacta;
 - recuperação e redefinição de palavra-passe;
 - seleção de idioma;
 - seleção de perfil;
 - configuração de atividade;
-- tela de atividade/desafio;
+- ecrã de atividade/desafio;
 - resultados e análises;
 - conta do utilizador;
 - ajustes;
@@ -347,7 +379,7 @@ Foi aplicado o padrão **Strategy** aos tipos de atividade da aplicação.
 
 Cada tipo de atividade passou a concentrar a sua própria configuração, como nome visível, ícone, cor, forma geométrica, pergunta predefinida, dica de resposta, cenário padrão e dificuldade padrão.
 
-O motivo para aplicar este padrão foi evitar que a lógica de cada tipo de atividade ficasse espalhada por várias telas da aplicação. Assim, quando for necessário adicionar novos tipos de atividade, a alteração será mais simples e localizada.
+O motivo para aplicar este padrão foi evitar que a lógica de cada tipo de atividade ficasse espalhada por vários ecrãs da aplicação. Assim, quando for necessário adicionar novos tipos de atividade, a alteração será mais simples e localizada.
 
 ### Factory simples
 
@@ -374,9 +406,9 @@ O motivo para esta alteração foi evitar o uso excessivo de textos soltos no c�
 
 Foi aplicada uma **Facade** para concentrar os principais fluxos da aplicação, como criar atividade, iniciar atividade, submeter resposta, carregar resultados e sincronizar submissões pendentes.
 
-O motivo para usar este padrão foi reduzir o acoplamento das telas com detalhes internos, como abertura da base SQLite, criação de objetos de acesso a dados, chamadas à API, gravação local e lógica de sincronização.
+O motivo para usar este padrão foi reduzir o acoplamento dos ecrãs com detalhes internos, como abertura da base SQLite, criação de objetos de acesso a dados, chamadas à API, gravação local e lógica de sincronização.
 
-Com isso, as telas passam a chamar uma interface de alto nível, sem precisarem conhecer toda a infraestrutura interna da aplicação.
+Com isso, os ecrãs passam a chamar uma interface de alto nível, sem precisarem conhecer toda a infraestrutura interna da aplicação.
 
 ### Command
 
@@ -388,9 +420,11 @@ Esta estrutura facilita futuras melhorias, como repetição automática, fila de
 
 ### Observer
 
-Foi aplicado um mecanismo simples de **Observer** para avisar partes da aplicação quando eventos relevantes acontecem, como submissão de resposta, alteração de resultados ou conclusão de sincronização.
+Foi aplicado um mecanismo de **Observer** em dois contextos principais da aplicação.
 
-O motivo para usar este padrão foi permitir que a página de resultados seja atualizada automaticamente quando os dados locais mudam, reduzindo a necessidade de ações manuais do utilizador.
+O primeiro contexto está relacionado com eventos internos, como submissão de resposta, alteração de resultados ou conclusão de sincronização. Neste caso, o padrão permite que partes da aplicação sejam notificadas quando os dados locais mudam, reduzindo a necessidade de ações manuais do utilizador.
+
+O segundo contexto foi introduzido com o modo teste. Foi criado um controlador global de sessão, baseado em `ChangeNotifier` e `InheritedNotifier`, para representar o estado da aplicação entre modo teste, sessão autenticada e ausência de sessão. Desta forma, os vários ecrãs conseguem reagir de forma consistente à mudança de estado, evitando redirecionamentos inconsistentes e reduzindo o acoplamento entre ecrãs.
 
 ---
 
@@ -407,6 +441,7 @@ A prioridade foi manter o código funcional e compreensível, mas preparado para
 - atualização automática da interface;
 - integração com backend real;
 - autenticação e perfis;
+- modo teste como estado válido da aplicação;
 - sincronização entre mobile e Web;
 - segurança e validação de sessão.
 
@@ -424,7 +459,7 @@ Nesta versão foram contemplados os seguintes pontos:
 
 - criação do projeto Flutter;
 - organização inicial de pastas;
-- separação entre telas, widgets, modelos, dados, repositórios e serviços;
+- separação entre ecrãs, widgets, modelos, dados, repositórios e serviços;
 - configuração de dependências principais.
 
 ### Interface e navegação
@@ -505,7 +540,7 @@ Além disso, a criação de atividades foi reposicionada como funcionalidade sec
 
 ## Funcionalidades da Sprint 3
 
-A Sprint 3 tinha como previsão a tela de análises, finalização da UI e usabilidade, cobertura de testes unitários/widget e ajustes de performance e segurança.
+A Sprint 3 tinha como previsão o ecrã de análises, finalização da UI e usabilidade, cobertura de testes unitários/widget e ajustes de performance e segurança.
 
 O objetivo desta sprint foi estabilizar o protótipo antes da fase final, permitindo que a etapa seguinte seja dedicada à correção final, melhoria da experiência de utilização e preparação da entrega.
 
@@ -538,7 +573,7 @@ Durante esta sprint foi implementado mais do que o previsto inicialmente.
 ### Conta de utilizador
 
 - registo de conta;
-- login;
+- início de sessão;
 - logout;
 - validação de sessão contra a API;
 - armazenamento seguro de token;
@@ -549,9 +584,9 @@ Durante esta sprint foi implementado mais do que o previsto inicialmente.
 ### Usabilidade
 
 - implementação do ícone de visualização de palavra-passe;
-- melhoria do fluxo de login;
+- melhoria do fluxo de início de sessão;
 - melhoria do fluxo de registo;
-- melhoria da tela Conta;
+- melhoria do ecrã Conta;
 - melhoria das mensagens de sessão inválida;
 - implementação do fluxo de recuperação de palavra-passe em modo protótipo/debug.
 
@@ -559,7 +594,7 @@ Durante esta sprint foi implementado mais do que o previsto inicialmente.
 
 - autenticação com JWT;
 - `JWT_SECRET` configurado como secret na Cloudflare;
-- hash de password com PBKDF2;
+- hash de palavra-passe com PBKDF2;
 - ajuste de iterações PBKDF2 para compatibilidade com Cloudflare Workers;
 - CORS configurado para o domínio do projeto;
 - validação de sessão com `/api/me`;
@@ -588,7 +623,7 @@ Como alternativa para protótipo/debug, o sistema gera um código temporário, g
 
 ### Resultado da Sprint 3
 
-Considera-se que a Sprint 3 cumpriu o previsto e avançou além do inicialmente planeado. Para além da tela de análises, ajustes de UI/usabilidade, testes e melhorias de segurança, foi criada a base técnica para autenticação, sincronização Web/mobile, persistência em backend, recuperação de palavra-passe em modo protótipo e publicação em Cloudflare.
+Considera-se que a Sprint 3 cumpriu o previsto e avançou além do inicialmente planeado. Para além do ecrã de análises, ajustes de UI/usabilidade, testes e melhorias de segurança, foi criada a base técnica para autenticação, sincronização Web/mobile, persistência em backend, recuperação de palavra-passe em modo protótipo e publicação em Cloudflare.
 
 ---
 
@@ -600,24 +635,42 @@ O ponto de partida foi a análise do ecrã de entrada a partir da perspetiva dos
 
 ### Identidade visual e primeira impressão
 
-- reformulação do ecrã de login;
+- reformulação do ecrã inicial;
 - integração de uma composição visual com mascote, livro, balões de fala e marca DailyTalk.pt;
 - reforço da proposta de valor: **Serious game para aprendizagem de idiomas**;
 - remoção de elementos que pareciam botões, mas não eram interativos;
-- destaque das ações **Entrar** e **Criar conta**;
+- substituição do formulário inicial por três ações principais: **Testar agora**, **Entrar** e **Criar conta**;
+- criação de ecrã próprio para início de sessão;
+- previsão visual de autenticação futura com Conta Google;
 - utilização de rodapé decorativo com ambiente associado à mobilidade escolar.
 
 ### Coerência entre fluxos de autenticação
 
 Foram alinhados visualmente os ecrãs ligados à autenticação:
 
-- login;
+- início de sessão;
 - criação de conta;
 - recuperação de palavra-passe;
 - redefinição de palavra-passe;
 - conta do utilizador.
 
 O azul passou a ser usado prioritariamente para marca, foco e ação principal, evitando que ícones de campos inativos parecessem elementos selecionados.
+
+### Modo teste e estado global da sessão
+
+Foi introduzido um modo teste para permitir que o utilizador experimente a aplicação sem conta. Esta alteração exigiu rever a lógica de sessão em vários ecrãs, porque “sem sessão” deixou de significar apenas erro ou retorno obrigatório ao início de sessão, passando a poder representar uma experiência válida de experimentação.
+
+Foram ajustados comportamentos em áreas como:
+
+- Home gamificada;
+- Language;
+- Conta;
+- Resultados;
+- Análises;
+- Ajustes;
+- submissões e sincronização.
+
+Para suportar este comportamento, foi criado um controlador global de sessão com base no padrão Observer. Assim, a aplicação consegue distinguir modo teste, modo autenticado e ausência de sessão, permitindo que os ecrãs reajam de forma consistente.
 
 ### Ajustes em ecrãs internos
 
@@ -643,11 +696,11 @@ Foram ainda criados e integrados ecrãs específicos para atividades do percurso
 - **Diálogo**, com simulação guiada de conversa;
 - **Revisão**, com cartões de reforço e consolidação.
 
-Estes ecrãs leem os idiomas definidos pelo utilizador no perfil, mantendo a separação entre o idioma de apoio/interface e o idioma de aprendizagem.
+Estes ecrãs leem os idiomas definidos pelo utilizador no perfil, mantendo a separação entre o idioma de apoio/interface e o idioma de aprendizagem. No ecrã de vocabulário, a apresentação dos idiomas foi compactada para Android, colocando o idioma da aplicação e o idioma a praticar na mesma linha. Além disso, o separador **Praticar** passou a encaminhar aleatoriamente para Vocabulário, Diálogo ou Quiz.
 
 ### Resultado da Sprint 4
 
-A Sprint 4 consolidou a aplicação como um protótipo mais coerente do ponto de vista visual e de experiência de utilização. A aplicação passou a comunicar melhor a sua identidade, o seu propósito educativo e as ações principais esperadas em cada fluxo. Além disso, o mapa gamificado deixou de funcionar apenas como navegação visual e passou a abrir atividades concretas de prática.
+A Sprint 4 consolidou a aplicação como um protótipo mais coerente do ponto de vista visual e de experiência de utilização. A aplicação passou a comunicar melhor a sua identidade, o seu propósito educativo e as ações principais esperadas em cada fluxo. Além disso, o mapa gamificado deixou de funcionar apenas como navegação visual e passou a abrir atividades concretas de prática. A introdução do modo teste também tornou a experiência inicial menos dependente de registo, permitindo demonstrar o valor da aplicação antes do início de sessão.
 
 ---
 
@@ -709,8 +762,8 @@ Principais endpoints:
 GET  /api/health
 POST /api/auth/register
 POST /api/auth/login
-POST /api/auth/forgot-password
-POST /api/auth/reset-password
+POST /api/auth/forgot-palavra-passe
+POST /api/auth/reset-palavra-passe
 GET  /api/me
 PUT  /api/me/preferences
 POST /api/activities/submissions
@@ -829,6 +882,7 @@ flutter build web --release \
 - JWT;
 - PBKDF2;
 - flutter_secure_storage;
+- ChangeNotifier / InheritedNotifier;
 - arquitetura em camadas;
 - padrões de software aplicados de forma incremental.
 
@@ -838,11 +892,12 @@ flutter build web --release \
 
 As próximas etapas do projeto poderão incluir:
 
-- reforço da tela de análises para professores;
+- reforço do ecrã de análises para professores;
 - dashboards pedagógicos;
 - aumento da cobertura de testes unitários;
 - envio real de emails transacionais para recuperação de palavra-passe;
 - autenticação multifator;
+- autenticação real com Conta Google ou outro serviço externo;
 - verificação de email;
 - abertura da atividade em WebView;
 - melhoria da sincronização offline-first;
@@ -902,7 +957,7 @@ Estado: implementada e expandida.
 
 Entregas contempladas:
 
-- tela de análises/resultados;
+- ecrã de análises/resultados;
 - finalização e refinamento de UI;
 - ajustes de usabilidade;
 - criação da logo DTK;
@@ -929,7 +984,10 @@ Estado: implementada como refinamento visual e de experiência de utilização.
 
 Entregas contempladas:
 
-- redesign do ecrã de login;
+- redesign do ecrã inicial;
+- criação da ação **Testar agora**;
+- separação entre ecrã inicial e ecrã de início de sessão;
+- criação do modo teste sem conta;
 - criação/reforço de assets de branding;
 - integração de mascote e rodapé decorativo;
 - melhoria do ecrã de criação de conta;
@@ -937,9 +995,9 @@ Entregas contempladas:
 - melhoria da seleção de idioma;
 - melhoria da seleção de perfil;
 - melhoria da configuração de atividade;
-- melhoria da tela de atividade/desafio;
+- melhoria do ecrã de atividade/desafio;
 - melhoria de resultados e análises;
-- melhoria da tela Conta;
+- melhoria do ecrã Conta;
 - melhoria dos Ajustes;
 - melhoria das Notas privadas;
 - alinhamento visual de páginas internas;
@@ -947,6 +1005,9 @@ Entregas contempladas:
 - criação de ecrãs próprios para Vocabulário, Quiz, Diálogo e Revisão;
 - ligação dos nós da Home gamificada aos novos ecrãs de atividade;
 - utilização dos idiomas definidos no perfil nos ecrãs de prática;
+- apresentação compacta dos idiomas no ecrã de vocabulário;
+- encaminhamento aleatório do separador **Praticar** para Vocabulário, Diálogo ou Quiz;
+- aplicação do padrão Observer ao estado global da sessão;
 - aplicação da identidade visual do DailyTalk.pt às atividades gamificadas.
 
 ---
@@ -957,6 +1018,6 @@ Esta versão continua a ser um protótipo funcional, mas já ultrapassa o fluxo 
 
 A aplicação passou a ter backend real, autenticação, persistência remota e sincronização entre plataformas. Ainda assim, algumas funcionalidades continuam em modo de protótipo, principalmente a recuperação de palavra-passe, que nesta fase utiliza código devolvido pela app em modo debug por limitação do plano de envio de email transacional.
 
-A organização em quatro sprints permitiu testar progressivamente as funcionalidades principais. A Sprint 3 foi usada para consolidar autenticação, backend, segurança, testes e infraestrutura. A Sprint 4 foi usada para melhorar a comunicação visual, reforçar a identidade do DailyTalk.pt, tornar os fluxos principais mais consistentes do ponto de vista de usabilidade e transformar parte do mapa gamificado em atividades jogáveis.
+A organização em quatro sprints permitiu testar progressivamente as funcionalidades principais. A Sprint 3 foi usada para consolidar autenticação, backend, segurança, testes e infraestrutura. A Sprint 4 foi usada para melhorar a comunicação visual, reforçar a identidade do DailyTalk.pt, tornar os fluxos principais mais consistentes do ponto de vista de usabilidade, transformar parte do mapa gamificado em atividades jogáveis e introduzir um modo teste que permite experimentar a aplicação antes do registo.
 
-A próxima etapa deverá concentrar-se na validação final em Android e Web, reforço dos testes unitários, persistência mais completa do progresso das novas atividades, substituição de mecanismos temporários por serviços definitivos quando a infraestrutura permitir e preparação da entrega final.
+A próxima etapa deverá concentrar-se na validação final em Android e Web, reforço dos testes unitários, persistência mais completa do progresso das novas atividades, validação do comportamento do modo teste em todos os ecrãs, substituição de mecanismos temporários por serviços definitivos quando a infraestrutura permitir e preparação da entrega final.

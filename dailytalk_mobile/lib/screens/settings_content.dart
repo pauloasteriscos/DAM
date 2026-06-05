@@ -1,33 +1,45 @@
 import 'package:flutter/material.dart';
 
 import '../data/facades/activity_workflow_facade.dart';
+import '../state/app_session_controller.dart';
+import '../widgets/dailytalk_support_dialogs.dart';
 import 'account_page.dart';
 import 'create_activity_page.dart';
 import 'language_selection_page.dart';
+import 'login_form_page.dart';
 import 'my_activities_page.dart';
-import 'profile_selection_page.dart';
 import 'private_notes_page.dart';
-import '../widgets/dailytalk_support_dialogs.dart';
+import 'profile_selection_page.dart';
+import 'register_page.dart';
 
 /// Conteúdo da página de Ajustes.
 ///
-/// Concentra opções secundárias da aplicação, mantendo a navegação simples
-/// e agrupando funcionalidades por intenção: perfil, aprendizagem,
-/// privacidade/sincronização e apoio.
+/// Em modo teste, esta página distingue preferências locais de funcionalidades
+/// que dependem de conta. Assim, o utilizador não é bloqueado em opções como
+/// idioma/perfil, mas recebe feedback claro quando algo exige autenticação.
 class SettingsContent extends StatelessWidget {
   const SettingsContent({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final session = AppSessionScope.watch(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (session.isTestMode) ...[
+          _buildTestModeInfoCard(),
+          const SizedBox(height: 18),
+        ],
+
         _buildSectionTitle('Conta e preferências'),
 
         _SettingsButton(
           icon: Icons.account_circle_outlined,
           title: 'Conta',
-          description: 'Ver dados do perfil autenticado e terminar sessão.',
+          description: session.isAuthenticated
+              ? 'Ver dados do perfil autenticado e terminar sessão.'
+              : 'Entrar ou criar conta para guardar progresso e sincronizar.',
           onTap: () {
             Navigator.push(
               context,
@@ -41,7 +53,9 @@ class SettingsContent extends StatelessWidget {
         _SettingsButton(
           icon: Icons.person_pin_circle_outlined,
           title: 'Perfil',
-          description: 'Escolher entre Estudante, Anfitrião ou Professor.',
+          description: session.isAuthenticated
+              ? 'Escolher entre Estudante, Anfitrião ou Professor.'
+              : 'Escolher perfil localmente durante o modo teste.',
           onTap: () {
             Navigator.push(
               context,
@@ -57,8 +71,9 @@ class SettingsContent extends StatelessWidget {
         _SettingsButton(
           icon: Icons.translate,
           title: 'Language',
-          description:
-              'Choose your language and the language you want to learn.',
+          description: session.isAuthenticated
+              ? 'Choose your language and the language you want to learn.'
+              : 'Alterar idiomas localmente durante o modo teste.',
           onTap: () {
             Navigator.push(
               context,
@@ -75,8 +90,15 @@ class SettingsContent extends StatelessWidget {
         _SettingsButton(
           icon: Icons.add_circle_outline,
           title: 'Criar atividade',
-          description: 'Criar uma atividade com base nas tuas dificuldades.',
+          description: session.isAuthenticated
+              ? 'Criar uma atividade com base nas tuas dificuldades.'
+              : 'Funcionalidade disponível depois de entrares na conta.',
           onTap: () {
+            if (!session.isAuthenticated) {
+              _showAuthenticationRequiredDialog(context);
+              return;
+            }
+
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -91,9 +113,15 @@ class SettingsContent extends StatelessWidget {
         _SettingsButton(
           icon: Icons.folder_special_outlined,
           title: 'Minhas atividades',
-          description:
-              'Ver atividades criadas por ti e o seu estado de aprovação.',
+          description: session.isAuthenticated
+              ? 'Ver atividades criadas por ti e o seu estado de aprovação.'
+              : 'Disponível com conta, para associar atividades ao teu perfil.',
           onTap: () {
+            if (!session.isAuthenticated) {
+              _showAuthenticationRequiredDialog(context);
+              return;
+            }
+
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const MyActivitiesPage()),
@@ -122,9 +150,15 @@ class SettingsContent extends StatelessWidget {
         _SettingsButton(
           icon: Icons.sync,
           title: 'Sincronizar',
-          description:
-              'Atualizar dados e enviar submissões pendentes quando houver ligação.',
+          description: session.isAuthenticated
+              ? 'Atualizar dados e enviar submissões pendentes quando houver ligação.'
+              : 'Entra para sincronizar o progresso com a tua conta.',
           onTap: () {
+            if (!session.isAuthenticated) {
+              _showAuthenticationRequiredDialog(context);
+              return;
+            }
+
             _syncPendingSubmissions(context);
           },
         ),
@@ -155,6 +189,33 @@ class SettingsContent extends StatelessWidget {
     );
   }
 
+  Widget _buildTestModeInfoCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.lightBlue.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.lightBlueAccent.withValues(alpha: 0.34)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.visibility_outlined, color: Colors.lightBlueAccent),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Modo teste ativo. Podes alterar idioma e perfil localmente; para sincronizar, entra ou cria conta.',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.76),
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10, left: 4),
@@ -167,6 +228,71 @@ class SettingsContent extends StatelessWidget {
           letterSpacing: 0.4,
         ),
       ),
+    );
+  }
+
+  /// Mostra um diálogo claro quando a funcionalidade exige conta.
+  void _showAuthenticationRequiredDialog(BuildContext context) {
+    final session = AppSessionScope.read(context);
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF10232D),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          title: const Text(
+            'Conta necessária',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          content: Text(
+            'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.76),
+              height: 1.4,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Continuar a testar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) => RegisterPage(
+                      onAuthenticated: () => session.markAuthenticated(),
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Criar conta'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) => LoginFormPage(
+                      onAuthenticated: () => session.markAuthenticated(),
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Entrar'),
+            ),
+          ],
+        );
+      },
     );
   }
 

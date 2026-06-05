@@ -54,5 +54,32 @@ build/
 .wrangler/
 cloudflare_dist/
 
+# Backups temporários
+*.bak
+*.backup
+*.old
+*.tmp
 
-DAM_instrucoes_github_cloudflare.txt
+# Ambientes e segredos locais
+.env
+.env.*
+.dev.vars
+
+# Cloudflare/Wrangler local
+.wrangler/
+
+# Node
+node_modules/
+
+# Flutter/Dart gerados
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Sistema operativo/IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+"@

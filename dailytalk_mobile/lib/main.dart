@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'data/database/database_factory_config.dart';
 import 'screens/auth_gate.dart';
+import 'state/app_session_controller.dart';
 
 /// Ponto de entrada da aplicação DailyTalk.pt.
 ///
@@ -26,14 +27,17 @@ class DailyTalkApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'DailyTalk.pt',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
+    return AppSessionScope(
+      controller: AppSessionController.instance,
+      child: MaterialApp(
+        title: 'DailyTalk.pt',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          useMaterial3: true,
+        ),
+        home: const AuthGate(),
       ),
-      home: const AuthGate(),
     );
   }
 }

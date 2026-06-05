@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/facades/activity_workflow_facade.dart';
+import '../state/app_session_controller.dart';
 
 /// Página de execução/submissão da atividade.
 ///
@@ -73,6 +74,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
         answerText: _answerController.text.trim(),
         nativeLanguageCode: 'pt-PT',
         targetLanguageCode: 'it-IT',
+        syncWithRemote: AppSessionController.instance.isAuthenticated,
       );
 
       if (!mounted) {

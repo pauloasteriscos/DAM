@@ -149,6 +149,7 @@ class ActivityWorkflowFacade {
     String? scenarioOverride,
     String? difficultyOverride,
     UserProfileType? userProfile,
+    bool syncWithRemote = true,
   }) async {
     final remoteActivityId =
         remoteActivityIdOverride ?? strategy.predefinedRemoteActivityId;
@@ -169,6 +170,7 @@ class ActivityWorkflowFacade {
       answerText: answerText,
       nativeLanguageCode: nativeLanguageCode,
       targetLanguageCode: targetLanguageCode,
+      syncWithRemote: syncWithRemote,
     );
 
     if (userProfile != null && scenarioOverride != null) {
@@ -195,6 +197,7 @@ class ActivityWorkflowFacade {
     required String answerText,
     String nativeLanguageCode = 'pt-PT',
     String targetLanguageCode = 'it-IT',
+    bool syncWithRemote = true,
   }) async {
     final activity = await activityDao.getByRemoteActivityId(remoteActivityId);
 
@@ -211,6 +214,7 @@ class ActivityWorkflowFacade {
       answerText: answerText,
       nativeLanguageCode: nativeLanguageCode,
       targetLanguageCode: targetLanguageCode,
+      syncWithRemote: syncWithRemote,
     );
 
     AppEventNotifier.instance.notifyResultsChanged();

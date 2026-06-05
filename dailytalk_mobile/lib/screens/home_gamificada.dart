@@ -8,13 +8,27 @@ import 'vocabulary_pairs_page.dart';
 import 'dialogue_page.dart';
 import 'revision_page.dart';
 import 'quiz_page.dart';
+import 'login_form_page.dart';
 
 /// Tela inicial gamificada do DailyTalk.pt.
 ///
 /// Esta tela dá prioridade ao percurso de prática do utilizador.
 /// O foco principal é o mapa de atividades já disponíveis.
 class HomeGamificada extends StatelessWidget {
-  const HomeGamificada({super.key});
+  const HomeGamificada({
+    super.key,
+    this.isTestMode = false,
+    this.onAuthenticated,
+  });
+
+  /// Indica se a Home foi aberta a partir do botão "Testar agora".
+  ///
+  /// Em modo teste, o utilizador consegue experimentar as atividades, mas a
+  /// interface informa que o progresso da sessão não será sincronizado.
+  final bool isTestMode;
+
+  /// Callback usado quando o utilizador decide entrar a partir do modo teste.
+  final VoidCallback? onAuthenticated;
 
   /// Lista temporária de atividades.
   ///
@@ -61,43 +75,79 @@ class HomeGamificada extends StatelessWidget {
     return SafeArea(
       child: Container(
         color: const Color(0xFF0D1B22),
-        child: Column(
-          children: [
-            _buildHeader(),
-            _buildCompactProgressCard(),
-            _buildMapTitle(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Em orientação horizontal a altura útil é muito menor.
+            // Nesses casos, a Home passa a ser totalmente deslocável para
+            // evitar RenderFlex overflow junto à barra de navegação inferior.
+            final useCompactLandscapeLayout = constraints.maxHeight < 520;
 
-            // O mapa recebe a maior parte da área disponível.
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(
-                  top: 4,
-                  bottom: 18,
-                ),
+            if (useCompactLandscapeLayout) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 14),
                 child: Column(
                   children: [
-                    _buildActivityMap(context, lessons),
-                    const SizedBox(height: 12),
+                    _buildHeader(compact: true),
+                    if (isTestMode) _buildTestModeBanner(context, compact: true),
+                    _buildCompactProgressCard(compact: true),
+                    _buildMapTitle(compact: true),
+                    _buildActivityMap(
+                      context,
+                      lessons,
+                      compact: true,
+                    ),
+                    const SizedBox(height: 10),
                     _buildShortcutsPanel(context),
                   ],
                 ),
-              ),
-            ),
-          ],
+              );
+            }
+
+            return Column(
+              children: [
+                _buildHeader(),
+                if (isTestMode) _buildTestModeBanner(context),
+                _buildCompactProgressCard(),
+                _buildMapTitle(),
+
+                // O mapa recebe a maior parte da área disponível.
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(
+                      top: 4,
+                      bottom: 18,
+                    ),
+                    child: Column(
+                      children: [
+                        _buildActivityMap(context, lessons),
+                        const SizedBox(height: 12),
+                        _buildShortcutsPanel(context),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
   /// Cabeçalho superior com logo, nome da app e menu.
-  Widget _buildHeader() {
+  Widget _buildHeader({bool compact = false}) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 10, 8),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        compact ? 6 : 8,
+        10,
+        compact ? 4 : 8,
+      ),
       child: Row(
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: compact ? 34 : 42,
+            height: compact ? 34 : 42,
             decoration: BoxDecoration(
               color: const Color(0xFF06345C),
               borderRadius: BorderRadius.circular(12),
@@ -105,23 +155,23 @@ class HomeGamificada extends StatelessWidget {
                 color: Colors.lightBlue.withValues(alpha: 0.35),
               ),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.menu_book,
               color: Colors.amber,
-              size: 28,
+              size: compact ? 23 : 28,
             ),
           ),
 
-          const SizedBox(width: 12),
+          SizedBox(width: compact ? 10 : 12),
 
-          const Expanded(
+          Expanded(
             child: Text(
               'DailyTalk.pt',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 28,
+                fontSize: compact ? 24 : 28,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -133,13 +183,127 @@ class HomeGamificada extends StatelessWidget {
     );
   }
 
-  /// Cartão azul superior, agora mais compacto.
-  Widget _buildCompactProgressCard() {
+
+  /// Aviso compacto apresentado quando o utilizador está a experimentar sem conta.
+  ///
+  /// A informação continua visível, mas deixa de competir com o mapa de
+  /// atividades. O objetivo é informar sem quebrar a experiência gamificada.
+  Widget _buildTestModeBanner(BuildContext context, {bool compact = false}) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        compact ? 0 : 2,
+        16,
+        compact ? 4 : 6,
+      ),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+        padding: EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: compact ? 6 : 8,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0B2B3C).withValues(alpha: 0.92),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: Colors.lightBlueAccent.withValues(alpha: 0.45),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.visibility_outlined,
+              color: Colors.lightBlueAccent,
+              size: 18,
+            ),
+
+            const SizedBox(width: 8),
+
+            Expanded(
+              child: Text(
+                'Modo teste · progresso não guardado',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.88),
+                  fontSize: compact ? 12 : 12.5,
+                  height: 1.2,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 6),
+
+            TextButton(
+              onPressed: () => _goToAuthentication(context),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.lightBlueAccent,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                textStyle: TextStyle(
+                  fontSize: compact ? 12 : 12.5,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              child: const Text('Entrar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Abre a tela de login a partir do modo teste.
+  ///
+  /// O botão usa o rótulo curto "Entrar" para caber na faixa compacta,
+  /// mas o destino é a página "Aceder à tua conta".
+  void _goToAuthentication(BuildContext context) {
+    final callback = onAuthenticated;
+
+    if (callback == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Volta ao ecrã inicial para entrar ou criar conta.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => LoginFormPage(
+          onAuthenticated: callback,
+        ),
+      ),
+    );
+  }
+
+  /// Cartão azul superior, agora mais compacto.
+  Widget _buildCompactProgressCard({bool compact = false}) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        16,
+        compact ? 6 : 8,
+        16,
+        compact ? 6 : 10,
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.fromLTRB(
+          18,
+          compact ? 10 : 14,
+          18,
+          compact ? 10 : 14,
+        ),
         decoration: BoxDecoration(
           color: Colors.lightBlue,
           borderRadius: BorderRadius.circular(20),
@@ -176,27 +340,27 @@ class HomeGamificada extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  SizedBox(height: compact ? 6 : 10),
 
-                  const Text(
+                  Text(
                     'Tema: Comunicação e amizades',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 25,
+                      fontSize: compact ? 21 : 25,
                       fontWeight: FontWeight.bold,
                       height: 1.18,
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  SizedBox(height: compact ? 5 : 8),
 
-                  const Text(
+                  Text(
                     '3 de 6 atividades concluídas',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 15,
+                      fontSize: compact ? 13 : 15,
                     ),
                   ),
 
@@ -217,19 +381,19 @@ class HomeGamificada extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(width: 12),
+            SizedBox(width: compact ? 10 : 12),
 
             Container(
-              width: 66,
-              height: 66,
+              width: compact ? 52 : 66,
+              height: compact ? 52 : 66,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.22),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.chat_bubble_outline,
                 color: Colors.white,
-                size: 34,
+                size: compact ? 28 : 34,
               ),
             ),
           ],
@@ -239,32 +403,37 @@ class HomeGamificada extends StatelessWidget {
   }
 
   /// Título visual da área principal de atividades.
-  Widget _buildMapTitle() {
+  Widget _buildMapTitle({bool compact = false}) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        compact ? 2 : 6,
+        16,
+        compact ? 0 : 4,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
+        children: [
           Icon(
             Icons.auto_awesome,
             color: Colors.lightBlueAccent,
-            size: 18,
+            size: compact ? 16 : 18,
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Text(
             'MAPA DE ATIVIDADES',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 15,
+              fontSize: compact ? 13 : 15,
               letterSpacing: 1.0,
               fontWeight: FontWeight.w800,
             ),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Icon(
             Icons.auto_awesome,
             color: Colors.lightBlueAccent,
-            size: 18,
+            size: compact ? 16 : 18,
           ),
         ],
       ),
@@ -278,8 +447,9 @@ class HomeGamificada extends StatelessWidget {
 /// fiquem demasiado afastados nas extremidades do ecrã.
 Widget _buildActivityMap(
   BuildContext context,
-  List<LessonItem> lessons,
-) {
+  List<LessonItem> lessons, {
+  bool compact = false,
+}) {
   return Center(
     child: ConstrainedBox(
       constraints: const BoxConstraints(
@@ -295,14 +465,14 @@ Widget _buildActivityMap(
           final alignLeft = index % 2 == 0;
 
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            padding: EdgeInsets.symmetric(vertical: compact ? 8 : 14),
             child: Align(
               alignment:
                   alignLeft ? Alignment.centerLeft : Alignment.centerRight,
               child: Padding(
                 padding: EdgeInsets.only(
-                  left: alignLeft ? 42 : 0,
-                  right: alignLeft ? 0 : 42,
+                  left: alignLeft ? (compact ? 28 : 42) : 0,
+                  right: alignLeft ? 0 : (compact ? 28 : 42),
                 ),
                 child: LessonNode(
                   lesson: lesson,

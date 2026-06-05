@@ -121,6 +121,49 @@ class SubmissionDao {
     });
   }
 
+  /// Grava um resultado local sem marcar a submissão como sincronizada.
+  ///
+  /// Usado no modo teste: o utilizador recebe feedback imediato, mas a
+  /// submissão continua pendente para indicar que não foi enviada para a conta.
+  Future<void> markAsLocalResult({
+    required int submissionId,
+    required String remoteActivityId,
+    double? score,
+    String? feedbackText,
+    String? feedbackUrl,
+    Map<String, dynamic>? metrics,
+  }) async {
+    final now = DateTime.now().toIso8601String();
+
+    await db.transaction((txn) async {
+      await txn.update(
+        'submissions',
+        {
+          'sync_status': SubmissionSyncStatus.pending.databaseValue,
+          'submitted_at': now,
+          'updated_at': now,
+          'last_error': null,
+        },
+        where: 'id = ?',
+        whereArgs: [submissionId],
+      );
+
+      await txn.insert(
+        'submission_results',
+        {
+          'submission_id': submissionId,
+          'remote_activity_id': remoteActivityId,
+          'score': score,
+          'feedback_text': feedbackText,
+          'feedback_url': feedbackUrl,
+          'metrics_json': metrics == null ? null : jsonEncode(metrics),
+          'created_at': now,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
+  }
+
   /// Obtém o resultado associado a uma submissão.
   Future<Map<String, Object?>?> getResultForSubmission(int submissionId) async {
     final rows = await db.query(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/facades/activity_workflow_facade.dart';
 import '../models/communication_scenario.dart';
 import '../models/user_profile.dart';
+import '../state/app_session_controller.dart';
 
 /// Conteúdo da página "Análises".
 ///
@@ -77,8 +78,15 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
 
   @override
   Widget build(BuildContext context) {
+    final session = AppSessionScope.watch(context);
+
     return Column(
       children: [
+        if (!session.isAuthenticated) ...[
+          _buildTestModeInfoCard(),
+          const SizedBox(height: 18),
+        ],
+
         _buildPrivacyInfo(),
         const SizedBox(height: 18),
 
@@ -93,6 +101,32 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
 
         if (_analytics.isNotEmpty) _buildAnalyticsList(),
       ],
+    );
+  }
+
+  Widget _buildTestModeInfoCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecoration(
+        borderColor: Colors.lightBlueAccent.withValues(alpha: 0.34),
+        color: Colors.lightBlue.withValues(alpha: 0.10),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.visibility_outlined, color: Colors.lightBlueAccent),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Modo teste: as análises usam apenas dados locais desta instalação. Entra para consultar e sincronizar métricas da tua conta.',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.76),
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

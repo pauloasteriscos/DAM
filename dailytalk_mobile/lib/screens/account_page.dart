@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../data/repositories/auth_repository.dart';
 import '../models/auth_user.dart';
+import '../state/app_session_controller.dart';
 import 'auth_gate.dart';
+import 'login_form_page.dart';
+import 'register_page.dart';
 
-/// Página de conta do utilizador autenticado.
+/// Página de conta do utilizador.
 ///
-/// Esta versão mantém a funcionalidade existente, mas aproxima o ecrã da
-/// identidade visual do DailyTalk.pt: fundo com gradiente, cartões arredondados,
-/// ícones neutros e ações claramente diferenciadas.
+/// Em modo autenticado mostra os dados da conta.
+/// Em modo teste deixa de tratar a ausência de sessão como erro e passa a
+/// apresentar uma escolha clara: entrar ou criar conta para guardar progresso.
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
@@ -35,13 +38,13 @@ class _AccountPageState extends State<AccountPage> {
     try {
       return await _authRepository.getCurrentUser();
     } catch (_) {
-      await _authRepository.logout();
+      await AppSessionController.instance.logout();
       return null;
     }
   }
 
   Future<void> _logout() async {
-    await _authRepository.logout();
+    await AppSessionScope.read(context).logout();
 
     if (!mounted) {
       return;
@@ -53,21 +56,43 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  Future<void> _goToLogin() async {
-    await _authRepository.logout();
+  void _openLogin() {
+    final session = AppSessionScope.read(context);
 
-    if (!mounted) {
-      return;
-    }
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => LoginFormPage(
+          onAuthenticated: () {
+            session.markAuthenticated();
+            setState(() {
+              _userFuture = _loadCurrentUser();
+            });
+          },
+        ),
+      ),
+    );
+  }
 
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const AuthGate()),
-      (route) => false,
+  void _openRegister() {
+    final session = AppSessionScope.read(context);
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => RegisterPage(
+          onAuthenticated: () {
+            session.markAuthenticated();
+            setState(() {
+              _userFuture = _loadCurrentUser();
+            });
+          },
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final session = AppSessionScope.watch(context);
     final screenHeight = MediaQuery.sizeOf(context).height;
     final isCompact = screenHeight < 760;
 
@@ -124,54 +149,74 @@ class _AccountPageState extends State<AccountPage> {
             ),
           ),
 
-          FutureBuilder<AuthUser?>(
-            future: _userFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(
-                  child: CircularProgressIndicator(
-                    color: _accentColor,
-                  ),
-                );
-              }
+          if (session.isTestMode)
+            _buildGuestState(
+              title: 'Estás em modo teste',
+              message:
+                  'Podes experimentar a aplicação sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.',
+            )
+          else if (!session.isAuthenticated)
+            _buildGuestState(
+              title: 'Ainda não entraste',
+              message:
+                  'Acede à tua conta para guardar progresso, consultar resultados sincronizados e continuar noutro dispositivo.',
+            )
+          else
+            FutureBuilder<AuthUser?>(
+              future: _userFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: _accentColor,
+                    ),
+                  );
+                }
 
-              final user = snapshot.data;
+                final user = snapshot.data;
 
-              if (user == null) {
-                return _buildMissingSessionState();
-              }
+                if (user == null) {
+                  return _buildGuestState(
+                    title: 'Sessão não encontrada',
+                    message:
+                        'A sessão guardada neste dispositivo não é válida. Entra novamente para continuar.',
+                  );
+                }
 
-              return SafeArea(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(
-                    22,
-                    isCompact ? 10 : 18,
-                    22,
-                    isCompact ? 40 : 54,
-                  ),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 520),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildProfileCard(user: user, isCompact: isCompact),
-                          const SizedBox(height: 18),
-                          _buildLogoutButton(),
-                        ],
+                return SafeArea(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                      22,
+                      isCompact ? 10 : 18,
+                      22,
+                      isCompact ? 40 : 54,
+                    ),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 520),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildProfileCard(user: user, isCompact: isCompact),
+                            const SizedBox(height: 18),
+                            _buildLogoutButton(),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildMissingSessionState() {
+  Widget _buildGuestState({
+    required String title,
+    required String message,
+  }) {
     return SafeArea(
       child: Center(
         child: SingleChildScrollView(
@@ -186,14 +231,14 @@ class _AccountPageState extends State<AccountPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildCircleIcon(
-                    icon: Icons.lock_outline,
-                    color: Colors.white70,
+                    icon: Icons.account_circle_outlined,
+                    color: _accentColor,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Sessão não encontrada',
+                  Text(
+                    title,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 23,
                       fontWeight: FontWeight.w800,
@@ -201,7 +246,7 @@ class _AccountPageState extends State<AccountPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'A sessão guardada neste dispositivo não é válida. Inicia sessão novamente.',
+                    message,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.72),
@@ -210,6 +255,8 @@ class _AccountPageState extends State<AccountPage> {
                   ),
                   const SizedBox(height: 20),
                   _buildLoginButton(),
+                  const SizedBox(height: 12),
+                  _buildCreateAccountButton(),
                 ],
               ),
             ),
@@ -366,10 +413,10 @@ class _AccountPageState extends State<AccountPage> {
           ],
         ),
         child: ElevatedButton.icon(
-          onPressed: _goToLogin,
+          onPressed: _openLogin,
           icon: const Icon(Icons.login, size: 23),
           label: const Text(
-            'Ir para login',
+            'Entrar',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w800,
@@ -383,6 +430,34 @@ class _AccountPageState extends State<AccountPage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(999),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCreateAccountButton() {
+    return SizedBox(
+      height: 56,
+      child: OutlinedButton.icon(
+        onPressed: _openRegister,
+        icon: const Icon(Icons.person_add_alt_1_outlined, size: 23),
+        label: const Text(
+          'Criar conta',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: _backgroundColor.withValues(alpha: 0.28),
+          side: BorderSide(
+            color: _accentColor.withValues(alpha: 0.72),
+            width: 1.35,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(999),
           ),
         ),
       ),

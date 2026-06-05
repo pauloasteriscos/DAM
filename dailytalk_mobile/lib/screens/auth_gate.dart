@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../data/repositories/auth_repository.dart';
+import '../state/app_session_controller.dart';
 import 'login_page.dart';
 import 'main_navigation.dart';
 
-/// Decide se a app abre no login ou na navegação principal.
+/// Decide se a app abre na navegação principal ou na entrada inicial.
 ///
-/// Não basta existir um token guardado no dispositivo.
-/// O token pode ser antigo, de outro ambiente ou de modo mock.
-/// Por isso, na abertura da app, validamos a sessão contra a API através do /me.
+/// O estado de sessão é centralizado em [AppSessionController].
+/// Assim, o modo teste deixa de ser um parâmetro isolado de uma página e passa
+/// a ser um estado global observado por toda a aplicação.
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
 
@@ -17,55 +17,28 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
-  final AuthRepository _authRepository = AuthRepository();
-
-  bool _isLoading = true;
-  bool _isAuthenticated = false;
-
   @override
   void initState() {
     super.initState();
-    _checkSession();
-  }
-
-  Future<void> _checkSession() async {
-    var authenticated = false;
-
-    try {
-      final user = await _authRepository.getCurrentUser();
-      authenticated = user != null;
-    } catch (_) {
-      // Se o token existir mas não for aceite pela API, removemos a sessão local.
-      await _authRepository.logout();
-      authenticated = false;
-    }
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _isAuthenticated = authenticated;
-      _isLoading = false;
-    });
+    Future.microtask(AppSessionController.instance.checkStoredSession);
   }
 
   void _handleAuthenticated() {
-    setState(() {
-      _isAuthenticated = true;
-    });
+    AppSessionController.instance.markAuthenticated();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    final session = AppSessionScope.watch(context);
+
+    if (session.isChecking) {
       return const Scaffold(
         backgroundColor: Color(0xFF0D1B22),
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (_isAuthenticated) {
+    if (session.isAuthenticated) {
       return const MainNavigation();
     }
 

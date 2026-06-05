@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
 import '../data/repositories/auth_repository.dart';
+import '../state/app_session_controller.dart';
 
 /// Página de configuração dos idiomas do DailyTalk.pt.
 ///
@@ -87,7 +88,9 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       // Depois tenta obter o perfil remoto. Isto resolve o caso em que os
       // idiomas foram alterados noutro dispositivo, por exemplo no Android,
       // e a versão Web ainda tem uma cache local antiga.
-      final currentUser = await AuthRepository().getCurrentUser();
+      final currentUser = AppSessionController.instance.isAuthenticated
+          ? await AuthRepository().getCurrentUser()
+          : null;
 
       if (currentUser != null) {
         nativeLanguageCode = _normalizeLanguageCode(
@@ -138,6 +141,8 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       _isSaving = true;
     });
 
+    final session = AppSessionScope.read(context);
+
     try {
       final db = await AppDatabase.instance.database;
       final settingsDao = AppSettingsDao(db);
@@ -147,8 +152,28 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
         targetLanguageCode: _targetLanguageCode,
       );
 
-      /// Tenta sincronizar as preferências com o perfil remoto.
-      /// Se a API estiver em modo mock, também funciona sem backend real.
+      if (!session.isAuthenticated) {
+        if (!mounted) {
+          return;
+        }
+
+        final nativeLanguage = _languageByCode(_nativeLanguageCode);
+        final targetLanguage = _languageByCode(_targetLanguageCode);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Guardado neste dispositivo: ${nativeLanguage.name} → ${targetLanguage.name}. Entra para sincronizar.',
+            ),
+          ),
+        );
+
+        Navigator.pop(context);
+        return;
+      }
+
+      /// Tenta sincronizar as preferências com o perfil remoto apenas quando
+      /// existe sessão autenticada. Em modo teste, a preferência fica local.
       final updatedUser = await AuthRepository().updatePreferences(
         appLanguageCode: _nativeLanguageCode,
         learningLanguageCode: _targetLanguageCode,
@@ -230,6 +255,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final session = AppSessionScope.watch(context);
     final nativeLanguage = _languageByCode(_nativeLanguageCode);
     final targetLanguage = _languageByCode(_targetLanguageCode);
 
@@ -311,6 +337,11 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               _buildIntroCard(isCompact: isCompact),
+
+                              if (!session.isAuthenticated) ...[
+                                const SizedBox(height: 12),
+                                _buildLocalOnlyInfoCard(),
+                              ],
 
                               SizedBox(height: isCompact ? 14 : 18),
 
@@ -404,6 +435,36 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
               fontSize: 14.5,
               fontWeight: FontWeight.w500,
               height: 1.35,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocalOnlyInfoCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: _accentColor.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: _accentColor.withValues(alpha: 0.38),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, color: _accentColor, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Modo teste: os idiomas podem ser alterados, mas ficam apenas neste dispositivo até entrares na conta.',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.78),
+                fontSize: 13.5,
+                height: 1.35,
+              ),
             ),
           ),
         ],

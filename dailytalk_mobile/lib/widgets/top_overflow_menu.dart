@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 
+import '../data/facades/activity_workflow_facade.dart';
 import '../screens/account_page.dart';
 import '../screens/create_activity_page.dart';
 import '../screens/language_selection_page.dart';
+import '../screens/login_form_page.dart';
 import '../screens/my_activities_page.dart';
-
-import '../data/facades/activity_workflow_facade.dart';
+import '../screens/register_page.dart';
+import '../state/app_session_controller.dart';
 import 'dailytalk_support_dialogs.dart';
 
 /// Menu superior de três pontos.
 ///
-/// Este menu concentra ações globais e secundárias da aplicação.
-/// A ação principal da app é praticar atividades.
-/// A criação de atividades fica como opção secundária.
+/// Este menu respeita o modo teste: opções locais continuam acessíveis,
+/// enquanto ações que exigem conta mostram um pedido claro de autenticação.
 class TopOverflowMenu extends StatelessWidget {
   const TopOverflowMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final session = AppSessionScope.watch(context);
+
     return PopupMenuButton<_TopMenuAction>(
       icon: const Icon(Icons.more_vert, color: Colors.white, size: 30),
       color: const Color(0xFF14252D),
@@ -42,6 +45,11 @@ class TopOverflowMenu extends StatelessWidget {
             break;
 
           case _TopMenuAction.createActivity:
+            if (!session.isAuthenticated) {
+              _showAuthenticationRequiredDialog(context);
+              return;
+            }
+
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -51,6 +59,11 @@ class TopOverflowMenu extends StatelessWidget {
             break;
 
           case _TopMenuAction.myActivities:
+            if (!session.isAuthenticated) {
+              _showAuthenticationRequiredDialog(context);
+              return;
+            }
+
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const MyActivitiesPage()),
@@ -62,6 +75,11 @@ class TopOverflowMenu extends StatelessWidget {
             break;
 
           case _TopMenuAction.sync:
+            if (!session.isAuthenticated) {
+              _showAuthenticationRequiredDialog(context);
+              return;
+            }
+
             _syncPendingSubmissions(context);
             break;
 
@@ -74,7 +92,10 @@ class TopOverflowMenu extends StatelessWidget {
         return const [
           PopupMenuItem(
             value: _TopMenuAction.account,
-            child: _MenuItemContent(icon: Icons.account_circle_outlined, text: 'Conta'),
+            child: _MenuItemContent(
+              icon: Icons.account_circle_outlined,
+              text: 'Conta',
+            ),
           ),
           PopupMenuItem(
             value: _TopMenuAction.language,
@@ -111,6 +132,70 @@ class TopOverflowMenu extends StatelessWidget {
     );
   }
 
+  void _showAuthenticationRequiredDialog(BuildContext context) {
+    final session = AppSessionScope.read(context);
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF10232D),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          title: const Text(
+            'Conta necessária',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          content: Text(
+            'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.76),
+              height: 1.4,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Continuar a testar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) => RegisterPage(
+                      onAuthenticated: () => session.markAuthenticated(),
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Criar conta'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) => LoginFormPage(
+                      onAuthenticated: () => session.markAuthenticated(),
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Entrar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _syncPendingSubmissions(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
 
@@ -135,7 +220,6 @@ class TopOverflowMenu extends StatelessWidget {
       );
     }
   }
-
 }
 
 /// Ações disponíveis no menu superior.

@@ -30,6 +30,7 @@ class SubmissionRepository {
     required String answerText,
     String nativeLanguageCode = 'pt-PT',
     String targetLanguageCode = 'it-IT',
+    bool syncWithRemote = true,
   }) async {
     final submissionPayload = {
       'activityType': activityType,
@@ -50,6 +51,37 @@ class SubmissionRepository {
       remoteActivityId: remoteActivityId,
       submission: submissionPayload,
     );
+
+    if (!syncWithRemote) {
+      final score = answerText.trim().length >= 20 ? 85.0 : 65.0;
+      final syncStatus = SubmissionSyncStatus.pending;
+      final feedbackText = score >= 80
+          ? 'Boa resposta. Em modo teste, este resultado fica apenas local e não é sincronizado.'
+          : 'Resposta registada em modo teste. Entra para guardar e sincronizar o progresso.';
+      final metrics = {
+        'totalInteractions': 1,
+        'answerLength': answerText.length,
+        'evaluatedBy': 'local-test-mode',
+      };
+
+      await submissionDao.markAsLocalResult(
+        submissionId: submissionId,
+        remoteActivityId: remoteActivityId,
+        score: score,
+        feedbackText: feedbackText,
+        metrics: metrics,
+      );
+
+      return {
+        'submission_id': submissionId,
+        'sync_status': syncStatus.databaseValue,
+        'sync_status_label': 'Local / modo teste',
+        'remote_activity_id': remoteActivityId,
+        'score': score,
+        'feedback': feedbackText,
+        'metrics': metrics,
+      };
+    }
 
     try {
       final response = await apiService.submitActivity(

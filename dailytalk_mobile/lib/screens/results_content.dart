@@ -4,6 +4,7 @@ import '../data/api/dailytalk_api_service.dart';
 import '../data/facades/activity_workflow_facade.dart';
 import '../models/app_status.dart';
 import '../state/app_event_notifier.dart';
+import '../state/app_session_controller.dart';
 
 /// Conteúdo da página "Meus Resultados".
 ///
@@ -65,7 +66,9 @@ class _ResultsContentState extends State<ResultsContent> {
     try {
       final facade = await ActivityWorkflowFacade.create();
       final localResults = await facade.loadRecentResults();
-      final remoteResults = await DailyTalkApiService().getMySubmissions();
+      final remoteResults = AppSessionController.instance.isAuthenticated
+          ? await DailyTalkApiService().getMySubmissions()
+          : <Map<String, dynamic>>[];
 
       final normalizedRemoteResults = remoteResults
           .map(_normalizeRemoteSubmission)
@@ -127,8 +130,14 @@ class _ResultsContentState extends State<ResultsContent> {
 
   @override
   Widget build(BuildContext context) {
+    final session = AppSessionScope.watch(context);
+
     return Column(
       children: [
+        if (!session.isAuthenticated) ...[
+          _buildTestModeInfoCard(),
+          const SizedBox(height: 14),
+        ],
         SizedBox(
           width: double.infinity,
           height: 52,
@@ -160,6 +169,33 @@ class _ResultsContentState extends State<ResultsContent> {
     );
   }
 
+  Widget _buildTestModeInfoCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.lightBlue.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.lightBlueAccent.withValues(alpha: 0.34)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.visibility_outlined, color: Colors.lightBlueAccent),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Modo teste: são mostrados apenas resultados locais. Entra para sincronizar histórico entre dispositivos.',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.76),
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
     return Container(
       width: double.infinity,
@@ -171,7 +207,7 @@ class _ResultsContentState extends State<ResultsContent> {
       ),
       child: const Text(
         'Ainda não há resultados disponíveis. '
-        'Submete uma atividade para consultar o histórico sincronizado.',
+        'Submete uma atividade para consultar o histórico local.',
         textAlign: TextAlign.center,
         style: TextStyle(color: Colors.white70, height: 1.4),
       ),

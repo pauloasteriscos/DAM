@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
 import '../data/repositories/auth_repository.dart';
+import 'language_selection_page.dart';
 
 /// Ecrã do jogo "Combina pares" do DailyTalk.pt.
 ///
@@ -252,6 +253,172 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
     setState(_startNewRound);
   }
 
+  /// Linha compacta com os idiomas ativos.
+  ///
+  /// O idioma da aplicação fica apenas informativo, porque controla também os
+  /// menus e mensagens do sistema. Já o idioma a praticar pode ser alterado
+  /// rapidamente a partir deste ecrã, abrindo a página Language.
+  Widget _buildLanguageShortcutRow() {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: _buildLanguageInfoCard(
+            label: _ui('sourceColumn'),
+            languageCode: _userLanguageCode,
+            canEdit: false,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: _buildLanguageInfoCard(
+            label: _ui('targetColumn'),
+            languageCode: _learningLanguageCode,
+            canEdit: true,
+            onTap: _openLanguageSelection,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Abre a página Language para alterar o idioma a praticar.
+  ///
+  /// Ao regressar, recarrega os idiomas guardados no perfil/cache local e
+  /// reinicia a ronda com o novo par linguístico.
+  Future<void> _openLanguageSelection() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const LanguageSelectionPage(),
+      ),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    await _loadSavedLanguages();
+  }
+
+  /// Cartão de idioma.
+  ///
+  /// O cartão do idioma da aplicação é apenas informativo. O cartão do idioma a
+  /// praticar é clicável e inclui um ícone de edição para deixar claro que pode
+  /// ser alterado na página Language.
+  Widget _buildLanguageInfoCard({
+    required String label,
+    required String languageCode,
+    required bool canEdit,
+    VoidCallback? onTap,
+  }) {
+    final String languageName = _languageName(languageCode);
+    final String semanticsLabel = canEdit
+        ? '$label: $languageName. ${_ui('tapToChangePracticeLanguage')}'
+        : '$label: $languageName';
+
+    final Widget cardContent = Container(
+      constraints: const BoxConstraints(minHeight: 66),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: _panelColor.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: canEdit
+              ? _accentColor.withValues(alpha: 0.48)
+              : _accentColor.withValues(alpha: 0.30),
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.16),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          SizedBox(
+            width: double.infinity,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label.toUpperCase(),
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: _accentColor.withValues(alpha: 0.95),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.45,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                _languageFlag(languageCode),
+                style: const TextStyle(fontSize: 17),
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  languageName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              if (canEdit) ...<Widget>[
+                const SizedBox(width: 6),
+                Container(
+                  width: 26,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: _accentColor.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: _accentColor.withValues(alpha: 0.60),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.edit,
+                    color: _accentColor,
+                    size: 15,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+
+    return Semantics(
+      button: canEdit,
+      label: semanticsLabel,
+      child: canEdit
+          ? Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(16),
+                child: cardContent,
+              ),
+            )
+          : cardContent,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -269,22 +436,46 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 900),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Column(
                 children: <Widget>[
-                  _buildCardsColumn(
-                    title: _languageName(_userLanguageCode),
-                    subtitle: _ui('sourceColumn'),
-                    cards: _leftCards,
-                    isLeft: true,
+                  Text(
+                    _ui('heroTitle'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.48),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.1,
+                    ),
                   ),
-                  const SizedBox(width: 14),
-                  _buildCardsColumn(
-                    title: _languageName(_learningLanguageCode),
-                    subtitle: _ui('targetColumn'),
-                    cards: _rightCards,
-                    isLeft: false,
+                  const SizedBox(height: 8),
+                  _buildLanguageShortcutRow(),
+                  const SizedBox(height: 10),
+                  Divider(
+                    color: _accentColor.withValues(alpha: 0.18),
+                    thickness: 1,
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        _buildCardsColumn(
+                          title: _languageName(_userLanguageCode),
+                          subtitle: _ui('sourceColumn'),
+                          cards: _leftCards,
+                          isLeft: true,
+                        ),
+                        const SizedBox(width: 14),
+                        _buildCardsColumn(
+                          title: _languageName(_learningLanguageCode),
+                          subtitle: _ui('targetColumn'),
+                          cards: _rightCards,
+                          isLeft: false,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -344,54 +535,15 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
     required bool isLeft,
   }) {
     return Expanded(
-      child: Column(
-        children: <Widget>[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: _panelColor,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: _accentColor.withValues(alpha: 0.28),
-              ),
-            ),
-            child: Column(
-              children: <Widget>[
-                Text(
-                  subtitle.toUpperCase(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: _accentColor.withValues(alpha: 0.86),
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: ListView.separated(
-              itemCount: cards.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                return _buildPairCard(cards[index], isLeft: isLeft);
-              },
-            ),
-          ),
-        ],
+      child: Semantics(
+        label: '$subtitle: $title',
+        child: ListView.separated(
+          itemCount: cards.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 10),
+          itemBuilder: (context, index) {
+            return _buildPairCard(cards[index], isLeft: isLeft);
+          },
+        ),
       ),
     );
   }
@@ -475,7 +627,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
                   ),
                 ),
                 if (trailingIcon != null) ...<Widget>[
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   Icon(
                     trailingIcon,
                     color: trailingColor,
@@ -623,6 +775,19 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
     return userLanguageCode == 'pt-PT' ? 'en-US' : 'pt-PT';
   }
 
+  String _languageFlag(String code) {
+    final String lower = code.toLowerCase().replaceAll('_', '-');
+
+    if (lower.startsWith('pt')) return '🇵🇹';
+    if (lower.startsWith('en')) return '🇺🇸';
+    if (lower.startsWith('es')) return '🇪🇸';
+    if (lower.startsWith('fr')) return '🇫🇷';
+    if (lower.startsWith('it')) return '🇮🇹';
+    if (lower.startsWith('de')) return '🇩🇪';
+    if (lower.startsWith('zh') || lower.startsWith('cn')) return '🇨🇳';
+
+    return '🌐';
+  }
 
   String _languageName(String code) {
     for (final _DailyTalkLanguage language in _availableLanguages) {
@@ -697,8 +862,10 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
   'pt': <String, String>{
     'title': 'Combina pares',
     'heroTitle': 'Vocabulário DailyTalk.pt',
-    'sourceColumn': 'Idioma do utilizador',
-    'targetColumn': 'Idioma a aprender',
+    'sourceColumn': 'Idioma da aplicação',
+    'targetColumn': 'Idioma a praticar',
+    'changeLanguages': 'Alterar',
+    'tapToChangePracticeLanguage': 'Alterar idioma a praticar',
     'instructions':
         'Liga cada palavra ou frase do DailyTalk.pt ao significado correto no idioma que estás a aprender.',
     'userLanguage': 'Idioma do utilizador',
@@ -713,8 +880,10 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
   'en': <String, String>{
     'title': 'Match pairs',
     'heroTitle': 'DailyTalk.pt vocabulary',
-    'sourceColumn': 'User language',
-    'targetColumn': 'Learning language',
+    'sourceColumn': 'Application language',
+    'targetColumn': 'Practice language',
+    'changeLanguages': 'Change',
+    'tapToChangePracticeLanguage': 'Change practice language',
     'instructions':
         'Match each DailyTalk.pt word or sentence with the correct meaning in the language you are learning.',
     'userLanguage': 'User language',
@@ -729,8 +898,10 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
   'es': <String, String>{
     'title': 'Combina pares',
     'heroTitle': 'Vocabulario DailyTalk.pt',
-    'sourceColumn': 'Idioma del usuario',
-    'targetColumn': 'Idioma a aprender',
+    'sourceColumn': 'Idioma de la aplicación',
+    'targetColumn': 'Idioma a practicar',
+    'changeLanguages': 'Alterar',
+    'tapToChangePracticeLanguage': 'Cambiar idioma a practicar',
     'instructions':
         'Une cada palabra o frase de DailyTalk.pt con su significado correcto en el idioma que estás aprendiendo.',
     'userLanguage': 'Idioma del usuario',
@@ -745,8 +916,10 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
   'fr': <String, String>{
     'title': 'Associer les paires',
     'heroTitle': 'Vocabulaire DailyTalk.pt',
-    'sourceColumn': 'Langue utilisateur',
-    'targetColumn': 'Langue à apprendre',
+    'sourceColumn': 'Langue de l’application',
+    'targetColumn': 'Langue à pratiquer',
+    'changeLanguages': 'Modifier',
+    'tapToChangePracticeLanguage': 'Modifier la langue à pratiquer',
     'instructions':
         'Associe chaque mot ou phrase DailyTalk.pt au sens correct dans la langue que tu apprends.',
     'userLanguage': 'Langue utilisateur',
@@ -761,8 +934,10 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
   'it': <String, String>{
     'title': 'Abbina le coppie',
     'heroTitle': 'Vocabolario DailyTalk.pt',
-    'sourceColumn': 'Lingua utente',
-    'targetColumn': 'Lingua da imparare',
+    'sourceColumn': 'Lingua dell’applicazione',
+    'targetColumn': 'Lingua da praticare',
+    'changeLanguages': 'Cambia',
+    'tapToChangePracticeLanguage': 'Cambia lingua da praticare',
     'instructions':
         'Abbina ogni parola o frase di DailyTalk.pt al significato corretto nella lingua che stai imparando.',
     'userLanguage': 'Lingua utente',
@@ -777,8 +952,10 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
   'de': <String, String>{
     'title': 'Paare finden',
     'heroTitle': 'DailyTalk.pt-Wortschatz',
-    'sourceColumn': 'Nutzersprache',
-    'targetColumn': 'Lernsprache',
+    'sourceColumn': 'App-Sprache',
+    'targetColumn': 'Übungssprache',
+    'changeLanguages': 'Ändern',
+    'tapToChangePracticeLanguage': 'Übungssprache ändern',
     'instructions':
         'Verbinde jedes DailyTalk.pt-Wort oder jeden Satz mit der richtigen Bedeutung in der Lernsprache.',
     'userLanguage': 'Nutzersprache',
@@ -793,8 +970,10 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
   'zh': <String, String>{
     'title': '配对练习',
     'heroTitle': 'DailyTalk.pt 词汇',
-    'sourceColumn': '用户语言',
-    'targetColumn': '学习语言',
+    'sourceColumn': '应用语言',
+    'targetColumn': '练习语言',
+    'changeLanguages': '更改',
+    'tapToChangePracticeLanguage': '更改练习语言',
     'instructions': '把每个 DailyTalk.pt 单词或句子与学习语言中的正确意思配对。',
     'userLanguage': '用户语言',
     'learningLanguage': '学习语言',

@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 
 import '../data/repositories/auth_repository.dart';
 import '../state/app_session_controller.dart';
+import 'forgot_password_page.dart';
+import 'register_page.dart';
 
-/// Página de criação de conta do DailyTalk.pt.
+/// Página de autenticação do DailyTalk.pt.
 ///
-/// Esta versão aproxima o ecrã de criação de conta da identidade visual
-/// usada no login, mas com uma composição mais compacta:
-/// - mascote pequena como reforço de marca;
-/// - título mais humano: "Cria o teu perfil";
-/// - campos neutros, para evitar parecerem ativos;
-/// - azul reservado para marca, foco e ação principal.
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({
+/// Esta página concentra o login real por email/password e deixa preparada
+/// a zona de autenticação por serviços padrão, como Google Account.
+/// Nesta versão de protótipo, o botão Google apenas apresenta feedback
+/// informativo, porque a integração SSO ainda não está implementada.
+class LoginFormPage extends StatefulWidget {
+  const LoginFormPage({
     super.key,
     required this.onAuthenticated,
   });
@@ -20,17 +20,15 @@ class RegisterPage extends StatefulWidget {
   final VoidCallback onAuthenticated;
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<LoginFormPage> createState() => _LoginFormPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _LoginFormPageState extends State<LoginFormPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authRepository = AuthRepository();
 
-  String _selectedRole = 'student';
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
@@ -41,13 +39,12 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   void dispose() {
-    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> _register() async {
+  Future<void> _login() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -58,11 +55,9 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     try {
-      final user = await _authRepository.register(
-        name: _nameController.text.trim(),
+      final user = await _authRepository.login(
         email: _emailController.text.trim(),
         password: _passwordController.text,
-        role: _selectedRole,
       );
 
       if (!mounted) {
@@ -92,6 +87,81 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  void _openRegister() {
+    // Substitui a página de login pelo registo para evitar uma pilha de
+    // navegação desnecessária caso o utilizador crie conta com sucesso.
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => RegisterPage(
+          onAuthenticated: widget.onAuthenticated,
+        ),
+      ),
+    );
+  }
+
+  void _openForgotPassword() {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (context) => ForgotPasswordPage(
+          initialEmail: _emailController.text.trim().isEmpty
+              ? null
+              : _emailController.text.trim(),
+        ),
+      ),
+    );
+  }
+
+  void _showGooglePrototypeMessage() {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF10232D),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.info_outline, color: _accentColor),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Integração futura',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Nesta versão de protótipo, o acesso com Google Account ainda não está disponível. '
+            'A funcionalidade está prevista para uma versão futura, permitindo uma autenticação mais rápida e segura.',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.82),
+              height: 1.35,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'Compreendi',
+                style: TextStyle(
+                  color: _accentColor,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.sizeOf(context).height;
@@ -105,10 +175,10 @@ class _RegisterPageState extends State<RegisterPage> {
         elevation: 0,
         titleSpacing: 0,
         title: const Text(
-          'Criar conta',
+          'Entrar',
           style: TextStyle(
             fontSize: 26,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -171,7 +241,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         SizedBox(height: isCompact ? 14 : 18),
 
                         const Text(
-                          'Cria o teu perfil',
+                          'Aceder à tua conta',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,
@@ -181,22 +251,20 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
 
-                        SizedBox(height: isCompact ? 22 : 30),
+                        const SizedBox(height: 8),
 
-                        _buildTextField(
-                          controller: _nameController,
-                          label: 'Nome',
-                          icon: Icons.person_outline,
-                          validator: (value) {
-                            if (value == null || value.trim().length < 2) {
-                              return 'Indica o nome.';
-                            }
-
-                            return null;
-                          },
+                        Text(
+                          'Guarda progresso, resultados e sincroniza entre dispositivos.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.72),
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w500,
+                            height: 1.35,
+                          ),
                         ),
 
-                        const SizedBox(height: 14),
+                        SizedBox(height: isCompact ? 22 : 30),
 
                         _buildTextField(
                           controller: _emailController,
@@ -204,7 +272,11 @@ class _RegisterPageState extends State<RegisterPage> {
                           icon: Icons.email_outlined,
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
-                            if (value == null || !value.contains('@')) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Indica o email.';
+                            }
+
+                            if (!value.contains('@')) {
                               return 'Indica um email válido.';
                             }
 
@@ -227,7 +299,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               _obscurePassword
                                   ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
-                              color: Colors.white.withValues(alpha: 0.74),
+                              color: Colors.white.withValues(alpha: 0.78),
                             ),
                             onPressed: () {
                               setState(() {
@@ -236,26 +308,54 @@ class _RegisterPageState extends State<RegisterPage> {
                             },
                           ),
                           validator: (value) {
-                            if (value == null || value.length < 6) {
-                              return 'A password deve ter pelo menos 6 caracteres.';
+                            if (value == null || value.isEmpty) {
+                              return 'Indica a password.';
                             }
 
                             return null;
                           },
                         ),
 
-                        const SizedBox(height: 14),
-
-                        _buildRoleDropdown(),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: _isLoading ? null : _openForgotPassword,
+                            style: TextButton.styleFrom(
+                              foregroundColor: _accentColor,
+                            ),
+                            child: const Text('Esqueci a palavra-passe'),
+                          ),
+                        ),
 
                         if (_errorMessage != null) ...[
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 10),
                           _buildErrorBox(_errorMessage!),
                         ],
 
-                        SizedBox(height: isCompact ? 22 : 28),
+                        SizedBox(height: isCompact ? 14 : 22),
 
                         _buildPrimaryButton(),
+
+                        const SizedBox(height: 18),
+
+                        _buildDivider(),
+
+                        const SizedBox(height: 18),
+
+                        _buildGoogleButton(),
+
+                        const SizedBox(height: 18),
+
+                        TextButton(
+                          onPressed: _isLoading ? null : _openRegister,
+                          style: TextButton.styleFrom(
+                            foregroundColor: _accentColor,
+                          ),
+                          child: const Text(
+                            'Ainda não tem conta? Criar conta',
+                            style: TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -269,46 +369,34 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _buildBrandBadge({required bool isCompact}) {
-    final badgeSize = isCompact ? 76.0 : 92.0;
-
     return Center(
       child: Container(
-        width: badgeSize,
-        height: badgeSize,
-        padding: const EdgeInsets.all(4),
+        width: isCompact ? 84 : 98,
+        height: isCompact ? 84 : 98,
         decoration: BoxDecoration(
+          color: const Color(0xFF071D2A).withValues(alpha: 0.88),
           shape: BoxShape.circle,
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF52D8FF),
-              Color(0xFF168CFF),
-            ],
+          border: Border.all(
+            color: _accentColor.withValues(alpha: 0.55),
+            width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: _accentColor.withValues(alpha: 0.26),
-              blurRadius: 20,
+              color: _accentColor.withValues(alpha: 0.18),
+              blurRadius: 22,
               offset: const Offset(0, 8),
             ),
           ],
         ),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF092333),
-            shape: BoxShape.circle,
-          ),
-          clipBehavior: Clip.antiAlias,
+        child: ClipOval(
           child: Image.asset(
             'assets/branding/dailytalk_mascot.png',
             fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
             errorBuilder: (context, error, stackTrace) {
               return const Icon(
                 Icons.record_voice_over,
                 color: _accentColor,
-                size: 42,
+                size: 44,
               );
             },
           ),
@@ -337,114 +425,62 @@ class _RegisterPageState extends State<RegisterPage> {
         fontWeight: FontWeight.w500,
       ),
       cursorColor: _accentColor,
-      decoration: _inputDecoration(
-        label: label,
-        icon: icon,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(
+          color: Colors.white.withValues(alpha: 0.68),
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(left: 14, right: 8),
+          child: Icon(
+            icon,
+            color: Colors.white.withValues(alpha: 0.76),
+            size: 25,
+          ),
+        ),
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 54,
+          minHeight: 52,
+        ),
         suffixIcon: suffixIcon,
-      ),
-    );
-  }
-
-  Widget _buildRoleDropdown() {
-    return DropdownButtonFormField<String>(
-      initialValue: _selectedRole,
-      dropdownColor: const Color(0xFF102A38),
-      iconEnabledColor: Colors.white.withValues(alpha: 0.74),
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: FontWeight.w500,
-      ),
-      decoration: _inputDecoration(
-        label: 'Perfil inicial',
-        icon: Icons.person_pin_circle_outlined,
-      ),
-      items: const [
-        DropdownMenuItem(
-          value: 'student',
-          child: Text('Estudante'),
+        filled: true,
+        fillColor: _fieldColor.withValues(alpha: 0.78),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
         ),
-        DropdownMenuItem(
-          value: 'host',
-          child: Text('Anfitrião'),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
         ),
-        DropdownMenuItem(
-          value: 'teacher',
-          child: Text('Professor'),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: BorderSide(
+            color: Colors.white.withValues(alpha: 0.20),
+            width: 1.35,
+          ),
         ),
-      ],
-      onChanged: (value) {
-        if (value == null) {
-          return;
-        }
-
-        setState(() {
-          _selectedRole = value;
-        });
-      },
-    );
-  }
-
-  InputDecoration _inputDecoration({
-    required String label,
-    required IconData icon,
-    Widget? suffixIcon,
-  }) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(
-        color: Colors.white.withValues(alpha: 0.66),
-        fontSize: 18,
-        fontWeight: FontWeight.w500,
-      ),
-      prefixIcon: Padding(
-        padding: const EdgeInsets.only(left: 14, right: 8),
-        child: Icon(
-          icon,
-          color: Colors.white.withValues(alpha: 0.72),
-          size: 27,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: const BorderSide(
+            color: _accentColor,
+            width: 1.8,
+          ),
         ),
-      ),
-      prefixIconConstraints: const BoxConstraints(
-        minWidth: 58,
-        minHeight: 58,
-      ),
-      suffixIcon: suffixIcon,
-      filled: true,
-      fillColor: _fieldColor.withValues(alpha: 0.82),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 18,
-        vertical: 20,
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(28),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(28),
-        borderSide: BorderSide(
-          color: Colors.white.withValues(alpha: 0.20),
-          width: 1.35,
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: const BorderSide(
+            color: Colors.redAccent,
+            width: 1.35,
+          ),
         ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(28),
-        borderSide: const BorderSide(
-          color: _accentColor,
-          width: 1.8,
-        ),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(28),
-        borderSide: const BorderSide(
-          color: Colors.redAccent,
-          width: 1.35,
-        ),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(28),
-        borderSide: const BorderSide(
-          color: Colors.redAccent,
-          width: 1.8,
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: const BorderSide(
+            color: Colors.redAccent,
+            width: 1.8,
+          ),
         ),
       ),
     );
@@ -452,7 +488,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Widget _buildPrimaryButton() {
     return SizedBox(
-      height: 60,
+      height: 56,
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
@@ -482,7 +518,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ],
         ),
         child: ElevatedButton.icon(
-          onPressed: _isLoading ? null : _register,
+          onPressed: _isLoading ? null : _login,
           icon: _isLoading
               ? const SizedBox(
                   width: 22,
@@ -492,14 +528,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     color: Colors.white,
                   ),
                 )
-              : const Icon(
-                  Icons.check,
-                  size: 25,
-                ),
+              : const Icon(Icons.login, size: 24),
           label: Text(
-            _isLoading ? 'A criar...' : 'Criar conta',
+            _isLoading ? 'A entrar...' : 'Entrar',
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 19,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -513,6 +546,58 @@ class _RegisterPageState extends State<RegisterPage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(999),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Row(
+      children: [
+        Expanded(
+          child: Divider(color: Colors.white.withValues(alpha: 0.22)),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            'ou',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.62),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Divider(color: Colors.white.withValues(alpha: 0.22)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGoogleButton() {
+    return SizedBox(
+      height: 52,
+      child: OutlinedButton.icon(
+        onPressed: _isLoading ? null : _showGooglePrototypeMessage,
+        icon: const Icon(Icons.account_circle_outlined, size: 22),
+        label: const Text(
+          'Continuar com Google',
+          style: TextStyle(
+            fontSize: 16.5,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.white,
+          disabledForegroundColor: Colors.white38,
+          backgroundColor: _backgroundColor.withValues(alpha: 0.42),
+          side: BorderSide(
+            color: Colors.white.withValues(alpha: 0.26),
+            width: 1.35,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(999),
           ),
         ),
       ),

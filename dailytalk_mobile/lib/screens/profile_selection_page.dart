@@ -5,6 +5,7 @@ import '../data/database/app_database.dart';
 import '../data/repositories/auth_repository.dart';
 import '../models/user_profile.dart';
 import '../state/app_event_notifier.dart';
+import '../state/app_session_controller.dart';
 
 /// Página de seleção do perfil de utilização.
 ///
@@ -69,15 +70,19 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
       _errorMessage = null;
     });
 
+    final session = AppSessionScope.read(context);
+
     try {
       final db = await AppDatabase.instance.database;
       final settingsDao = AppSettingsDao(db);
 
       await settingsDao.setSelectedProfile(_selectedProfile);
 
-      await AuthRepository().updatePreferences(
-        selectedProfile: _selectedProfile.databaseValue,
-      );
+      if (session.isAuthenticated) {
+        await AuthRepository().updatePreferences(
+          selectedProfile: _selectedProfile.databaseValue,
+        );
+      }
 
       AppEventNotifier.instance.notifyProfileChanged();
 
@@ -85,8 +90,12 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
         return;
       }
 
+      final message = session.isAuthenticated
+          ? 'Perfil guardado: ${_selectedProfile.label}'
+          : 'Perfil guardado neste dispositivo. Entra para sincronizar.';
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Perfil guardado: ${_selectedProfile.label}')),
+        SnackBar(content: Text(message)),
       );
 
       Navigator.pop(context);
@@ -109,6 +118,7 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final session = AppSessionScope.watch(context);
     final screenHeight = MediaQuery.sizeOf(context).height;
     final isCompact = screenHeight < 760;
 
@@ -186,6 +196,11 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
                             children: [
                               _buildIntroCard(isCompact: isCompact),
 
+                              if (!session.isAuthenticated) ...[
+                                const SizedBox(height: 12),
+                                _buildLocalOnlyInfoCard(),
+                              ],
+
                               SizedBox(height: isCompact ? 14 : 18),
 
                               for (final profile in UserProfileType.values) ...[
@@ -252,6 +267,36 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
               fontSize: 14.5,
               fontWeight: FontWeight.w500,
               height: 1.35,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocalOnlyInfoCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: _accentColor.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: _accentColor.withValues(alpha: 0.38),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, color: _accentColor, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Modo teste: o perfil pode ser ajustado localmente, mas só será sincronizado depois de entrares na conta.',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.78),
+                fontSize: 13.5,
+                height: 1.35,
+              ),
             ),
           ),
         ],

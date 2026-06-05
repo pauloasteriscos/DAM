@@ -6,6 +6,7 @@ import '../data/facades/activity_workflow_facade.dart';
 import '../models/practice_activity.dart';
 import '../models/user_profile.dart';
 import '../state/app_event_notifier.dart';
+import '../state/app_session_controller.dart';
 
 /// Conteúdo da página "Praticar".
 ///
@@ -135,6 +136,7 @@ class _PracticeContentState extends State<PracticeContent> {
         scenarioOverride: activity.scenario.databaseValue,
         difficultyOverride: activity.difficulty,
         userProfile: _selectedProfile,
+        syncWithRemote: AppSessionController.instance.isAuthenticated,
       );
 
       if (!mounted) {
