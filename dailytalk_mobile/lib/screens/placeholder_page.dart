@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../widgets/top_overflow_menu.dart';
 
 /// Página-base usada por áreas que partilham a mesma estrutura visual.
@@ -106,7 +108,7 @@ class PlaceholderPage extends StatelessWidget {
         children: [
           if (showBackButton)
             IconButton(
-              tooltip: 'Voltar',
+              tooltip: context.tr('Voltar'),
               onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.arrow_back, color: Colors.white),
             )
@@ -131,7 +133,7 @@ class PlaceholderPage extends StatelessWidget {
           const SizedBox(width: 12),
 
           const Expanded(
-            child: Text(
+            child: AppText(
               'DailyTalk.pt',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -248,7 +250,7 @@ class PlaceholderPage extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          Text(
+          AppText(
             title,
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -261,7 +263,7 @@ class PlaceholderPage extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          Text(
+          AppText(
             message,
             textAlign: TextAlign.center,
             style: TextStyle(

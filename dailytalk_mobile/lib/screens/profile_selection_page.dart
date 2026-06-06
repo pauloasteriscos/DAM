@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
 import '../data/repositories/auth_repository.dart';
@@ -91,11 +93,18 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
       }
 
       final message = session.isAuthenticated
-          ? 'Perfil guardado: ${_selectedProfile.label}'
-          : 'Perfil guardado neste dispositivo. Entra para sincronizar.';
+          ? context.tr(
+              'Perfil guardado: {profile}',
+              parameters: <String, Object?>{
+                'profile': context.tr(_selectedProfile.label),
+              },
+            )
+          : context.tr(
+              'Perfil guardado neste dispositivo. Entra para sincronizar.',
+            );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
+        SnackBar(content: AppText(message)),
       );
 
       Navigator.pop(context);
@@ -129,7 +138,7 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
-        title: const Text(
+        title: const AppText(
           'Perfil',
           style: TextStyle(
             fontSize: 26,
@@ -246,7 +255,7 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
 
           const SizedBox(height: 12),
 
-          const Text(
+          const AppText(
             'Escolhe o teu perfil',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -259,7 +268,7 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
 
           const SizedBox(height: 8),
 
-          Text(
+          AppText(
             'O DailyTalk.pt adapta os cenários e atividades ao teu papel no contexto escolar.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -290,7 +299,7 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
           const Icon(Icons.info_outline, color: _accentColor, size: 22),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
+            child: AppText(
               'Modo teste: o perfil pode ser ajustado localmente, mas só será sincronizado depois de entrares na conta.',
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.78),
@@ -356,7 +365,7 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
           color: Colors.redAccent.withValues(alpha: 0.85),
         ),
       ),
-      child: Text(
+      child: AppText(
         _errorMessage!,
         style: const TextStyle(
           color: Colors.redAccent,
@@ -409,7 +418,7 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
                   ),
                 )
               : const Icon(Icons.check, size: 25),
-          label: Text(
+          label: AppText(
             _isSaving ? 'A guardar...' : 'Guardar perfil',
             style: const TextStyle(
               fontSize: 18,
@@ -536,7 +545,7 @@ class _ProfileOptionCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       profile.label,
                       style: const TextStyle(
                         color: Colors.white,
@@ -545,7 +554,7 @@ class _ProfileOptionCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Text(
+                    AppText(
                       profile.description,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.70),

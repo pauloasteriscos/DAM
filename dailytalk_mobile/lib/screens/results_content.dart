@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/api/dailytalk_api_service.dart';
 import '../data/facades/activity_workflow_facade.dart';
 import '../models/app_status.dart';
@@ -150,7 +152,7 @@ class _ResultsContentState extends State<ResultsContent> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.refresh),
-            label: Text(
+            label: AppText(
               _isLoading ? 'A carregar...' : 'Atualizar resultados',
               style: const TextStyle(fontSize: 17),
             ),
@@ -183,7 +185,7 @@ class _ResultsContentState extends State<ResultsContent> {
           const Icon(Icons.visibility_outlined, color: Colors.lightBlueAccent),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
+            child: AppText(
               'Modo teste: são mostrados apenas resultados locais. Entra para sincronizar histórico entre dispositivos.',
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.76),
@@ -205,7 +207,7 @@ class _ResultsContentState extends State<ResultsContent> {
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: Colors.white12),
       ),
-      child: const Text(
+      child: const AppText(
         'Ainda não há resultados disponíveis. '
         'Submete uma atividade para consultar o histórico local.',
         textAlign: TextAlign.center,
@@ -248,7 +250,7 @@ class _ResultsContentState extends State<ResultsContent> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Text(
+                    child: AppText(
                       title,
                       style: const TextStyle(
                         color: Colors.white,
@@ -263,14 +265,14 @@ class _ResultsContentState extends State<ResultsContent> {
 
               const SizedBox(height: 8),
 
-              Text(
+              AppText(
                 'Tipo: $type',
                 style: const TextStyle(color: Colors.white70),
               ),
 
               if (nativeLanguageCode != null || targetLanguageCode != null) ...[
                 const SizedBox(height: 6),
-                Text(
+                AppText(
                   'Idiomas: ${nativeLanguageCode ?? '-'} → ${targetLanguageCode ?? '-'}',
                   style: const TextStyle(color: Colors.white70),
                 ),
@@ -278,7 +280,7 @@ class _ResultsContentState extends State<ResultsContent> {
 
               const SizedBox(height: 6),
 
-              Text(
+              AppText(
                 'Pontuação: $score',
                 style: const TextStyle(
                   color: Colors.lightBlueAccent,
@@ -289,14 +291,14 @@ class _ResultsContentState extends State<ResultsContent> {
 
               const SizedBox(height: 8),
 
-              Text(
+              AppText(
                 feedback,
                 style: const TextStyle(color: Colors.white70, height: 1.4),
               ),
 
               if (answerText != null && answerText.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Text(
+                AppText(
                   'Resposta: $answerText',
                   style: const TextStyle(color: Colors.white60, height: 1.4),
                 ),
@@ -304,14 +306,14 @@ class _ResultsContentState extends State<ResultsContent> {
 
               const SizedBox(height: 8),
 
-              Text(
+              AppText(
                 'Estado: $syncStatusLabel',
                 style: const TextStyle(color: Colors.white70, fontSize: 13),
               ),
 
               const SizedBox(height: 8),
 
-              Text(
+              AppText(
                 'Data: $createdAt',
                 style: const TextStyle(color: Colors.white38, fontSize: 12),
               ),
@@ -332,7 +334,7 @@ class _ResultsContentState extends State<ResultsContent> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.redAccent),
       ),
-      child: Text(
+      child: AppText(
         _errorMessage!,
         style: const TextStyle(color: Colors.redAccent),
       ),
@@ -354,7 +356,7 @@ class _OriginChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: Colors.white24),
       ),
-      child: Text(
+      child: AppText(
         label,
         style: const TextStyle(
           color: Colors.white70,

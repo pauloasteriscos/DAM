@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/repositories/auth_repository.dart';
 import 'reset_password_page.dart';
 
@@ -92,7 +94,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
+          content: AppText(
             hasDebugResetToken
                 ? 'Modo protótipo: o código foi gerado e será apresentado no ecrã seguinte.'
                 : result.message,
@@ -138,7 +140,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
-        title: const Text(
+        title: const AppText(
           'Recuperar palavra-passe',
           style: TextStyle(
             fontSize: 23,
@@ -205,7 +207,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
                           SizedBox(height: isCompact ? 18 : 22),
 
-                          const Text(
+                          const AppText(
                             'Esqueceste a palavra-passe?',
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -218,7 +220,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
                           const SizedBox(height: 10),
 
-                          Text(
+                          AppText(
                             'Indica o email da tua conta. Nesta versão de protótipo, alojada no plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário será apresentado no ecrã seguinte.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -307,17 +309,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       cursorColor: _accentColor,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Indica o email.';
+          return context.tr('Indica o email.');
         }
 
         if (!value.contains('@')) {
-          return 'Indica um email válido.';
+          return context.tr('Indica um email válido.');
         }
 
         return null;
       },
       decoration: InputDecoration(
-        labelText: 'Email',
+        labelText: context.tr('Email'),
         labelStyle: TextStyle(
           color: Colors.white.withValues(alpha: 0.66),
           fontSize: 18,
@@ -422,7 +424,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   Icons.send_outlined,
                   size: 24,
                 ),
-          label: Text(
+          label: AppText(
             _isLoading ? 'A preparar...' : 'Gerar código de recuperação',
             style: const TextStyle(
               fontSize: 17,
@@ -455,7 +457,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           color: Colors.redAccent.withValues(alpha: 0.85),
         ),
       ),
-      child: Text(
+      child: AppText(
         message,
         style: const TextStyle(
           color: Colors.redAccent,

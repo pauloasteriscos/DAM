@@ -1,10 +1,13 @@
 # DailyTalk.pt Mobile
 
+**Versão:** 1.0.0 — Sprint 4 Final  
+**Estado:** versão candidata à entrega final, em validação após a localização global
+
 Aplicação móvel desenvolvida em Flutter para o projeto **Erasmus DailyTalk.pt**, no âmbito da unidade curricular **DAM - Desenvolvimento de Aplicações Móveis**.
 
 O objetivo da aplicação é apoiar crianças e jovens em mobilidade escolar, normalmente entre os 11 e os 15 anos, na prática de comunicação em situações reais do quotidiano escolar, através de atividades gamificadas como vocabulário, áudio, diálogos, quizzes e desafios.
 
-Esta versão contempla a evolução até à **Sprint 4**, incluindo a estrutura inicial da aplicação, navegação, Home gamificada, base de dados local SQLite, configuração de atividades, submissão de respostas, apresentação de resultados, integração com backend real, autenticação de utilizadores, sincronização entre mobile e Web, publicação em Cloudflare, aplicação progressiva de padrões de software, refinamento visual/UX dos principais fluxos, implementação inicial de atividades gamificadas concretas para vocabulário, quiz, diálogo e revisão, introdução do **modo teste sem conta**, reorganização do fluxo de início de sessão e aplicação de um controlador global de sessão baseado no padrão **Observer**.
+Esta versão contempla a evolução até à **Sprint 4**, incluindo a estrutura inicial da aplicação, navegação, Home gamificada, base de dados local SQLite, configuração de atividades, submissão de respostas, apresentação de resultados, integração com backend real, autenticação de utilizadores, sincronização entre mobile e Web, publicação em Cloudflare, aplicação progressiva de padrões de software, refinamento visual/UX dos principais fluxos, implementação de atividades gamificadas para vocabulário, quiz, diálogo e revisão, introdução do **modo teste sem conta**, reorganização do fluxo de início de sessão, localização global da interface, adaptação a orientação horizontal e aplicação de controladores globais baseados no padrão **Observer** para sessão e idioma.
 
 ---
 
@@ -57,6 +60,13 @@ A aplicação já possui:
 - aplicação inicial dos padrões Strategy, Factory simples, Facade, Command e Observer;
 - ecrã de vocabulário com seleção compacta dos idiomas na mesma linha;
 - separador **Praticar** com abertura aleatória de uma atividade entre Vocabulário, Diálogo e Quiz.
+- localização global da interface para Português, Inglês, Espanhol, Francês, Italiano e Alemão;
+- atualização imediata dos textos ao alterar o idioma da aplicação;
+- manutenção deliberada da designação **Language** em inglês, independentemente do idioma selecionado;
+- controlador global de idioma baseado em Observer;
+- correção do layout da Home gamificada em orientação horizontal;
+- bateria automatizada de testes da Sprint 4, com **13 testes automatizados disponíveis**;
+- análise estática concluída sem problemas através de `flutter analyze`.
 
 ---
 
@@ -124,7 +134,9 @@ Por exemplo, um aluno pode usar Português como idioma habitual e escolher Itali
 
 Esta separação é importante porque os exercícios, diálogos e atividades podem ser preparados considerando a relação entre o idioma conhecido pelo aluno e o idioma que pretende praticar.
 
-A opção aparece como **Language** no menu, por ser uma designação reconhecível internacionalmente mesmo para alunos de diferentes países.
+A opção aparece sempre como **Language** no menu e no respetivo ecrã. Esta designação permanece intencionalmente em inglês, mesmo quando o idioma da aplicação é alterado, para que o utilizador consiga regressar facilmente à configuração linguística caso selecione um idioma por engano.
+
+A interface dispõe de localização global para Português, Inglês, Espanhol, Francês, Italiano e Alemão. Quando o idioma da aplicação é alterado, os textos da navegação, autenticação, Home, atividades, resultados, análises, conta, ajustes, mensagens e diálogos são atualizados imediatamente. Em modo teste, a preferência é guardada localmente; numa sessão autenticada, permanece associada às preferências do utilizador.
 
 Nos ecrãs de prática foi adotada a seguinte regra:
 
@@ -132,6 +144,8 @@ Nos ecrãs de prática foi adotada a seguinte regra:
 - respostas, falas, cartões principais e alternativas aparecem no idioma que o aluno pretende aprender ou praticar.
 
 Desta forma, se o aluno escolher Português como idioma habitual e Italiano como idioma de aprendizagem, o contexto e a pergunta surgem em Português, enquanto as respostas ou frases de prática surgem em Italiano.
+
+Nos ecrãs de prática, a apresentação dos idiomas foi compactada para reduzir o espaço ocupado antes da atividade. O idioma da aplicação e o idioma a praticar passam a ser mostrados lado a lado, mantendo o idioma da aplicação como informação contextual e o idioma a praticar como opção editável.
 
 ---
 
@@ -331,15 +345,15 @@ Numa versão futura, este fluxo deverá ser substituído por:
 
 Durante os testes da Sprint 3 foram identificados ajustes de usabilidade.
 
-Um dos pontos observados foi a ausência do ícone de visualização da palavra-passe nos ecrãs de início de sessão e criação de conta. Para resolver isto, foi implementado um botão com ícone de “olhinho”, permitindo alternar entre mostrar e ocultar a palavra-passe.
+Um dos pontos observados foi a ausência do ícone de visualização da palavra-passe nos ecrãs de login e criação de conta. Para resolver isto, foi implementado um botão com ícone de “olhinho”, permitindo alternar entre mostrar e ocultar a palavra-passe.
 
 Também foram ajustados:
 
 - mensagens de erro de início de sessão;
 - comportamento de sessão inválida;
-- navegação entre início de sessão e registo;
+- navegação entre login e registo;
 - fluxo de recuperação de palavra-passe;
-- retorno para o ecrã de início de sessão após terminar sessão;
+- retorno para o ecrã de login após logout;
 - validação de token antes de abrir a navegação principal;
 - comportamento de conta quando a sessão não existe.
 
@@ -425,6 +439,8 @@ Foi aplicado um mecanismo de **Observer** em dois contextos principais da aplica
 O primeiro contexto está relacionado com eventos internos, como submissão de resposta, alteração de resultados ou conclusão de sincronização. Neste caso, o padrão permite que partes da aplicação sejam notificadas quando os dados locais mudam, reduzindo a necessidade de ações manuais do utilizador.
 
 O segundo contexto foi introduzido com o modo teste. Foi criado um controlador global de sessão, baseado em `ChangeNotifier` e `InheritedNotifier`, para representar o estado da aplicação entre modo teste, sessão autenticada e ausência de sessão. Desta forma, os vários ecrãs conseguem reagir de forma consistente à mudança de estado, evitando redirecionamentos inconsistentes e reduzindo o acoplamento entre ecrãs.
+
+O terceiro contexto está relacionado com a localização global. Um controlador de idioma notifica a árvore de widgets quando o idioma da aplicação é alterado, permitindo atualizar imediatamente os textos visíveis sem reiniciar a aplicação, mantendo apenas **Language** como designação fixa em inglês.
 
 ---
 
@@ -608,12 +624,14 @@ Foram executados:
 
 ```bash
 flutter analyze
-flutter test
+flutter test --reporter expanded
 ```
 
-A aplicação ficou sem problemas de análise estática e com os testes automatizados a passar.
+A bateria atual contém **13 testes automatizados**. Antes do commit final, deve confirmar-se novamente `flutter analyze` sem problemas e a aprovação integral de `flutter test --reporter expanded`.
 
-A cobertura de testes foi reforçada ao nível dos widgets e do fluxo inicial da aplicação. Fica identificada para a próxima etapa a possibilidade de aumentar a cobertura unitária de componentes específicos, como repositórios, serviços de autenticação, serviços de sincronização e modelos de dados.
+Os testes cobrem o novo ecrã inicial, o fluxo de autenticação, a mensagem de funcionalidade futura da Conta Google, o controlador global de sessão, o modo teste, a Home gamificada, o comportamento em orientação horizontal e ações protegidas que exigem conta. Foi ainda criada documentação própria em `test/README_TESTES_SPRINT4.md`.
+
+Permanece prevista a expansão da cobertura para repositórios, serviços de autenticação, serviços de sincronização e modelos de dados.
 
 ### Decisão sobre recuperação de palavra-passe
 
@@ -698,9 +716,25 @@ Foram ainda criados e integrados ecrãs específicos para atividades do percurso
 
 Estes ecrãs leem os idiomas definidos pelo utilizador no perfil, mantendo a separação entre o idioma de apoio/interface e o idioma de aprendizagem. No ecrã de vocabulário, a apresentação dos idiomas foi compactada para Android, colocando o idioma da aplicação e o idioma a praticar na mesma linha. Além disso, o separador **Praticar** passou a encaminhar aleatoriamente para Vocabulário, Diálogo ou Quiz.
 
+### Localização global da interface
+
+Foi implementada a localização global da aplicação. A alteração do idioma da aplicação passa a atualizar imediatamente os textos dos principais ecrãs e componentes, incluindo navegação, autenticação, Home, atividades, resultados, análises, conta, ajustes e mensagens de feedback.
+
+A designação **Language** constitui uma exceção deliberada e permanece sempre em inglês. Esta decisão reduz o risco de o utilizador ficar sem referência para regressar à seleção linguística após escolher um idioma por engano.
+
+A gestão do idioma utiliza também o padrão Observer, garantindo que os ecrãs observadores reagem à mudança sem propagação manual de parâmetros.
+
+### Testes e robustez visual
+
+A Sprint 4 passou a incluir uma bateria com 13 testes automatizados, além da validação por análise estática. Foram ainda corrigidos problemas de overflow na Home gamificada em orientação horizontal e ajustados componentes com textos longos, nomeadamente os cartões de idioma no ecrã de vocabulário.
+
+### Revisão de antipadrões
+
+Foi realizada uma revisão dos antipadrões de desenvolvimento, arquitetura e gestão aplicáveis ao projeto. A análise permitiu justificar os casos em que existia necessidade de refatoração e os casos em que não foram encontrados sintomas relevantes. Entre os pontos revistos destacam-se o estado global de sessão, o risco de acoplamento entre ecrãs, a concentração excessiva de responsabilidades, a duplicação de código, o código temporário e a transparência sobre funcionalidades futuras.
+
 ### Resultado da Sprint 4
 
-A Sprint 4 consolidou a aplicação como um protótipo mais coerente do ponto de vista visual e de experiência de utilização. A aplicação passou a comunicar melhor a sua identidade, o seu propósito educativo e as ações principais esperadas em cada fluxo. Além disso, o mapa gamificado deixou de funcionar apenas como navegação visual e passou a abrir atividades concretas de prática. A introdução do modo teste também tornou a experiência inicial menos dependente de registo, permitindo demonstrar o valor da aplicação antes do início de sessão.
+A Sprint 4 consolidou a aplicação como um protótipo mais coerente do ponto de vista visual, arquitetural e de experiência de utilização. A aplicação passou a comunicar melhor a sua identidade, o seu propósito educativo e as ações principais esperadas em cada fluxo. Além disso, o mapa gamificado deixou de funcionar apenas como navegação visual e passou a abrir atividades concretas de prática. A introdução do modo teste tornou a experiência inicial menos dependente de registo, enquanto a localização global passou a adaptar imediatamente a interface ao idioma escolhido, preservando **Language** como ponto de recuperação. A versão candidata à entrega final inclui análise estática e uma bateria com 13 testes automatizados, cuja execução deve ser repetida após qualquer alteração ao código.
 
 ---
 
@@ -790,6 +824,45 @@ flutter run -d chrome \
 
 ---
 
+## Validação e testes automatizados
+
+A versão final da Sprint 4 foi validada com:
+
+```powershell
+flutter analyze
+flutter test --reporter expanded
+```
+
+Resultado esperado antes da publicação final:
+
+```text
+No issues found!
+All tests passed!
+```
+
+A bateria de testes inclui, entre outros:
+
+- apresentação do ecrã inicial com **Testar agora**, **Entrar** e **Criar conta**;
+- abertura do ecrã de autenticação;
+- feedback da Conta Google como funcionalidade futura;
+- transições do controlador de sessão entre modo teste e sessão autenticada;
+- presença e ausência do aviso de modo teste;
+- comportamento da Home gamificada em orientação horizontal;
+- mensagens e recuperação em funcionalidades que exigem conta;
+- alteração global do idioma e manutenção da designação **Language**.
+
+Para visualizar individualmente os testes executados:
+
+```powershell
+flutter test --reporter expanded
+```
+
+Para guardar a evidência num ficheiro:
+
+```powershell
+flutter test --reporter expanded | Tee-Object -FilePath testes_sprint4_resultado.txt
+```
+
 ## Build e execução
 
 ### Instalar dependências
@@ -867,6 +940,29 @@ flutter build web --release \
 ```
 
 ---
+
+## Versão e release
+
+A versão final desta entrega é identificada no `pubspec.yaml` como:
+
+```yaml
+version: 1.0.0+1
+```
+
+Designação da entrega:
+
+```text
+DailyTalk.pt Mobile v1.0.0+1 — Sprint 4 Final
+```
+
+Após validação, recomenda-se marcar o commit correspondente no GitHub:
+
+```powershell
+git tag -a v1.0.0 -m "Versão final do projeto DAM"
+git push origin v1.0.0
+```
+
+A tag permite reproduzir exatamente o código correspondente à entrega, independentemente de alterações futuras na branch principal.
 
 ## Tecnologias utilizadas
 
@@ -1009,6 +1105,13 @@ Entregas contempladas:
 - encaminhamento aleatório do separador **Praticar** para Vocabulário, Diálogo ou Quiz;
 - aplicação do padrão Observer ao estado global da sessão;
 - aplicação da identidade visual do DailyTalk.pt às atividades gamificadas.
+- localização global da interface em seis idiomas;
+- manutenção de **Language** em inglês como mecanismo de recuperação;
+- controlador global de idioma baseado em Observer;
+- correção do layout da Home em orientação horizontal;
+- revisão estruturada de antipadrões;
+- 13 testes automatizados incluídos;
+- análise estática concluída sem problemas.
 
 ---
 

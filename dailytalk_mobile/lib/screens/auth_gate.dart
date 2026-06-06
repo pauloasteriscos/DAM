@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../state/app_locale_controller.dart';
 import '../state/app_session_controller.dart';
 import 'login_page.dart';
 import 'main_navigation.dart';
@@ -20,7 +21,21 @@ class _AuthGateState extends State<AuthGate> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(AppSessionController.instance.checkStoredSession);
+    Future.microtask(_initializeSession);
+  }
+
+
+  Future<void> _initializeSession() async {
+    final session = AppSessionController.instance;
+    await session.checkStoredSession();
+
+    final appLanguageCode = session.currentUser?.preferences.appLanguageCode;
+    if (appLanguageCode != null) {
+      await AppLocaleController.instance.setLanguageCode(
+        appLanguageCode,
+        persist: true,
+      );
+    }
   }
 
   void _handleAuthenticated() {

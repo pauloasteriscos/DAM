@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
 import '../data/repositories/auth_repository.dart';
@@ -260,7 +262,7 @@ class _DialoguePageState extends State<DialoguePage> {
   /// Placeholder para futura reprodução de áudio.
   void _playAudioPlaceholder() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(_ui('audioSoon'))),
+      SnackBar(content: AppText(_ui('audioSoon'))),
     );
   }
 
@@ -362,7 +364,7 @@ class _DialoguePageState extends State<DialoguePage> {
         ),
         const SizedBox(width: 14),
         const Expanded(
-          child: Text(
+          child: AppText(
             'DailyTalk.pt',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -399,7 +401,7 @@ class _DialoguePageState extends State<DialoguePage> {
           ),
           const SizedBox(width: 14),
           Expanded(
-            child: Text(
+            child: AppText(
               _ui('loadingLanguages'),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.78),
@@ -432,7 +434,7 @@ class _DialoguePageState extends State<DialoguePage> {
           Row(
             children: [
               Expanded(
-                child: Text(
+                child: AppText(
                   '${_ui('turn')} ${_turnIndex + 1} ${_ui('of')} ${_scenario.turns.length}',
                   style: const TextStyle(
                     color: Colors.white,
@@ -441,7 +443,7 @@ class _DialoguePageState extends State<DialoguePage> {
                   ),
                 ),
               ),
-              Text(
+              AppText(
                 '$percent%',
                 style: const TextStyle(
                   color: _accentColor,
@@ -529,7 +531,7 @@ class _DialoguePageState extends State<DialoguePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              AppText(
                 _scenario.title.textFor(nativeKey),
                 style: const TextStyle(
                   color: _accentColor,
@@ -538,7 +540,7 @@ class _DialoguePageState extends State<DialoguePage> {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
+              AppText(
                 '${_ui('contextLabel')} · ${_languageName(_learningLanguageCode)}',
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.66),
@@ -553,7 +555,7 @@ class _DialoguePageState extends State<DialoguePage> {
         TextButton.icon(
           onPressed: _playAudioPlaceholder,
           icon: const Icon(Icons.play_arrow, size: 22),
-          label: Text(_ui('listen')),
+          label: AppText(_ui('listen')),
           style: TextButton.styleFrom(
             foregroundColor: _accentColor,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -571,7 +573,7 @@ class _DialoguePageState extends State<DialoguePage> {
         color: _accentColor.withValues(alpha: 0.08),
         borderColor: _accentColor.withValues(alpha: 0.20),
       ),
-      child: Text(
+      child: AppText(
         _scenario.description.textFor(nativeKey),
         style: TextStyle(
           color: Colors.white.withValues(alpha: 0.82),
@@ -673,7 +675,7 @@ class _DialoguePageState extends State<DialoguePage> {
           crossAxisAlignment:
               isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(
+            AppText(
               speaker,
               style: TextStyle(
                 color: isUser ? _accentColor : Colors.white.withValues(alpha: 0.58),
@@ -682,7 +684,7 @@ class _DialoguePageState extends State<DialoguePage> {
               ),
             ),
             const SizedBox(height: 5),
-            Text(
+            AppText(
               text,
               textAlign: isUser ? TextAlign.right : TextAlign.left,
               style: const TextStyle(
@@ -717,7 +719,7 @@ class _DialoguePageState extends State<DialoguePage> {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
+          child: AppText(
             _currentTurn.prompt.textFor(nativeKey),
             style: const TextStyle(
               color: Colors.white,
@@ -794,7 +796,7 @@ class _DialoguePageState extends State<DialoguePage> {
                   color: badgeColor.withValues(alpha: 0.10),
                   border: Border.all(color: badgeColor, width: 1.6),
                 ),
-                child: Text(
+                child: AppText(
                   letter,
                   style: TextStyle(
                     color: badgeColor,
@@ -805,7 +807,7 @@ class _DialoguePageState extends State<DialoguePage> {
               ),
               const SizedBox(width: 14),
               Expanded(
-                child: Text(
+                child: AppText(
                   reply.text,
                   style: const TextStyle(
                     color: Colors.white,
@@ -832,7 +834,7 @@ class _DialoguePageState extends State<DialoguePage> {
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: _softBoxDecoration(),
-        child: Text(
+        child: AppText(
           _ui('chooseReply'),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.70),
@@ -865,7 +867,7 @@ class _DialoguePageState extends State<DialoguePage> {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
+            child: AppText(
               isCorrect ? _ui('correct') : _ui('wrong'),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.86),
@@ -955,7 +957,7 @@ class _DialoguePageState extends State<DialoguePage> {
             borderRadius: BorderRadius.circular(18),
           ),
         ),
-        child: Text(
+        child: AppText(
           buttonText,
           style: const TextStyle(
             fontSize: 18,
@@ -998,7 +1000,7 @@ class _DialoguePageState extends State<DialoguePage> {
             ),
           ),
           const SizedBox(height: 16),
-          Text(
+          AppText(
             _ui('dialogueCompleted'),
             textAlign: TextAlign.center,
             style: const TextStyle(
@@ -1008,7 +1010,7 @@ class _DialoguePageState extends State<DialoguePage> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             _ui('dialogueCompletedDescription'),
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -1059,7 +1061,7 @@ class _DialoguePageState extends State<DialoguePage> {
             child: ElevatedButton.icon(
               onPressed: _restartDialogue,
               icon: const Icon(Icons.refresh),
-              label: Text(_ui('newDialogue')),
+              label: AppText(_ui('newDialogue')),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _accentColor,
                 foregroundColor: const Color(0xFF05202D),
@@ -1187,7 +1189,7 @@ class _StatusMetric extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              AppText(
                 value,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -1199,7 +1201,7 @@ class _StatusMetric extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
+              AppText(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

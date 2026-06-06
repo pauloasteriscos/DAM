@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/facades/activity_workflow_facade.dart';
 import '../state/app_session_controller.dart';
 import '../widgets/dailytalk_support_dialogs.dart';
@@ -203,7 +205,7 @@ class SettingsContent extends StatelessWidget {
           const Icon(Icons.visibility_outlined, color: Colors.lightBlueAccent),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
+            child: AppText(
               'Modo teste ativo. Podes alterar idioma e perfil localmente; para sincronizar, entra ou cria conta.',
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.76),
@@ -219,7 +221,7 @@ class SettingsContent extends StatelessWidget {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10, left: 4),
-      child: Text(
+      child: AppText(
         title,
         style: TextStyle(
           color: Colors.white.withValues(alpha: 0.74),
@@ -243,14 +245,14 @@ class SettingsContent extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(22),
           ),
-          title: const Text(
+          title: const AppText(
             'Conta necessária',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w800,
             ),
           ),
-          content: Text(
+          content: AppText(
             'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.76),
@@ -260,7 +262,7 @@ class SettingsContent extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Continuar a testar'),
+              child: const AppText('Continuar a testar'),
             ),
             TextButton(
               onPressed: () {
@@ -274,7 +276,7 @@ class SettingsContent extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text('Criar conta'),
+              child: const AppText('Criar conta'),
             ),
             TextButton(
               onPressed: () {
@@ -288,7 +290,7 @@ class SettingsContent extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text('Entrar'),
+              child: const AppText('Entrar'),
             ),
           ],
         );
@@ -306,18 +308,24 @@ class SettingsContent extends StatelessWidget {
       final facade = await ActivityWorkflowFacade.create();
       final result = await facade.syncPendingSubmissions();
 
+      // O ecrã pode ter sido removido enquanto a operação assíncrona decorria.
+      // Neste caso, não devemos reutilizar o BuildContext nem mostrar feedback.
+      if (!context.mounted) return;
+
       messenger.showSnackBar(
         SnackBar(
-          content: Text(
-            '${result.message} '
-            'Sincronizadas: ${result.syncedCount}. '
-            'Falhas: ${result.failedCount}.',
+          content: AppText(
+            '${context.tr(result.message)} '
+            '${context.tr('Sincronizadas')}: ${result.syncedCount}. '
+            '${context.tr('Falhas')}: ${result.failedCount}.',
           ),
         ),
       );
     } catch (error) {
+      if (!context.mounted) return;
+
       messenger.showSnackBar(
-        SnackBar(content: Text('Erro ao sincronizar: $error')),
+        SnackBar(content: AppText('Erro ao sincronizar: $error')),
       );
     }
   }
@@ -385,7 +393,7 @@ class _SettingsButton extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       title,
                       style: const TextStyle(
                         color: Colors.white,
@@ -394,7 +402,7 @@ class _SettingsButton extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    Text(
+                    AppText(
                       description,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.70),

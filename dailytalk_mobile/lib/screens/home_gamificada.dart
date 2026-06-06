@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../models/lesson_item.dart';
 import '../widgets/lesson_node.dart';
 import '../widgets/top_overflow_menu.dart';
@@ -165,7 +167,7 @@ class HomeGamificada extends StatelessWidget {
           SizedBox(width: compact ? 10 : 12),
 
           Expanded(
-            child: Text(
+            child: AppText(
               'DailyTalk.pt',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -221,7 +223,7 @@ class HomeGamificada extends StatelessWidget {
             const SizedBox(width: 8),
 
             Expanded(
-              child: Text(
+              child: AppText(
                 'Modo teste · progresso não guardado',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -251,7 +253,7 @@ class HomeGamificada extends StatelessWidget {
                   fontWeight: FontWeight.w900,
                 ),
               ),
-              child: const Text('Entrar'),
+              child: const AppText('Entrar'),
             ),
           ],
         ),
@@ -269,7 +271,7 @@ class HomeGamificada extends StatelessWidget {
     if (callback == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
+          content: AppText(
             'Volta ao ecrã inicial para entrar ou criar conta.',
           ),
         ),
@@ -330,7 +332,7 @@ class HomeGamificada extends StatelessWidget {
                       color: const Color(0xFF1264B0),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text(
+                    child: const AppText(
                       'UNIDADE 5',
                       style: TextStyle(
                         color: Colors.white,
@@ -342,7 +344,7 @@ class HomeGamificada extends StatelessWidget {
 
                   SizedBox(height: compact ? 6 : 10),
 
-                  Text(
+                  AppText(
                     'Tema: Comunicação e amizades',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -356,7 +358,7 @@ class HomeGamificada extends StatelessWidget {
 
                   SizedBox(height: compact ? 5 : 8),
 
-                  Text(
+                  AppText(
                     '3 de 6 atividades concluídas',
                     style: TextStyle(
                       color: Colors.white,
@@ -420,7 +422,7 @@ class HomeGamificada extends StatelessWidget {
             size: compact ? 16 : 18,
           ),
           const SizedBox(width: 8),
-          Text(
+          AppText(
             'MAPA DE ATIVIDADES',
             style: TextStyle(
               color: Colors.white,
@@ -515,7 +517,7 @@ Widget _buildActivityMap(
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(
+                        content: AppText(
                           'Abrir atividade: ${lesson.title}',
                         ),
                       ),
@@ -549,7 +551,7 @@ Widget _buildActivityMap(
         ),
         child: Column(
           children: [
-            const Text(
+            const AppText(
               'ATALHOS / FEEDBACK',
               style: TextStyle(
                 color: Colors.lightBlueAccent,
@@ -627,7 +629,7 @@ Widget _buildActivityMap(
   void _showShortcutMessage(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: AppText(message),
       ),
     );
   }
@@ -680,7 +682,7 @@ class _ShortcutButton extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      AppText(
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -691,7 +693,7 @@ class _ShortcutButton extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 3),
-                      Text(
+                      AppText(
                         subtitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

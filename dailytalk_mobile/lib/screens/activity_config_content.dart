@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/facades/activity_workflow_facade.dart';
 import '../strategies/activity_strategy.dart';
 import 'activity_display_page.dart';
@@ -238,7 +240,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              const AppText(
                 'Configura o desafio',
                 style: TextStyle(
                   color: Colors.white,
@@ -248,7 +250,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
                 ),
               ),
               const SizedBox(height: 6),
-              Text(
+              AppText(
                 'Escolhe o contexto, o idioma, a dificuldade e o tipo de atividade antes de começar.',
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.70),
@@ -280,7 +282,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Indica o cenário da atividade.';
+          return context.tr('Indica o cenário da atividade.');
         }
 
         return null;
@@ -309,7 +311,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
       items: items.entries.map((entry) {
         return DropdownMenuItem<String>(
           value: entry.key,
-          child: Text(entry.value),
+          child: AppText(entry.value),
         );
       }).toList(),
       onChanged: onChanged,
@@ -323,8 +325,8 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
     required IconData icon,
   }) {
     return InputDecoration(
-      labelText: label,
-      hintText: hint,
+      labelText: context.tr(label),
+      hintText: hint == null ? null : context.tr(hint),
       labelStyle: TextStyle(
         color: Colors.white.withValues(alpha: 0.66),
         fontSize: 16,
@@ -433,7 +435,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
                   Icons.play_arrow,
                   size: 25,
                 ),
-          label: Text(
+          label: AppText(
             _isLoading ? 'A iniciar...' : 'Iniciar atividade',
             style: const TextStyle(
               fontSize: 18,
@@ -468,7 +470,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
           color: Colors.redAccent.withValues(alpha: 0.85),
         ),
       ),
-      child: Text(
+      child: AppText(
         _errorMessage!,
         style: const TextStyle(
           color: Colors.redAccent,

@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
 import '../data/repositories/auth_repository.dart';
@@ -342,7 +344,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
             width: double.infinity,
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: Text(
+              child: AppText(
                 label.toUpperCase(),
                 maxLines: 1,
                 textAlign: TextAlign.center,
@@ -360,13 +362,13 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text(
+              AppText(
                 _languageFlag(languageCode),
                 style: const TextStyle(fontSize: 17),
               ),
               const SizedBox(width: 6),
               Flexible(
-                child: Text(
+                child: AppText(
                   languageName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -439,7 +441,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: Column(
                 children: <Widget>[
-                  Text(
+                  AppText(
                     _ui('heroTitle'),
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -514,7 +516,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
           ),
         ),
         const SizedBox(width: 10),
-        const Text(
+        const AppText(
           'DailyTalk.pt',
           style: TextStyle(
             color: Colors.white,
@@ -615,7 +617,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Flexible(
-                  child: Text(
+                  child: AppText(
                     card.text,
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -662,7 +664,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text(
+                  AppText(
                     _isCompleted ? _ui('completed') : _ui(_feedbackKey),
                     style: const TextStyle(
                       color: Colors.white,
@@ -671,7 +673,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
+                  AppText(
                     '$completed/$total • $_attempts ${_ui('attempts')}',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.56),

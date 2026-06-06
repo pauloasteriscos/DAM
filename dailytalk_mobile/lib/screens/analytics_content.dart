@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/facades/activity_workflow_facade.dart';
 import '../models/communication_scenario.dart';
 import '../models/user_profile.dart';
@@ -117,7 +119,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
           const Icon(Icons.visibility_outlined, color: Colors.lightBlueAccent),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
+            child: AppText(
               'Modo teste: as análises usam apenas dados locais desta instalação. Entra para consultar e sincronizar métricas da tua conta.',
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.76),
@@ -143,7 +145,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
         children: [
           _buildInsightBadge(),
           const SizedBox(height: 12),
-          const Text(
+          const AppText(
             'Análises pedagógicas',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -154,7 +156,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             'Estas análises usam apenas dados de desempenho, como perfil, cenário, tipo de atividade, tentativas e pontuação. Não guardam dados sensíveis.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -182,7 +184,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
             size: 38,
           ),
           const SizedBox(height: 12),
-          const Text(
+          const AppText(
             'Ainda não há dados suficientes',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -192,7 +194,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             'Submete algumas atividades na página Praticar para gerar análises pedagógicas.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -265,8 +267,8 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '${profile.label} — ${scenario.label}',
+                        AppText(
+                          '${context.tr(profile.label)} — ${context.tr(scenario.label)}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -275,8 +277,8 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          'Tipo de atividade: $activityType',
+                        AppText(
+                          '${context.tr('Tipo de atividade')}: ${context.tr(activityType)}',
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.62),
                             fontSize: 13.5,
@@ -303,7 +305,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
 
               const SizedBox(height: 12),
 
-              Text(
+              AppText(
                 'Atualizado em: $updatedAt',
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.36),
@@ -401,7 +403,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                   Icons.refresh,
                   size: 24,
                 ),
-          label: Text(
+          label: AppText(
             _isLoading ? 'A carregar...' : 'Atualizar análises',
             style: const TextStyle(
               fontSize: 17,
@@ -442,8 +444,8 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
               : Colors.white.withValues(alpha: 0.11),
         ),
       ),
-      child: Text(
-        '$label: $value',
+      child: AppText(
+        '${context.tr(label)}: $value',
         style: TextStyle(
           color: highlighted ? _accentColor : Colors.white.withValues(alpha: 0.82),
           fontSize: 13.5,
@@ -466,7 +468,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
           color: Colors.redAccent.withValues(alpha: 0.85),
         ),
       ),
-      child: Text(
+      child: AppText(
         _errorMessage!,
         style: const TextStyle(
           color: Colors.redAccent,

@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../state/app_session_controller.dart';
 import 'analytics_content.dart';
 import 'vocabulary_pairs_page.dart';
@@ -137,21 +139,21 @@ class _MainNavigationState extends State<MainNavigation> {
         selectedItemColor: Colors.lightBlue,
         unselectedItemColor: Colors.white70,
         onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.home), label: context.tr('Home')),
           BottomNavigationBarItem(
-            icon: Icon(Icons.play_circle_outline),
-            label: 'Praticar',
+            icon: const Icon(Icons.play_circle_outline),
+            label: context.tr('Praticar'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events_outlined),
-            label: 'Resultados',
+            icon: const Icon(Icons.emoji_events_outlined),
+            label: context.tr('Resultados'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Análises',
+            icon: const Icon(Icons.bar_chart),
+            label: context.tr('Análises'),
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Ajustes'),
+          BottomNavigationBarItem(icon: const Icon(Icons.settings), label: context.tr('Ajustes')),
         ],
       ),
     );

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
 import '../data/facades/activity_workflow_facade.dart';
@@ -201,7 +203,7 @@ class _PracticeContentState extends State<PracticeContent> {
           size: 58,
         ),
         const SizedBox(height: 12),
-        Text(
+        AppText(
           _practiceTitle,
           textAlign: TextAlign.center,
           style: const TextStyle(
@@ -211,7 +213,7 @@ class _PracticeContentState extends State<PracticeContent> {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
+        AppText(
           'Perfil: ${_selectedProfile.label}',
           textAlign: TextAlign.center,
           style: const TextStyle(
@@ -221,13 +223,13 @@ class _PracticeContentState extends State<PracticeContent> {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
+        AppText(
           'Cenário: ${activity.scenario.label}',
           textAlign: TextAlign.center,
           style: const TextStyle(color: Colors.white70, fontSize: 15),
         ),
         const SizedBox(height: 12),
-        Text(
+        AppText(
           activity.title,
           textAlign: TextAlign.center,
           style: const TextStyle(
@@ -237,7 +239,7 @@ class _PracticeContentState extends State<PracticeContent> {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
+        AppText(
           activity.description,
           textAlign: TextAlign.center,
           style: const TextStyle(color: Colors.white70, height: 1.4),
@@ -251,7 +253,7 @@ class _PracticeContentState extends State<PracticeContent> {
       key: _formKey,
       child: Column(
         children: [
-          const Text(
+          const AppText(
             'Desafio',
             style: TextStyle(
               color: Colors.lightBlueAccent,
@@ -260,7 +262,7 @@ class _PracticeContentState extends State<PracticeContent> {
             ),
           ),
           const SizedBox(height: 10),
-          Text(
+          AppText(
             activity.question,
             textAlign: TextAlign.center,
             style: const TextStyle(
@@ -277,10 +279,10 @@ class _PracticeContentState extends State<PracticeContent> {
             maxLines: 5,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              labelText: 'A tua resposta',
+              labelText: context.tr('A tua resposta'),
               alignLabelWithHint: true,
               labelStyle: const TextStyle(color: Colors.white70),
-              hintText: activity.answerHint,
+              hintText: context.tr(activity.answerHint),
               hintStyle: const TextStyle(color: Colors.white38),
               filled: true,
               fillColor: const Color(0xFF0D1B22),
@@ -294,7 +296,7 @@ class _PracticeContentState extends State<PracticeContent> {
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Escreve uma resposta antes de submeter.';
+                return context.tr('Escreve uma resposta antes de submeter.');
               }
 
               return null;
@@ -313,7 +315,7 @@ class _PracticeContentState extends State<PracticeContent> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.send),
-              label: Text(
+              label: AppText(
                 _isSubmitting ? 'A submeter...' : 'Submeter resposta',
                 style: const TextStyle(fontSize: 17),
               ),
@@ -345,7 +347,7 @@ class _PracticeContentState extends State<PracticeContent> {
         children: [
           const Icon(Icons.check_circle, color: Colors.greenAccent, size: 44),
           const SizedBox(height: 10),
-          const Text(
+          const AppText(
             'Resposta submetida',
             style: TextStyle(
               color: Colors.white,
@@ -354,7 +356,7 @@ class _PracticeContentState extends State<PracticeContent> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             'Pontuação: $score',
             style: const TextStyle(
               color: Colors.lightBlueAccent,
@@ -363,12 +365,12 @@ class _PracticeContentState extends State<PracticeContent> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             'Estado: $syncStatus',
             style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             feedback,
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white70, height: 1.4),
@@ -388,7 +390,7 @@ class _PracticeContentState extends State<PracticeContent> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.redAccent),
       ),
-      child: Text(
+      child: AppText(
         _errorMessage!,
         style: const TextStyle(color: Colors.redAccent),
       ),

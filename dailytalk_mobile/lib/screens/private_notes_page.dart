@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/dao/local_private_notes_dao.dart';
 import '../data/database/app_database.dart';
 import '../models/communication_scenario.dart';
@@ -118,7 +120,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Nota privada guardada apenas neste dispositivo.'),
+          content: AppText('Nota privada guardada apenas neste dispositivo.'),
         ),
       );
     } catch (error) {
@@ -159,7 +161,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
-        title: const Text(
+        title: const AppText(
           'Notas privadas',
           style: TextStyle(
             fontSize: 24,
@@ -280,7 +282,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
 
           const SizedBox(height: 12),
 
-          const Text(
+          const AppText(
             'Nota privada local',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -292,7 +294,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
 
           const SizedBox(height: 8),
 
-          Text(
+          AppText(
             'Estas notas ficam apenas neste dispositivo. Não são enviadas para o servidor e não entram na sincronização.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -325,7 +327,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Indica um título para a nota.';
+                  return context.tr('Indica um título para a nota.');
                 }
 
                 return null;
@@ -346,7 +348,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
               items: CommunicationScenario.values.map((scenario) {
                 return DropdownMenuItem<String>(
                   value: scenario.databaseValue,
-                  child: Text(scenario.label),
+                  child: AppText(scenario.label),
                 );
               }).toList(),
               onChanged: (value) {
@@ -371,7 +373,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Escreve o conteúdo da nota.';
+                  return context.tr('Escreve o conteúdo da nota.');
                 }
 
                 return null;
@@ -431,7 +433,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
                   ),
                 )
               : const Icon(Icons.save_outlined, size: 23),
-          label: Text(
+          label: AppText(
             _isSaving ? 'A guardar...' : 'Guardar nota privada',
             style: const TextStyle(
               fontSize: 17,
@@ -459,7 +461,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: _cardDecoration(),
-      child: Text(
+      child: AppText(
         'Ainda não existem notas privadas locais.',
         textAlign: TextAlign.center,
         style: TextStyle(
@@ -495,7 +497,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Text(
+                    child: AppText(
                       title,
                       style: const TextStyle(
                         color: Colors.white,
@@ -514,7 +516,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
 
               const SizedBox(height: 6),
 
-              Text(
+              AppText(
                 scenarioLabel,
                 style: const TextStyle(
                   color: _accentColor,
@@ -525,7 +527,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
 
               const SizedBox(height: 10),
 
-              Text(
+              AppText(
                 noteText,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.72),
@@ -535,7 +537,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
 
               const SizedBox(height: 10),
 
-              Text(
+              AppText(
                 'Atualizada em: $updatedAt',
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.38),
@@ -550,7 +552,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
                 child: TextButton.icon(
                   onPressed: () => _deleteNote(id),
                   icon: const Icon(Icons.delete_outline),
-                  label: const Text('Apagar'),
+                  label: const AppText('Apagar'),
                 ),
               ),
             ],
@@ -566,8 +568,8 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
     required IconData icon,
   }) {
     return InputDecoration(
-      labelText: label,
-      hintText: hint,
+      labelText: context.tr(label),
+      hintText: hint == null ? null : context.tr(hint),
       prefixIcon: Padding(
         padding: const EdgeInsets.only(left: 14, right: 8),
         child: Icon(
@@ -639,7 +641,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
           color: Colors.redAccent.withValues(alpha: 0.85),
         ),
       ),
-      child: Text(
+      child: AppText(
         _errorMessage!,
         style: const TextStyle(
           color: Colors.redAccent,

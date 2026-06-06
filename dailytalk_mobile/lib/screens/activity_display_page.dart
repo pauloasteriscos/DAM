@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/facades/activity_workflow_facade.dart';
 import '../state/app_session_controller.dart';
 
@@ -113,7 +115,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
-        title: const Text(
+        title: const AppText(
           'Atividade',
           style: TextStyle(
             fontSize: 26,
@@ -207,7 +209,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
             isCompact: isCompact,
           ),
           const SizedBox(height: 16),
-          const Text(
+          const AppText(
             'Desafio pronto',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -218,7 +220,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             'A atividade foi preparada. Lê o enunciado, responde e submete para receber feedback.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -255,7 +257,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
                 ),
                 const SizedBox(width: 10),
                 const Expanded(
-                  child: Text(
+                  child: AppText(
                     'Resposta da atividade',
                     style: TextStyle(
                       color: Colors.white,
@@ -280,7 +282,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
               decoration: _inputDecoration(),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Escreve uma resposta antes de submeter.';
+                  return context.tr('Escreve uma resposta antes de submeter.');
                 }
 
                 return null;
@@ -320,7 +322,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
             size: 52,
           ),
           const SizedBox(height: 12),
-          const Text(
+          const AppText(
             'Resultado guardado',
             style: TextStyle(
               color: Colors.white,
@@ -339,7 +341,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
             ],
           ),
           const SizedBox(height: 14),
-          Text(
+          AppText(
             feedback,
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -405,8 +407,8 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
           color: _accentColor.withValues(alpha: 0.42),
         ),
       ),
-      child: Text(
-        '$label: $value',
+      child: AppText(
+        '${context.tr(label)}: $value',
         textAlign: TextAlign.center,
         style: const TextStyle(
           color: _accentColor,
@@ -427,8 +429,8 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
           color: Colors.white.withValues(alpha: 0.14),
         ),
       ),
-      child: Text(
-        '$label: $value',
+      child: AppText(
+        '${context.tr(label)}: $value',
         style: const TextStyle(
           color: Colors.white,
           fontSize: 14,
@@ -451,7 +453,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
       ),
       child: Column(
         children: [
-          Text(
+          AppText(
             'URL devolvida pelo deploy',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -477,14 +479,14 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
 
   InputDecoration _inputDecoration() {
     return InputDecoration(
-      labelText: 'Escreve a tua resposta',
+      labelText: context.tr('Escreve a tua resposta'),
       alignLabelWithHint: true,
       labelStyle: TextStyle(
         color: Colors.white.withValues(alpha: 0.66),
         fontSize: 16,
         fontWeight: FontWeight.w500,
       ),
-      hintText: 'Ex.: resposta ao diálogo, quiz ou atividade...',
+      hintText: context.tr('Ex.: resposta ao diálogo, quiz ou atividade...'),
       hintStyle: TextStyle(
         color: Colors.white.withValues(alpha: 0.34),
       ),
@@ -575,7 +577,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
                   Icons.send_outlined,
                   size: 24,
                 ),
-          label: Text(
+          label: AppText(
             _isSubmitting ? 'A submeter...' : 'Submeter resposta',
             style: const TextStyle(
               fontSize: 17,
@@ -609,7 +611,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
           color: Colors.redAccent.withValues(alpha: 0.85),
         ),
       ),
-      child: Text(
+      child: AppText(
         _errorMessage!,
         style: const TextStyle(
           color: Colors.redAccent,

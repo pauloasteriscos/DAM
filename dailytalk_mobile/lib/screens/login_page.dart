@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import 'login_form_page.dart';
 import '../state/app_session_controller.dart';
 import 'main_navigation.dart';
@@ -152,7 +154,7 @@ class LoginPage extends StatelessWidget {
 
                       SizedBox(height: isCompact ? 18 : 24),
 
-                      _buildInfoText(),
+                      _buildInfoAppText(),
                     ],
                   ),
                 ),
@@ -192,7 +194,7 @@ class LoginPage extends StatelessWidget {
         /// FittedBox evita a quebra desta frase em telemóveis estreitos.
         const FittedBox(
           fit: BoxFit.scaleDown,
-          child: Text(
+          child: AppText(
             'Serious game para aprendizagem de idiomas',
             textAlign: TextAlign.center,
             maxLines: 1,
@@ -207,7 +209,7 @@ class LoginPage extends StatelessWidget {
 
         const SizedBox(height: 8),
 
-        Text(
+        AppText(
           'Pratica diálogos antes da mobilidade escolar',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -250,7 +252,7 @@ class LoginPage extends StatelessWidget {
         child: ElevatedButton.icon(
           onPressed: onPressed,
           icon: Icon(icon, size: 26),
-          label: Text(
+          label: AppText(
             label,
             style: const TextStyle(
               fontSize: 19,
@@ -281,7 +283,7 @@ class LoginPage extends StatelessWidget {
       child: FilledButton.icon(
         onPressed: onPressed,
         icon: Icon(icon, size: 22),
-        label: Text(
+        label: AppText(
           label,
           style: const TextStyle(
             fontSize: 17,
@@ -313,7 +315,7 @@ class LoginPage extends StatelessWidget {
       child: OutlinedButton.icon(
         onPressed: onPressed,
         icon: Icon(icon, size: 22),
-        label: Text(
+        label: AppText(
           label,
           style: const TextStyle(
             fontSize: 17,
@@ -335,8 +337,8 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoText() {
-    return Text(
+  Widget _buildInfoAppText() {
+    return AppText(
       'Podes experimentar sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.',
       textAlign: TextAlign.center,
       style: TextStyle(

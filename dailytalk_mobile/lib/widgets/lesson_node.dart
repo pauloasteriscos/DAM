@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../models/lesson_item.dart';
 import '../strategies/activity_strategy.dart';
 import 'lesson_badge.dart';
@@ -39,7 +41,7 @@ class LessonNode extends StatelessWidget {
         const SizedBox(height: 8),
         SizedBox(
           width: 120,
-          child: Text(
+          child: AppText(
             lesson.title,
             textAlign: TextAlign.center,
             style: TextStyle(

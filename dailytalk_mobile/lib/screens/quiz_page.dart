@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
 import '../data/repositories/auth_repository.dart';
@@ -245,7 +247,7 @@ class _QuizPageState extends State<QuizPage> {
   void _playAudioPlaceholder() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(_ui('audioSoon')),
+        content: AppText(_ui('audioSoon')),
       ),
     );
   }
@@ -348,7 +350,7 @@ class _QuizPageState extends State<QuizPage> {
         ),
         const SizedBox(width: 14),
         const Expanded(
-          child: Text(
+          child: AppText(
             'DailyTalk.pt',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -385,7 +387,7 @@ class _QuizPageState extends State<QuizPage> {
           ),
           const SizedBox(width: 14),
           Expanded(
-            child: Text(
+            child: AppText(
               _ui('loadingLanguages'),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.78),
@@ -418,7 +420,7 @@ class _QuizPageState extends State<QuizPage> {
           Row(
             children: [
               Expanded(
-                child: Text(
+                child: AppText(
                   '${_ui('question')} ${_currentIndex + 1} ${_ui('of')} ${_questions.length}',
                   style: const TextStyle(
                     color: Colors.white,
@@ -427,7 +429,7 @@ class _QuizPageState extends State<QuizPage> {
                   ),
                 ),
               ),
-              Text(
+              AppText(
                 '$percent%',
                 style: const TextStyle(
                   color: _accentColor,
@@ -516,7 +518,7 @@ class _QuizPageState extends State<QuizPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              AppText(
                 question.category.textFor(_translationKey(_userLanguageCode)),
                 style: const TextStyle(
                   color: _accentColor,
@@ -525,7 +527,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
+              AppText(
                 _ui('contextLabel'),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.66),
@@ -540,7 +542,7 @@ class _QuizPageState extends State<QuizPage> {
         TextButton.icon(
           onPressed: _playAudioPlaceholder,
           icon: const Icon(Icons.play_arrow, size: 22),
-          label: Text(_ui('listen')),
+          label: AppText(_ui('listen')),
           style: TextButton.styleFrom(
             foregroundColor: _accentColor,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -555,7 +557,7 @@ class _QuizPageState extends State<QuizPage> {
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 560;
 
-        final scenarioText = Text(
+        final scenarioText = AppText(
           question.scenario.textFor(nativeKey),
           style: const TextStyle(
             color: Colors.white,
@@ -646,7 +648,7 @@ class _QuizPageState extends State<QuizPage> {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
+          child: AppText(
             question.prompt.textFor(nativeKey),
             style: const TextStyle(
               color: Colors.white,
@@ -723,7 +725,7 @@ class _QuizPageState extends State<QuizPage> {
                   color: badgeColor.withValues(alpha: 0.10),
                   border: Border.all(color: badgeColor, width: 1.6),
                 ),
-                child: Text(
+                child: AppText(
                   letter,
                   style: TextStyle(
                     color: badgeColor,
@@ -734,7 +736,7 @@ class _QuizPageState extends State<QuizPage> {
               ),
               const SizedBox(width: 14),
               Expanded(
-                child: Text(
+                child: AppText(
                   answer.text,
                   style: const TextStyle(
                     color: Colors.white,
@@ -761,7 +763,7 @@ class _QuizPageState extends State<QuizPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: _softBoxDecoration(),
-        child: Text(
+        child: AppText(
           _ui('chooseAnswer'),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.70),
@@ -798,7 +800,7 @@ class _QuizPageState extends State<QuizPage> {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
+            child: AppText(
               isCorrect ? _ui('correct') : _ui('wrong'),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.86),
@@ -886,7 +888,7 @@ class _QuizPageState extends State<QuizPage> {
             borderRadius: BorderRadius.circular(18),
           ),
         ),
-        child: Text(
+        child: AppText(
           buttonText,
           style: const TextStyle(
             fontSize: 18,
@@ -929,7 +931,7 @@ class _QuizPageState extends State<QuizPage> {
             ),
           ),
           const SizedBox(height: 16),
-          Text(
+          AppText(
             _ui('quizCompleted'),
             textAlign: TextAlign.center,
             style: const TextStyle(
@@ -939,7 +941,7 @@ class _QuizPageState extends State<QuizPage> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             _ui('quizCompletedDescription'),
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -990,7 +992,7 @@ class _QuizPageState extends State<QuizPage> {
             child: ElevatedButton.icon(
               onPressed: _restartQuiz,
               icon: const Icon(Icons.refresh),
-              label: Text(_ui('newRound')),
+              label: AppText(_ui('newRound')),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _accentColor,
                 foregroundColor: const Color(0xFF05202D),
@@ -1114,7 +1116,7 @@ class _StatusMetric extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              AppText(
                 value,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -1126,7 +1128,7 @@ class _StatusMetric extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
+              AppText(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

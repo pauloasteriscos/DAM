@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/repositories/auth_repository.dart';
+import '../state/app_locale_controller.dart';
 import '../state/app_session_controller.dart';
 import 'forgot_password_page.dart';
 import 'register_page.dart';
@@ -58,6 +61,15 @@ class _LoginFormPageState extends State<LoginFormPage> {
       final user = await _authRepository.login(
         email: _emailController.text.trim(),
         password: _passwordController.text,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      await AppLocaleScope.read(context).setLanguageCode(
+        user.preferences.appLanguageCode,
+        persist: true,
       );
 
       if (!mounted) {
@@ -127,7 +139,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
               Icon(Icons.info_outline, color: _accentColor),
               SizedBox(width: 10),
               Expanded(
-                child: Text(
+                child: AppText(
                   'Integração futura',
                   style: TextStyle(
                     color: Colors.white,
@@ -137,7 +149,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
               ),
             ],
           ),
-          content: Text(
+          content: AppText(
             'Nesta versão de protótipo, o acesso com Google Account ainda não está disponível. '
             'A funcionalidade está prevista para uma versão futura, permitindo uma autenticação mais rápida e segura.',
             style: TextStyle(
@@ -148,7 +160,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(
+              child: const AppText(
                 'Compreendi',
                 style: TextStyle(
                   color: _accentColor,
@@ -174,7 +186,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
-        title: const Text(
+        title: const AppText(
           'Entrar',
           style: TextStyle(
             fontSize: 26,
@@ -240,7 +252,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
 
                         SizedBox(height: isCompact ? 14 : 18),
 
-                        const Text(
+                        const AppText(
                           'Aceder à tua conta',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -253,7 +265,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
 
                         const SizedBox(height: 8),
 
-                        Text(
+                        AppText(
                           'Guarda progresso, resultados e sincroniza entre dispositivos.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -273,11 +285,11 @@ class _LoginFormPageState extends State<LoginFormPage> {
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Indica o email.';
+                              return context.tr('Indica o email.');
                             }
 
                             if (!value.contains('@')) {
-                              return 'Indica um email válido.';
+                              return context.tr('Indica um email válido.');
                             }
 
                             return null;
@@ -292,9 +304,11 @@ class _LoginFormPageState extends State<LoginFormPage> {
                           icon: Icons.lock_outline,
                           obscureText: _obscurePassword,
                           suffixIcon: IconButton(
-                            tooltip: _obscurePassword
-                                ? 'Mostrar password'
-                                : 'Ocultar password',
+                            tooltip: context.tr(
+                              _obscurePassword
+                                  ? 'Mostrar password'
+                                  : 'Ocultar password',
+                            ),
                             icon: Icon(
                               _obscurePassword
                                   ? Icons.visibility_outlined
@@ -309,7 +323,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Indica a password.';
+                              return context.tr('Indica a password.');
                             }
 
                             return null;
@@ -323,7 +337,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
                             style: TextButton.styleFrom(
                               foregroundColor: _accentColor,
                             ),
-                            child: const Text('Esqueci a palavra-passe'),
+                            child: const AppText('Esqueci a palavra-passe'),
                           ),
                         ),
 
@@ -351,7 +365,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
                           style: TextButton.styleFrom(
                             foregroundColor: _accentColor,
                           ),
-                          child: const Text(
+                          child: const AppText(
                             'Ainda não tem conta? Criar conta',
                             style: TextStyle(fontWeight: FontWeight.w800),
                           ),
@@ -426,7 +440,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
       ),
       cursorColor: _accentColor,
       decoration: InputDecoration(
-        labelText: label,
+        labelText: context.tr(label),
         labelStyle: TextStyle(
           color: Colors.white.withValues(alpha: 0.68),
           fontSize: 18,
@@ -529,7 +543,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
                   ),
                 )
               : const Icon(Icons.login, size: 24),
-          label: Text(
+          label: AppText(
             _isLoading ? 'A entrar...' : 'Entrar',
             style: const TextStyle(
               fontSize: 19,
@@ -560,7 +574,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text(
+          child: AppText(
             'ou',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.62),
@@ -581,7 +595,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
       child: OutlinedButton.icon(
         onPressed: _isLoading ? null : _showGooglePrototypeMessage,
         icon: const Icon(Icons.account_circle_outlined, size: 22),
-        label: const Text(
+        label: const AppText(
           'Continuar com Google',
           style: TextStyle(
             fontSize: 16.5,
@@ -614,7 +628,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
           color: Colors.redAccent.withValues(alpha: 0.85),
         ),
       ),
-      child: Text(
+      child: AppText(
         message,
         style: const TextStyle(
           color: Colors.redAccent,

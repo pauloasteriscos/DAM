@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
 import '../data/repositories/auth_repository.dart';
+import '../state/app_locale_controller.dart';
 import '../state/app_session_controller.dart';
 
 /// Página de configuração dos idiomas do DailyTalk.pt.
@@ -129,7 +132,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
     if (_nativeLanguageCode == _targetLanguageCode) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
+          content: AppText(
             'Escolhe dois idiomas diferentes.',
           ),
         ),
@@ -142,6 +145,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
     });
 
     final session = AppSessionScope.read(context);
+    final localeController = AppLocaleScope.read(context);
 
     try {
       final db = await AppDatabase.instance.database;
@@ -151,6 +155,14 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
         nativeLanguageCode: _nativeLanguageCode,
         targetLanguageCode: _targetLanguageCode,
       );
+
+      // Atualiza imediatamente toda a interface. O título "Language" é a
+      // única exceção e permanece em inglês para facilitar a recuperação.
+      await localeController.setLanguageCode(_nativeLanguageCode);
+
+      if (!mounted) {
+        return;
+      }
 
       if (!session.isAuthenticated) {
         if (!mounted) {
@@ -162,8 +174,14 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Guardado neste dispositivo: ${nativeLanguage.name} → ${targetLanguage.name}. Entra para sincronizar.',
+            content: AppText(
+              context.tr(
+                'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.',
+                parameters: <String, Object?>{
+                  'source': nativeLanguage.name,
+                  'target': targetLanguage.name,
+                },
+              ),
             ),
           ),
         );
@@ -195,6 +213,8 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
         targetLanguageCode: savedTargetLanguageCode,
       );
 
+      await localeController.setLanguageCode(savedNativeLanguageCode);
+
       if (!mounted) {
         return;
       }
@@ -209,8 +229,14 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Guardado: ${nativeLanguage.name} → ${targetLanguage.name}',
+          content: AppText(
+            context.tr(
+              'Guardado: {source} → {target}',
+              parameters: <String, Object?>{
+                'source': nativeLanguage.name,
+                'target': targetLanguage.name,
+              },
+            ),
           ),
         ),
       );
@@ -222,7 +248,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao guardar idiomas: $error')),
+        SnackBar(content: AppText('Erro ao guardar idiomas: $error')),
       );
     } finally {
       if (mounted) {
@@ -269,7 +295,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
-        title: const Text(
+        title: const AppText(
           'Language',
           style: TextStyle(
             fontSize: 26,
@@ -414,7 +440,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
 
           const SizedBox(height: 12),
 
-          const Text(
+          const AppText(
             'Escolhe os teus idiomas',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -427,7 +453,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
 
           const SizedBox(height: 8),
 
-          Text(
+          AppText(
             'O DailyTalk.pt adapta as atividades ao idioma que já conheces e ao idioma que queres praticar.',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -458,7 +484,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
           const Icon(Icons.info_outline, color: _accentColor, size: 22),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
+            child: AppText(
               'Modo teste: os idiomas podem ser alterados, mas ficam apenas neste dispositivo até entrares na conta.',
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.78),
@@ -538,7 +564,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                     color: Colors.white.withValues(alpha: 0.12),
                   ),
                 ),
-                child: Text(
+                child: AppText(
                   selectedLanguage.flag,
                   style: const TextStyle(fontSize: 28),
                 ),
@@ -550,7 +576,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       title,
                       style: const TextStyle(
                         color: Colors.white,
@@ -559,7 +585,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    AppText(
                       selectedLanguage.description,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.58),
@@ -575,7 +601,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
 
           const SizedBox(height: 10),
 
-          Text(
+          AppText(
             description,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.70),
@@ -599,7 +625,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
             items: _languages.map((language) {
               return DropdownMenuItem<String>(
                 value: language.code,
-                child: Text('${language.flag}  ${language.name}'),
+                child: AppText('${language.flag}  ${language.name}'),
               );
             }).toList(),
             onChanged: onChanged,
@@ -631,7 +657,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       ),
       child: Column(
         children: [
-          Text(
+          AppText(
             hasSameLanguage ? 'Atenção' : 'Percurso de aprendizagem',
             style: TextStyle(
               color: hasSameLanguage ? Colors.orangeAccent : _accentColor,
@@ -642,7 +668,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
 
           const SizedBox(height: 13),
 
-          Text(
+          AppText(
             '${nativeLanguage.flag} ${nativeLanguage.name}  →  '
             '${targetLanguage.flag} ${targetLanguage.name}',
             textAlign: TextAlign.center,
@@ -655,7 +681,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
 
           const SizedBox(height: 10),
 
-          Text(
+          AppText(
             hasSameLanguage
                 ? 'Escolhe idiomas diferentes para que as atividades tenham um objetivo de aprendizagem claro.'
                 : 'As atividades serão preparadas com base no idioma que conheces e no idioma que queres praticar.',
@@ -717,7 +743,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                   Icons.check,
                   size: 25,
                 ),
-          label: Text(
+          label: AppText(
             _isSaving ? 'A guardar...' : 'Guardar idiomas',
             style: const TextStyle(
               fontSize: 18,

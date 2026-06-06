@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/repositories/auth_repository.dart';
 
 /// Página final do fluxo de recuperação de palavra-passe.
@@ -74,7 +76,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
+          content: AppText(
             'Palavra-passe alterada com sucesso. Inicia sessão novamente.',
           ),
         ),
@@ -111,7 +113,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
-        title: const Text(
+        title: const AppText(
           'Nova palavra-passe',
           style: TextStyle(
             fontSize: 23,
@@ -178,7 +180,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
                         SizedBox(height: isCompact ? 16 : 20),
 
-                        const Text(
+                        const AppText(
                           'Define uma nova palavra-passe',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -191,10 +193,20 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
                         const SizedBox(height: 10),
 
-                        Text(
+                        AppText(
                           debugToken != null && debugToken.isNotEmpty
-                              ? 'Conta: ${widget.email}\nUsa o código temporário abaixo para concluir o teste de recuperação.'
-                              : 'Conta: ${widget.email}',
+                              ? context.tr(
+                                  'Conta: {email}\nUsa o código temporário abaixo para concluir o teste de recuperação.',
+                                  parameters: <String, Object?>{
+                                    'email': widget.email,
+                                  },
+                                )
+                              : context.tr(
+                                  'Conta: {email}',
+                                  parameters: <String, Object?>{
+                                    'email': widget.email,
+                                  },
+                                ),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.72),
@@ -217,7 +229,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           icon: Icons.pin_outlined,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Indica o código de recuperação.';
+                              return context.tr('Indica o código de recuperação.');
                             }
 
                             return null;
@@ -241,7 +253,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           ),
                           validator: (value) {
                             if (value == null || value.length < 6) {
-                              return 'A password deve ter pelo menos 6 caracteres.';
+                              return context.tr('A password deve ter pelo menos 6 caracteres.');
                             }
 
                             return null;
@@ -266,7 +278,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           ),
                           validator: (value) {
                             if (value != _passwordController.text) {
-                              return 'As passwords não coincidem.';
+                              return context.tr('As passwords não coincidem.');
                             }
 
                             return null;
@@ -346,11 +358,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         ),
       ),
       child: SelectableText(
-        'Versão de protótipo\n'
-        'No plano gratuito da Cloudflare, o servidor não envia emails de '
-        'recuperação. Para permitir testar o fluxo, o código temporário é '
-        'apresentado aqui.\n\n'
-        'Código: $debugToken',
+        context.tr(
+          'Versão de protótipo\nNo plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário é apresentado aqui.\n\nCódigo: {code}',
+          parameters: <String, Object?>{'code': debugToken},
+        ),
         textAlign: TextAlign.center,
         style: const TextStyle(
           color: Colors.orangeAccent,
@@ -366,7 +377,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     required VoidCallback onPressed,
   }) {
     return IconButton(
-      tooltip: obscure ? 'Mostrar password' : 'Ocultar password',
+      tooltip: context.tr(
+        obscure ? 'Mostrar password' : 'Ocultar password',
+      ),
       icon: Icon(
         obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
         color: Colors.white.withValues(alpha: 0.74),
@@ -394,7 +407,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       ),
       cursorColor: _accentColor,
       decoration: InputDecoration(
-        labelText: label,
+        labelText: context.tr(label),
         labelStyle: TextStyle(
           color: Colors.white.withValues(alpha: 0.66),
           fontSize: 18,
@@ -500,7 +513,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   Icons.save_outlined,
                   size: 24,
                 ),
-          label: Text(
+          label: AppText(
             _isLoading ? 'A guardar...' : 'Alterar palavra-passe',
             style: const TextStyle(
               fontSize: 17,
@@ -533,7 +546,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           color: Colors.redAccent.withValues(alpha: 0.85),
         ),
       ),
-      child: Text(
+      child: AppText(
         message,
         style: const TextStyle(
           color: Colors.redAccent,

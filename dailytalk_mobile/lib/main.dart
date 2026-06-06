@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'data/database/database_factory_config.dart';
 import 'screens/auth_gate.dart';
+import 'state/app_locale_controller.dart';
 import 'state/app_session_controller.dart';
 
 /// Ponto de entrada da aplicação DailyTalk.pt.
-///
-/// Antes de iniciar a interface gráfica, configuramos a factory da base de dados.
-/// Isto é necessário porque:
-/// - no Android, o sqflite funciona de forma nativa;
-/// - no Web, é necessário inicializar a implementação SQLite/WASM.
 Future<void> main() async {
-  // Garante que o Flutter está inicializado antes de qualquer operação assíncrona.
   WidgetsFlutterBinding.ensureInitialized();
 
   // Configura a base de dados conforme a plataforma atual.
   await configureDatabaseFactory();
 
-  // Inicia a aplicação.
+  // Lê o idioma guardado antes de construir o primeiro ecrã. Desta forma, a
+  // aplicação não apresenta primeiro português e só depois muda de idioma.
+  await AppLocaleController.instance.initialize();
+
   runApp(const DailyTalkApp());
 }
 
@@ -27,16 +26,36 @@ class DailyTalkApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSessionScope(
-      controller: AppSessionController.instance,
-      child: MaterialApp(
-        title: 'DailyTalk.pt',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
+    final localeController = AppLocaleController.instance;
+
+    return AppLocaleScope(
+      controller: localeController,
+      child: AppSessionScope(
+        controller: AppSessionController.instance,
+        child: AnimatedBuilder(
+          animation: localeController,
+          builder: (context, child) {
+            return MaterialApp(
+              title: 'DailyTalk.pt',
+              debugShowCheckedModeBanner: false,
+              locale: localeController.locale,
+              supportedLocales: const <Locale>[
+                Locale('pt', 'PT'),
+                Locale('en', 'US'),
+                Locale('es', 'ES'),
+                Locale('fr', 'FR'),
+                Locale('it', 'IT'),
+                Locale('de', 'DE'),
+              ],
+              localizationsDelegates: GlobalMaterialLocalizations.delegates,
+              theme: ThemeData(
+                colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+                useMaterial3: true,
+              ),
+              home: const AuthGate(),
+            );
+          },
         ),
-        home: const AuthGate(),
       ),
     );
   }

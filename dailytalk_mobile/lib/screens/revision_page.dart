@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
 import '../data/repositories/auth_repository.dart';
@@ -255,7 +257,7 @@ class _RevisionPageState extends State<RevisionPage> {
           ),
           const SizedBox(width: 12),
           const Expanded(
-            child: Text(
+            child: AppText(
               'DailyTalk.pt',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -310,7 +312,7 @@ class _RevisionPageState extends State<RevisionPage> {
           Row(
             children: <Widget>[
               Expanded(
-                child: Text(
+                child: AppText(
                   '${_ui('review')} ${_currentIndex + 1}/${_cards.length}',
                   style: const TextStyle(
                     color: Colors.white,
@@ -357,7 +359,7 @@ class _RevisionPageState extends State<RevisionPage> {
           color: _accentColor.withValues(alpha: 0.32),
         ),
       ),
-      child: Text(
+      child: AppText(
         '${_languageName(_userLanguageCode)} → ${_languageName(_learningLanguageCode)}',
         style: const TextStyle(
           color: _accentColor,
@@ -382,7 +384,7 @@ class _RevisionPageState extends State<RevisionPage> {
             Icon(icon, color: color, size: 18),
             const SizedBox(width: 6),
             Expanded(
-              child: Text(
+              child: AppText(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -393,7 +395,7 @@ class _RevisionPageState extends State<RevisionPage> {
                 ),
               ),
             ),
-            Text(
+            AppText(
               value,
               style: const TextStyle(
                 color: Colors.white,
@@ -457,7 +459,7 @@ class _RevisionPageState extends State<RevisionPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(
+                    AppText(
                       _ui('cardTitle'),
                       style: const TextStyle(
                         color: Colors.white,
@@ -466,7 +468,7 @@ class _RevisionPageState extends State<RevisionPage> {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    Text(
+                    AppText(
                       card.categoryFor(_translationKey(_userLanguageCode)),
                       style: const TextStyle(
                         color: Colors.white60,
@@ -480,7 +482,7 @@ class _RevisionPageState extends State<RevisionPage> {
             ],
           ),
           const SizedBox(height: 22),
-          Text(
+          AppText(
             _ui('frontLabel'),
             style: const TextStyle(
               color: _accentColor,
@@ -490,7 +492,7 @@ class _RevisionPageState extends State<RevisionPage> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             card.textFor(_translationKey(_learningLanguageCode)),
             style: const TextStyle(
               color: Colors.white,
@@ -525,7 +527,7 @@ class _RevisionPageState extends State<RevisionPage> {
         const Icon(Icons.visibility_outlined, color: _accentColor, size: 22),
         const SizedBox(width: 10),
         Expanded(
-          child: Text(
+          child: AppText(
             _ui('hint'),
             style: const TextStyle(
               color: Colors.white70,
@@ -543,7 +545,7 @@ class _RevisionPageState extends State<RevisionPage> {
       key: const ValueKey<String>('meaning'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
+        AppText(
           _ui('meaning'),
           style: const TextStyle(
             color: _successColor,
@@ -553,7 +555,7 @@ class _RevisionPageState extends State<RevisionPage> {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
+        AppText(
           card.textFor(_translationKey(_userLanguageCode)),
           style: const TextStyle(
             color: Colors.white,
@@ -563,7 +565,7 @@ class _RevisionPageState extends State<RevisionPage> {
           ),
         ),
         const SizedBox(height: 10),
-        Text(
+        AppText(
           card.contextFor(_translationKey(_userLanguageCode)),
           style: const TextStyle(
             color: Colors.white60,
@@ -595,7 +597,7 @@ class _RevisionPageState extends State<RevisionPage> {
       child: FilledButton.icon(
         onPressed: _showMeaning,
         icon: const Icon(Icons.visibility),
-        label: Text(_ui('showMeaning')),
+        label: AppText(_ui('showMeaning')),
         style: FilledButton.styleFrom(
           backgroundColor: _primaryBlue,
           foregroundColor: Colors.white,
@@ -615,7 +617,7 @@ class _RevisionPageState extends State<RevisionPage> {
             child: OutlinedButton.icon(
               onPressed: _markForReview,
               icon: const Icon(Icons.refresh),
-              label: Text(_ui('reviewAgain')),
+              label: AppText(_ui('reviewAgain')),
               style: OutlinedButton.styleFrom(
                 foregroundColor: _warningColor,
                 side: BorderSide(color: _warningColor.withValues(alpha: 0.65)),
@@ -632,7 +634,7 @@ class _RevisionPageState extends State<RevisionPage> {
             child: FilledButton.icon(
               onPressed: _markKnown,
               icon: const Icon(Icons.check_circle),
-              label: Text(_ui('iKnow')),
+              label: AppText(_ui('iKnow')),
               style: FilledButton.styleFrom(
                 backgroundColor: _successColor,
                 foregroundColor: const Color(0xFF062014),
@@ -664,7 +666,7 @@ class _RevisionPageState extends State<RevisionPage> {
           children: <Widget>[
             const Icon(Icons.workspace_premium, color: _successColor, size: 54),
             const SizedBox(height: 14),
-            Text(
+            AppText(
               _ui('finishedTitle'),
               textAlign: TextAlign.center,
               style: const TextStyle(
@@ -674,7 +676,7 @@ class _RevisionPageState extends State<RevisionPage> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            AppText(
               _ui('finishedSubtitle'),
               textAlign: TextAlign.center,
               style: const TextStyle(
@@ -700,7 +702,7 @@ class _RevisionPageState extends State<RevisionPage> {
               child: FilledButton.icon(
                 onPressed: _restart,
                 icon: const Icon(Icons.replay),
-                label: Text(_ui('newReview')),
+                label: AppText(_ui('newReview')),
                 style: FilledButton.styleFrom(
                   backgroundColor: _primaryBlue,
                   foregroundColor: Colors.white,
@@ -726,7 +728,7 @@ class _RevisionPageState extends State<RevisionPage> {
         ),
         child: Column(
           children: <Widget>[
-            Text(
+            AppText(
               value,
               style: const TextStyle(
                 color: Colors.white,
@@ -735,7 +737,7 @@ class _RevisionPageState extends State<RevisionPage> {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
+            AppText(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 /// Diálogos comuns de Ajuda e Sobre do DailyTalk.pt.
 ///
 /// Este ficheiro centraliza estes conteúdos para que o menu superior
@@ -18,7 +20,7 @@ class DailyTalkSupportDialogs {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(22),
           ),
-          title: const Text(
+          title: const AppText(
             'Ajuda',
             style: TextStyle(
               color: Colors.white,
@@ -26,7 +28,7 @@ class DailyTalkSupportDialogs {
             ),
           ),
           content: const SingleChildScrollView(
-            child: Text(
+            child: AppText(
               'Usa a Home para acompanhar o teu percurso e aceder rapidamente às atividades.\n\n'
               'Em Praticar, responde a atividades predefinidas para treinares comunicação em contexto escolar.\n\n'
               'Em Resultados, acompanha o teu histórico, pontuações e estado de sincronização.\n\n'
@@ -39,7 +41,7 @@ class DailyTalkSupportDialogs {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Fechar'),
+              child: const AppText('Fechar'),
             ),
           ],
         );
@@ -56,7 +58,7 @@ class DailyTalkSupportDialogs {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(22),
           ),
-          title: const Text(
+          title: const AppText(
             'Sobre o DailyTalk.pt',
             style: TextStyle(
               color: Colors.white,
@@ -64,7 +66,7 @@ class DailyTalkSupportDialogs {
             ),
           ),
           content: const SingleChildScrollView(
-            child: Text(
+            child: AppText(
               'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\n'
               'A aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.\n\n'
               'O projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.\n\n'
@@ -75,7 +77,7 @@ class DailyTalkSupportDialogs {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Fechar'),
+              child: const AppText('Fechar'),
             ),
           ],
         );

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/repositories/auth_repository.dart';
 import '../models/auth_user.dart';
 import '../state/app_session_controller.dart';
@@ -103,7 +105,7 @@ class _AccountPageState extends State<AccountPage> {
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
-        title: const Text(
+        title: const AppText(
           'Conta',
           style: TextStyle(
             fontSize: 26,
@@ -235,7 +237,7 @@ class _AccountPageState extends State<AccountPage> {
                     color: _accentColor,
                   ),
                   const SizedBox(height: 16),
-                  Text(
+                  AppText(
                     title,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
@@ -245,7 +247,7 @@ class _AccountPageState extends State<AccountPage> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  AppText(
                     message,
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -281,7 +283,7 @@ class _AccountPageState extends State<AccountPage> {
             color: _accentColor,
           ),
           const SizedBox(height: 16),
-          Text(
+          AppText(
             user.name,
             textAlign: TextAlign.center,
             style: const TextStyle(
@@ -292,7 +294,7 @@ class _AccountPageState extends State<AccountPage> {
             ),
           ),
           const SizedBox(height: 5),
-          Text(
+          AppText(
             user.email,
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -368,7 +370,7 @@ class _AccountPageState extends State<AccountPage> {
       child: OutlinedButton.icon(
         onPressed: _logout,
         icon: const Icon(Icons.logout, size: 23),
-        label: const Text(
+        label: const AppText(
           'Terminar sessão',
           style: TextStyle(
             fontSize: 16,
@@ -415,7 +417,7 @@ class _AccountPageState extends State<AccountPage> {
         child: ElevatedButton.icon(
           onPressed: _openLogin,
           icon: const Icon(Icons.login, size: 23),
-          label: const Text(
+          label: const AppText(
             'Entrar',
             style: TextStyle(
               fontSize: 16,
@@ -442,7 +444,7 @@ class _AccountPageState extends State<AccountPage> {
       child: OutlinedButton.icon(
         onPressed: _openRegister,
         icon: const Icon(Icons.person_add_alt_1_outlined, size: 23),
-        label: const Text(
+        label: const AppText(
           'Criar conta',
           style: TextStyle(
             fontSize: 16,
@@ -516,7 +518,7 @@ class _InfoRow extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
+            child: AppText(
               label,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.64),
@@ -527,7 +529,7 @@ class _InfoRow extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Flexible(
-            child: Text(
+            child: AppText(
               value,
               textAlign: TextAlign.right,
               style: const TextStyle(

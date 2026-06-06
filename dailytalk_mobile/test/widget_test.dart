@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dailytalk_mobile/screens/login_page.dart';
+import 'package:dailytalk_mobile/state/app_locale_controller.dart';
 import 'package:dailytalk_mobile/state/app_session_controller.dart';
 
 /// Cria um ambiente mínimo de teste para o ecrã inicial.
@@ -10,9 +11,11 @@ import 'package:dailytalk_mobile/state/app_session_controller.dart';
 /// sessão guardada de forma assíncrona. Em testes de widget, isso pode manter
 /// animações/pedidos pendentes e fazer o pumpAndSettle expirar.
 Widget _buildTestApp() {
-  return AppSessionScope(
-    controller: AppSessionController.instance,
-    child: MaterialApp(
+  return AppLocaleScope(
+    controller: AppLocaleController.instance,
+    child: AppSessionScope(
+      controller: AppSessionController.instance,
+      child: MaterialApp(
       title: 'DailyTalk.pt',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -22,16 +25,15 @@ Widget _buildTestApp() {
       home: LoginPage(
         onAuthenticated: () {},
       ),
+      ),
     ),
   );
 }
 
 void main() {
-  testWidgets('Mostra o ecrã inicial do DailyTalk', (tester) async {
+  testWidgets('Mostra o ecrã inicial com ações principais visíveis',
+      (tester) async {
     await tester.pumpWidget(_buildTestApp());
-
-    // Usa pumps fixos em vez de pumpAndSettle para evitar timeout causado por
-    // animações contínuas ou validações assíncronas não relevantes para o teste.
     await tester.pump(const Duration(milliseconds: 300));
 
     // O primeiro ecrã deixou de ser o formulário de login.
@@ -45,7 +47,8 @@ void main() {
     expect(find.text('Password'), findsNothing);
   });
 
-  testWidgets('Abre o ecrã de autenticação ao tocar em Entrar', (tester) async {
+  testWidgets('Abre o ecrã de autenticação ao tocar em Entrar',
+      (tester) async {
     await tester.pumpWidget(_buildTestApp());
     await tester.pump(const Duration(milliseconds: 300));
 

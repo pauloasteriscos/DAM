@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/facades/activity_workflow_facade.dart';
 import '../screens/account_page.dart';
 import '../screens/create_activity_page.dart';
@@ -143,14 +145,14 @@ class TopOverflowMenu extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(22),
           ),
-          title: const Text(
+          title: const AppText(
             'Conta necessária',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w800,
             ),
           ),
-          content: Text(
+          content: AppText(
             'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.76),
@@ -160,7 +162,7 @@ class TopOverflowMenu extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Continuar a testar'),
+              child: const AppText('Continuar a testar'),
             ),
             TextButton(
               onPressed: () {
@@ -174,7 +176,7 @@ class TopOverflowMenu extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text('Criar conta'),
+              child: const AppText('Criar conta'),
             ),
             TextButton(
               onPressed: () {
@@ -188,7 +190,7 @@ class TopOverflowMenu extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text('Entrar'),
+              child: const AppText('Entrar'),
             ),
           ],
         );
@@ -203,19 +205,25 @@ class TopOverflowMenu extends StatelessWidget {
       final facade = await ActivityWorkflowFacade.create();
       final result = await facade.syncPendingSubmissions();
 
+      // O ecrã pode ter sido removido enquanto a operação assíncrona decorria.
+      // Neste caso, não devemos reutilizar o BuildContext nem mostrar feedback.
+      if (!context.mounted) return;
+
       messenger.showSnackBar(
         SnackBar(
-          content: Text(
-            '${result.message} '
-            'Sincronizadas: ${result.syncedCount}. '
-            'Falhas: ${result.failedCount}.',
+          content: AppText(
+            '${context.tr(result.message)} '
+            '${context.tr('Sincronizadas')}: ${result.syncedCount}. '
+            '${context.tr('Falhas')}: ${result.failedCount}.',
           ),
         ),
       );
     } catch (error) {
+      if (!context.mounted) return;
+
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Erro ao sincronizar: $error'),
+          content: AppText('Erro ao sincronizar: $error'),
         ),
       );
     }
@@ -246,7 +254,7 @@ class _MenuItemContent extends StatelessWidget {
       children: [
         Icon(icon, color: Colors.white70, size: 22),
         const SizedBox(width: 12),
-        Text(text, style: const TextStyle(color: Colors.white)),
+        AppText(text, style: const TextStyle(color: Colors.white)),
       ],
     );
   }

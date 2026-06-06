@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 import '../data/repositories/auth_repository.dart';
+import '../state/app_locale_controller.dart';
 import '../state/app_session_controller.dart';
 
 /// Página de criação de conta do DailyTalk.pt.
@@ -69,6 +72,15 @@ class _RegisterPageState extends State<RegisterPage> {
         return;
       }
 
+      await AppLocaleScope.read(context).setLanguageCode(
+        user.preferences.appLanguageCode,
+        persist: true,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
       AppSessionScope.read(context).markAuthenticated(user);
       widget.onAuthenticated();
 
@@ -104,7 +116,7 @@ class _RegisterPageState extends State<RegisterPage> {
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
-        title: const Text(
+        title: const AppText(
           'Criar conta',
           style: TextStyle(
             fontSize: 26,
@@ -170,7 +182,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                         SizedBox(height: isCompact ? 14 : 18),
 
-                        const Text(
+                        const AppText(
                           'Cria o teu perfil',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -189,7 +201,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           icon: Icons.person_outline,
                           validator: (value) {
                             if (value == null || value.trim().length < 2) {
-                              return 'Indica o nome.';
+                              return context.tr('Indica o nome.');
                             }
 
                             return null;
@@ -205,7 +217,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || !value.contains('@')) {
-                              return 'Indica um email válido.';
+                              return context.tr('Indica um email válido.');
                             }
 
                             return null;
@@ -220,9 +232,11 @@ class _RegisterPageState extends State<RegisterPage> {
                           icon: Icons.lock_outline,
                           obscureText: _obscurePassword,
                           suffixIcon: IconButton(
-                            tooltip: _obscurePassword
-                                ? 'Mostrar password'
-                                : 'Ocultar password',
+                            tooltip: context.tr(
+                              _obscurePassword
+                                  ? 'Mostrar password'
+                                  : 'Ocultar password',
+                            ),
                             icon: Icon(
                               _obscurePassword
                                   ? Icons.visibility_outlined
@@ -237,7 +251,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                           validator: (value) {
                             if (value == null || value.length < 6) {
-                              return 'A password deve ter pelo menos 6 caracteres.';
+                              return context.tr('A password deve ter pelo menos 6 caracteres.');
                             }
 
                             return null;
@@ -362,15 +376,15 @@ class _RegisterPageState extends State<RegisterPage> {
       items: const [
         DropdownMenuItem(
           value: 'student',
-          child: Text('Estudante'),
+          child: AppText('Estudante'),
         ),
         DropdownMenuItem(
           value: 'host',
-          child: Text('Anfitrião'),
+          child: AppText('Anfitrião'),
         ),
         DropdownMenuItem(
           value: 'teacher',
-          child: Text('Professor'),
+          child: AppText('Professor'),
         ),
       ],
       onChanged: (value) {
@@ -391,7 +405,7 @@ class _RegisterPageState extends State<RegisterPage> {
     Widget? suffixIcon,
   }) {
     return InputDecoration(
-      labelText: label,
+      labelText: context.tr(label),
       labelStyle: TextStyle(
         color: Colors.white.withValues(alpha: 0.66),
         fontSize: 18,
@@ -496,7 +510,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   Icons.check,
                   size: 25,
                 ),
-          label: Text(
+          label: AppText(
             _isLoading ? 'A criar...' : 'Criar conta',
             style: const TextStyle(
               fontSize: 18,
@@ -529,7 +543,7 @@ class _RegisterPageState extends State<RegisterPage> {
           color: Colors.redAccent.withValues(alpha: 0.85),
         ),
       ),
-      child: Text(
+      child: AppText(
         message,
         style: const TextStyle(
           color: Colors.redAccent,
