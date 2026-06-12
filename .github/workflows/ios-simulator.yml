@@ -1,0 +1,79 @@
+﻿name: iOS Simulator Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "dailytalk_mobile/**"
+      - ".github/workflows/ios-simulator.yml"
+
+jobs:
+  build-ios-simulator:
+    name: Build Flutter app for iOS Simulator
+    runs-on: macos-latest
+
+    defaults:
+      run:
+        working-directory: dailytalk_mobile
+
+    steps:
+      # Obter o código do repositório.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Instalar Flutter no runner macOS.
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # Mostrar versões para ficarem como evidência da validação.
+      - name: Show environment
+        run: |
+          flutter --version
+          xcodebuild -version
+          flutter doctor -v
+
+      # Instalar dependências do projeto Flutter.
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Validar análise estática do código.
+      - name: Analyze project
+        run: flutter analyze
+
+      # Executar testes automatizados existentes.
+      - name: Run tests
+        run: flutter test
+
+      # Garantir que a pasta iOS existe no projeto.
+      # Se já existir, este passo não altera nada de relevante.
+      - name: Ensure iOS platform exists
+        run: |
+          if [ ! -d "ios" ]; then
+            flutter create --platforms=ios .
+          fi
+
+      # Compilar a app para iOS Simulator.
+      # Isto não gera IPA nem instala em iPhone físico.
+      - name: Build iOS Simulator app
+        run: |
+          flutter build ios --simulator --debug \
+            --dart-define=DAILYTALK_USE_MOCK_API=false \
+            --dart-define=DAILYTALK_API_BASE_URL=https://dailytalk.pt/api
+
+      # Compactar o .app gerado.
+      - name: Zip iOS Simulator app
+        run: |
+          cd build/ios/iphonesimulator
+          zip -r DailyTalk_iOS_Simulator.app.zip Runner.app
+
+      # Guardar o build como artefacto descarregável no GitHub Actions.
+      - name: Upload iOS Simulator artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DailyTalk_iOS_Simulator_Build
+          path: dailytalk_mobile/build/ios/iphonesimulator/DailyTalk_iOS_Simulator.app.zip
