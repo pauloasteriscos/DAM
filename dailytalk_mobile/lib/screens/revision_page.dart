@@ -183,10 +183,7 @@ class _RevisionPageState extends State<RevisionPage> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: <Color>[
-                Color(0xFF0D1B22),
-                Color(0xFF07141B),
-              ],
+              colors: <Color>[Color(0xFF0D1B22), Color(0xFF07141B)],
             ),
           ),
           child: Column(
@@ -195,9 +192,7 @@ class _RevisionPageState extends State<RevisionPage> {
               Expanded(
                 child: _isLoading
                     ? const Center(
-                        child: CircularProgressIndicator(
-                          color: _accentColor,
-                        ),
+                        child: CircularProgressIndicator(color: _accentColor),
                       )
                     : Center(
                         child: ConstrainedBox(
@@ -238,9 +233,7 @@ class _RevisionPageState extends State<RevisionPage> {
             decoration: BoxDecoration(
               color: const Color(0xFF06345C),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: _accentColor.withValues(alpha: 0.40),
-              ),
+              border: Border.all(color: _accentColor.withValues(alpha: 0.40)),
               boxShadow: <BoxShadow>[
                 BoxShadow(
                   color: _accentColor.withValues(alpha: 0.18),
@@ -249,11 +242,7 @@ class _RevisionPageState extends State<RevisionPage> {
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.menu_book,
-              color: Colors.amber,
-              size: 28,
-            ),
+            child: const Icon(Icons.menu_book, color: Colors.amber, size: 28),
           ),
           const SizedBox(width: 12),
           const Expanded(
@@ -302,9 +291,7 @@ class _RevisionPageState extends State<RevisionPage> {
       decoration: BoxDecoration(
         color: _panelColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: _accentColor.withValues(alpha: 0.28),
-        ),
+        border: Border.all(color: _accentColor.withValues(alpha: 0.28)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,11 +324,26 @@ class _RevisionPageState extends State<RevisionPage> {
           const SizedBox(height: 12),
           Row(
             children: <Widget>[
-              _buildMetric(Icons.check_circle_outline, _ui('known'), '$_knownCount', _successColor),
+              _buildMetric(
+                Icons.check_circle_outline,
+                _ui('known'),
+                '$_knownCount',
+                _successColor,
+              ),
               const SizedBox(width: 8),
-              _buildMetric(Icons.refresh, _ui('toReview'), '$_reviewCount', _warningColor),
+              _buildMetric(
+                Icons.refresh,
+                _ui('toReview'),
+                '$_reviewCount',
+                _warningColor,
+              ),
               const SizedBox(width: 8),
-              _buildMetric(Icons.local_fire_department, _ui('streak'), '$_streak', Colors.orangeAccent),
+              _buildMetric(
+                Icons.local_fire_department,
+                _ui('streak'),
+                '$_streak',
+                Colors.orangeAccent,
+              ),
             ],
           ),
         ],
@@ -355,9 +357,7 @@ class _RevisionPageState extends State<RevisionPage> {
       decoration: BoxDecoration(
         color: _primaryBlue.withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: _accentColor.withValues(alpha: 0.32),
-        ),
+        border: Border.all(color: _accentColor.withValues(alpha: 0.32)),
       ),
       child: AppText(
         '${_languageName(_userLanguageCode)} → ${_languageName(_learningLanguageCode)}',
@@ -446,13 +446,11 @@ class _RevisionPageState extends State<RevisionPage> {
                 decoration: BoxDecoration(
                   color: _primaryBlue.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: _accentColor.withValues(alpha: 0.30)),
+                  border: Border.all(
+                    color: _accentColor.withValues(alpha: 0.30),
+                  ),
                 ),
-                child: const Icon(
-                  Icons.style,
-                  color: _accentColor,
-                  size: 24,
-                ),
+                child: const Icon(Icons.style, color: _accentColor, size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -602,7 +600,9 @@ class _RevisionPageState extends State<RevisionPage> {
           backgroundColor: _primaryBlue,
           foregroundColor: Colors.white,
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
     );
@@ -621,8 +621,13 @@ class _RevisionPageState extends State<RevisionPage> {
               style: OutlinedButton.styleFrom(
                 foregroundColor: _warningColor,
                 side: BorderSide(color: _warningColor.withValues(alpha: 0.65)),
-                textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
             ),
           ),
@@ -638,8 +643,13 @@ class _RevisionPageState extends State<RevisionPage> {
               style: FilledButton.styleFrom(
                 backgroundColor: _successColor,
                 foregroundColor: const Color(0xFF062014),
-                textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
             ),
           ),
@@ -706,8 +716,13 @@ class _RevisionPageState extends State<RevisionPage> {
                 style: FilledButton.styleFrom(
                   backgroundColor: _primaryBlue,
                   foregroundColor: Colors.white,
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
               ),
             ),
@@ -861,7 +876,8 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'reviewAgain': 'Preciso rever',
     'iKnow': 'Já sei',
     'finishedTitle': 'Revisão concluída',
-    'finishedSubtitle': 'Boa sessão. As frases marcadas para rever podem voltar numa ronda posterior.',
+    'finishedSubtitle':
+        'Boa sessão. As frases marcadas para rever podem voltar numa ronda posterior.',
     'mastery': 'Domínio',
     'newReview': 'Nova revisão',
   },
@@ -873,13 +889,15 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'streak': 'Streak',
     'cardTitle': 'Review card',
     'frontLabel': 'PHRASE TO PRACTICE',
-    'hint': 'Read the phrase and try to remember the meaning before revealing it.',
+    'hint':
+        'Read the phrase and try to remember the meaning before revealing it.',
     'meaning': 'MEANING',
     'showMeaning': 'Show meaning',
     'reviewAgain': 'Review again',
     'iKnow': 'I know it',
     'finishedTitle': 'Review completed',
-    'finishedSubtitle': 'Good session. Phrases marked for review can return in a later round.',
+    'finishedSubtitle':
+        'Good session. Phrases marked for review can return in a later round.',
     'mastery': 'Mastery',
     'newReview': 'New review',
   },
@@ -891,13 +909,15 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'streak': 'Racha',
     'cardTitle': 'Tarjeta de revisión',
     'frontLabel': 'FRASE A PRACTICAR',
-    'hint': 'Lee la frase e intenta recordar el significado antes de revelarlo.',
+    'hint':
+        'Lee la frase e intenta recordar el significado antes de revelarlo.',
     'meaning': 'SIGNIFICADO',
     'showMeaning': 'Mostrar significado',
     'reviewAgain': 'Necesito revisar',
     'iKnow': 'Ya lo sé',
     'finishedTitle': 'Revisión completada',
-    'finishedSubtitle': 'Buena sesión. Las frases marcadas para revisar pueden volver en otra ronda.',
+    'finishedSubtitle':
+        'Buena sesión. Las frases marcadas para revisar pueden volver en otra ronda.',
     'mastery': 'Dominio',
     'newReview': 'Nueva revisión',
   },
@@ -909,13 +929,15 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'streak': 'Série',
     'cardTitle': 'Carte de révision',
     'frontLabel': 'PHRASE À PRATIQUER',
-    'hint': 'Lis la phrase et essaie de te souvenir du sens avant de le révéler.',
+    'hint':
+        'Lis la phrase et essaie de te souvenir du sens avant de le révéler.',
     'meaning': 'SENS',
     'showMeaning': 'Afficher le sens',
     'reviewAgain': 'À revoir',
     'iKnow': 'Je sais',
     'finishedTitle': 'Révision terminée',
-    'finishedSubtitle': 'Bonne session. Les phrases à revoir peuvent revenir dans une prochaine manche.',
+    'finishedSubtitle':
+        'Bonne session. Les phrases à revoir peuvent revenir dans une prochaine manche.',
     'mastery': 'Maîtrise',
     'newReview': 'Nouvelle révision',
   },
@@ -927,13 +949,15 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'streak': 'Serie',
     'cardTitle': 'Scheda di ripasso',
     'frontLabel': 'FRASE DA PRATICARE',
-    'hint': 'Leggi la frase e prova a ricordare il significato prima di mostrarlo.',
+    'hint':
+        'Leggi la frase e prova a ricordare il significato prima di mostrarlo.',
     'meaning': 'SIGNIFICATO',
     'showMeaning': 'Mostra significato',
     'reviewAgain': 'Devo ripassare',
     'iKnow': 'Lo so già',
     'finishedTitle': 'Ripasso completato',
-    'finishedSubtitle': 'Buona sessione. Le frasi segnate per il ripasso possono tornare in un altro giro.',
+    'finishedSubtitle':
+        'Buona sessione. Le frasi segnate per il ripasso possono tornare in un altro giro.',
     'mastery': 'Padronanza',
     'newReview': 'Nuovo ripasso',
   },
@@ -945,13 +969,15 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'streak': 'Serie',
     'cardTitle': 'Wiederholungskarte',
     'frontLabel': 'SATZ ZUM ÜBEN',
-    'hint': 'Lies den Satz und versuche, die Bedeutung zu erinnern, bevor du sie aufdeckst.',
+    'hint':
+        'Lies den Satz und versuche, die Bedeutung zu erinnern, bevor du sie aufdeckst.',
     'meaning': 'BEDEUTUNG',
     'showMeaning': 'Bedeutung zeigen',
     'reviewAgain': 'Noch einmal üben',
     'iKnow': 'Kann ich schon',
     'finishedTitle': 'Wiederholung abgeschlossen',
-    'finishedSubtitle': 'Gute Sitzung. Sätze zum Wiederholen können später erneut erscheinen.',
+    'finishedSubtitle':
+        'Gute Sitzung. Sätze zum Wiederholen können später erneut erscheinen.',
     'mastery': 'Sicherheit',
     'newReview': 'Neue Wiederholung',
   },

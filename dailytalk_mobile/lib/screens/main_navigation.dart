@@ -75,7 +75,8 @@ class _MainNavigationState extends State<MainNavigation> {
       ),
       const PlaceholderPage(
         title: 'Análises',
-        message: 'Consulta métricas de aprendizagem e acompanhamento pedagógico.',
+        message:
+            'Consulta métricas de aprendizagem e acompanhamento pedagógico.',
         icon: Icons.bar_chart,
         child: AnalyticsContent(),
       ),
@@ -116,9 +117,9 @@ class _MainNavigationState extends State<MainNavigation> {
     final Widget selectedActivity =
         practiceActivities[_random.nextInt(practiceActivities.length)];
 
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => selectedActivity),
-    );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => selectedActivity));
   }
 
   @override
@@ -140,7 +141,10 @@ class _MainNavigationState extends State<MainNavigation> {
         unselectedItemColor: Colors.white70,
         onTap: _onItemTapped,
         items: [
-          BottomNavigationBarItem(icon: const Icon(Icons.home), label: context.tr('Home')),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home),
+            label: context.tr('Home'),
+          ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.play_circle_outline),
             label: context.tr('Praticar'),
@@ -153,7 +157,10 @@ class _MainNavigationState extends State<MainNavigation> {
             icon: const Icon(Icons.bar_chart),
             label: context.tr('Análises'),
           ),
-          BottomNavigationBarItem(icon: const Icon(Icons.settings), label: context.tr('Ajustes')),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.settings),
+            label: context.tr('Ajustes'),
+          ),
         ],
       ),
     );

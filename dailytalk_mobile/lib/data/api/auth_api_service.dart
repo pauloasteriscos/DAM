@@ -4,16 +4,32 @@ import 'package:http/http.dart' as http;
 
 import '../../config/app_config.dart';
 import '../../models/auth_user.dart';
+import '../../security/auth_session_service.dart';
+import '../../security/device_key_service.dart';
 import '../storage/auth_token_storage.dart';
 
 /// Serviço de autenticação da API DailyTalk.pt.
 class AuthApiService {
-  AuthApiService({http.Client? client, AuthTokenStorage? tokenStorage})
-    : _client = client ?? http.Client(),
-      _tokenStorage = tokenStorage ?? AuthTokenStorage();
+  AuthApiService({
+    http.Client? client,
+    AuthTokenStorage? tokenStorage,
+    DeviceKeyService? deviceKeyService,
+    AuthSessionService? authSessionService,
+  }) : _client = client ?? http.Client(),
+       _tokenStorage = tokenStorage ?? AuthTokenStorage(),
+       _deviceKeyService = deviceKeyService ?? DeviceKeyService(),
+       _authSessionService =
+           authSessionService ??
+           AuthSessionService(
+             client: client,
+             tokenStorage: tokenStorage,
+             deviceKeyService: deviceKeyService,
+           );
 
   final http.Client _client;
   final AuthTokenStorage _tokenStorage;
+  final DeviceKeyService _deviceKeyService;
+  final AuthSessionService _authSessionService;
 
   Future<AuthSession> register({
     required String name,
@@ -42,12 +58,13 @@ class AuthApiService {
     final response = await _client
         .post(
           Uri.parse('${AppConfig.apiBaseUrl}/auth/register'),
-          headers: const {'Content-Type': 'application/json'},
+          headers: AppConfig.jsonHeaders,
           body: jsonEncode({
             'name': name,
             'email': email,
             'password': password,
             'role': role,
+            'device': await _deviceKeyService.registrationPayload(),
           }),
         )
         .timeout(AppConfig.apiTimeout);
@@ -80,8 +97,12 @@ class AuthApiService {
     final response = await _client
         .post(
           Uri.parse('${AppConfig.apiBaseUrl}/auth/login'),
-          headers: const {'Content-Type': 'application/json'},
-          body: jsonEncode({'email': email, 'password': password}),
+          headers: AppConfig.jsonHeaders,
+          body: jsonEncode({
+            'email': email,
+            'password': password,
+            'device': await _deviceKeyService.registrationPayload(),
+          }),
         )
         .timeout(AppConfig.apiTimeout);
 
@@ -103,19 +124,18 @@ class AuthApiService {
     final response = await _client
         .post(
           Uri.parse('${AppConfig.apiBaseUrl}/auth/forgot-password'),
-          headers: const {'Content-Type': 'application/json'},
+          headers: AppConfig.jsonHeaders,
           body: jsonEncode({'email': email}),
         )
         .timeout(AppConfig.apiTimeout);
-
     final decoded = _decodeResponse(response);
-    final isPrototypeDebug = decoded['debug'] == true;
 
     return PasswordResetRequestResult(
-      message: decoded['message']?.toString() ??
+      message:
+          decoded['message']?.toString() ??
           'Se o email existir, serão disponibilizadas instruções de recuperação.',
       debugResetToken: decoded['resetToken']?.toString(),
-      isPrototypeDebug: isPrototypeDebug,
+      isPrototypeDebug: decoded['debug'] == true,
       expiresAt: decoded['expiresAt']?.toString(),
     );
   }
@@ -125,14 +145,12 @@ class AuthApiService {
     required String resetToken,
     required String newPassword,
   }) async {
-    if (AppConfig.useMockApi) {
-      return;
-    }
+    if (AppConfig.useMockApi) return;
 
     final response = await _client
         .post(
           Uri.parse('${AppConfig.apiBaseUrl}/auth/reset-password'),
-          headers: const {'Content-Type': 'application/json'},
+          headers: AppConfig.jsonHeaders,
           body: jsonEncode({
             'email': email,
             'token': resetToken,
@@ -140,7 +158,6 @@ class AuthApiService {
           }),
         )
         .timeout(AppConfig.apiTimeout);
-
     _decodeResponse(response);
   }
 
@@ -160,15 +177,22 @@ class AuthApiService {
       );
     }
 
+    final uri = Uri.parse('${AppConfig.apiBaseUrl}/me');
     final response = await _client
         .get(
-          Uri.parse('${AppConfig.apiBaseUrl}/me'),
-          headers: await _authHeaders(),
+          uri,
+          headers: await _authSessionService.authenticatedHeaders(
+            method: 'GET',
+            uri: uri,
+          ),
         )
         .timeout(AppConfig.apiTimeout);
-
     final decoded = _decodeResponse(response);
-    return AuthUser.fromJson(Map<String, dynamic>.from(decoded['user'] as Map));
+    final user = AuthUser.fromJson(
+      Map<String, dynamic>.from(decoded['user'] as Map),
+    );
+    await _tokenStorage.saveCachedUser(user);
+    return user;
   }
 
   Future<AuthUser> updatePreferences({
@@ -193,53 +217,45 @@ class AuthApiService {
     }
 
     final payload = <String, dynamic>{};
-
-    void addIfNotNull(String key, Object? value) {
-      if (value != null) {
-        payload[key] = value;
-      }
+    if (appLanguageCode != null) payload['appLanguageCode'] = appLanguageCode;
+    if (learningLanguageCode != null) {
+      payload['learningLanguageCode'] = learningLanguageCode;
     }
+    if (selectedProfile != null) payload['selectedProfile'] = selectedProfile;
+    if (difficultyLevel != null) payload['difficultyLevel'] = difficultyLevel;
 
-    addIfNotNull('appLanguageCode', appLanguageCode);
-    addIfNotNull('learningLanguageCode', learningLanguageCode);
-    addIfNotNull('selectedProfile', selectedProfile);
-    addIfNotNull('difficultyLevel', difficultyLevel);
-
+    final uri = Uri.parse('${AppConfig.apiBaseUrl}/me/preferences');
     final response = await _client
         .put(
-          Uri.parse('${AppConfig.apiBaseUrl}/me/preferences'),
-          headers: await _authHeaders(),
+          uri,
+          headers: await _authSessionService.authenticatedHeaders(
+            method: 'PUT',
+            uri: uri,
+          ),
           body: jsonEncode(payload),
         )
         .timeout(AppConfig.apiTimeout);
-
     final decoded = _decodeResponse(response);
-    return AuthUser.fromJson(Map<String, dynamic>.from(decoded['user'] as Map));
-  }
-
-  Future<Map<String, String>> _authHeaders() async {
-    final token = await _tokenStorage.readToken();
-
-    if (token == null || token.isEmpty) {
-      throw Exception('Sessão expirada. Inicia sessão novamente.');
-    }
-
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
+    final user = AuthUser.fromJson(
+      Map<String, dynamic>.from(decoded['user'] as Map),
+    );
+    await _tokenStorage.saveCachedUser(user);
+    return user;
   }
 
   AuthSession _parseAuthSession(http.Response response) {
     final decoded = _decodeResponse(response);
-    final token = decoded['token']?.toString();
-
+    final token =
+        decoded['accessToken']?.toString() ?? decoded['token']?.toString();
     if (token == null || token.isEmpty) {
       throw Exception('A API não devolveu token de autenticação.');
     }
 
     return AuthSession(
       token: token,
+      refreshToken: decoded['refreshToken']?.toString(),
+      accessTokenExpiresAt: decoded['accessTokenExpiresAt']?.toString(),
+      deviceId: decoded['deviceId']?.toString(),
       user: AuthUser.fromJson(
         Map<String, dynamic>.from(decoded['user'] as Map),
       ),
@@ -247,44 +263,46 @@ class AuthApiService {
   }
 
   Map<String, dynamic> _decodeResponse(http.Response response) {
-    final Object decoded;
+    AppConfig.assertResponseEnvironment(response.headers);
 
+    final Object decoded;
     try {
       decoded = response.body.isEmpty
           ? <String, dynamic>{}
           : jsonDecode(response.body);
     } on FormatException {
-      final status = response.statusCode;
-      final bodyPreview = response.body.trim();
-      final hasBodyPreview = bodyPreview.isNotEmpty;
-
       throw Exception(
-        hasBodyPreview
-            ? 'A API devolveu uma resposta inválida em JSON (HTTP $status): $bodyPreview'
-            : 'A API devolveu uma resposta inválida em JSON (HTTP $status).',
+        'A API devolveu uma resposta inválida em JSON (HTTP ${response.statusCode}).',
       );
-    }
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      final message = decoded is Map && decoded['error'] != null
-          ? decoded['error'].toString()
-          : 'Erro HTTP ${response.statusCode}.';
-      throw Exception(message);
     }
 
     if (decoded is! Map) {
       throw Exception('Resposta inválida da API.');
     }
-
-    return Map<String, dynamic>.from(decoded);
+    final map = Map<String, dynamic>.from(decoded);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(
+        map['error']?.toString() ?? 'Erro HTTP ${response.statusCode}.',
+      );
+    }
+    return map;
   }
 }
 
 /// Resultado de login ou registo.
 class AuthSession {
-  const AuthSession({required this.token, required this.user});
+  const AuthSession({
+    required this.token,
+    required this.user,
+    this.refreshToken,
+    this.accessTokenExpiresAt,
+    this.deviceId,
+  });
 
   final String token;
+  final String? refreshToken;
+  final String? accessTokenExpiresAt;
+  final String? deviceId;
   final AuthUser user;
 }
 

@@ -328,10 +328,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF52D8FF),
-            Color(0xFF168CFF),
-          ],
+          colors: [Color(0xFF52D8FF), Color(0xFF168CFF)],
         ),
         boxShadow: [
           BoxShadow(
@@ -347,11 +344,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
           color: Color(0xFF092333),
           shape: BoxShape.circle,
         ),
-        child: const Icon(
-          Icons.insights,
-          color: _accentColor,
-          size: 38,
-        ),
+        child: const Icon(Icons.insights, color: _accentColor, size: 38),
       ),
     );
   }
@@ -373,10 +366,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
               : const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF49D7FF),
-                    Color(0xFF168CFF),
-                  ],
+                  colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
                 ),
           boxShadow: _isLoading
               ? []
@@ -399,16 +389,10 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
                     color: Colors.white,
                   ),
                 )
-              : const Icon(
-                  Icons.refresh,
-                  size: 24,
-                ),
+              : const Icon(Icons.refresh, size: 24),
           label: AppText(
             _isLoading ? 'A carregar...' : 'Atualizar análises',
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
           ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -447,7 +431,9 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
       child: AppText(
         '${context.tr(label)}: $value',
         style: TextStyle(
-          color: highlighted ? _accentColor : Colors.white.withValues(alpha: 0.82),
+          color: highlighted
+              ? _accentColor
+              : Colors.white.withValues(alpha: 0.82),
           fontSize: 13.5,
           fontWeight: FontWeight.w800,
         ),
@@ -464,9 +450,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.redAccent.withValues(alpha: 0.85),
-        ),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.85)),
       ),
       child: AppText(
         _errorMessage!,
@@ -478,10 +462,7 @@ class _AnalyticsContentState extends State<AnalyticsContent> {
     );
   }
 
-  BoxDecoration _cardDecoration({
-    Color? color,
-    Color? borderColor,
-  }) {
+  BoxDecoration _cardDecoration({Color? color, Color? borderColor}) {
     return BoxDecoration(
       color: color ?? _cardColor.withValues(alpha: 0.86),
       borderRadius: BorderRadius.circular(24),

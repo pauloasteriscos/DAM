@@ -1124,3 +1124,19 @@ A aplicação passou a ter backend real, autenticação, persistência remota e 
 A organização em quatro sprints permitiu testar progressivamente as funcionalidades principais. A Sprint 3 foi usada para consolidar autenticação, backend, segurança, testes e infraestrutura. A Sprint 4 foi usada para melhorar a comunicação visual, reforçar a identidade do DailyTalk.pt, tornar os fluxos principais mais consistentes do ponto de vista de usabilidade, transformar parte do mapa gamificado em atividades jogáveis e introduzir um modo teste que permite experimentar a aplicação antes do registo.
 
 A próxima etapa deverá concentrar-se na validação final em Android e Web, reforço dos testes unitários, persistência mais completa do progresso das novas atividades, validação do comportamento do modo teste em todos os ecrãs, substituição de mecanismos temporários por serviços definitivos quando a infraestrutura permitir e preparação da entrega final.
+
+---
+
+## Sincronização segura de produção
+
+A ação **Sincronizar progresso** utiliza agora um único lote assinado e cifrado, protegido por TLS, DPoP, Ed25519, X25519 e AES-256-GCM. A sessão é vinculada ao dispositivo e renovada silenciosamente para evitar logins provocados por expiração técnica ou atualização normal da aplicação.
+
+A aplicação mantém o progresso local e o utilizador em cache durante falhas de rede. Os tokens e as chaves não são eliminados automaticamente quando a API está temporariamente indisponível.
+
+A configuração completa encontra-se em:
+
+```text
+../IMPLEMENTACAO_SINCRONIZACAO_SEGURA.md
+```
+
+Esta base passa a ser orientada a produção robusta. A designação de protótipo nas secções históricas descreve apenas o estado das sprints anteriores e não o objetivo atual do projeto.

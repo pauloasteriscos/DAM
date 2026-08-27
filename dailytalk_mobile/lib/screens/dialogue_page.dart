@@ -261,9 +261,9 @@ class _DialoguePageState extends State<DialoguePage> {
 
   /// Placeholder para futura reprodução de áudio.
   void _playAudioPlaceholder() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: AppText(_ui('audioSoon'))),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: AppText(_ui('audioSoon'))));
   }
 
   @override
@@ -276,10 +276,7 @@ class _DialoguePageState extends State<DialoguePage> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: <Color>[
-                Color(0xFF061823),
-                Color(0xFF0D1B22),
-              ],
+              colors: <Color>[Color(0xFF061823), Color(0xFF0D1B22)],
             ),
           ),
           child: Center(
@@ -325,9 +322,7 @@ class _DialoguePageState extends State<DialoguePage> {
               height: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: _accentColor.withValues(alpha: 0.35),
-                ),
+                border: Border.all(color: _accentColor.withValues(alpha: 0.35)),
               ),
               child: const Icon(
                 Icons.arrow_back_ios_new,
@@ -356,11 +351,7 @@ class _DialoguePageState extends State<DialoguePage> {
               ),
             ],
           ),
-          child: const Icon(
-            Icons.menu_book,
-            color: Colors.amber,
-            size: 32,
-          ),
+          child: const Icon(Icons.menu_book, color: Colors.amber, size: 32),
         ),
         const SizedBox(width: 14),
         const Expanded(
@@ -520,11 +511,7 @@ class _DialoguePageState extends State<DialoguePage> {
             color: _accentColor.withValues(alpha: 0.14),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Icon(
-            _scenario.icon,
-            color: _accentColor,
-            size: 26,
-          ),
+          child: Icon(_scenario.icon, color: _accentColor, size: 26),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -611,7 +598,9 @@ class _DialoguePageState extends State<DialoguePage> {
             isCorrect: true,
           ),
         );
-      } else if (index == _turnIndex && _hasAnswered && _selectedReplyId != null) {
+      } else if (index == _turnIndex &&
+          _hasAnswered &&
+          _selectedReplyId != null) {
         final selectedReply = _currentReplies.firstWhere(
           (reply) => reply.id == _selectedReplyId,
         );
@@ -632,9 +621,7 @@ class _DialoguePageState extends State<DialoguePage> {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: _softBoxDecoration(),
-      child: Column(
-        children: widgets,
-      ),
+      child: Column(children: widgets),
     );
   }
 
@@ -652,8 +639,8 @@ class _DialoguePageState extends State<DialoguePage> {
     final borderColor = isWrong
         ? _errorColor.withValues(alpha: 0.70)
         : isCorrect
-            ? _successColor.withValues(alpha: 0.45)
-            : _accentColor.withValues(alpha: isUser ? 0.34 : 0.14);
+        ? _successColor.withValues(alpha: 0.45)
+        : _accentColor.withValues(alpha: isUser ? 0.34 : 0.14);
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -672,13 +659,16 @@ class _DialoguePageState extends State<DialoguePage> {
           border: Border.all(color: borderColor),
         ),
         child: Column(
-          crossAxisAlignment:
-              isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isUser
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             AppText(
               speaker,
               style: TextStyle(
-                color: isUser ? _accentColor : Colors.white.withValues(alpha: 0.58),
+                color: isUser
+                    ? _accentColor
+                    : Colors.white.withValues(alpha: 0.58),
                 fontSize: 12,
                 fontWeight: FontWeight.w900,
               ),
@@ -933,18 +923,18 @@ class _DialoguePageState extends State<DialoguePage> {
     final buttonText = !_hasAnswered
         ? _ui('confirm')
         : _selectedReplyIsCorrect
-            ? _isLastTurn
-                ? _ui('finish')
-                : _ui('next')
-            : _ui('tryAgain');
+        ? _isLastTurn
+              ? _ui('finish')
+              : _ui('next')
+        : _ui('tryAgain');
 
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: !_hasAnswered
             ? canConfirm
-                ? _confirmReply
-                : null
+                  ? _confirmReply
+                  : null
             : _continueDialogue,
         style: ElevatedButton.styleFrom(
           backgroundColor: _accentColor,
@@ -959,10 +949,7 @@ class _DialoguePageState extends State<DialoguePage> {
         ),
         child: AppText(
           buttonText,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
         ),
       ),
     );
@@ -1102,10 +1089,7 @@ class _DialoguePageState extends State<DialoguePage> {
     );
   }
 
-  BoxDecoration _softBoxDecoration({
-    Color? color,
-    Color? borderColor,
-  }) {
+  BoxDecoration _softBoxDecoration({Color? color, Color? borderColor}) {
     return BoxDecoration(
       color: color ?? _panelColor.withValues(alpha: 0.72),
       borderRadius: BorderRadius.circular(18),
@@ -1264,10 +1248,7 @@ class _DialogueReply {
 }
 
 class _LocalizedText {
-  const _LocalizedText({
-    required this.id,
-    required this.translations,
-  });
+  const _LocalizedText({required this.id, required this.translations});
 
   final String id;
   final Map<String, String> translations;
@@ -1308,7 +1289,8 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'loadingLanguages': 'A carregar os idiomas definidos no perfil...',
     'chooseReply': 'Escolhe a melhor resposta no idioma que estás a praticar.',
     'correct': 'Correto. A resposta é natural e mantém a conversa a avançar.',
-    'wrong': 'Ainda não é a melhor resposta. Observa a opção correta e tenta novamente.',
+    'wrong':
+        'Ainda não é a melhor resposta. Observa a opção correta e tenta novamente.',
     'partner': 'Interlocutor',
     'you': 'Tu',
     'points': 'Pontos',
@@ -1329,11 +1311,14 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'of': 'of',
     'contextLabel': 'Guided dialogue · Erasmus+',
     'listen': 'Listen',
-    'audioSoon': 'Audio for this dialogue will be integrated in a future version.',
+    'audioSoon':
+        'Audio for this dialogue will be integrated in a future version.',
     'loadingLanguages': 'Loading the languages defined in your profile...',
     'chooseReply': 'Choose the best reply in the language you are practising.',
-    'correct': 'Correct. The reply is natural and keeps the conversation going.',
-    'wrong': 'That is not the best reply yet. Check the correct option and try again.',
+    'correct':
+        'Correct. The reply is natural and keeps the conversation going.',
+    'wrong':
+        'That is not the best reply yet. Check the correct option and try again.',
     'partner': 'Partner',
     'you': 'You',
     'points': 'Points',
@@ -1354,11 +1339,14 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'of': 'de',
     'contextLabel': 'Diálogo guiado · Erasmus+',
     'listen': 'Escuchar',
-    'audioSoon': 'El audio de este diálogo se integrará en una próxima versión.',
+    'audioSoon':
+        'El audio de este diálogo se integrará en una próxima versión.',
     'loadingLanguages': 'Cargando los idiomas definidos en tu perfil...',
-    'chooseReply': 'Elige la mejor respuesta en el idioma que estás practicando.',
+    'chooseReply':
+        'Elige la mejor respuesta en el idioma que estás practicando.',
     'correct': 'Correcto. La respuesta es natural y mantiene la conversación.',
-    'wrong': 'Todavía no es la mejor respuesta. Observa la opción correcta e inténtalo de nuevo.',
+    'wrong':
+        'Todavía no es la mejor respuesta. Observa la opción correcta e inténtalo de nuevo.',
     'partner': 'Interlocutor',
     'you': 'Tú',
     'points': 'Puntos',
@@ -1379,11 +1367,15 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'of': 'sur',
     'contextLabel': 'Dialogue guidé · Erasmus+',
     'listen': 'Écouter',
-    'audioSoon': 'L’audio de ce dialogue sera intégré dans une prochaine version.',
+    'audioSoon':
+        'L’audio de ce dialogue sera intégré dans une prochaine version.',
     'loadingLanguages': 'Chargement des langues définies dans ton profil...',
-    'chooseReply': 'Choisis la meilleure réponse dans la langue que tu pratiques.',
-    'correct': 'Correct. La réponse est naturelle et fait avancer la conversation.',
-    'wrong': 'Ce n’est pas encore la meilleure réponse. Observe la bonne option et réessaie.',
+    'chooseReply':
+        'Choisis la meilleure réponse dans la langue que tu pratiques.',
+    'correct':
+        'Correct. La réponse est naturelle et fait avancer la conversation.',
+    'wrong':
+        'Ce n’est pas encore la meilleure réponse. Observe la bonne option et réessaie.',
     'partner': 'Interlocuteur',
     'you': 'Toi',
     'points': 'Points',
@@ -1404,11 +1396,15 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'of': 'di',
     'contextLabel': 'Dialogo guidato · Erasmus+',
     'listen': 'Ascolta',
-    'audioSoon': 'L’audio di questo dialogo sarà integrato in una prossima versione.',
+    'audioSoon':
+        'L’audio di questo dialogo sarà integrato in una prossima versione.',
     'loadingLanguages': 'Caricamento delle lingue definite nel profilo...',
-    'chooseReply': 'Scegli la risposta migliore nella lingua che stai praticando.',
-    'correct': 'Corretto. La risposta è naturale e fa andare avanti la conversazione.',
-    'wrong': 'Non è ancora la risposta migliore. Guarda l’opzione corretta e riprova.',
+    'chooseReply':
+        'Scegli la risposta migliore nella lingua che stai praticando.',
+    'correct':
+        'Corretto. La risposta è naturale e fa andare avanti la conversazione.',
+    'wrong':
+        'Non è ancora la risposta migliore. Guarda l’opzione corretta e riprova.',
     'partner': 'Interlocutore',
     'you': 'Tu',
     'points': 'Punti',
@@ -1429,11 +1425,14 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'of': 'von',
     'contextLabel': 'Geführter Dialog · Erasmus+',
     'listen': 'Anhören',
-    'audioSoon': 'Audio für diesen Dialog wird in einer nächsten Version integriert.',
+    'audioSoon':
+        'Audio für diesen Dialog wird in einer nächsten Version integriert.',
     'loadingLanguages': 'Die im Profil festgelegten Sprachen werden geladen...',
     'chooseReply': 'Wähle die beste Antwort in der Sprache, die du übst.',
-    'correct': 'Richtig. Die Antwort ist natürlich und führt das Gespräch weiter.',
-    'wrong': 'Das ist noch nicht die beste Antwort. Sieh dir die richtige Option an und versuche es erneut.',
+    'correct':
+        'Richtig. Die Antwort ist natürlich und führt das Gespräch weiter.',
+    'wrong':
+        'Das ist noch nicht die beste Antwort. Sieh dir die richtige Option an und versuche es erneut.',
     'partner': 'Gesprächspartner',
     'you': 'Du',
     'points': 'Punkte',
@@ -1468,12 +1467,18 @@ const List<_DialogueScenario> _dialogueBank = <_DialogueScenario>[
     description: _LocalizedText(
       id: 'description_host_family_first_morning',
       translations: <String, String>{
-        'pt': 'Estás com a família anfitriã. Treina uma conversa curta para te apresentares, combinar o pequeno-almoço e pedir ajuda para chegar à escola.',
-        'en': 'You are with the host family. Practise a short conversation to introduce yourself, agree on breakfast and ask for help getting to school.',
-        'es': 'Estás con la familia anfitriona. Practica una conversación corta para presentarte, acordar el desayuno y pedir ayuda para llegar a la escuela.',
-        'fr': 'Tu es avec la famille d’accueil. Entraîne une courte conversation pour te présenter, organiser le petit-déjeuner et demander de l’aide pour aller à l’école.',
-        'it': 'Sei con la famiglia ospitante. Esercitati con una breve conversazione per presentarti, concordare la colazione e chiedere aiuto per andare a scuola.',
-        'de': 'Du bist bei der Gastfamilie. Übe ein kurzes Gespräch, um dich vorzustellen, das Frühstück abzusprechen und nach Hilfe für den Weg zur Schule zu fragen.',
+        'pt':
+            'Estás com a família anfitriã. Treina uma conversa curta para te apresentares, combinar o pequeno-almoço e pedir ajuda para chegar à escola.',
+        'en':
+            'You are with the host family. Practise a short conversation to introduce yourself, agree on breakfast and ask for help getting to school.',
+        'es':
+            'Estás con la familia anfitriona. Practica una conversación corta para presentarte, acordar el desayuno y pedir ayuda para llegar a la escuela.',
+        'fr':
+            'Tu es avec la famille d’accueil. Entraîne une courte conversation pour te présenter, organiser le petit-déjeuner et demander de l’aide pour aller à l’école.',
+        'it':
+            'Sei con la famiglia ospitante. Esercitati con una breve conversazione per presentarti, concordare la colazione e chiedere aiuto per andare a scuola.',
+        'de':
+            'Du bist bei der Gastfamilie. Übe ein kurzes Gespräch, um dich vorzustellen, das Frühstück abzusprechen und nach Hilfe für den Weg zur Schule zu fragen.',
       },
     ),
     icon: Icons.home_outlined,
@@ -1494,12 +1499,18 @@ const List<_DialogueScenario> _dialogueBank = <_DialogueScenario>[
         prompt: _LocalizedText(
           id: 'prompt_introduce_yourself',
           translations: <String, String>{
-            'pt': 'O anfitrião deu-te as boas-vindas e perguntou o teu nome. Escolhe uma resposta natural.',
-            'en': 'The host welcomed you and asked your name. Choose a natural reply.',
-            'es': 'El anfitrión te dio la bienvenida y preguntó tu nombre. Elige una respuesta natural.',
-            'fr': 'L’hôte t’a souhaité la bienvenue et a demandé ton nom. Choisis une réponse naturelle.',
-            'it': 'L’ospite ti ha dato il benvenuto e ti ha chiesto il nome. Scegli una risposta naturale.',
-            'de': 'Der Gastgeber hat dich begrüßt und nach deinem Namen gefragt. Wähle eine natürliche Antwort.',
+            'pt':
+                'O anfitrião deu-te as boas-vindas e perguntou o teu nome. Escolhe uma resposta natural.',
+            'en':
+                'The host welcomed you and asked your name. Choose a natural reply.',
+            'es':
+                'El anfitrión te dio la bienvenida y preguntó tu nombre. Elige una respuesta natural.',
+            'fr':
+                'L’hôte t’a souhaité la bienvenue et a demandé ton nom. Choisis une réponse naturelle.',
+            'it':
+                'L’ospite ti ha dato il benvenuto e ti ha chiesto il nome. Scegli una risposta naturale.',
+            'de':
+                'Der Gastgeber hat dich begrüßt und nach deinem Namen gefragt. Wähle eine natürliche Antwort.',
           },
         ),
         correctReply: _LocalizedText(
@@ -1565,12 +1576,18 @@ const List<_DialogueScenario> _dialogueBank = <_DialogueScenario>[
         prompt: _LocalizedText(
           id: 'prompt_breakfast_time',
           translations: <String, String>{
-            'pt': 'A família anfitriã perguntou se o horário do pequeno-almoço está bem para ti.',
-            'en': 'The host family asked if the breakfast time is fine for you.',
-            'es': 'La familia anfitriona preguntó si la hora del desayuno te parece bien.',
-            'fr': 'La famille d’accueil demande si l’heure du petit-déjeuner te convient.',
-            'it': 'La famiglia ospitante chiede se l’orario della colazione va bene per te.',
-            'de': 'Die Gastfamilie fragt, ob die Frühstückszeit für dich passt.',
+            'pt':
+                'A família anfitriã perguntou se o horário do pequeno-almoço está bem para ti.',
+            'en':
+                'The host family asked if the breakfast time is fine for you.',
+            'es':
+                'La familia anfitriona preguntó si la hora del desayuno te parece bien.',
+            'fr':
+                'La famille d’accueil demande si l’heure du petit-déjeuner te convient.',
+            'it':
+                'La famiglia ospitante chiede se l’orario della colazione va bene per te.',
+            'de':
+                'Die Gastfamilie fragt, ob die Frühstückszeit für dich passt.',
           },
         ),
         correctReply: _LocalizedText(
@@ -1709,12 +1726,18 @@ const List<_DialogueScenario> _dialogueBank = <_DialogueScenario>[
     description: _LocalizedText(
       id: 'description_school_first_break',
       translations: <String, String>{
-        'pt': 'Estás no intervalo e falas com um colega. Treina como pedir orientação, pedir para repetir e agradecer.',
-        'en': 'You are on a break and talk to a classmate. Practise asking for directions, asking to repeat and saying thank you.',
-        'es': 'Estás en el recreo y hablas con un compañero. Practica pedir indicaciones, pedir que repitan y agradecer.',
-        'fr': 'Tu es en pause et tu parles avec un camarade. Entraîne-toi à demander une direction, à demander de répéter et à remercier.',
-        'it': 'Sei durante la pausa e parli con un compagno. Esercitati a chiedere indicazioni, chiedere di ripetere e ringraziare.',
-        'de': 'Du bist in der Pause und sprichst mit einem Mitschüler. Übe, nach dem Weg zu fragen, um Wiederholung zu bitten und dich zu bedanken.',
+        'pt':
+            'Estás no intervalo e falas com um colega. Treina como pedir orientação, pedir para repetir e agradecer.',
+        'en':
+            'You are on a break and talk to a classmate. Practise asking for directions, asking to repeat and saying thank you.',
+        'es':
+            'Estás en el recreo y hablas con un compañero. Practica pedir indicaciones, pedir que repitan y agradecer.',
+        'fr':
+            'Tu es en pause et tu parles avec un camarade. Entraîne-toi à demander une direction, à demander de répéter et à remercier.',
+        'it':
+            'Sei durante la pausa e parli con un compagno. Esercitati a chiedere indicazioni, chiedere di ripetere e ringraziare.',
+        'de':
+            'Du bist in der Pause und sprichst mit einem Mitschüler. Übe, nach dem Weg zu fragen, um Wiederholung zu bitten und dich zu bedanken.',
       },
     ),
     icon: Icons.school_outlined,
@@ -1797,7 +1820,8 @@ const List<_DialogueScenario> _dialogueBank = <_DialogueScenario>[
           translations: <String, String>{
             'pt': 'É no segundo piso, depois da biblioteca, à direita.',
             'en': 'It is on the second floor, after the library, on the right.',
-            'es': 'Está en el segundo piso, después de la biblioteca, a la derecha.',
+            'es':
+                'Está en el segundo piso, después de la biblioteca, a la derecha.',
             'fr': 'C’est au deuxième étage, après la bibliothèque, à droite.',
             'it': 'È al secondo piano, dopo la biblioteca, a destra.',
             'de': 'Er ist im zweiten Stock, nach der Bibliothek, rechts.',
@@ -1811,7 +1835,8 @@ const List<_DialogueScenario> _dialogueBank = <_DialogueScenario>[
             'es': 'No entendiste todo. Pide que repitan de forma educada.',
             'fr': 'Tu n’as pas tout compris. Demande poliment de répéter.',
             'it': 'Non hai capito tutto. Chiedi gentilmente di ripetere.',
-            'de': 'Du hast nicht alles verstanden. Bitte höflich um Wiederholung.',
+            'de':
+                'Du hast nicht alles verstanden. Bitte höflich um Wiederholung.',
           },
         ),
         correctReply: _LocalizedText(
@@ -1882,7 +1907,8 @@ const List<_DialogueScenario> _dialogueBank = <_DialogueScenario>[
             'es': 'Ahora quieres agradecer al compañero por la ayuda.',
             'fr': 'Maintenant tu veux remercier le camarade pour son aide.',
             'it': 'Ora vuoi ringraziare il compagno per l’aiuto.',
-            'de': 'Jetzt möchtest du dich bei dem Mitschüler für die Hilfe bedanken.',
+            'de':
+                'Jetzt möchtest du dich bei dem Mitschüler für die Hilfe bedanken.',
           },
         ),
         correctReply: _LocalizedText(

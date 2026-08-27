@@ -18,10 +18,7 @@ import 'register_page.dart';
 /// Assim, a ação principal fica visível sem scroll e o formulário de login
 /// passa para uma página própria, preparada para integrações futuras como SSO.
 class LoginPage extends StatelessWidget {
-  const LoginPage({
-    super.key,
-    required this.onAuthenticated,
-  });
+  const LoginPage({super.key, required this.onAuthenticated});
 
   final VoidCallback onAuthenticated;
 
@@ -34,9 +31,7 @@ class LoginPage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => MainNavigation(
-          onAuthenticated: onAuthenticated,
-        ),
+        builder: (context) => MainNavigation(onAuthenticated: onAuthenticated),
       ),
     );
   }
@@ -45,9 +40,7 @@ class LoginPage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => LoginFormPage(
-          onAuthenticated: onAuthenticated,
-        ),
+        builder: (context) => LoginFormPage(onAuthenticated: onAuthenticated),
       ),
     );
   }
@@ -56,9 +49,7 @@ class LoginPage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => RegisterPage(
-          onAuthenticated: onAuthenticated,
-        ),
+        builder: (context) => RegisterPage(onAuthenticated: onAuthenticated),
       ),
     );
   }
@@ -236,10 +227,7 @@ class LoginPage extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
-            colors: [
-              Color(0xFF49D7FF),
-              Color(0xFF168CFF),
-            ],
+            colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
           ),
           boxShadow: [
             BoxShadow(
@@ -254,10 +242,7 @@ class LoginPage extends StatelessWidget {
           icon: Icon(icon, size: 26),
           label: AppText(
             label,
-            style: const TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800),
           ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -285,10 +270,7 @@ class LoginPage extends StatelessWidget {
         icon: Icon(icon, size: 22),
         label: AppText(
           label,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-          ),
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
         ),
         style: FilledButton.styleFrom(
           foregroundColor: Colors.white,
@@ -317,10 +299,7 @@ class LoginPage extends StatelessWidget {
         icon: Icon(icon, size: 22),
         label: AppText(
           label,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-          ),
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
         ),
         style: OutlinedButton.styleFrom(
           foregroundColor: _accentColor,

@@ -47,7 +47,9 @@ class ActivityDao {
   }
 
   /// Obtém uma atividade pelo identificador remoto do backend.
-  Future<Map<String, Object?>?> getByRemoteActivityId(String remoteActivityId) async {
+  Future<Map<String, Object?>?> getByRemoteActivityId(
+    String remoteActivityId,
+  ) async {
     final rows = await db.query(
       'activities',
       where: 'remote_activity_id = ?',
@@ -87,10 +89,7 @@ class ActivityDao {
 
     return db.update(
       'activities',
-      {
-        'activity_url': activityUrl,
-        'updated_at': now,
-      },
+      {'activity_url': activityUrl, 'updated_at': now},
       where: 'id = ?',
       whereArgs: [activityId],
     );
@@ -102,10 +101,7 @@ class ActivityDao {
 
     return db.update(
       'activities',
-      {
-        'last_opened_at': now,
-        'updated_at': now,
-      },
+      {'last_opened_at': now, 'updated_at': now},
       where: 'id = ?',
       whereArgs: [activityId],
     );
@@ -131,10 +127,7 @@ class ActivityDao {
   Future<int> deactivate(int activityId) async {
     return db.update(
       'activities',
-      {
-        'is_active': 0,
-        'updated_at': DateTime.now().toIso8601String(),
-      },
+      {'is_active': 0, 'updated_at': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [activityId],
     );

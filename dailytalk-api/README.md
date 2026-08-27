@@ -15,6 +15,7 @@ dailytalk-api/
 ├── package.json
 ├── package-lock.json
 ├── wrangler.jsonc
+├── wrangler.production.jsonc
 └── README.md
 ```
 
@@ -63,7 +64,7 @@ Para desenvolvimento local:
 ```powershell
 cd C:\DEV\Flutter\dailytalk-api
 
-npx wrangler dev --port 8787
+npm run dev -- --port 8787
 ```
 
 A API local fica disponível em:
@@ -113,12 +114,12 @@ Flutter Web local: http://127.0.0.1:5555
 API local:         http://127.0.0.1:8787/api
 ```
 
-A aplicação Flutter possui configuração dinâmica da API:
+A aplicação Flutter deteta o ambiente sem configuração manual:
 
-- se estiver em `https://dailytalk.pt/web/`, usa `https://dailytalk.pt/api`;
-- se estiver em `http://localhost:5555`, usa `http://localhost:8787/api`;
-- se estiver em `http://127.0.0.1:5555`, usa `http://127.0.0.1:8787/api`;
-- se for usado `DAILYTALK_API_BASE_URL`, esse valor tem prioridade.
+- em `https://dailytalk.pt` ou `https://www.dailytalk.pt`, usa `https://dailytalk.pt/api`;
+- em `http://localhost:5555`, usa `http://localhost:8787/api`;
+- em `http://127.0.0.1:5555`, usa `http://127.0.0.1:8787/api`;
+- qualquer host Web desconhecido é bloqueado, sem fallback para outro ambiente.
 
 ---
 
@@ -130,16 +131,15 @@ Para testes locais, deve existir um ficheiro:
 C:\DEV\Flutter\dailytalk-api\.dev.vars
 ```
 
-Exemplo:
+Exemplo mínimo:
 
 ```env
-JWT_SECRET=definir_um_valor_local_seguro
-CORS_ORIGIN=http://127.0.0.1:5555
-PASSWORD_RESET_DEBUG=true
-JWT_EXPIRES_SECONDS=7200
-PASSWORD_RESET_FROM_EMAIL=no-reply@dailytalk.pt
-PASSWORD_RESET_FROM_NAME=DailyTalk.pt
+JWT_SECRET=definir_um_valor_local_seguro_com_pelo_menos_32_bytes
 ```
+
+As variáveis de ambiente não sensíveis, incluindo `APP_ENV` e as origens CORS,
+já são fornecidas automaticamente por `wrangler.jsonc`. Não devem ser trocadas
+manualmente no `.dev.vars`.
 
 O ficheiro `.dev.vars` é apenas local e **não deve ser enviado para o GitHub**, porque pode conter variáveis locais e segredos.
 
@@ -153,33 +153,16 @@ Confirma que está ignorado no `.gitignore`:
 
 ## CORS em desenvolvimento
 
-Quando a app Flutter Web local corre em:
+O CORS é escolhido automaticamente pelo ambiente da API:
 
 ```text
-http://127.0.0.1:5555
+DEV -> http://localhost:5555 e http://127.0.0.1:5555
+PRD -> https://dailytalk.pt e https://www.dailytalk.pt
 ```
 
-a API local deve aceitar essa origem através de:
-
-```env
-CORS_ORIGIN=http://127.0.0.1:5555
-```
-
-Se a API local arrancar com:
-
-```text
-env.CORS_ORIGIN ("https://dailytalk.pt")
-```
-
-então o browser pode bloquear pedidos locais com erro de CORS.
-
-O correto em desenvolvimento local é o Wrangler mostrar que está a usar variáveis do `.dev.vars`, por exemplo:
-
-```text
-Using secrets defined in .dev.vars
-env.CORS_ORIGIN ("(hidden)")
-env.JWT_SECRET ("(hidden)")
-```
+A origem tem de pertencer ao mesmo ambiente definido por `APP_ENV`. Uma origem
+PRD nunca é aceite pela API DEV e uma origem DEV nunca é aceite pela API PRD.
+O cabeçalho `X-DailyTalk-Environment` também é validado em cada pedido.
 
 ---
 
@@ -202,7 +185,7 @@ JWT_SECRET=definir_um_valor_local_seguro
 Depois reiniciar o Wrangler:
 
 ```powershell
-npx wrangler dev --port 8787
+npm run dev -- --port 8787
 ```
 
 ---
@@ -370,7 +353,7 @@ Antes de publicar:
 ```powershell
 cd C:\DEV\Flutter\dailytalk-api
 
-npx wrangler dev --port 8787
+npm run dev -- --port 8787
 ```
 
 Testar:
@@ -401,3 +384,67 @@ Este backend continua em fase de protótipo funcional. Já suporta autenticaçã
 - envio real de emails transacionais;
 - auditoria e logs de sessão;
 - gestão mais fina de permissões por perfil.
+
+---
+
+## Sincronização segura de produção
+
+O endpoint `POST /api/sync/progress` está preparado para produção com:
+
+- sessão duradoura por dispositivo e access token curto;
+- autenticação DPoP Ed25519;
+- lotes JWS assinados pelo dispositivo;
+- JWE ECDH-ES com X25519 e AES-256-GCM;
+- proteção anti-replay e idempotência;
+- respostas assinadas e cifradas;
+- armazenamento das chaves privadas do servidor apenas em secrets.
+
+A configuração, migração D1, geração de chaves e comandos de build estão documentados em:
+
+```text
+../IMPLEMENTACAO_SINCRONIZACAO_SEGURA.md
+```
+
+Esta base deixa de ser tratada como protótipo. Alterações futuras devem preservar requisitos de produção, incluindo gestão de chaves, migrações, observabilidade sem dados sensíveis, testes de atualização, revogação de dispositivos e resposta a incidentes.
+
+---
+
+## Separação automática e estrita entre DEV e PRD
+
+A API não deduz o ambiente a partir de dados enviados pelo cliente. O ambiente
+é definido pela configuração utilizada ao iniciar ou publicar o Worker:
+
+| Comando | Configuração | Ambiente | Destino |
+|---|---|---|---|
+| `npm run dev` | `wrangler.jsonc` | `DEV` | servidor local e D1 local |
+| `npm run deploy` | `wrangler.production.jsonc` | `PRD` | `dailytalk.pt/api/*` e D1 de produção |
+
+O código recebe `APP_ENV=DEV` ou `APP_ENV=PRD` diretamente da configuração do
+Worker. Não existe alteração manual de ficheiros ao mudar de ambiente.
+
+Proteções aplicadas:
+
+- DEV aceita apenas `localhost`, `127.0.0.1` e `10.0.2.2`;
+- PRD aceita apenas `dailytalk.pt` e `www.dailytalk.pt` por HTTPS;
+- o cabeçalho `X-DailyTalk-Environment` tem de coincidir com o ambiente da API;
+- o `Origin` do browser tem de pertencer ao mesmo ambiente;
+- as respostas identificam o ambiente no mesmo cabeçalho;
+- o JWT inclui a claim `env`, validada em todos os pedidos autenticados;
+- o `htu` DPoP é reconstruído no mesmo ambiente e nunca salta de DEV para PRD;
+- a configuração DEV não contém a rota de produção;
+- a configuração PRD não aceita origens locais.
+
+Para desenvolvimento:
+
+```powershell
+npm run dev -- --port 8787
+```
+
+Para publicação em produção:
+
+```powershell
+npm run deploy
+```
+
+Os segredos permanecem separados: `.dev.vars` serve apenas para DEV; os
+segredos do Worker `dailytalk-api` são configurados na Cloudflare para PRD.

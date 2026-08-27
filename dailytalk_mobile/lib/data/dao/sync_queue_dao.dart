@@ -99,13 +99,7 @@ class SyncQueueDao {
           next_retry_at = ?
       WHERE id = ?
       ''',
-      [
-        'failed',
-        error,
-        now.toIso8601String(),
-        nextRetry.toIso8601String(),
-        id,
-      ],
+      ['failed', error, now.toIso8601String(), nextRetry.toIso8601String(), id],
     );
   }
 }

@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "dailytalk-api-dev",
+  "name": "dailytalk-api",
   "main": "src/index.ts",
   "compatibility_date": "2026-05-24",
   "observability": {
@@ -10,14 +10,8 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "workers_dev": false,
-  "dev": {
-    "ip": "localhost",
-    "port": 8787,
-    "local_protocol": "http"
-  },
   "vars": {
-    "APP_ENV": "DEV",
+    "APP_ENV": "PRD",
     "JWT_EXPIRES_SECONDS": "900",
     "DEVICE_SESSION_EXPIRES_DAYS": "730",
     "DPOP_MAX_AGE_SECONDS": "300",
@@ -26,7 +20,7 @@
     "SYNC_MAX_BATCH_SIZE": "50",
     "SYNC_SERVER_SIGNING_KEY_ID": "sync-sign-v1",
     "SYNC_SERVER_AGREEMENT_KEY_ID": "sync-enc-v1",
-    "CORS_ORIGIN": "http://localhost:5555,http://127.0.0.1:5555",
+    "CORS_ORIGIN": "https://dailytalk.pt,https://www.dailytalk.pt",
     "PASSWORD_RESET_FROM_EMAIL": "no-reply@dailytalk.pt",
     "PASSWORD_RESET_FROM_NAME": "DailyTalk.pt",
     "PASSWORD_RESET_DEBUG": "false"
@@ -36,6 +30,12 @@
       "binding": "DB",
       "database_name": "dailytalk-db",
       "database_id": "8ae71c83-12cc-4701-857e-6f719e6f806b"
+    }
+  ],
+  "routes": [
+    {
+      "pattern": "dailytalk.pt/api/*",
+      "zone_name": "dailytalk.pt"
     }
   ]
 }

@@ -103,9 +103,9 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
               'Perfil guardado neste dispositivo. Entra para sincronizar.',
             );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: AppText(message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: AppText(message)));
 
       Navigator.pop(context);
     } catch (error) {
@@ -140,10 +140,7 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
         titleSpacing: 0,
         title: const AppText(
           'Perfil',
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
         ),
       ),
       body: Stack(
@@ -290,9 +287,7 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
       decoration: BoxDecoration(
         color: _accentColor.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: _accentColor.withValues(alpha: 0.38),
-        ),
+        border: Border.all(color: _accentColor.withValues(alpha: 0.38)),
       ),
       child: Row(
         children: [
@@ -324,10 +319,7 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF52D8FF),
-            Color(0xFF168CFF),
-          ],
+          colors: [Color(0xFF52D8FF), Color(0xFF168CFF)],
         ),
         boxShadow: [
           BoxShadow(
@@ -361,9 +353,7 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.redAccent.withValues(alpha: 0.85),
-        ),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.85)),
       ),
       child: AppText(
         _errorMessage!,
@@ -391,10 +381,7 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
               : const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF49D7FF),
-                    Color(0xFF168CFF),
-                  ],
+                  colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
                 ),
           boxShadow: _isSaving
               ? []
@@ -420,10 +407,7 @@ class _ProfileSelectionPageState extends State<ProfileSelectionPage> {
               : const Icon(Icons.check, size: 25),
           label: AppText(
             _isSaving ? 'A guardar...' : 'Guardar perfil',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
           ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -509,10 +493,7 @@ class _ProfileOptionCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(
-              color: borderColor,
-              width: selected ? 1.8 : 1.2,
-            ),
+            border: Border.all(color: borderColor, width: selected ? 1.8 : 1.2),
           ),
           child: Row(
             children: [

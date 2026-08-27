@@ -115,10 +115,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         titleSpacing: 0,
         title: const AppText(
           'Nova palavra-passe',
-          style: TextStyle(
-            fontSize: 23,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 23, fontWeight: FontWeight.w500),
         ),
       ),
       body: Stack(
@@ -172,129 +169,135 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 460),
                     child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildPasswordBadge(isCompact: isCompact),
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildPasswordBadge(isCompact: isCompact),
 
-                        SizedBox(height: isCompact ? 16 : 20),
+                          SizedBox(height: isCompact ? 16 : 20),
 
-                        const AppText(
-                          'Define uma nova palavra-passe',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 27,
-                            fontWeight: FontWeight.w800,
-                            height: 1.15,
+                          const AppText(
+                            'Define uma nova palavra-passe',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 27,
+                              fontWeight: FontWeight.w800,
+                              height: 1.15,
+                            ),
                           ),
-                        ),
 
-                        const SizedBox(height: 10),
+                          const SizedBox(height: 10),
 
-                        AppText(
-                          debugToken != null && debugToken.isNotEmpty
-                              ? context.tr(
-                                  'Conta: {email}\nUsa o código temporário abaixo para concluir o teste de recuperação.',
-                                  parameters: <String, Object?>{
-                                    'email': widget.email,
-                                  },
-                                )
-                              : context.tr(
-                                  'Conta: {email}',
-                                  parameters: <String, Object?>{
-                                    'email': widget.email,
-                                  },
-                                ),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.72),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            height: 1.35,
+                          AppText(
+                            debugToken != null && debugToken.isNotEmpty
+                                ? context.tr(
+                                    'Conta: {email}\nUsa o código temporário abaixo para concluir o teste de recuperação.',
+                                    parameters: <String, Object?>{
+                                      'email': widget.email,
+                                    },
+                                  )
+                                : context.tr(
+                                    'Conta: {email}',
+                                    parameters: <String, Object?>{
+                                      'email': widget.email,
+                                    },
+                                  ),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.72),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              height: 1.35,
+                            ),
                           ),
-                        ),
 
-                        if (debugToken != null && debugToken.isNotEmpty) ...[
-                          const SizedBox(height: 16),
-                          _buildDebugTokenBox(debugToken),
-                        ],
+                          if (debugToken != null && debugToken.isNotEmpty) ...[
+                            const SizedBox(height: 16),
+                            _buildDebugTokenBox(debugToken),
+                          ],
 
-                        SizedBox(height: isCompact ? 22 : 28),
+                          SizedBox(height: isCompact ? 22 : 28),
 
-                        _buildTextField(
-                          controller: _tokenController,
-                          label: 'Código de recuperação',
-                          icon: Icons.pin_outlined,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return context.tr('Indica o código de recuperação.');
-                            }
+                          _buildTextField(
+                            controller: _tokenController,
+                            label: 'Código de recuperação',
+                            icon: Icons.pin_outlined,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return context.tr(
+                                  'Indica o código de recuperação.',
+                                );
+                              }
 
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        _buildTextField(
-                          controller: _passwordController,
-                          label: 'Nova password',
-                          icon: Icons.lock_outline,
-                          obscureText: _obscurePassword,
-                          suffixIcon: _buildVisibilityButton(
-                            obscure: _obscurePassword,
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
+                              return null;
                             },
                           ),
-                          validator: (value) {
-                            if (value == null || value.length < 6) {
-                              return context.tr('A password deve ter pelo menos 6 caracteres.');
-                            }
 
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        _buildTextField(
-                          controller: _confirmPasswordController,
-                          label: 'Confirmar password',
-                          icon: Icons.lock_reset_outlined,
-                          obscureText: _obscureConfirmPassword,
-                          suffixIcon: _buildVisibilityButton(
-                            obscure: _obscureConfirmPassword,
-                            onPressed: () {
-                              setState(() {
-                                _obscureConfirmPassword =
-                                    !_obscureConfirmPassword;
-                              });
-                            },
-                          ),
-                          validator: (value) {
-                            if (value != _passwordController.text) {
-                              return context.tr('As passwords não coincidem.');
-                            }
-
-                            return null;
-                          },
-                        ),
-
-                        if (_errorMessage != null) ...[
                           const SizedBox(height: 14),
-                          _buildErrorBox(_errorMessage!),
+
+                          _buildTextField(
+                            controller: _passwordController,
+                            label: 'Nova password',
+                            icon: Icons.lock_outline,
+                            obscureText: _obscurePassword,
+                            suffixIcon: _buildVisibilityButton(
+                              obscure: _obscurePassword,
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                            validator: (value) {
+                              if (value == null || value.length < 6) {
+                                return context.tr(
+                                  'A password deve ter pelo menos 6 caracteres.',
+                                );
+                              }
+
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          _buildTextField(
+                            controller: _confirmPasswordController,
+                            label: 'Confirmar password',
+                            icon: Icons.lock_reset_outlined,
+                            obscureText: _obscureConfirmPassword,
+                            suffixIcon: _buildVisibilityButton(
+                              obscure: _obscureConfirmPassword,
+                              onPressed: () {
+                                setState(() {
+                                  _obscureConfirmPassword =
+                                      !_obscureConfirmPassword;
+                                });
+                              },
+                            ),
+                            validator: (value) {
+                              if (value != _passwordController.text) {
+                                return context.tr(
+                                  'As passwords não coincidem.',
+                                );
+                              }
+
+                              return null;
+                            },
+                          ),
+
+                          if (_errorMessage != null) ...[
+                            const SizedBox(height: 14),
+                            _buildErrorBox(_errorMessage!),
+                          ],
+
+                          SizedBox(height: isCompact ? 22 : 28),
+
+                          _buildPrimaryButton(),
                         ],
-
-                        SizedBox(height: isCompact ? 22 : 28),
-
-                        _buildPrimaryButton(),
-                      ],
-                    ),
+                      ),
                     ),
                   ),
                 ),
@@ -318,10 +321,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF52D8FF),
-              Color(0xFF168CFF),
-            ],
+            colors: [Color(0xFF52D8FF), Color(0xFF168CFF)],
           ),
           boxShadow: [
             BoxShadow(
@@ -353,9 +353,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       decoration: BoxDecoration(
         color: Colors.orange.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.orangeAccent.withValues(alpha: 0.76),
-        ),
+        border: Border.all(color: Colors.orangeAccent.withValues(alpha: 0.76)),
       ),
       child: SelectableText(
         context.tr(
@@ -377,9 +375,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     required VoidCallback onPressed,
   }) {
     return IconButton(
-      tooltip: context.tr(
-        obscure ? 'Mostrar password' : 'Ocultar password',
-      ),
+      tooltip: context.tr(obscure ? 'Mostrar password' : 'Ocultar password'),
       icon: Icon(
         obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
         color: Colors.white.withValues(alpha: 0.74),
@@ -432,9 +428,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           horizontal: 18,
           vertical: 20,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
           borderSide: BorderSide(
@@ -444,24 +438,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
-          borderSide: const BorderSide(
-            color: _accentColor,
-            width: 1.8,
-          ),
+          borderSide: const BorderSide(color: _accentColor, width: 1.8),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
-          borderSide: const BorderSide(
-            color: Colors.redAccent,
-            width: 1.35,
-          ),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.35),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
-          borderSide: const BorderSide(
-            color: Colors.redAccent,
-            width: 1.8,
-          ),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.8),
         ),
       ),
     );
@@ -483,10 +468,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               : const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF49D7FF),
-                    Color(0xFF168CFF),
-                  ],
+                  colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
                 ),
           boxShadow: _isLoading
               ? []
@@ -509,16 +491,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     color: Colors.white,
                   ),
                 )
-              : const Icon(
-                  Icons.save_outlined,
-                  size: 24,
-                ),
+              : const Icon(Icons.save_outlined, size: 24),
           label: AppText(
             _isLoading ? 'A guardar...' : 'Alterar palavra-passe',
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
           ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -542,9 +518,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.redAccent.withValues(alpha: 0.85),
-        ),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.85)),
       ),
       child: AppText(
         message,

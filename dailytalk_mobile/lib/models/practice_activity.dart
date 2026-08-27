@@ -69,8 +69,7 @@ class PracticeActivityBank {
       scenario: CommunicationScenario.bathroom,
       strategy: DialogActivityStrategy(),
       title: 'Perguntar pela casa de banho',
-      description:
-          'Treina uma pergunta útil para encontrar a casa de banho.',
+      description: 'Treina uma pergunta útil para encontrar a casa de banho.',
       question:
           'Estás numa casa nova e precisas de perguntar onde fica a casa de banho. '
           'Escreve a frase que dirias.',
@@ -157,8 +156,7 @@ class PracticeActivityBank {
       scenario: CommunicationScenario.houseRules,
       strategy: ReviewActivityStrategy(),
       title: 'Explicar regras da casa',
-      description:
-          'Treina uma frase curta sobre uma regra básica da casa.',
+      description: 'Treina uma frase curta sobre uma regra básica da casa.',
       question:
           'Queres explicar ao aluno onde deve deixar as chaves. '
           'Escreve uma frase simples.',

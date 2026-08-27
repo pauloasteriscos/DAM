@@ -167,15 +167,16 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
         )
         .toList();
 
-    _rightCards = roundItems
-        .map(
-          (item) => _VocabularyPairCard(
-            id: item.id,
-            text: item.textFor(_translationKey(_learningLanguageCode)),
-          ),
-        )
-        .toList()
-      ..shuffle(Random());
+    _rightCards =
+        roundItems
+            .map(
+              (item) => _VocabularyPairCard(
+                id: item.id,
+                text: item.textFor(_translationKey(_learningLanguageCode)),
+              ),
+            )
+            .toList()
+          ..shuffle(Random());
 
     _matchedIds.clear();
     _selectedLeft = null;
@@ -289,9 +290,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
   /// reinicia a ronda com o novo par linguístico.
   Future<void> _openLanguageSelection() async {
     await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => const LanguageSelectionPage(),
-      ),
+      MaterialPageRoute<void>(builder: (_) => const LanguageSelectionPage()),
     );
 
     if (!mounted) {
@@ -392,11 +391,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
                       color: _accentColor.withValues(alpha: 0.60),
                     ),
                   ),
-                  child: const Icon(
-                    Icons.edit,
-                    color: _accentColor,
-                    size: 15,
-                  ),
+                  child: const Icon(Icons.edit, color: _accentColor, size: 15),
                 ),
               ],
             ],
@@ -498,9 +493,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
           decoration: BoxDecoration(
             color: const Color(0xFF06345C),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: _accentColor.withValues(alpha: 0.38),
-            ),
+            border: Border.all(color: _accentColor.withValues(alpha: 0.38)),
             boxShadow: <BoxShadow>[
               BoxShadow(
                 color: _accentColor.withValues(alpha: 0.16),
@@ -509,11 +502,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
               ),
             ],
           ),
-          child: const Icon(
-            Icons.menu_book,
-            color: Colors.amber,
-            size: 25,
-          ),
+          child: const Icon(Icons.menu_book, color: Colors.amber, size: 25),
         ),
         const SizedBox(width: 10),
         const AppText(
@@ -551,15 +540,14 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
   }
 
   /// Constrói cada cartão selecionável do jogo.
-  Widget _buildPairCard(
-    _VocabularyPairCard card, {
-    required bool isLeft,
-  }) {
+  Widget _buildPairCard(_VocabularyPairCard card, {required bool isLeft}) {
     final bool isMatched = _matchedIds.contains(card.id);
-    final bool isSelected =
-        isLeft ? _selectedLeft?.id == card.id : _selectedRight?.id == card.id;
-    final bool isWrong =
-        isLeft ? _wrongLeftId == card.id : _wrongRightId == card.id;
+    final bool isSelected = isLeft
+        ? _selectedLeft?.id == card.id
+        : _selectedRight?.id == card.id;
+    final bool isWrong = isLeft
+        ? _wrongLeftId == card.id
+        : _wrongRightId == card.id;
 
     Color borderColor = Colors.white.withValues(alpha: 0.14);
     Color backgroundColor = _cardColor.withValues(alpha: 0.92);
@@ -630,11 +618,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
                 ),
                 if (trailingIcon != null) ...<Widget>[
                   const SizedBox(width: 6),
-                  Icon(
-                    trailingIcon,
-                    color: trailingColor,
-                    size: 20,
-                  ),
+                  Icon(trailingIcon, color: trailingColor, size: 20),
                 ],
               ],
             ),
@@ -690,10 +674,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: <Color>[
-                    Color(0xFF49D7FF),
-                    _primaryBlue,
-                  ],
+                  colors: <Color>[Color(0xFF49D7FF), _primaryBlue],
                 ),
                 boxShadow: <BoxShadow>[
                   BoxShadow(
@@ -716,10 +697,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
     );
   }
 
-  BoxDecoration _cardDecoration({
-    Color? color,
-    Color? borderColor,
-  }) {
+  BoxDecoration _cardDecoration({Color? color, Color? borderColor}) {
     return BoxDecoration(
       color: color ?? _cardColor.withValues(alpha: 0.86),
       borderRadius: BorderRadius.circular(24),
@@ -809,10 +787,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
 
 /// Idioma disponível no DailyTalk.pt.
 class _DailyTalkLanguage {
-  const _DailyTalkLanguage({
-    required this.code,
-    required this.name,
-  });
+  const _DailyTalkLanguage({required this.code, required this.name});
 
   final String code;
   final String name;
@@ -820,10 +795,7 @@ class _DailyTalkLanguage {
 
 /// Cartão apresentado no ecrã.
 class _VocabularyPairCard {
-  const _VocabularyPairCard({
-    required this.id,
-    required this.text,
-  });
+  const _VocabularyPairCard({required this.id, required this.text});
 
   final String id;
   final String text;
@@ -831,10 +803,7 @@ class _VocabularyPairCard {
 
 /// Item do banco de vocabulário contextualizado.
 class _VocabularyItem {
-  const _VocabularyItem({
-    required this.id,
-    required this.translations,
-  });
+  const _VocabularyItem({required this.id, required this.translations});
 
   final String id;
   final Map<String, String> translations;

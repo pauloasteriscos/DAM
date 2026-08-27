@@ -24,7 +24,6 @@ class _AuthGateState extends State<AuthGate> {
     Future.microtask(_initializeSession);
   }
 
-
   Future<void> _initializeSession() async {
     final session = AppSessionController.instance;
     await session.checkStoredSession();

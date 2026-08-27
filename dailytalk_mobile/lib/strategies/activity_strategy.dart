@@ -60,10 +60,7 @@ abstract class ActivityStrategy {
       'targetLanguageCode': targetLanguageCode,
       'submittedAt': DateTime.now().toIso8601String(),
       'answers': [
-        {
-          'field': 'response',
-          'value': answerText,
-        },
+        {'field': 'response', 'value': answerText},
       ],
     };
   }
@@ -297,7 +294,8 @@ class ActivityStrategyFactory {
   static const ActivityStrategy dialog = DialogActivityStrategy();
   static const ActivityStrategy quiz = QuizActivityStrategy();
   static const ActivityStrategy review = ReviewActivityStrategy();
-  static const ActivityStrategy finalChallenge = FinalChallengeActivityStrategy();
+  static const ActivityStrategy finalChallenge =
+      FinalChallengeActivityStrategy();
 
   /// Lista de estratégias disponíveis no jogo.
   static const List<ActivityStrategy> all = [
@@ -311,9 +309,7 @@ class ActivityStrategyFactory {
 
   /// Opções que podem ser usadas no formulário de criação/configuração.
   static Map<String, String> get creationOptions {
-    return {
-      for (final strategy in all) strategy.type: strategy.label,
-    };
+    return {for (final strategy in all) strategy.type: strategy.label};
   }
 
   /// Obtém uma estratégia a partir do tipo técnico.

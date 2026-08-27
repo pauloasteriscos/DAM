@@ -124,10 +124,7 @@ class _ResultsContentState extends State<ResultsContent> {
   }
 
   Map<String, Object?> _normalizeLocalResult(Map<String, Object?> item) {
-    return <String, Object?>{
-      ...item,
-      'origin': 'Local',
-    };
+    return <String, Object?>{...item, 'origin': 'Local'};
   }
 
   @override
@@ -178,7 +175,9 @@ class _ResultsContentState extends State<ResultsContent> {
       decoration: BoxDecoration(
         color: Colors.lightBlue.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.lightBlueAccent.withValues(alpha: 0.34)),
+        border: Border.all(
+          color: Colors.lightBlueAccent.withValues(alpha: 0.34),
+        ),
       ),
       child: Row(
         children: [

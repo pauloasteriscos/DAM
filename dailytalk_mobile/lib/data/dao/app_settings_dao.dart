@@ -26,16 +26,12 @@ class AppSettingsDao {
     String? value,
     String valueType = 'text',
   }) async {
-    await db.insert(
-      'app_settings',
-      {
-        'key': key,
-        'value': value,
-        'value_type': valueType,
-        'updated_at': DateTime.now().toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('app_settings', {
+      'key': key,
+      'value': value,
+      'value_type': valueType,
+      'updated_at': DateTime.now().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   /// Lê uma configuração como texto.
@@ -79,11 +75,7 @@ class AppSettingsDao {
 
   /// Remove uma configuração.
   Future<int> deleteValue(String key) async {
-    return db.delete(
-      'app_settings',
-      where: 'key = ?',
-      whereArgs: [key],
-    );
+    return db.delete('app_settings', where: 'key = ?', whereArgs: [key]);
   }
 
   /// Guarda o perfil selecionado pelo utilizador.
@@ -117,27 +109,19 @@ class AppSettingsDao {
     final batch = db.batch();
     final now = DateTime.now().toIso8601String();
 
-    batch.insert(
-      'app_settings',
-      {
-        'key': nativeLanguageKey,
-        'value': nativeLanguageCode,
-        'value_type': 'text',
-        'updated_at': now,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    batch.insert('app_settings', {
+      'key': nativeLanguageKey,
+      'value': nativeLanguageCode,
+      'value_type': 'text',
+      'updated_at': now,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
 
-    batch.insert(
-      'app_settings',
-      {
-        'key': targetLanguageKey,
-        'value': targetLanguageCode,
-        'value_type': 'text',
-        'updated_at': now,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    batch.insert('app_settings', {
+      'key': targetLanguageKey,
+      'value': targetLanguageCode,
+      'value_type': 'text',
+      'updated_at': now,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
 
     await batch.commit(noResult: true);
   }

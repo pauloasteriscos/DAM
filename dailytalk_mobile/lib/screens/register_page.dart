@@ -15,10 +15,7 @@ import '../state/app_session_controller.dart';
 /// - campos neutros, para evitar parecerem ativos;
 /// - azul reservado para marca, foco e ação principal.
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({
-    super.key,
-    required this.onAuthenticated,
-  });
+  const RegisterPage({super.key, required this.onAuthenticated});
 
   final VoidCallback onAuthenticated;
 
@@ -72,10 +69,9 @@ class _RegisterPageState extends State<RegisterPage> {
         return;
       }
 
-      await AppLocaleScope.read(context).setLanguageCode(
-        user.preferences.appLanguageCode,
-        persist: true,
-      );
+      await AppLocaleScope.read(
+        context,
+      ).setLanguageCode(user.preferences.appLanguageCode, persist: true);
 
       if (!mounted) {
         return;
@@ -118,10 +114,7 @@ class _RegisterPageState extends State<RegisterPage> {
         titleSpacing: 0,
         title: const AppText(
           'Criar conta',
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
         ),
       ),
       body: Stack(
@@ -251,7 +244,9 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                           validator: (value) {
                             if (value == null || value.length < 6) {
-                              return context.tr('A password deve ter pelo menos 6 caracteres.');
+                              return context.tr(
+                                'A password deve ter pelo menos 6 caracteres.',
+                              );
                             }
 
                             return null;
@@ -295,10 +290,7 @@ class _RegisterPageState extends State<RegisterPage> {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF52D8FF),
-              Color(0xFF168CFF),
-            ],
+            colors: [Color(0xFF52D8FF), Color(0xFF168CFF)],
           ),
           boxShadow: [
             BoxShadow(
@@ -374,18 +366,9 @@ class _RegisterPageState extends State<RegisterPage> {
         icon: Icons.person_pin_circle_outlined,
       ),
       items: const [
-        DropdownMenuItem(
-          value: 'student',
-          child: AppText('Estudante'),
-        ),
-        DropdownMenuItem(
-          value: 'host',
-          child: AppText('Anfitrião'),
-        ),
-        DropdownMenuItem(
-          value: 'teacher',
-          child: AppText('Professor'),
-        ),
+        DropdownMenuItem(value: 'student', child: AppText('Estudante')),
+        DropdownMenuItem(value: 'host', child: AppText('Anfitrião')),
+        DropdownMenuItem(value: 'teacher', child: AppText('Professor')),
       ],
       onChanged: (value) {
         if (value == null) {
@@ -419,20 +402,12 @@ class _RegisterPageState extends State<RegisterPage> {
           size: 27,
         ),
       ),
-      prefixIconConstraints: const BoxConstraints(
-        minWidth: 58,
-        minHeight: 58,
-      ),
+      prefixIconConstraints: const BoxConstraints(minWidth: 58, minHeight: 58),
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: _fieldColor.withValues(alpha: 0.82),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 18,
-        vertical: 20,
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(28),
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(28),
         borderSide: BorderSide(
@@ -442,24 +417,15 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(28),
-        borderSide: const BorderSide(
-          color: _accentColor,
-          width: 1.8,
-        ),
+        borderSide: const BorderSide(color: _accentColor, width: 1.8),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(28),
-        borderSide: const BorderSide(
-          color: Colors.redAccent,
-          width: 1.35,
-        ),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.35),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(28),
-        borderSide: const BorderSide(
-          color: Colors.redAccent,
-          width: 1.8,
-        ),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.8),
       ),
     );
   }
@@ -480,10 +446,7 @@ class _RegisterPageState extends State<RegisterPage> {
               : const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF49D7FF),
-                    Color(0xFF168CFF),
-                  ],
+                  colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
                 ),
           boxShadow: _isLoading
               ? []
@@ -506,16 +469,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     color: Colors.white,
                   ),
                 )
-              : const Icon(
-                  Icons.check,
-                  size: 25,
-                ),
+              : const Icon(Icons.check, size: 25),
           label: AppText(
             _isLoading ? 'A criar...' : 'Criar conta',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
           ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -539,9 +496,7 @@ class _RegisterPageState extends State<RegisterPage> {
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.redAccent.withValues(alpha: 0.85),
-        ),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.85)),
       ),
       child: AppText(
         message,

@@ -26,7 +26,7 @@ class TopOverflowMenu extends StatelessWidget {
     return PopupMenuButton<_TopMenuAction>(
       icon: const Icon(Icons.more_vert, color: Colors.white, size: 30),
       color: const Color(0xFF14252D),
-      onSelected: (action) {
+      onSelected: (action) async {
         switch (action) {
           case _TopMenuAction.account:
             Navigator.push(
@@ -88,47 +88,62 @@ class TopOverflowMenu extends StatelessWidget {
           case _TopMenuAction.about:
             DailyTalkSupportDialogs.showAbout(context);
             break;
+
+          case _TopMenuAction.logout:
+            await _logout(context);
+            break;
         }
       },
       itemBuilder: (context) {
-        return const [
-          PopupMenuItem(
+        return [
+          const PopupMenuItem(
             value: _TopMenuAction.account,
             child: _MenuItemContent(
               icon: Icons.account_circle_outlined,
               text: 'Conta',
             ),
           ),
-          PopupMenuItem(
+          const PopupMenuItem(
             value: _TopMenuAction.language,
             child: _MenuItemContent(icon: Icons.language, text: 'Language'),
           ),
-          PopupMenuItem(
+          const PopupMenuItem(
             value: _TopMenuAction.createActivity,
             child: _MenuItemContent(
               icon: Icons.add_circle_outline,
               text: 'Criar atividade',
             ),
           ),
-          PopupMenuItem(
+          const PopupMenuItem(
             value: _TopMenuAction.myActivities,
             child: _MenuItemContent(
               icon: Icons.folder_special_outlined,
               text: 'Minhas atividades',
             ),
           ),
-          PopupMenuItem(
+          const PopupMenuItem(
             value: _TopMenuAction.help,
             child: _MenuItemContent(icon: Icons.help_outline, text: 'Ajuda'),
           ),
-          PopupMenuItem(
+          const PopupMenuItem(
             value: _TopMenuAction.sync,
             child: _MenuItemContent(icon: Icons.sync, text: 'Sincronizar'),
           ),
-          PopupMenuItem(
+          const PopupMenuItem(
             value: _TopMenuAction.about,
             child: _MenuItemContent(icon: Icons.info_outline, text: 'Sobre'),
           ),
+          if (session.isAuthenticated) ...[
+            const PopupMenuDivider(height: 1),
+            const PopupMenuItem(
+              value: _TopMenuAction.logout,
+              child: _MenuItemContent(
+                icon: Icons.logout,
+                text: 'Terminar sessão',
+                color: Colors.redAccent,
+              ),
+            ),
+          ],
         ];
       },
     );
@@ -198,6 +213,26 @@ class TopOverflowMenu extends StatelessWidget {
     );
   }
 
+  /// Termina explicitamente a sessão a partir do atalho do menu.
+  ///
+  /// A raiz de autenticação observa o [AppSessionController] e regressa
+  /// automaticamente ao ecrã de entrada após limpar a sessão local.
+  Future<void> _logout(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      await AppSessionScope.read(context).logout();
+    } catch (error) {
+      if (!context.mounted) return;
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: AppText('Erro ao terminar a sessão: $error'),
+        ),
+      );
+    }
+  }
+
   Future<void> _syncPendingSubmissions(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
 
@@ -239,22 +274,34 @@ enum _TopMenuAction {
   help,
   sync,
   about,
+  logout,
 }
 
 /// Conteúdo visual de cada item do menu.
 class _MenuItemContent extends StatelessWidget {
-  const _MenuItemContent({required this.icon, required this.text});
+  const _MenuItemContent({
+    required this.icon,
+    required this.text,
+    this.color,
+  });
 
   final IconData icon;
   final String text;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, color: Colors.white70, size: 22),
+        Icon(icon, color: color ?? Colors.white70, size: 22),
         const SizedBox(width: 12),
-        AppText(text, style: const TextStyle(color: Colors.white)),
+        AppText(
+          text,
+          style: TextStyle(
+            color: color ?? Colors.white,
+            fontWeight: color == null ? FontWeight.normal : FontWeight.w600,
+          ),
+        ),
       ],
     );
   }

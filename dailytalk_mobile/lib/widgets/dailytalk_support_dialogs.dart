@@ -22,10 +22,7 @@ class DailyTalkSupportDialogs {
           ),
           title: const AppText(
             'Ajuda',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
           ),
           content: const SingleChildScrollView(
             child: AppText(
@@ -60,10 +57,7 @@ class DailyTalkSupportDialogs {
           ),
           title: const AppText(
             'Sobre o DailyTalk.pt',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
           ),
           content: const SingleChildScrollView(
             child: AppText(

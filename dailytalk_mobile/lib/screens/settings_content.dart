@@ -198,7 +198,9 @@ class SettingsContent extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.lightBlue.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.lightBlueAccent.withValues(alpha: 0.34)),
+        border: Border.all(
+          color: Colors.lightBlueAccent.withValues(alpha: 0.34),
+        ),
       ),
       child: Row(
         children: [
@@ -247,10 +249,7 @@ class SettingsContent extends StatelessWidget {
           ),
           title: const AppText(
             'Conta necessária',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
           ),
           content: AppText(
             'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.',

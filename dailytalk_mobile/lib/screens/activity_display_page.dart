@@ -117,10 +117,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
         titleSpacing: 0,
         title: const AppText(
           'Atividade',
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
         ),
       ),
       body: Stack(
@@ -310,9 +307,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
       decoration: BoxDecoration(
         color: Colors.greenAccent.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: Colors.greenAccent.withValues(alpha: 0.58),
-        ),
+        border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.58)),
       ),
       child: Column(
         children: [
@@ -369,10 +364,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF52D8FF),
-            Color(0xFF168CFF),
-          ],
+          colors: [Color(0xFF52D8FF), Color(0xFF168CFF)],
         ),
         boxShadow: [
           BoxShadow(
@@ -388,11 +380,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
           color: Color(0xFF092333),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          icon,
-          color: color,
-          size: 46,
-        ),
+        child: Icon(icon, color: color, size: 46),
       ),
     );
   }
@@ -403,9 +391,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
       decoration: BoxDecoration(
         color: _accentColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: _accentColor.withValues(alpha: 0.42),
-        ),
+        border: Border.all(color: _accentColor.withValues(alpha: 0.42)),
       ),
       child: AppText(
         '${context.tr(label)}: $value',
@@ -425,9 +411,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.14),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
       ),
       child: AppText(
         '${context.tr(label)}: $value',
@@ -447,9 +431,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
       decoration: BoxDecoration(
         color: _fieldColor.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.14),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
       ),
       child: Column(
         children: [
@@ -487,18 +469,11 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
         fontWeight: FontWeight.w500,
       ),
       hintText: context.tr('Ex.: resposta ao diálogo, quiz ou atividade...'),
-      hintStyle: TextStyle(
-        color: Colors.white.withValues(alpha: 0.34),
-      ),
+      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.34)),
       filled: true,
       fillColor: _fieldColor.withValues(alpha: 0.78),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 17,
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(22),
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(22)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(22),
         borderSide: BorderSide(
@@ -508,24 +483,15 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(22),
-        borderSide: const BorderSide(
-          color: _accentColor,
-          width: 1.8,
-        ),
+        borderSide: const BorderSide(color: _accentColor, width: 1.8),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(22),
-        borderSide: const BorderSide(
-          color: Colors.redAccent,
-          width: 1.35,
-        ),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.35),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(22),
-        borderSide: const BorderSide(
-          color: Colors.redAccent,
-          width: 1.8,
-        ),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.8),
       ),
     );
   }
@@ -547,10 +513,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
               : const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF49D7FF),
-                    Color(0xFF168CFF),
-                  ],
+                  colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
                 ),
           boxShadow: _isSubmitting
               ? []
@@ -573,16 +536,10 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
                     color: Colors.white,
                   ),
                 )
-              : const Icon(
-                  Icons.send_outlined,
-                  size: 24,
-                ),
+              : const Icon(Icons.send_outlined, size: 24),
           label: AppText(
             _isSubmitting ? 'A submeter...' : 'Submeter resposta',
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
           ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -607,9 +564,7 @@ class _ActivityDisplayPageState extends State<ActivityDisplayPage> {
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.redAccent.withValues(alpha: 0.85),
-        ),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.85)),
       ),
       child: AppText(
         _errorMessage!,

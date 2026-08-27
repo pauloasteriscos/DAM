@@ -163,10 +163,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
         titleSpacing: 0,
         title: const AppText(
           'Notas privadas',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
         ),
       ),
       body: Stack(
@@ -250,9 +247,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
       decoration: BoxDecoration(
         color: Colors.amber.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: Colors.amberAccent.withValues(alpha: 0.70),
-        ),
+        border: Border.all(color: Colors.amberAccent.withValues(alpha: 0.70)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.14),
@@ -406,10 +401,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
               : const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF49D7FF),
-                    Color(0xFF168CFF),
-                  ],
+                  colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
                 ),
           boxShadow: _isSaving
               ? []
@@ -435,10 +427,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
               : const Icon(Icons.save_outlined, size: 23),
           label: AppText(
             _isSaving ? 'A guardar...' : 'Guardar nota privada',
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
           ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -578,26 +567,16 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
           size: 26,
         ),
       ),
-      prefixIconConstraints: const BoxConstraints(
-        minWidth: 56,
-        minHeight: 56,
-      ),
+      prefixIconConstraints: const BoxConstraints(minWidth: 56, minHeight: 56),
       labelStyle: TextStyle(
         color: Colors.white.withValues(alpha: 0.66),
         fontWeight: FontWeight.w500,
       ),
-      hintStyle: TextStyle(
-        color: Colors.white.withValues(alpha: 0.38),
-      ),
+      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.38)),
       filled: true,
       fillColor: _fieldColor.withValues(alpha: 0.76),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 18,
-        vertical: 18,
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(24),
         borderSide: BorderSide(
@@ -607,24 +586,15 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(24),
-        borderSide: const BorderSide(
-          color: _accentColor,
-          width: 1.8,
-        ),
+        borderSide: const BorderSide(color: _accentColor, width: 1.8),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(24),
-        borderSide: const BorderSide(
-          color: Colors.redAccent,
-          width: 1.35,
-        ),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.35),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(24),
-        borderSide: const BorderSide(
-          color: Colors.redAccent,
-          width: 1.8,
-        ),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.8),
       ),
     );
   }
@@ -637,9 +607,7 @@ class _PrivateNotesPageState extends State<PrivateNotesPage> {
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.redAccent.withValues(alpha: 0.85),
-        ),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.85)),
       ),
       child: AppText(
         _errorMessage!,

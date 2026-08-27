@@ -8,12 +8,7 @@ import '../models/auth_user.dart';
 /// O modo teste é tratado como um estado válido da aplicação, não como erro.
 /// Isto permite que as telas reajam corretamente quando não existe sessão,
 /// mantendo a experiência de demonstração sem forçar autenticação imediata.
-enum AppSessionStatus {
-  checking,
-  unauthenticated,
-  testMode,
-  authenticated,
-}
+enum AppSessionStatus { checking, unauthenticated, testMode, authenticated }
 
 /// Controlador global de sessão do DailyTalk.pt.
 ///
@@ -43,8 +38,9 @@ class AppSessionController extends ChangeNotifier {
 
   /// Valida a sessão guardada no dispositivo.
   ///
-  /// Se o token existir mas for inválido, a sessão local é removida para
-  /// evitar que a aplicação continue num estado incoerente.
+  /// Uma falha de rede ou expiração técnica não elimina a sessão local.
+  /// O utilizador continua a aceder aos dados em cache e a renovação é tentada
+  /// silenciosamente quando a ligação estiver disponível.
   Future<void> checkStoredSession() async {
     _setStatus(AppSessionStatus.checking);
 
@@ -60,7 +56,9 @@ class AppSessionController extends ChangeNotifier {
       _currentUser = user;
       _setStatus(AppSessionStatus.authenticated);
     } catch (_) {
-      await _authRepository.logout();
+      // Nunca terminar a sessão automaticamente por falhas transitórias.
+      // Sem utilizador em cache, a aplicação apresenta o ecrã inicial, mas os
+      // tokens e as chaves permanecem guardados para recuperação posterior.
       _currentUser = null;
       _setStatus(AppSessionStatus.unauthenticated);
     }
@@ -94,7 +92,8 @@ class AppSessionController extends ChangeNotifier {
       _currentUser = await _authRepository.getCurrentUser();
       notifyListeners();
     } catch (_) {
-      await logout();
+      // Mantém o utilizador atual e tenta novamente mais tarde.
+      notifyListeners();
     }
   }
 
@@ -129,8 +128,7 @@ class AppSessionScope extends InheritedNotifier<AppSessionController> {
   }) : super(notifier: controller);
 
   static AppSessionController watch(BuildContext context) {
-    final scope =
-        context.dependOnInheritedWidgetOfExactType<AppSessionScope>();
+    final scope = context.dependOnInheritedWidgetOfExactType<AppSessionScope>();
 
     assert(
       scope != null,
@@ -141,7 +139,8 @@ class AppSessionScope extends InheritedNotifier<AppSessionController> {
   }
 
   static AppSessionController read(BuildContext context) {
-    final element = context.getElementForInheritedWidgetOfExactType<AppSessionScope>();
+    final element = context
+        .getElementForInheritedWidgetOfExactType<AppSessionScope>();
 
     assert(
       element != null,

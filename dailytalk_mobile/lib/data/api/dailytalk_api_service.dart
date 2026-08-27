@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../config/app_config.dart';
+import '../../security/auth_session_service.dart';
+import '../../security/secure_sync_service.dart';
 import '../storage/auth_token_storage.dart';
 
 /// Serviço responsável pela comunicação com a API DailyTalk.
@@ -10,13 +12,24 @@ class DailyTalkApiService {
   DailyTalkApiService({
     http.Client? client,
     AuthTokenStorage? tokenStorage,
+    AuthSessionService? authSessionService,
+    SecureSyncService? secureSyncService,
   }) : _client = client ?? http.Client(),
-       _tokenStorage = tokenStorage ?? AuthTokenStorage();
+       _authSessionService =
+           authSessionService ??
+           AuthSessionService(client: client, tokenStorage: tokenStorage),
+       _secureSyncService =
+           secureSyncService ??
+           SecureSyncService(
+             client: client,
+             tokenStorage: tokenStorage,
+             authSessionService: authSessionService,
+           );
 
   final http.Client _client;
-  final AuthTokenStorage _tokenStorage;
+  final AuthSessionService _authSessionService;
+  final SecureSyncService _secureSyncService;
 
-  /// Obtém parâmetros dinâmicos da atividade.
   Future<List<Map<String, dynamic>>> getJsonParams() async {
     if (AppConfig.useMockApi) {
       return [
@@ -27,77 +40,65 @@ class DailyTalkApiService {
     }
 
     final uri = Uri.parse('${AppConfig.apiBaseUrl}/json-params');
-
-    final response = await _client.get(uri).timeout(AppConfig.apiTimeout);
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(
-        'Erro ao obter parâmetros da atividade. Código: ${response.statusCode}',
-      );
-    }
-
-    final decoded = jsonDecode(response.body);
-
+    final response = await _client
+        .get(uri, headers: AppConfig.environmentHeaders)
+        .timeout(AppConfig.apiTimeout);
+    final decoded = _decodeResponse(response);
     if (decoded is! List) {
       throw Exception('Formato inválido em /json-params.');
     }
-
     return decoded
         .map((item) => Map<String, dynamic>.from(item as Map))
         .toList();
   }
 
-  /// Inicia/cria a atividade no backend.
   Future<String> deployActivity({
     required String activityId,
     required String type,
   }) async {
     if (AppConfig.useMockApi) {
-      return 'https://dailytalk.pt/activity/$type/$activityId';
+      return '${AppConfig.applicationBaseUrl}/activity/$type/$activityId';
     }
 
-    final uri = Uri.parse('${AppConfig.apiBaseUrl}/deploy').replace(
-      queryParameters: {
-        'activityID': activityId,
-        'type': type,
-      },
-    );
-
+    final uri = Uri.parse(
+      '${AppConfig.apiBaseUrl}/deploy',
+    ).replace(queryParameters: {'activityID': activityId, 'type': type});
     final response = await _client
-        .get(uri, headers: await _authHeaders())
+        .get(
+          uri,
+          headers: await _authSessionService.authenticatedHeaders(
+            method: 'GET',
+            uri: uri,
+          ),
+        )
         .timeout(AppConfig.apiTimeout);
+
+    AppConfig.assertResponseEnvironment(response.headers);
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception(
         'Erro ao iniciar atividade. Código: ${response.statusCode}',
       );
     }
-
     final activityUrl = response.body.trim();
-
     if (activityUrl.isEmpty) {
       throw Exception('O servidor devolveu uma URL vazia.');
     }
-
     return activityUrl;
   }
 
-  /// Submete as respostas da atividade.
-  ///
-  /// Endpoint real: POST /api/activities/submissions.
+  /// Endpoint antigo mantido para submissão imediata.
+  /// A ação manual "Sincronizar progresso" usa secureSyncProgress.
   Future<Map<String, dynamic>> submitActivity({
     required String activityId,
     required Map<String, dynamic> submission,
   }) async {
     if (AppConfig.useMockApi) {
       final answers = submission['answers'];
-
       final answerText = answers is List && answers.isNotEmpty
-          ? answers.first['value']?.toString() ?? ''
+          ? (answers.first as Map)['value']?.toString() ?? ''
           : '';
-
       final score = answerText.trim().length >= 20 ? 90.0 : 70.0;
-
       return {
         'activityID': activityId,
         'score': score,
@@ -113,79 +114,97 @@ class DailyTalkApiService {
     }
 
     final uri = Uri.parse('${AppConfig.apiBaseUrl}/activities/submissions');
-
     final response = await _client
         .post(
           uri,
-          headers: await _authHeaders(),
+          headers: await _authSessionService.authenticatedHeaders(
+            method: 'POST',
+            uri: uri,
+          ),
           body: jsonEncode({
             'activityID': activityId,
             'submission': submission,
           }),
         )
         .timeout(AppConfig.apiTimeout);
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      final decoded = response.body.isEmpty ? null : jsonDecode(response.body);
-      final message = decoded is Map && decoded['error'] != null
-          ? decoded['error'].toString()
-          : 'Erro ao submeter atividade. Código: ${response.statusCode}';
-      throw Exception(message);
-    }
-
-    final decoded = jsonDecode(response.body);
-
+    final decoded = _decodeResponse(response);
     if (decoded is! Map) {
       throw Exception('Formato inválido em /activities/submissions.');
     }
-
     return Map<String, dynamic>.from(decoded);
   }
 
-  /// Carrega o histórico de submissões associado ao utilizador autenticado.
-  ///
-  /// Esta chamada permite que a versão Web e a versão Android mostrem o mesmo
-  /// histórico quando o utilizador entra com a mesma conta.
-  Future<List<Map<String, dynamic>>> getMySubmissions() async {
+  /// Envia até 50 submissões num único lote assinado e cifrado.
+  Future<Map<String, dynamic>> secureSyncProgress(
+    List<Map<String, dynamic>> items,
+  ) {
     if (AppConfig.useMockApi) {
-      return <Map<String, dynamic>>[];
+      return Future.value({
+        'version': 1,
+        'batchId': 'mock-batch',
+        'results': items
+            .map(
+              (item) => {
+                'clientSubmissionId': item['clientSubmissionId'],
+                'submissionId': 'mock-${item['clientSubmissionId']}',
+                'status': 'accepted',
+                'remoteActivityId': item['remoteActivityId'],
+                'score': 80,
+                'feedback': 'Sincronização segura simulada.',
+                'metrics': {'evaluatedBy': 'mock-secure-sync'},
+              },
+            )
+            .toList(),
+      });
     }
 
-    final uri = Uri.parse('${AppConfig.apiBaseUrl}/activities/submissions/mine');
+    return _secureSyncService.synchronizeProgress(items);
+  }
 
+  Future<List<Map<String, dynamic>>> getMySubmissions() async {
+    if (AppConfig.useMockApi) return <Map<String, dynamic>>[];
+
+    final uri = Uri.parse(
+      '${AppConfig.apiBaseUrl}/activities/submissions/mine',
+    );
     final response = await _client
-        .get(uri, headers: await _authHeaders())
+        .get(
+          uri,
+          headers: await _authSessionService.authenticatedHeaders(
+            method: 'GET',
+            uri: uri,
+          ),
+        )
         .timeout(AppConfig.apiTimeout);
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      final decoded = response.body.isEmpty ? null : jsonDecode(response.body);
-      final message = decoded is Map && decoded['error'] != null
-          ? decoded['error'].toString()
-          : 'Erro ao carregar histórico remoto. Código: ${response.statusCode}';
-      throw Exception(message);
-    }
-
-    final decoded = jsonDecode(response.body);
-
+    final decoded = _decodeResponse(response);
     if (decoded is! Map || decoded['submissions'] is! List) {
       throw Exception('Formato inválido em /activities/submissions/mine.');
     }
-
     return (decoded['submissions'] as List)
         .map((item) => Map<String, dynamic>.from(item as Map))
         .toList();
   }
 
-  Future<Map<String, String>> _authHeaders() async {
-    final token = await _tokenStorage.readToken();
+  Object _decodeResponse(http.Response response) {
+    AppConfig.assertResponseEnvironment(response.headers);
 
-    if (token == null || token.isEmpty) {
-      throw Exception('Sessão expirada. Inicia sessão novamente.');
+    final Object decoded;
+    try {
+      decoded = response.body.isEmpty
+          ? <String, dynamic>{}
+          : jsonDecode(response.body);
+    } on FormatException {
+      throw Exception(
+        'A API devolveu JSON inválido (HTTP ${response.statusCode}).',
+      );
     }
 
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      final message = decoded is Map && decoded['error'] != null
+          ? decoded['error'].toString()
+          : 'Erro HTTP ${response.statusCode}.';
+      throw Exception(message);
+    }
+    return decoded;
   }
 }

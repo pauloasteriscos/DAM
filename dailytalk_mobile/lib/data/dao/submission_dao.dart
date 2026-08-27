@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 
 import '../../models/app_status.dart';
+import '../../security/jose_utils.dart';
 
 /// DAO para submissões e respetivos resultados.
 ///
@@ -23,6 +24,7 @@ class SubmissionDao {
     final now = DateTime.now().toIso8601String();
 
     return db.insert('submissions', {
+      'client_submission_id': randomBase64Url(24),
       'activity_id': activityId,
       'student_id': studentId,
       'remote_activity_id': remoteActivityId,
@@ -35,7 +37,9 @@ class SubmissionDao {
   }
 
   /// Lista submissões pendentes ou com falha para tentar sincronizar.
-  Future<List<Map<String, Object?>>> getPendingSubmissions() async {
+  Future<List<Map<String, Object?>>> getPendingSubmissions({
+    int limit = 50,
+  }) async {
     return db.query(
       'submissions',
       where: 'sync_status IN (?, ?)',
@@ -44,6 +48,7 @@ class SubmissionDao {
         SubmissionSyncStatus.failed.databaseValue,
       ],
       orderBy: 'created_at ASC',
+      limit: limit,
     );
   }
 
@@ -63,12 +68,7 @@ class SubmissionDao {
           updated_at = ?
       WHERE id = ?
       ''',
-      [
-        SubmissionSyncStatus.failed.databaseValue,
-        error,
-        now,
-        submissionId,
-      ],
+      [SubmissionSyncStatus.failed.databaseValue, error, now, submissionId],
     );
   }
 
@@ -105,19 +105,15 @@ class SubmissionDao {
         whereArgs: [submissionId],
       );
 
-      await txn.insert(
-        'submission_results',
-        {
-          'submission_id': submissionId,
-          'remote_activity_id': remoteActivityId,
-          'score': score,
-          'feedback_text': feedbackText,
-          'feedback_url': feedbackUrl,
-          'metrics_json': metrics == null ? null : jsonEncode(metrics),
-          'created_at': now,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await txn.insert('submission_results', {
+        'submission_id': submissionId,
+        'remote_activity_id': remoteActivityId,
+        'score': score,
+        'feedback_text': feedbackText,
+        'feedback_url': feedbackUrl,
+        'metrics_json': metrics == null ? null : jsonEncode(metrics),
+        'created_at': now,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
     });
   }
 
@@ -148,19 +144,15 @@ class SubmissionDao {
         whereArgs: [submissionId],
       );
 
-      await txn.insert(
-        'submission_results',
-        {
-          'submission_id': submissionId,
-          'remote_activity_id': remoteActivityId,
-          'score': score,
-          'feedback_text': feedbackText,
-          'feedback_url': feedbackUrl,
-          'metrics_json': metrics == null ? null : jsonEncode(metrics),
-          'created_at': now,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await txn.insert('submission_results', {
+        'submission_id': submissionId,
+        'remote_activity_id': remoteActivityId,
+        'score': score,
+        'feedback_text': feedbackText,
+        'feedback_url': feedbackUrl,
+        'metrics_json': metrics == null ? null : jsonEncode(metrics),
+        'created_at': now,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
     });
   }
 
@@ -213,5 +205,88 @@ class SubmissionDao {
       ''',
       [limit],
     );
+  }
+
+  /// Aplica a resposta autenticada do lote às submissões locais.
+  Future<void> applySecureSyncResults(
+    List<Map<String, dynamic>> results,
+  ) async {
+    final now = DateTime.now().toIso8601String();
+
+    await db.transaction((txn) async {
+      for (final result in results) {
+        final clientId = result['clientSubmissionId']?.toString();
+        if (clientId == null || clientId.isEmpty) continue;
+
+        final rows = await txn.query(
+          'submissions',
+          columns: ['id', 'remote_activity_id'],
+          where: 'client_submission_id = ?',
+          whereArgs: [clientId],
+          limit: 1,
+        );
+        if (rows.isEmpty) continue;
+
+        final submissionId = rows.first['id'] as int;
+        final status = result['status']?.toString();
+        if (status == 'accepted' || status == 'duplicate') {
+          await txn.update(
+            'submissions',
+            {
+              'sync_status': SubmissionSyncStatus.synced.databaseValue,
+              'submitted_at': now,
+              'updated_at': now,
+              'last_sync_at': now,
+              'last_error': null,
+            },
+            where: 'id = ?',
+            whereArgs: [submissionId],
+          );
+          await txn.insert('submission_results', {
+            'submission_id': submissionId,
+            'remote_activity_id':
+                result['remoteActivityId']?.toString() ??
+                rows.first['remote_activity_id']?.toString() ??
+                '',
+            'score': _asDouble(result['score']),
+            'feedback_text': result['feedback']?.toString(),
+            'metrics_json': result['metrics'] is Map
+                ? jsonEncode(result['metrics'])
+                : null,
+            'created_at': now,
+          }, conflictAlgorithm: ConflictAlgorithm.replace);
+        } else {
+          await txn.rawUpdate(
+            '''
+            UPDATE submissions
+            SET sync_status = ?, attempt_count = attempt_count + 1,
+                last_error = ?, updated_at = ?
+            WHERE id = ?
+            ''',
+            [
+              SubmissionSyncStatus.failed.databaseValue,
+              result['reason']?.toString() ??
+                  'Submissão rejeitada pelo servidor.',
+              now,
+              submissionId,
+            ],
+          );
+        }
+      }
+    });
+  }
+
+  Future<void> markBatchAsFailed(
+    Iterable<int> submissionIds,
+    String error,
+  ) async {
+    for (final submissionId in submissionIds) {
+      await markAsFailed(submissionId: submissionId, error: error);
+    }
+  }
+
+  double? _asDouble(Object? value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '');
   }
 }

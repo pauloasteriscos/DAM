@@ -131,11 +131,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
   Future<void> _saveLanguages() async {
     if (_nativeLanguageCode == _targetLanguageCode) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: AppText(
-            'Escolhe dois idiomas diferentes.',
-          ),
-        ),
+        const SnackBar(content: AppText('Escolhe dois idiomas diferentes.')),
       );
       return;
     }
@@ -259,10 +255,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
     }
   }
 
-  String _normalizeLanguageCode(
-    String? code, {
-    required String fallbackCode,
-  }) {
+  String _normalizeLanguageCode(String? code, {required String fallbackCode}) {
     final hasLanguage = _languages.any((language) => language.code == code);
 
     if (hasLanguage) {
@@ -297,10 +290,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
         titleSpacing: 0,
         title: const AppText(
           'Language',
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
         ),
       ),
       body: Stack(
@@ -343,9 +333,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
 
           _isLoading
               ? const Center(
-                  child: CircularProgressIndicator(
-                    color: _accentColor,
-                  ),
+                  child: CircularProgressIndicator(color: _accentColor),
                 )
               : SafeArea(
                   child: Center(
@@ -475,9 +463,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       decoration: BoxDecoration(
         color: _accentColor.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: _accentColor.withValues(alpha: 0.38),
-        ),
+        border: Border.all(color: _accentColor.withValues(alpha: 0.38)),
       ),
       child: Row(
         children: [
@@ -509,10 +495,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF52D8FF),
-            Color(0xFF168CFF),
-          ],
+          colors: [Color(0xFF52D8FF), Color(0xFF168CFF)],
         ),
         boxShadow: [
           BoxShadow(
@@ -528,11 +511,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
           color: Color(0xFF092333),
           shape: BoxShape.circle,
         ),
-        child: const Icon(
-          Icons.translate,
-          color: _accentColor,
-          size: 40,
-        ),
+        child: const Icon(Icons.translate, color: _accentColor, size: 40),
       ),
     );
   }
@@ -713,10 +692,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
               : const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF49D7FF),
-                    Color(0xFF168CFF),
-                  ],
+                  colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
                 ),
           boxShadow: _isSaving
               ? []
@@ -739,16 +715,10 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                     color: Colors.white,
                   ),
                 )
-              : const Icon(
-                  Icons.check,
-                  size: 25,
-                ),
+              : const Icon(Icons.check, size: 25),
           label: AppText(
             _isSaving ? 'A guardar...' : 'Guardar idiomas',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
           ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -788,13 +758,8 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
     return InputDecoration(
       filled: true,
       fillColor: _backgroundColor.withValues(alpha: 0.76),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 16,
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(18),
         borderSide: BorderSide(
@@ -804,10 +769,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(
-          color: _accentColor,
-          width: 1.8,
-        ),
+        borderSide: const BorderSide(color: _accentColor, width: 1.8),
       ),
     );
   }

@@ -20,19 +20,19 @@ class AnalyticsDao {
       await txn.delete('analytics_definitions');
 
       for (final definition in definitions) {
-        final code = (definition['code'] ??
-                definition['id'] ??
-                definition['name'] ??
-                'metric_${definitions.indexOf(definition)}')
-            .toString();
+        final code =
+            (definition['code'] ??
+                    definition['id'] ??
+                    definition['name'] ??
+                    'metric_${definitions.indexOf(definition)}')
+                .toString();
 
         await txn.insert('analytics_definitions', {
           'code': code,
           'name': (definition['name'] ?? code).toString(),
-          'analytics_type': (definition['analytics_type'] ??
-                  definition['type'] ??
-                  'quant')
-              .toString(),
+          'analytics_type':
+              (definition['analytics_type'] ?? definition['type'] ?? 'quant')
+                  .toString(),
           'value_type': definition['value_type']?.toString(),
           'description': definition['description']?.toString(),
           'created_at': now,
@@ -101,39 +101,41 @@ class AnalyticsDao {
         final quantAnalytics = record['quantAnalytics'];
         final qualAnalytics = record['qualAnalytics'];
 
-        await txn.insert(
-          'analytics_records',
-          {
-            'activity_id': activityId,
-            'student_id': studentId,
-            'remote_activity_id': remoteActivityId,
-            'invenira_std_id': inveniraStdId,
-            'quant_analytics_json':
-                quantAnalytics == null ? null : jsonEncode(quantAnalytics),
-            'qual_analytics_json':
-                qualAnalytics == null ? null : jsonEncode(qualAnalytics),
-            'total_interactions': _extractIntMetric(
-              quantAnalytics,
-              ['totalInteracoes', 'total_interactions', 'total interactions'],
-            ),
-            'activity_time_seconds': _extractIntMetric(
-              quantAnalytics,
-              ['tempoAtividade', 'activity_time_seconds', 'time'],
-            ),
-            'student_profile': _extractStringMetric(
-              qualAnalytics,
-              ['perfilEstudante', 'student_profile', 'profile'],
-            ),
-            'heatmap_url': _extractStringMetric(
-              qualAnalytics,
-              ['heatmapURL', 'heatmap_url', 'heatmap'],
-            ),
-            'fetched_at': now,
-            'created_at': now,
-            'updated_at': now,
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
+        await txn.insert('analytics_records', {
+          'activity_id': activityId,
+          'student_id': studentId,
+          'remote_activity_id': remoteActivityId,
+          'invenira_std_id': inveniraStdId,
+          'quant_analytics_json': quantAnalytics == null
+              ? null
+              : jsonEncode(quantAnalytics),
+          'qual_analytics_json': qualAnalytics == null
+              ? null
+              : jsonEncode(qualAnalytics),
+          'total_interactions': _extractIntMetric(quantAnalytics, [
+            'totalInteracoes',
+            'total_interactions',
+            'total interactions',
+          ]),
+          'activity_time_seconds': _extractIntMetric(quantAnalytics, [
+            'tempoAtividade',
+            'activity_time_seconds',
+            'time',
+          ]),
+          'student_profile': _extractStringMetric(qualAnalytics, [
+            'perfilEstudante',
+            'student_profile',
+            'profile',
+          ]),
+          'heatmap_url': _extractStringMetric(qualAnalytics, [
+            'heatmapURL',
+            'heatmap_url',
+            'heatmap',
+          ]),
+          'fetched_at': now,
+          'created_at': now,
+          'updated_at': now,
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
       }
     });
   }
@@ -188,7 +190,8 @@ class AnalyticsDao {
     if (analytics is List) {
       for (final item in analytics) {
         if (item is Map) {
-          final name = (item['name'] ?? item['code'] ?? item['key'])?.toString();
+          final name = (item['name'] ?? item['code'] ?? item['key'])
+              ?.toString();
 
           if (name != null && normalizedKeys.contains(_normalize(name))) {
             return item['value'] ?? item['result'];

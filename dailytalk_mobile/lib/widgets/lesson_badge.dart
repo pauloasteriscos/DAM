@@ -38,13 +38,7 @@ class LessonBadge extends StatelessWidget {
           fillColor: effectiveFillColor,
           borderColor: effectiveBorderColor,
         ),
-        child: Center(
-          child: Icon(
-            icon,
-            color: effectiveIconColor,
-            size: 34,
-          ),
-        ),
+        child: Center(child: Icon(icon, color: effectiveIconColor, size: 34)),
       ),
     );
   }
@@ -67,12 +61,7 @@ class ShapeNodePainter extends CustomPainter {
     final path = _buildPath(size);
 
     // Sombra da forma para dar profundidade visual.
-    canvas.drawShadow(
-      path,
-      Colors.black.withValues(alpha: 0.25),
-      6,
-      false,
-    );
+    canvas.drawShadow(path, Colors.black.withValues(alpha: 0.25), 6, false);
 
     // Preenchimento da forma.
     final fillPaint = Paint()
@@ -93,22 +82,20 @@ class ShapeNodePainter extends CustomPainter {
   Path _buildPath(Size size) {
     switch (shape) {
       case NodeShape.circle:
-        return Path()
-          ..addOval(
-            Rect.fromCircle(
-              center: Offset(size.width / 2, size.height / 2),
-              radius: size.width / 2 - 4,
-            ),
-          );
+        return Path()..addOval(
+          Rect.fromCircle(
+            center: Offset(size.width / 2, size.height / 2),
+            radius: size.width / 2 - 4,
+          ),
+        );
 
       case NodeShape.roundedSquare:
-        return Path()
-          ..addRRect(
-            RRect.fromRectAndRadius(
-              Rect.fromLTWH(6, 6, size.width - 12, size.height - 12),
-              const Radius.circular(18),
-            ),
-          );
+        return Path()..addRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(6, 6, size.width - 12, size.height - 12),
+            const Radius.circular(18),
+          ),
+        );
 
       case NodeShape.diamond:
         return _diamondPath(size);

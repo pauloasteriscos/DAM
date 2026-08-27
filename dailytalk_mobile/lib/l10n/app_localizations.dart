@@ -25,10 +25,13 @@ class AppTranslations {
     var translated = language == 'pt'
         ? source
         : (_lookupExact(source, language) ??
-            _translatePrefixed(source, language));
+              _translatePrefixed(source, language));
 
     for (final entry in parameters.entries) {
-      translated = translated.replaceAll('{${entry.key}}', '${entry.value ?? ''}');
+      translated = translated.replaceAll(
+        '{${entry.key}}',
+        '${entry.value ?? ''}',
+      );
     }
 
     return translated;
@@ -46,7 +49,8 @@ class AppTranslations {
       for (final entry in prefixes.entries) {
         if (source.startsWith(entry.key)) {
           final remainder = source.substring(entry.key.length);
-          final translatedRemainder = _lookupExact(remainder, language) ?? remainder;
+          final translatedRemainder =
+              _lookupExact(remainder, language) ?? remainder;
           return '${entry.value}$translatedRemainder';
         }
       }
@@ -61,43 +65,62 @@ class AppTranslations {
       'Indica o código de recuperação.': 'Enter the recovery code.',
       'Indica um título para a nota.': 'Enter a title for the note.',
       'Escreve o conteúdo da nota.': 'Write the note content.',
-      'Escreve uma resposta antes de submeter.': 'Write an answer before submitting.',
+      'Escreve uma resposta antes de submeter.':
+          'Write an answer before submitting.',
       'Escolhe os teus idiomas': 'Choose your languages',
-      'O DailyTalk.pt adapta as atividades ao idioma que já conheces e ao idioma que queres praticar.': 'DailyTalk.pt adapts the activities to the language you already know and the language you want to practise.',
-      'Modo teste: os idiomas podem ser alterados, mas ficam apenas neste dispositivo até entrares na conta.': 'Test mode: languages can be changed, but they remain only on this device until you sign in.',
+      'O DailyTalk.pt adapta as atividades ao idioma que já conheces e ao idioma que queres praticar.':
+          'DailyTalk.pt adapts the activities to the language you already know and the language you want to practise.',
+      'Modo teste: os idiomas podem ser alterados, mas ficam apenas neste dispositivo até entrares na conta.':
+          'Test mode: languages can be changed, but they remain only on this device until you sign in.',
       'Atenção': 'Attention',
       'Percurso de aprendizagem': 'Learning path',
-      'Escolhe idiomas diferentes para que as atividades tenham um objetivo de aprendizagem claro.': 'Choose different languages so that the activities have a clear learning goal.',
-      'As atividades serão preparadas com base no idioma que conheces e no idioma que queres praticar.': 'Activities will be prepared based on the language you know and the language you want to practise.',
-      'Ainda não tem conta? Criar conta': 'Don’t have an account yet? Create one',
+      'Escolhe idiomas diferentes para que as atividades tenham um objetivo de aprendizagem claro.':
+          'Choose different languages so that the activities have a clear learning goal.',
+      'As atividades serão preparadas com base no idioma que conheces e no idioma que queres praticar.':
+          'Activities will be prepared based on the language you know and the language you want to practise.',
+      'Ainda não tem conta? Criar conta':
+          'Don’t have an account yet? Create one',
       'Esqueceste a palavra-passe?': 'Forgot your password?',
-      'Volta ao ecrã inicial para entrar ou criar conta.': 'Return to the initial screen to sign in or create an account.',
-      'Palavra-passe alterada com sucesso. Inicia sessão novamente.': 'Password changed successfully. Sign in again.',
+      'Volta ao ecrã inicial para entrar ou criar conta.':
+          'Return to the initial screen to sign in or create an account.',
+      'Palavra-passe alterada com sucesso. Inicia sessão novamente.':
+          'Password changed successfully. Sign in again.',
       'Define uma nova palavra-passe': 'Set a new password',
-      'Versão de protótipo\nNo plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário é apresentado aqui.\n\nCódigo: {code}': 'Prototype version\nOn the free Cloudflare plan, the server does not send recovery emails. To allow the flow to be tested, the temporary code is shown here.\n\nCode: {code}',
+      'Versão de protótipo\nNo plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário é apresentado aqui.\n\nCódigo: {code}':
+          'Prototype version\nOn the free Cloudflare plan, the server does not send recovery emails. To allow the flow to be tested, the temporary code is shown here.\n\nCode: {code}',
       'Desafio pronto': 'Challenge ready',
-      'A atividade foi preparada. Lê o enunciado, responde e submete para receber feedback.': 'The activity is ready. Read the prompt, answer and submit to receive feedback.',
+      'A atividade foi preparada. Lê o enunciado, responde e submete para receber feedback.':
+          'The activity is ready. Read the prompt, answer and submit to receive feedback.',
       'Resposta da atividade': 'Activity answer',
       'Resultado guardado': 'Result saved',
       'URL devolvida pelo deploy': 'URL returned by deployment',
-      'Modo teste: as análises usam apenas dados locais desta instalação. Entra para consultar e sincronizar métricas da tua conta.': 'Test mode: analytics use only local data from this installation. Sign in to view and sync your account metrics.',
-      'Estas análises usam apenas dados de desempenho, como perfil, cenário, tipo de atividade, tentativas e pontuação. Não guardam dados sensíveis.': 'These analytics use only performance data, such as profile, scenario, activity type, attempts and score. They do not store sensitive data.',
+      'Modo teste: as análises usam apenas dados locais desta instalação. Entra para consultar e sincronizar métricas da tua conta.':
+          'Test mode: analytics use only local data from this installation. Sign in to view and sync your account metrics.',
+      'Estas análises usam apenas dados de desempenho, como perfil, cenário, tipo de atividade, tentativas e pontuação. Não guardam dados sensíveis.':
+          'These analytics use only performance data, such as profile, scenario, activity type, attempts and score. They do not store sensitive data.',
       'Ainda não há dados suficientes': 'There is not enough data yet',
-      'Submete algumas atividades na página Praticar para gerar análises pedagógicas.': 'Submit some activities on the Practise page to generate pedagogical analytics.',
-      'Modo teste: são mostrados apenas resultados locais. Entra para sincronizar histórico entre dispositivos.': 'Test mode: only local results are shown. Sign in to sync history across devices.',
+      'Submete algumas atividades na página Praticar para gerar análises pedagógicas.':
+          'Submit some activities on the Practise page to generate pedagogical analytics.',
+      'Modo teste: são mostrados apenas resultados locais. Entra para sincronizar histórico entre dispositivos.':
+          'Test mode: only local results are shown. Sign in to sync history across devices.',
       'Ainda não há resultados disponíveis.': 'No results are available yet.',
       'Desafio': 'Challenge',
       'Resposta submetida': 'Answer submitted',
       'Notas privadas': 'Private notes',
       'Nota privada local': 'Local private note',
-      'Estas notas ficam apenas neste dispositivo. Não são enviadas para o servidor e não entram na sincronização.': 'These notes remain only on this device. They are not sent to the server or included in synchronization.',
-      'Ainda não existem notas privadas locais.': 'There are no local private notes yet.',
+      'Estas notas ficam apenas neste dispositivo. Não são enviadas para o servidor e não entram na sincronização.':
+          'These notes remain only on this device. They are not sent to the server or included in synchronization.',
+      'Ainda não existem notas privadas locais.':
+          'There are no local private notes yet.',
       'Cenário opcional': 'Optional scenario',
       'Nota': 'Note',
       'Escolhe o teu perfil': 'Choose your profile',
-      'O DailyTalk.pt adapta os cenários e atividades ao teu papel no contexto escolar.': 'DailyTalk.pt adapts scenarios and activities to your role in the school context.',
-      'Modo teste: o perfil pode ser ajustado localmente, mas só será sincronizado depois de entrares na conta.': 'Test mode: the profile can be changed locally, but it will only sync after you sign in.',
-      'Modo teste ativo. Podes alterar idioma e perfil localmente; para sincronizar, entra ou cria conta.': 'Test mode active. You can change language and profile locally; to sync, sign in or create an account.',
+      'O DailyTalk.pt adapta os cenários e atividades ao teu papel no contexto escolar.':
+          'DailyTalk.pt adapts scenarios and activities to your role in the school context.',
+      'Modo teste: o perfil pode ser ajustado localmente, mas só será sincronizado depois de entrares na conta.':
+          'Test mode: the profile can be changed locally, but it will only sync after you sign in.',
+      'Modo teste ativo. Podes alterar idioma e perfil localmente; para sincronizar, entra ou cria conta.':
+          'Test mode active. You can change language and profile locally; to sync, sign in or create an account.',
       'ATALHOS / FEEDBACK': 'SHORTCUTS / FEEDBACK',
       'Conquistas': 'Achievements',
       'Badges e pontos': 'Badges and points',
@@ -106,51 +129,73 @@ class AppTranslations {
       'Opinião': 'Opinion',
       'Ajuda rápida': 'Quick help',
       'Dicas': 'Tips',
-      'Usa a Home para acompanhar o teu percurso e aceder rapidamente às atividades.\n\nNo modo teste, podes experimentar as atividades e alterar preferências locais. Para guardar e sincronizar o progresso, entra ou cria uma conta.': 'Use Home to follow your journey and quickly access activities.\n\nIn test mode, you can try activities and change local preferences. To save and sync progress, sign in or create an account.',
+      'Usa a Home para acompanhar o teu percurso e aceder rapidamente às atividades.\n\nNo modo teste, podes experimentar as atividades e alterar preferências locais. Para guardar e sincronizar o progresso, entra ou cria uma conta.':
+          'Use Home to follow your journey and quickly access activities.\n\nIn test mode, you can try activities and change local preferences. To save and sync progress, sign in or create an account.',
       'Sobre o DailyTalk.pt': 'About DailyTalk.pt',
-      'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\nA aplicação combina atividades de vocabulário, diálogo, quiz e revisão para apoiar a comunicação em situações reais.': 'DailyTalk.pt is a serious game for language learning, aimed at children and young people in a school context and Erasmus+ mobility.\n\nThe application combines vocabulary, dialogue, quiz and review activities to support communication in real situations.',
+      'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\nA aplicação combina atividades de vocabulário, diálogo, quiz e revisão para apoiar a comunicação em situações reais.':
+          'DailyTalk.pt is a serious game for language learning, aimed at children and young people in a school context and Erasmus+ mobility.\n\nThe application combines vocabulary, dialogue, quiz and review activities to support communication in real situations.',
       'Prática para Estudante': 'Practice for Student',
       'Prática para Anfitrião': 'Practice for Host',
       'Prática para Professor': 'Practice for Teacher',
 
       'Conta e preferências': 'Account and preferences',
-      'Ver dados do perfil autenticado e terminar sessão.': 'View authenticated profile details and sign out.',
-      'Entrar ou criar conta para guardar progresso e sincronizar.': 'Sign in or create an account to save progress and sync.',
-      'Escolher entre Estudante, Anfitrião ou Professor.': 'Choose between Student, Host or Teacher.',
-      'Escolher perfil localmente durante o modo teste.': 'Choose a profile locally during test mode.',
-      'Choose your language and the language you want to learn.': 'Choose your language and the language you want to learn.',
-      'Alterar idiomas localmente durante o modo teste.': 'Change languages locally during test mode.',
+      'Ver dados do perfil autenticado e terminar sessão.':
+          'View authenticated profile details and sign out.',
+      'Entrar ou criar conta para guardar progresso e sincronizar.':
+          'Sign in or create an account to save progress and sync.',
+      'Escolher entre Estudante, Anfitrião ou Professor.':
+          'Choose between Student, Host or Teacher.',
+      'Escolher perfil localmente durante o modo teste.':
+          'Choose a profile locally during test mode.',
+      'Choose your language and the language you want to learn.':
+          'Choose your language and the language you want to learn.',
+      'Alterar idiomas localmente durante o modo teste.':
+          'Change languages locally during test mode.',
       'Atividades': 'Activities',
-      'Criar uma atividade com base nas tuas dificuldades.': 'Create an activity based on your learning difficulties.',
-      'Funcionalidade disponível depois de entrares na conta.': 'Feature available after signing in.',
-      'Ver atividades criadas por ti e o seu estado de aprovação.': 'View activities created by you and their approval status.',
-      'Disponível com conta, para associar atividades ao teu perfil.': 'Available with an account, to associate activities with your profile.',
+      'Criar uma atividade com base nas tuas dificuldades.':
+          'Create an activity based on your learning difficulties.',
+      'Funcionalidade disponível depois de entrares na conta.':
+          'Feature available after signing in.',
+      'Ver atividades criadas por ti e o seu estado de aprovação.':
+          'View activities created by you and their approval status.',
+      'Disponível com conta, para associar atividades ao teu perfil.':
+          'Available with an account, to associate activities with your profile.',
       'Privacidade e dados': 'Privacy and data',
-      'Guardar notas opcionais apenas neste dispositivo, sem sincronização.': 'Save optional notes only on this device, without synchronization.',
-      'Atualizar dados e enviar submissões pendentes quando houver ligação.': 'Update data and send pending submissions when a connection is available.',
-      'Entra para sincronizar o progresso com a tua conta.': 'Sign in to sync progress with your account.',
+      'Guardar notas opcionais apenas neste dispositivo, sem sincronização.':
+          'Save optional notes only on this device, without synchronization.',
+      'Atualizar dados e enviar submissões pendentes quando houver ligação.':
+          'Update data and send pending submissions when a connection is available.',
+      'Entra para sincronizar o progresso com a tua conta.':
+          'Sign in to sync progress with your account.',
       'Apoio': 'Support',
       'Ver instruções rápidas de utilização.': 'View quick usage instructions.',
       'Informação sobre o DailyTalk.pt.': 'Information about DailyTalk.pt.',
       'Sincronizadas: ': 'Synced: ',
       'Falhas: ': 'Failures: ',
-      'Podes experimentar a aplicação sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.': 'You can try the application without an account. To save progress and sync, sign in or create an account.',
-      'Acede à tua conta para guardar progresso, consultar resultados sincronizados e continuar noutro dispositivo.': 'Access your account to save progress, view synced results and continue on another device.',
-      'A sessão guardada neste dispositivo não é válida. Entra novamente para continuar.': 'The session saved on this device is not valid. Sign in again to continue.',
+      'Podes experimentar a aplicação sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.':
+          'You can try the application without an account. To save progress and sync, sign in or create an account.',
+      'Acede à tua conta para guardar progresso, consultar resultados sincronizados e continuar noutro dispositivo.':
+          'Access your account to save progress, view synced results and continue on another device.',
+      'A sessão guardada neste dispositivo não é válida. Entra novamente para continuar.':
+          'The session saved on this device is not valid. Sign in again to continue.',
       'Idioma da app': 'App language',
       'Idioma de aprendizagem': 'Learning language',
-      'Perfil guardado neste dispositivo. Entra para sincronizar.': 'Profile saved on this device. Sign in to sync.',
+      'Perfil guardado neste dispositivo. Entra para sincronizar.':
+          'Profile saved on this device. Sign in to sync.',
       'A preparar...': 'Preparing...',
       'Gerar código de recuperação': 'Generate recovery code',
-      'Modo protótipo: o código foi gerado e será apresentado no ecrã seguinte.': 'Prototype mode: the code was generated and will be shown on the next screen.',
-      'Indica o email da tua conta. Nesta versão de protótipo, alojada no plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário será apresentado no ecrã seguinte.': 'Enter your account email. In this prototype hosted on the free Cloudflare plan, the server does not send recovery emails. To test the flow, the temporary code will be shown on the next screen.',
+      'Modo protótipo: o código foi gerado e será apresentado no ecrã seguinte.':
+          'Prototype mode: the code was generated and will be shown on the next screen.',
+      'Indica o email da tua conta. Nesta versão de protótipo, alojada no plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário será apresentado no ecrã seguinte.':
+          'Enter your account email. In this prototype hosted on the free Cloudflare plan, the server does not send recovery emails. To test the flow, the temporary code will be shown on the next screen.',
       'Código de recuperação': 'Recovery code',
       'Alterar palavra-passe': 'Change password',
       'Atividade remota': 'Remote activity',
       'Sem feedback.': 'No feedback.',
       'Cloud/API': 'Cloud/API',
       'Atualizar resultados': 'Refresh results',
-      'Submete uma atividade para consultar o histórico local.': 'Submit an activity to view the local history.',
+      'Submete uma atividade para consultar o histórico local.':
+          'Submit an activity to view the local history.',
       'Não disponível': 'Not available',
       'Tentativas': 'Attempts',
       'Erros': 'Errors',
@@ -163,18 +208,30 @@ class AppTranslations {
       'Escreve aqui a nota privada...': 'Write the private note here...',
       'Guardar nota privada': 'Save private note',
       'Sem cenário': 'No scenario',
-      'Conquistas serão detalhadas na área de Resultados.': 'Achievements will be detailed in the Results area.',
-      'O progresso será apresentado com métricas de aprendizagem.': 'Progress will be shown with learning metrics.',
-      'O feedback ajudará a melhorar as atividades.': 'Feedback will help improve the activities.',
-      'A ajuda rápida explicará como usar a aplicação.': 'Quick help will explain how to use the application.',
-      'Em Praticar, responde a atividades predefinidas para treinares comunicação em contexto escolar.': 'In Practise, complete predefined activities to train communication in a school context.',
-      'Em Resultados, acompanha o teu histórico, pontuações e estado de sincronização.': 'In Results, view your history, scores and synchronization status.',
-      'Em Análises, consulta métricas pedagógicas agregadas, sem dados sensíveis.': 'In Analytics, view aggregated pedagogical metrics without sensitive data.',
-      'Em Ajustes, podes gerir conta, perfil, idiomas, notas privadas, sincronização e atividades criadas por ti.': 'In Settings, you can manage your account, profile, languages, private notes, synchronization and activities created by you.',
-      'A opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.': 'The Profile option adapts activities for Student, Host or Teacher.',
-      'A aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.': 'The application helps practise communication in real school-life situations through vocabulary, audio, dialogues, quizzes and challenges.',
-      'O projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.': 'The project considers different user profiles, such as Student, Host and Teacher, to better adapt activities to each person’s role.',
-      'A aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.': 'The application includes activities created by the DailyTalk.pt team and may evolve to accept community-proposed activities, with validation before publication.',
+      'Conquistas serão detalhadas na área de Resultados.':
+          'Achievements will be detailed in the Results area.',
+      'O progresso será apresentado com métricas de aprendizagem.':
+          'Progress will be shown with learning metrics.',
+      'O feedback ajudará a melhorar as atividades.':
+          'Feedback will help improve the activities.',
+      'A ajuda rápida explicará como usar a aplicação.':
+          'Quick help will explain how to use the application.',
+      'Em Praticar, responde a atividades predefinidas para treinares comunicação em contexto escolar.':
+          'In Practise, complete predefined activities to train communication in a school context.',
+      'Em Resultados, acompanha o teu histórico, pontuações e estado de sincronização.':
+          'In Results, view your history, scores and synchronization status.',
+      'Em Análises, consulta métricas pedagógicas agregadas, sem dados sensíveis.':
+          'In Analytics, view aggregated pedagogical metrics without sensitive data.',
+      'Em Ajustes, podes gerir conta, perfil, idiomas, notas privadas, sincronização e atividades criadas por ti.':
+          'In Settings, you can manage your account, profile, languages, private notes, synchronization and activities created by you.',
+      'A opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.':
+          'The Profile option adapts activities for Student, Host or Teacher.',
+      'A aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.':
+          'The application helps practise communication in real school-life situations through vocabulary, audio, dialogues, quizzes and challenges.',
+      'O projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.':
+          'The project considers different user profiles, such as Student, Host and Teacher, to better adapt activities to each person’s role.',
+      'A aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.':
+          'The application includes activities created by the DailyTalk.pt team and may evolve to accept community-proposed activities, with validation before publication.',
       'Resposta submetida em modo teste.': 'Answer submitted in test mode.',
     },
     'es': {
@@ -182,306 +239,594 @@ class AppTranslations {
       'Indica o código de recuperação.': 'Introduce el código de recuperación.',
       'Indica um título para a nota.': 'Introduce un título para la nota.',
       'Escreve o conteúdo da nota.': 'Escribe el contenido de la nota.',
-      'Escreve uma resposta antes de submeter.': 'Escribe una respuesta antes de enviarla.',
+      'Escreve uma resposta antes de submeter.':
+          'Escribe una respuesta antes de enviarla.',
       'Escolhe os teus idiomas': 'Elige tus idiomas',
-      'O DailyTalk.pt adapta as atividades ao idioma que já conheces e ao idioma que queres praticar.': 'DailyTalk.pt adapta las actividades al idioma que ya conoces y al idioma que quieres practicar.',
-      'Modo teste: os idiomas podem ser alterados, mas ficam apenas neste dispositivo até entrares na conta.': 'Modo de prueba: los idiomas pueden cambiarse, pero permanecen solo en este dispositivo hasta que inicies sesión.',
-      'Atenção': 'Atención', 'Percurso de aprendizagem': 'Itinerario de aprendizaje',
-      'Escolhe idiomas diferentes para que as atividades tenham um objetivo de aprendizagem claro.': 'Elige idiomas diferentes para que las actividades tengan un objetivo de aprendizaje claro.',
-      'As atividades serão preparadas com base no idioma que conheces e no idioma que queres praticar.': 'Las actividades se prepararán según el idioma que conoces y el idioma que quieres practicar.',
+      'O DailyTalk.pt adapta as atividades ao idioma que já conheces e ao idioma que queres praticar.':
+          'DailyTalk.pt adapta las actividades al idioma que ya conoces y al idioma que quieres practicar.',
+      'Modo teste: os idiomas podem ser alterados, mas ficam apenas neste dispositivo até entrares na conta.':
+          'Modo de prueba: los idiomas pueden cambiarse, pero permanecen solo en este dispositivo hasta que inicies sesión.',
+      'Atenção': 'Atención',
+      'Percurso de aprendizagem': 'Itinerario de aprendizaje',
+      'Escolhe idiomas diferentes para que as atividades tenham um objetivo de aprendizagem claro.':
+          'Elige idiomas diferentes para que las actividades tengan un objetivo de aprendizaje claro.',
+      'As atividades serão preparadas com base no idioma que conheces e no idioma que queres praticar.':
+          'Las actividades se prepararán según el idioma que conoces y el idioma que quieres practicar.',
       'Ainda não tem conta? Criar conta': '¿Aún no tienes cuenta? Crea una',
       'Esqueceste a palavra-passe?': '¿Has olvidado la contraseña?',
-      'Volta ao ecrã inicial para entrar ou criar conta.': 'Vuelve a la pantalla inicial para iniciar sesión o crear una cuenta.',
-      'Palavra-passe alterada com sucesso. Inicia sessão novamente.': 'Contraseña modificada correctamente. Vuelve a iniciar sesión.',
+      'Volta ao ecrã inicial para entrar ou criar conta.':
+          'Vuelve a la pantalla inicial para iniciar sesión o crear una cuenta.',
+      'Palavra-passe alterada com sucesso. Inicia sessão novamente.':
+          'Contraseña modificada correctamente. Vuelve a iniciar sesión.',
       'Define uma nova palavra-passe': 'Define una nueva contraseña',
       'Desafio pronto': 'Desafío preparado',
-      'A atividade foi preparada. Lê o enunciado, responde e submete para receber feedback.': 'La actividad está preparada. Lee el enunciado, responde y envíala para recibir comentarios.',
-      'Resposta da atividade': 'Respuesta de la actividad', 'Resultado guardado': 'Resultado guardado',
+      'A atividade foi preparada. Lê o enunciado, responde e submete para receber feedback.':
+          'La actividad está preparada. Lee el enunciado, responde y envíala para recibir comentarios.',
+      'Resposta da atividade': 'Respuesta de la actividad',
+      'Resultado guardado': 'Resultado guardado',
       'URL devolvida pelo deploy': 'URL devuelta por el despliegue',
-      'Modo teste: as análises usam apenas dados locais desta instalação. Entra para consultar e sincronizar métricas da tua conta.': 'Modo de prueba: los análisis usan solo datos locales de esta instalación. Inicia sesión para consultar y sincronizar las métricas de tu cuenta.',
-      'Estas análises usam apenas dados de desempenho, como perfil, cenário, tipo de atividade, tentativas e pontuação. Não guardam dados sensíveis.': 'Estos análisis usan solo datos de rendimiento, como perfil, escenario, tipo de actividad, intentos y puntuación. No guardan datos sensibles.',
+      'Modo teste: as análises usam apenas dados locais desta instalação. Entra para consultar e sincronizar métricas da tua conta.':
+          'Modo de prueba: los análisis usan solo datos locales de esta instalación. Inicia sesión para consultar y sincronizar las métricas de tu cuenta.',
+      'Estas análises usam apenas dados de desempenho, como perfil, cenário, tipo de atividade, tentativas e pontuação. Não guardam dados sensíveis.':
+          'Estos análisis usan solo datos de rendimiento, como perfil, escenario, tipo de actividad, intentos y puntuación. No guardan datos sensibles.',
       'Ainda não há dados suficientes': 'Aún no hay datos suficientes',
-      'Submete algumas atividades na página Praticar para gerar análises pedagógicas.': 'Envía algunas actividades en la página Practicar para generar análisis pedagógicos.',
-      'Modo teste: são mostrados apenas resultados locais. Entra para sincronizar histórico entre dispositivos.': 'Modo de prueba: solo se muestran resultados locales. Inicia sesión para sincronizar el historial entre dispositivos.',
-      'Ainda não há resultados disponíveis.': 'Aún no hay resultados disponibles.',
-      'Desafio': 'Desafío', 'Resposta submetida': 'Respuesta enviada',
+      'Submete algumas atividades na página Praticar para gerar análises pedagógicas.':
+          'Envía algunas actividades en la página Practicar para generar análisis pedagógicos.',
+      'Modo teste: são mostrados apenas resultados locais. Entra para sincronizar histórico entre dispositivos.':
+          'Modo de prueba: solo se muestran resultados locales. Inicia sesión para sincronizar el historial entre dispositivos.',
+      'Ainda não há resultados disponíveis.':
+          'Aún no hay resultados disponibles.',
+      'Desafio': 'Desafío',
+      'Resposta submetida': 'Respuesta enviada',
       'Nota privada local': 'Nota privada local',
-      'Estas notas ficam apenas neste dispositivo. Não são enviadas para o servidor e não entram na sincronização.': 'Estas notas permanecen solo en este dispositivo. No se envían al servidor ni se incluyen en la sincronización.',
-      'Ainda não existem notas privadas locais.': 'Aún no hay notas privadas locales.',
-      'Cenário opcional': 'Escenario opcional', 'Nota': 'Nota',
+      'Estas notas ficam apenas neste dispositivo. Não são enviadas para o servidor e não entram na sincronização.':
+          'Estas notas permanecen solo en este dispositivo. No se envían al servidor ni se incluyen en la sincronización.',
+      'Ainda não existem notas privadas locais.':
+          'Aún no hay notas privadas locales.',
+      'Cenário opcional': 'Escenario opcional',
+      'Nota': 'Nota',
       'Escolhe o teu perfil': 'Elige tu perfil',
-      'O DailyTalk.pt adapta os cenários e atividades ao teu papel no contexto escolar.': 'DailyTalk.pt adapta los escenarios y las actividades a tu papel en el contexto escolar.',
-      'Modo teste: o perfil pode ser ajustado localmente, mas só será sincronizado depois de entrares na conta.': 'Modo de prueba: el perfil puede ajustarse localmente, pero solo se sincronizará después de iniciar sesión.',
-      'Modo teste ativo. Podes alterar idioma e perfil localmente; para sincronizar, entra ou cria conta.': 'Modo de prueba activo. Puedes cambiar el idioma y el perfil localmente; para sincronizar, inicia sesión o crea una cuenta.',
-      'ATALHOS / FEEDBACK': 'ACCESOS DIRECTOS / COMENTARIOS', 'Conquistas': 'Logros', 'Badges e pontos': 'Insignias y puntos',
-      'Progresso': 'Progreso', 'Evolução': 'Evolución', 'Opinião': 'Opinión', 'Ajuda rápida': 'Ayuda rápida', 'Dicas': 'Consejos',
+      'O DailyTalk.pt adapta os cenários e atividades ao teu papel no contexto escolar.':
+          'DailyTalk.pt adapta los escenarios y las actividades a tu papel en el contexto escolar.',
+      'Modo teste: o perfil pode ser ajustado localmente, mas só será sincronizado depois de entrares na conta.':
+          'Modo de prueba: el perfil puede ajustarse localmente, pero solo se sincronizará después de iniciar sesión.',
+      'Modo teste ativo. Podes alterar idioma e perfil localmente; para sincronizar, entra ou cria conta.':
+          'Modo de prueba activo. Puedes cambiar el idioma y el perfil localmente; para sincronizar, inicia sesión o crea una cuenta.',
+      'ATALHOS / FEEDBACK': 'ACCESOS DIRECTOS / COMENTARIOS',
+      'Conquistas': 'Logros',
+      'Badges e pontos': 'Insignias y puntos',
+      'Progresso': 'Progreso',
+      'Evolução': 'Evolución',
+      'Opinião': 'Opinión',
+      'Ajuda rápida': 'Ayuda rápida',
+      'Dicas': 'Consejos',
       'Sobre o DailyTalk.pt': 'Acerca de DailyTalk.pt',
 
       'Conta e preferências': 'Cuenta y preferencias',
-      'Ver dados do perfil autenticado e terminar sessão.': 'Ver los datos del perfil autenticado y cerrar sesión.',
-      'Entrar ou criar conta para guardar progresso e sincronizar.': 'Inicia sesión o crea una cuenta para guardar el progreso y sincronizar.',
-      'Escolher entre Estudante, Anfitrião ou Professor.': 'Elegir entre Estudiante, Anfitrión o Profesor.',
-      'Escolher perfil localmente durante o modo teste.': 'Elegir el perfil localmente durante el modo de prueba.',
-      'Choose your language and the language you want to learn.': 'Elige tu idioma y el idioma que quieres aprender.',
-      'Alterar idiomas localmente durante o modo teste.': 'Cambiar idiomas localmente durante el modo de prueba.',
+      'Ver dados do perfil autenticado e terminar sessão.':
+          'Ver los datos del perfil autenticado y cerrar sesión.',
+      'Entrar ou criar conta para guardar progresso e sincronizar.':
+          'Inicia sesión o crea una cuenta para guardar el progreso y sincronizar.',
+      'Escolher entre Estudante, Anfitrião ou Professor.':
+          'Elegir entre Estudiante, Anfitrión o Profesor.',
+      'Escolher perfil localmente durante o modo teste.':
+          'Elegir el perfil localmente durante el modo de prueba.',
+      'Choose your language and the language you want to learn.':
+          'Elige tu idioma y el idioma que quieres aprender.',
+      'Alterar idiomas localmente durante o modo teste.':
+          'Cambiar idiomas localmente durante el modo de prueba.',
       'Atividades': 'Actividades',
-      'Criar uma atividade com base nas tuas dificuldades.': 'Crear una actividad basada en tus dificultades de aprendizaje.',
-      'Funcionalidade disponível depois de entrares na conta.': 'Función disponible después de iniciar sesión.',
-      'Ver atividades criadas por ti e o seu estado de aprovação.': 'Ver las actividades creadas por ti y su estado de aprobación.',
-      'Disponível com conta, para associar atividades ao teu perfil.': 'Disponible con una cuenta para asociar actividades a tu perfil.',
+      'Criar uma atividade com base nas tuas dificuldades.':
+          'Crear una actividad basada en tus dificultades de aprendizaje.',
+      'Funcionalidade disponível depois de entrares na conta.':
+          'Función disponible después de iniciar sesión.',
+      'Ver atividades criadas por ti e o seu estado de aprovação.':
+          'Ver las actividades creadas por ti y su estado de aprobación.',
+      'Disponível com conta, para associar atividades ao teu perfil.':
+          'Disponible con una cuenta para asociar actividades a tu perfil.',
       'Privacidade e dados': 'Privacidad y datos',
-      'Guardar notas opcionais apenas neste dispositivo, sem sincronização.': 'Guardar notas opcionales solo en este dispositivo, sin sincronización.',
-      'Atualizar dados e enviar submissões pendentes quando houver ligação.': 'Actualizar datos y enviar entregas pendientes cuando haya conexión.',
-      'Entra para sincronizar o progresso com a tua conta.': 'Inicia sesión para sincronizar el progreso con tu cuenta.',
-      'Apoio': 'Ayuda', 'Ver instruções rápidas de utilização.': 'Ver instrucciones rápidas de uso.',
+      'Guardar notas opcionais apenas neste dispositivo, sem sincronização.':
+          'Guardar notas opcionales solo en este dispositivo, sin sincronización.',
+      'Atualizar dados e enviar submissões pendentes quando houver ligação.':
+          'Actualizar datos y enviar entregas pendientes cuando haya conexión.',
+      'Entra para sincronizar o progresso com a tua conta.':
+          'Inicia sesión para sincronizar el progreso con tu cuenta.',
+      'Apoio': 'Ayuda',
+      'Ver instruções rápidas de utilização.':
+          'Ver instrucciones rápidas de uso.',
       'Informação sobre o DailyTalk.pt.': 'Información sobre DailyTalk.pt.',
-      'Podes experimentar a aplicação sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.': 'Puedes probar la aplicación sin cuenta. Para guardar el progreso y sincronizar, inicia sesión o crea una cuenta.',
-      'Acede à tua conta para guardar progresso, consultar resultados sincronizados e continuar noutro dispositivo.': 'Accede a tu cuenta para guardar el progreso, consultar resultados sincronizados y continuar en otro dispositivo.',
-      'A sessão guardada neste dispositivo não é válida. Entra novamente para continuar.': 'La sesión guardada en este dispositivo no es válida. Inicia sesión de nuevo para continuar.',
-      'Idioma da app': 'Idioma de la aplicación', 'Idioma de aprendizagem': 'Idioma de aprendizaje',
-      'Perfil guardado neste dispositivo. Entra para sincronizar.': 'Perfil guardado en este dispositivo. Inicia sesión para sincronizar.',
-      'A preparar...': 'Preparando...', 'Gerar código de recuperação': 'Generar código de recuperación',
-      'Modo protótipo: o código foi gerado e será apresentado no ecrã seguinte.': 'Modo prototipo: el código se ha generado y se mostrará en la siguiente pantalla.',
-      'Indica o email da tua conta. Nesta versão de protótipo, alojada no plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário será apresentado no ecrã seguinte.': 'Introduce el correo de tu cuenta. En esta versión del prototipo alojada en el plan gratuito de Cloudflare, el servidor no envía correos de recuperación. Para probar el flujo, el código temporal se mostrará en la pantalla siguiente.',
-      'Código de recuperação': 'Código de recuperación', 'Alterar palavra-passe': 'Cambiar contraseña',
-      'Atividade remota': 'Actividad remota', 'Sem feedback.': 'Sin comentarios.', 'Atualizar resultados': 'Actualizar resultados',
-      'Submete uma atividade para consultar o histórico local.': 'Envía una actividad para consultar el historial local.', 'Não disponível': 'No disponible',
-      'Tentativas': 'Intentos', 'Erros': 'Errores', 'Última': 'Última', 'Atualizar análises': 'Actualizar análisis', 'Tipo': 'Tipo',
-      'Submeter resposta': 'Enviar respuesta', 'Ex.: sala de aula': 'Ej.: aula', 'Ex.: Informação importante': 'Ej.: Información importante',
-      'Escreve aqui a nota privada...': 'Escribe aquí la nota privada...', 'Guardar nota privada': 'Guardar nota privada', 'Sem cenário': 'Sin escenario',
-      'Conquistas serão detalhadas na área de Resultados.': 'Los logros se detallarán en el área de Resultados.',
-      'O progresso será apresentado com métricas de aprendizagem.': 'El progreso se mostrará con métricas de aprendizaje.',
-      'O feedback ajudará a melhorar as atividades.': 'Los comentarios ayudarán a mejorar las actividades.',
-      'A ajuda rápida explicará como usar a aplicação.': 'La ayuda rápida explicará cómo usar la aplicación.',
-      'Prática para Estudante': 'Práctica para Estudiante', 'Prática para Anfitrião': 'Práctica para Anfitrión', 'Prática para Professor': 'Práctica para Profesor',
+      'Podes experimentar a aplicação sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.':
+          'Puedes probar la aplicación sin cuenta. Para guardar el progreso y sincronizar, inicia sesión o crea una cuenta.',
+      'Acede à tua conta para guardar progresso, consultar resultados sincronizados e continuar noutro dispositivo.':
+          'Accede a tu cuenta para guardar el progreso, consultar resultados sincronizados y continuar en otro dispositivo.',
+      'A sessão guardada neste dispositivo não é válida. Entra novamente para continuar.':
+          'La sesión guardada en este dispositivo no es válida. Inicia sesión de nuevo para continuar.',
+      'Idioma da app': 'Idioma de la aplicación',
+      'Idioma de aprendizagem': 'Idioma de aprendizaje',
+      'Perfil guardado neste dispositivo. Entra para sincronizar.':
+          'Perfil guardado en este dispositivo. Inicia sesión para sincronizar.',
+      'A preparar...': 'Preparando...',
+      'Gerar código de recuperação': 'Generar código de recuperación',
+      'Modo protótipo: o código foi gerado e será apresentado no ecrã seguinte.':
+          'Modo prototipo: el código se ha generado y se mostrará en la siguiente pantalla.',
+      'Indica o email da tua conta. Nesta versão de protótipo, alojada no plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário será apresentado no ecrã seguinte.':
+          'Introduce el correo de tu cuenta. En esta versión del prototipo alojada en el plan gratuito de Cloudflare, el servidor no envía correos de recuperación. Para probar el flujo, el código temporal se mostrará en la pantalla siguiente.',
+      'Código de recuperação': 'Código de recuperación',
+      'Alterar palavra-passe': 'Cambiar contraseña',
+      'Atividade remota': 'Actividad remota',
+      'Sem feedback.': 'Sin comentarios.',
+      'Atualizar resultados': 'Actualizar resultados',
+      'Submete uma atividade para consultar o histórico local.':
+          'Envía una actividad para consultar el historial local.',
+      'Não disponível': 'No disponible',
+      'Tentativas': 'Intentos',
+      'Erros': 'Errores',
+      'Última': 'Última',
+      'Atualizar análises': 'Actualizar análisis',
+      'Tipo': 'Tipo',
+      'Submeter resposta': 'Enviar respuesta',
+      'Ex.: sala de aula': 'Ej.: aula',
+      'Ex.: Informação importante': 'Ej.: Información importante',
+      'Escreve aqui a nota privada...': 'Escribe aquí la nota privada...',
+      'Guardar nota privada': 'Guardar nota privada',
+      'Sem cenário': 'Sin escenario',
+      'Conquistas serão detalhadas na área de Resultados.':
+          'Los logros se detallarán en el área de Resultados.',
+      'O progresso será apresentado com métricas de aprendizagem.':
+          'El progreso se mostrará con métricas de aprendizaje.',
+      'O feedback ajudará a melhorar as atividades.':
+          'Los comentarios ayudarán a mejorar las actividades.',
+      'A ajuda rápida explicará como usar a aplicação.':
+          'La ayuda rápida explicará cómo usar la aplicación.',
+      'Prática para Estudante': 'Práctica para Estudiante',
+      'Prática para Anfitrião': 'Práctica para Anfitrión',
+      'Prática para Professor': 'Práctica para Profesor',
     },
     'fr': {
-      'Indica o email.': 'Saisis l’adresse e-mail.', 'Indica o código de recuperação.': 'Saisis le code de récupération.',
-      'Indica um título para a nota.': 'Indique un titre pour la note.', 'Escreve o conteúdo da nota.': 'Écris le contenu de la note.',
-      'Escreve uma resposta antes de submeter.': 'Écris une réponse avant de l’envoyer.',
+      'Indica o email.': 'Saisis l’adresse e-mail.',
+      'Indica o código de recuperação.': 'Saisis le code de récupération.',
+      'Indica um título para a nota.': 'Indique un titre pour la note.',
+      'Escreve o conteúdo da nota.': 'Écris le contenu de la note.',
+      'Escreve uma resposta antes de submeter.':
+          'Écris une réponse avant de l’envoyer.',
       'Escolhe os teus idiomas': 'Choisis tes langues',
-      'O DailyTalk.pt adapta as atividades ao idioma que já conheces e ao idioma que queres praticar.': 'DailyTalk.pt adapte les activités à la langue que tu connais déjà et à celle que tu veux pratiquer.',
-      'Modo teste: os idiomas podem ser alterados, mas ficam apenas neste dispositivo até entrares na conta.': 'Mode test : les langues peuvent être modifiées, mais elles restent uniquement sur cet appareil jusqu’à ta connexion.',
-      'Atenção': 'Attention', 'Percurso de aprendizagem': 'Parcours d’apprentissage',
-      'Escolhe idiomas diferentes para que as atividades tenham um objetivo de aprendizagem claro.': 'Choisis des langues différentes afin que les activités aient un objectif d’apprentissage clair.',
-      'As atividades serão preparadas com base no idioma que conheces e no idioma que queres praticar.': 'Les activités seront préparées selon la langue que tu connais et celle que tu veux pratiquer.',
-      'Ainda não tem conta? Criar conta': 'Pas encore de compte ? Créer un compte',
+      'O DailyTalk.pt adapta as atividades ao idioma que já conheces e ao idioma que queres praticar.':
+          'DailyTalk.pt adapte les activités à la langue que tu connais déjà et à celle que tu veux pratiquer.',
+      'Modo teste: os idiomas podem ser alterados, mas ficam apenas neste dispositivo até entrares na conta.':
+          'Mode test : les langues peuvent être modifiées, mais elles restent uniquement sur cet appareil jusqu’à ta connexion.',
+      'Atenção': 'Attention',
+      'Percurso de aprendizagem': 'Parcours d’apprentissage',
+      'Escolhe idiomas diferentes para que as atividades tenham um objetivo de aprendizagem claro.':
+          'Choisis des langues différentes afin que les activités aient un objectif d’apprentissage clair.',
+      'As atividades serão preparadas com base no idioma que conheces e no idioma que queres praticar.':
+          'Les activités seront préparées selon la langue que tu connais et celle que tu veux pratiquer.',
+      'Ainda não tem conta? Criar conta':
+          'Pas encore de compte ? Créer un compte',
       'Esqueceste a palavra-passe?': 'Mot de passe oublié ?',
-      'Volta ao ecrã inicial para entrar ou criar conta.': 'Retourne à l’écran initial pour te connecter ou créer un compte.',
-      'Palavra-passe alterada com sucesso. Inicia sessão novamente.': 'Mot de passe modifié avec succès. Connecte-toi à nouveau.',
+      'Volta ao ecrã inicial para entrar ou criar conta.':
+          'Retourne à l’écran initial pour te connecter ou créer un compte.',
+      'Palavra-passe alterada com sucesso. Inicia sessão novamente.':
+          'Mot de passe modifié avec succès. Connecte-toi à nouveau.',
       'Define uma nova palavra-passe': 'Définis un nouveau mot de passe',
       'Desafio pronto': 'Défi prêt',
-      'A atividade foi preparada. Lê o enunciado, responde e submete para receber feedback.': 'L’activité est prête. Lis l’énoncé, réponds et envoie-la pour recevoir un retour.',
-      'Resposta da atividade': 'Réponse à l’activité', 'Resultado guardado': 'Résultat enregistré',
+      'A atividade foi preparada. Lê o enunciado, responde e submete para receber feedback.':
+          'L’activité est prête. Lis l’énoncé, réponds et envoie-la pour recevoir un retour.',
+      'Resposta da atividade': 'Réponse à l’activité',
+      'Resultado guardado': 'Résultat enregistré',
       'URL devolvida pelo deploy': 'URL renvoyée par le déploiement',
-      'Modo teste: as análises usam apenas dados locais desta instalação. Entra para consultar e sincronizar métricas da tua conta.': 'Mode test : les analyses utilisent uniquement les données locales de cette installation. Connecte-toi pour consulter et synchroniser les indicateurs de ton compte.',
-      'Estas análises usam apenas dados de desempenho, como perfil, cenário, tipo de atividade, tentativas e pontuação. Não guardam dados sensíveis.': 'Ces analyses utilisent uniquement des données de performance, comme le profil, le scénario, le type d’activité, les tentatives et le score. Elles ne conservent pas de données sensibles.',
+      'Modo teste: as análises usam apenas dados locais desta instalação. Entra para consultar e sincronizar métricas da tua conta.':
+          'Mode test : les analyses utilisent uniquement les données locales de cette installation. Connecte-toi pour consulter et synchroniser les indicateurs de ton compte.',
+      'Estas análises usam apenas dados de desempenho, como perfil, cenário, tipo de atividade, tentativas e pontuação. Não guardam dados sensíveis.':
+          'Ces analyses utilisent uniquement des données de performance, comme le profil, le scénario, le type d’activité, les tentatives et le score. Elles ne conservent pas de données sensibles.',
       'Ainda não há dados suficientes': 'Il n’y a pas encore assez de données',
-      'Submete algumas atividades na página Praticar para gerar análises pedagógicas.': 'Envoie quelques activités sur la page Pratiquer pour générer des analyses pédagogiques.',
-      'Modo teste: são mostrados apenas resultados locais. Entra para sincronizar histórico entre dispositivos.': 'Mode test : seuls les résultats locaux sont affichés. Connecte-toi pour synchroniser l’historique entre les appareils.',
-      'Ainda não há resultados disponíveis.': 'Aucun résultat n’est encore disponible.',
-      'Desafio': 'Défi', 'Resposta submetida': 'Réponse envoyée',
+      'Submete algumas atividades na página Praticar para gerar análises pedagógicas.':
+          'Envoie quelques activités sur la page Pratiquer pour générer des analyses pédagogiques.',
+      'Modo teste: são mostrados apenas resultados locais. Entra para sincronizar histórico entre dispositivos.':
+          'Mode test : seuls les résultats locaux sont affichés. Connecte-toi pour synchroniser l’historique entre les appareils.',
+      'Ainda não há resultados disponíveis.':
+          'Aucun résultat n’est encore disponible.',
+      'Desafio': 'Défi',
+      'Resposta submetida': 'Réponse envoyée',
       'Nota privada local': 'Note privée locale',
-      'Estas notas ficam apenas neste dispositivo. Não são enviadas para o servidor e não entram na sincronização.': 'Ces notes restent uniquement sur cet appareil. Elles ne sont pas envoyées au serveur et ne sont pas synchronisées.',
-      'Ainda não existem notas privadas locais.': 'Il n’existe pas encore de notes privées locales.',
-      'Cenário opcional': 'Scénario facultatif', 'Nota': 'Note',
+      'Estas notas ficam apenas neste dispositivo. Não são enviadas para o servidor e não entram na sincronização.':
+          'Ces notes restent uniquement sur cet appareil. Elles ne sont pas envoyées au serveur et ne sont pas synchronisées.',
+      'Ainda não existem notas privadas locais.':
+          'Il n’existe pas encore de notes privées locales.',
+      'Cenário opcional': 'Scénario facultatif',
+      'Nota': 'Note',
       'Escolhe o teu perfil': 'Choisis ton profil',
-      'O DailyTalk.pt adapta os cenários e atividades ao teu papel no contexto escolar.': 'DailyTalk.pt adapte les scénarios et les activités à ton rôle dans le contexte scolaire.',
-      'Modo teste: o perfil pode ser ajustado localmente, mas só será sincronizado depois de entrares na conta.': 'Mode test : le profil peut être modifié localement, mais il ne sera synchronisé qu’après ta connexion.',
-      'Modo teste ativo. Podes alterar idioma e perfil localmente; para sincronizar, entra ou cria conta.': 'Mode test actif. Tu peux modifier la langue et le profil localement ; pour synchroniser, connecte-toi ou crée un compte.',
-      'ATALHOS / FEEDBACK': 'RACCOURCIS / RETOUR', 'Conquistas': 'Réussites', 'Badges e pontos': 'Badges et points',
-      'Progresso': 'Progression', 'Evolução': 'Évolution', 'Opinião': 'Avis', 'Ajuda rápida': 'Aide rapide', 'Dicas': 'Conseils',
+      'O DailyTalk.pt adapta os cenários e atividades ao teu papel no contexto escolar.':
+          'DailyTalk.pt adapte les scénarios et les activités à ton rôle dans le contexte scolaire.',
+      'Modo teste: o perfil pode ser ajustado localmente, mas só será sincronizado depois de entrares na conta.':
+          'Mode test : le profil peut être modifié localement, mais il ne sera synchronisé qu’après ta connexion.',
+      'Modo teste ativo. Podes alterar idioma e perfil localmente; para sincronizar, entra ou cria conta.':
+          'Mode test actif. Tu peux modifier la langue et le profil localement ; pour synchroniser, connecte-toi ou crée un compte.',
+      'ATALHOS / FEEDBACK': 'RACCOURCIS / RETOUR',
+      'Conquistas': 'Réussites',
+      'Badges e pontos': 'Badges et points',
+      'Progresso': 'Progression',
+      'Evolução': 'Évolution',
+      'Opinião': 'Avis',
+      'Ajuda rápida': 'Aide rapide',
+      'Dicas': 'Conseils',
       'Sobre o DailyTalk.pt': 'À propos de DailyTalk.pt',
 
       'Conta e preferências': 'Compte et préférences',
-      'Ver dados do perfil autenticado e terminar sessão.': 'Afficher les données du profil connecté et se déconnecter.',
-      'Entrar ou criar conta para guardar progresso e sincronizar.': 'Connecte-toi ou crée un compte pour enregistrer la progression et la synchroniser.',
-      'Escolher entre Estudante, Anfitrião ou Professor.': 'Choisir entre Élève, Hôte ou Enseignant.',
-      'Escolher perfil localmente durante o modo teste.': 'Choisir le profil localement pendant le mode test.',
-      'Choose your language and the language you want to learn.': 'Choisis ta langue et celle que tu veux apprendre.',
-      'Alterar idiomas localmente durante o modo teste.': 'Modifier les langues localement pendant le mode test.',
+      'Ver dados do perfil autenticado e terminar sessão.':
+          'Afficher les données du profil connecté et se déconnecter.',
+      'Entrar ou criar conta para guardar progresso e sincronizar.':
+          'Connecte-toi ou crée un compte pour enregistrer la progression et la synchroniser.',
+      'Escolher entre Estudante, Anfitrião ou Professor.':
+          'Choisir entre Élève, Hôte ou Enseignant.',
+      'Escolher perfil localmente durante o modo teste.':
+          'Choisir le profil localement pendant le mode test.',
+      'Choose your language and the language you want to learn.':
+          'Choisis ta langue et celle que tu veux apprendre.',
+      'Alterar idiomas localmente durante o modo teste.':
+          'Modifier les langues localement pendant le mode test.',
       'Atividades': 'Activités',
-      'Criar uma atividade com base nas tuas dificuldades.': 'Créer une activité selon tes difficultés d’apprentissage.',
-      'Funcionalidade disponível depois de entrares na conta.': 'Fonction disponible après connexion.',
-      'Ver atividades criadas por ti e o seu estado de aprovação.': 'Afficher les activités que tu as créées et leur état d’approbation.',
-      'Disponível com conta, para associar atividades ao teu perfil.': 'Disponible avec un compte pour associer les activités à ton profil.',
+      'Criar uma atividade com base nas tuas dificuldades.':
+          'Créer une activité selon tes difficultés d’apprentissage.',
+      'Funcionalidade disponível depois de entrares na conta.':
+          'Fonction disponible après connexion.',
+      'Ver atividades criadas por ti e o seu estado de aprovação.':
+          'Afficher les activités que tu as créées et leur état d’approbation.',
+      'Disponível com conta, para associar atividades ao teu perfil.':
+          'Disponible avec un compte pour associer les activités à ton profil.',
       'Privacidade e dados': 'Confidentialité et données',
-      'Guardar notas opcionais apenas neste dispositivo, sem sincronização.': 'Enregistrer des notes facultatives uniquement sur cet appareil, sans synchronisation.',
-      'Atualizar dados e enviar submissões pendentes quando houver ligação.': 'Mettre à jour les données et envoyer les soumissions en attente lorsqu’une connexion est disponible.',
-      'Entra para sincronizar o progresso com a tua conta.': 'Connecte-toi pour synchroniser la progression avec ton compte.',
-      'Apoio': 'Assistance', 'Ver instruções rápidas de utilização.': 'Voir les instructions d’utilisation rapides.',
+      'Guardar notas opcionais apenas neste dispositivo, sem sincronização.':
+          'Enregistrer des notes facultatives uniquement sur cet appareil, sans synchronisation.',
+      'Atualizar dados e enviar submissões pendentes quando houver ligação.':
+          'Mettre à jour les données et envoyer les soumissions en attente lorsqu’une connexion est disponible.',
+      'Entra para sincronizar o progresso com a tua conta.':
+          'Connecte-toi pour synchroniser la progression avec ton compte.',
+      'Apoio': 'Assistance',
+      'Ver instruções rápidas de utilização.':
+          'Voir les instructions d’utilisation rapides.',
       'Informação sobre o DailyTalk.pt.': 'Informations sur DailyTalk.pt.',
-      'Podes experimentar a aplicação sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.': 'Tu peux essayer l’application sans compte. Pour enregistrer la progression et la synchroniser, connecte-toi ou crée un compte.',
-      'Acede à tua conta para guardar progresso, consultar resultados sincronizados e continuar noutro dispositivo.': 'Accède à ton compte pour enregistrer ta progression, consulter les résultats synchronisés et continuer sur un autre appareil.',
-      'A sessão guardada neste dispositivo não é válida. Entra novamente para continuar.': 'La session enregistrée sur cet appareil n’est pas valide. Connecte-toi à nouveau pour continuer.',
-      'Idioma da app': 'Langue de l’application', 'Idioma de aprendizagem': 'Langue d’apprentissage',
-      'Perfil guardado neste dispositivo. Entra para sincronizar.': 'Profil enregistré sur cet appareil. Connecte-toi pour synchroniser.',
-      'A preparar...': 'Préparation...', 'Gerar código de recuperação': 'Générer le code de récupération',
-      'Modo protótipo: o código foi gerado e será apresentado no ecrã seguinte.': 'Mode prototype : le code a été généré et sera affiché sur l’écran suivant.',
-      'Indica o email da tua conta. Nesta versão de protótipo, alojada no plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário será apresentado no ecrã seguinte.': 'Saisis l’e-mail de ton compte. Dans cette version du prototype hébergée sur l’offre gratuite Cloudflare, le serveur n’envoie pas d’e-mails de récupération. Pour tester le flux, le code temporaire sera affiché sur l’écran suivant.',
-      'Código de recuperação': 'Code de récupération', 'Alterar palavra-passe': 'Modifier le mot de passe',
-      'Atividade remota': 'Activité distante', 'Sem feedback.': 'Aucun retour.', 'Atualizar resultados': 'Actualiser les résultats',
-      'Submete uma atividade para consultar o histórico local.': 'Envoie une activité pour consulter l’historique local.', 'Não disponível': 'Non disponible',
-      'Tentativas': 'Tentatives', 'Erros': 'Erreurs', 'Última': 'Dernière', 'Atualizar análises': 'Actualiser les analyses', 'Tipo': 'Type',
-      'Submeter resposta': 'Envoyer la réponse', 'Ex.: sala de aula': 'Ex. : salle de classe', 'Ex.: Informação importante': 'Ex. : Information importante',
-      'Escreve aqui a nota privada...': 'Écris la note privée ici...', 'Guardar nota privada': 'Enregistrer la note privée', 'Sem cenário': 'Sans scénario',
-      'Conquistas serão detalhadas na área de Resultados.': 'Les réussites seront détaillées dans la zone Résultats.',
-      'O progresso será apresentado com métricas de aprendizagem.': 'La progression sera présentée avec des indicateurs d’apprentissage.',
-      'O feedback ajudará a melhorar as atividades.': 'Le retour aidera à améliorer les activités.',
-      'A ajuda rápida explicará como usar a aplicação.': 'L’aide rapide expliquera comment utiliser l’application.',
-      'Prática para Estudante': 'Pratique pour Élève', 'Prática para Anfitrião': 'Pratique pour Hôte', 'Prática para Professor': 'Pratique pour Enseignant',
+      'Podes experimentar a aplicação sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.':
+          'Tu peux essayer l’application sans compte. Pour enregistrer la progression et la synchroniser, connecte-toi ou crée un compte.',
+      'Acede à tua conta para guardar progresso, consultar resultados sincronizados e continuar noutro dispositivo.':
+          'Accède à ton compte pour enregistrer ta progression, consulter les résultats synchronisés et continuer sur un autre appareil.',
+      'A sessão guardada neste dispositivo não é válida. Entra novamente para continuar.':
+          'La session enregistrée sur cet appareil n’est pas valide. Connecte-toi à nouveau pour continuer.',
+      'Idioma da app': 'Langue de l’application',
+      'Idioma de aprendizagem': 'Langue d’apprentissage',
+      'Perfil guardado neste dispositivo. Entra para sincronizar.':
+          'Profil enregistré sur cet appareil. Connecte-toi pour synchroniser.',
+      'A preparar...': 'Préparation...',
+      'Gerar código de recuperação': 'Générer le code de récupération',
+      'Modo protótipo: o código foi gerado e será apresentado no ecrã seguinte.':
+          'Mode prototype : le code a été généré et sera affiché sur l’écran suivant.',
+      'Indica o email da tua conta. Nesta versão de protótipo, alojada no plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário será apresentado no ecrã seguinte.':
+          'Saisis l’e-mail de ton compte. Dans cette version du prototype hébergée sur l’offre gratuite Cloudflare, le serveur n’envoie pas d’e-mails de récupération. Pour tester le flux, le code temporaire sera affiché sur l’écran suivant.',
+      'Código de recuperação': 'Code de récupération',
+      'Alterar palavra-passe': 'Modifier le mot de passe',
+      'Atividade remota': 'Activité distante',
+      'Sem feedback.': 'Aucun retour.',
+      'Atualizar resultados': 'Actualiser les résultats',
+      'Submete uma atividade para consultar o histórico local.':
+          'Envoie une activité pour consulter l’historique local.',
+      'Não disponível': 'Non disponible',
+      'Tentativas': 'Tentatives',
+      'Erros': 'Erreurs',
+      'Última': 'Dernière',
+      'Atualizar análises': 'Actualiser les analyses',
+      'Tipo': 'Type',
+      'Submeter resposta': 'Envoyer la réponse',
+      'Ex.: sala de aula': 'Ex. : salle de classe',
+      'Ex.: Informação importante': 'Ex. : Information importante',
+      'Escreve aqui a nota privada...': 'Écris la note privée ici...',
+      'Guardar nota privada': 'Enregistrer la note privée',
+      'Sem cenário': 'Sans scénario',
+      'Conquistas serão detalhadas na área de Resultados.':
+          'Les réussites seront détaillées dans la zone Résultats.',
+      'O progresso será apresentado com métricas de aprendizagem.':
+          'La progression sera présentée avec des indicateurs d’apprentissage.',
+      'O feedback ajudará a melhorar as atividades.':
+          'Le retour aidera à améliorer les activités.',
+      'A ajuda rápida explicará como usar a aplicação.':
+          'L’aide rapide expliquera comment utiliser l’application.',
+      'Prática para Estudante': 'Pratique pour Élève',
+      'Prática para Anfitrião': 'Pratique pour Hôte',
+      'Prática para Professor': 'Pratique pour Enseignant',
     },
     'it': {
-      'Indica o email.': 'Inserisci l’e-mail.', 'Indica o código de recuperação.': 'Inserisci il codice di recupero.',
-      'Indica um título para a nota.': 'Inserisci un titolo per la nota.', 'Escreve o conteúdo da nota.': 'Scrivi il contenuto della nota.',
-      'Escreve uma resposta antes de submeter.': 'Scrivi una risposta prima di inviarla.',
+      'Indica o email.': 'Inserisci l’e-mail.',
+      'Indica o código de recuperação.': 'Inserisci il codice di recupero.',
+      'Indica um título para a nota.': 'Inserisci un titolo per la nota.',
+      'Escreve o conteúdo da nota.': 'Scrivi il contenuto della nota.',
+      'Escreve uma resposta antes de submeter.':
+          'Scrivi una risposta prima di inviarla.',
       'Escolhe os teus idiomas': 'Scegli le tue lingue',
-      'O DailyTalk.pt adapta as atividades ao idioma que já conheces e ao idioma que queres praticar.': 'DailyTalk.pt adatta le attività alla lingua che conosci già e a quella che vuoi praticare.',
-      'Modo teste: os idiomas podem ser alterados, mas ficam apenas neste dispositivo até entrares na conta.': 'Modalità test: le lingue possono essere modificate, ma restano solo su questo dispositivo fino all’accesso.',
-      'Atenção': 'Attenzione', 'Percurso de aprendizagem': 'Percorso di apprendimento',
-      'Escolhe idiomas diferentes para que as atividades tenham um objetivo de aprendizagem claro.': 'Scegli lingue diverse affinché le attività abbiano un obiettivo di apprendimento chiaro.',
-      'As atividades serão preparadas com base no idioma que conheces e no idioma que queres praticar.': 'Le attività saranno preparate in base alla lingua che conosci e a quella che vuoi praticare.',
-      'Ainda não tem conta? Criar conta': 'Non hai ancora un account? Creane uno',
+      'O DailyTalk.pt adapta as atividades ao idioma que já conheces e ao idioma que queres praticar.':
+          'DailyTalk.pt adatta le attività alla lingua che conosci già e a quella che vuoi praticare.',
+      'Modo teste: os idiomas podem ser alterados, mas ficam apenas neste dispositivo até entrares na conta.':
+          'Modalità test: le lingue possono essere modificate, ma restano solo su questo dispositivo fino all’accesso.',
+      'Atenção': 'Attenzione',
+      'Percurso de aprendizagem': 'Percorso di apprendimento',
+      'Escolhe idiomas diferentes para que as atividades tenham um objetivo de aprendizagem claro.':
+          'Scegli lingue diverse affinché le attività abbiano un obiettivo di apprendimento chiaro.',
+      'As atividades serão preparadas com base no idioma que conheces e no idioma que queres praticar.':
+          'Le attività saranno preparate in base alla lingua che conosci e a quella che vuoi praticare.',
+      'Ainda não tem conta? Criar conta':
+          'Non hai ancora un account? Creane uno',
       'Esqueceste a palavra-passe?': 'Hai dimenticato la password?',
-      'Volta ao ecrã inicial para entrar ou criar conta.': 'Torna alla schermata iniziale per accedere o creare un account.',
-      'Palavra-passe alterada com sucesso. Inicia sessão novamente.': 'Password modificata con successo. Accedi di nuovo.',
+      'Volta ao ecrã inicial para entrar ou criar conta.':
+          'Torna alla schermata iniziale per accedere o creare un account.',
+      'Palavra-passe alterada com sucesso. Inicia sessão novamente.':
+          'Password modificata con successo. Accedi di nuovo.',
       'Define uma nova palavra-passe': 'Imposta una nuova password',
       'Desafio pronto': 'Sfida pronta',
-      'A atividade foi preparada. Lê o enunciado, responde e submete para receber feedback.': 'L’attività è pronta. Leggi la consegna, rispondi e inviala per ricevere un feedback.',
-      'Resposta da atividade': 'Risposta dell’attività', 'Resultado guardado': 'Risultato salvato',
+      'A atividade foi preparada. Lê o enunciado, responde e submete para receber feedback.':
+          'L’attività è pronta. Leggi la consegna, rispondi e inviala per ricevere un feedback.',
+      'Resposta da atividade': 'Risposta dell’attività',
+      'Resultado guardado': 'Risultato salvato',
       'URL devolvida pelo deploy': 'URL restituito dal deployment',
-      'Modo teste: as análises usam apenas dados locais desta instalação. Entra para consultar e sincronizar métricas da tua conta.': 'Modalità test: le analisi usano solo dati locali di questa installazione. Accedi per consultare e sincronizzare le metriche del tuo account.',
-      'Estas análises usam apenas dados de desempenho, como perfil, cenário, tipo de atividade, tentativas e pontuação. Não guardam dados sensíveis.': 'Queste analisi usano solo dati sulle prestazioni, come profilo, scenario, tipo di attività, tentativi e punteggio. Non memorizzano dati sensibili.',
+      'Modo teste: as análises usam apenas dados locais desta instalação. Entra para consultar e sincronizar métricas da tua conta.':
+          'Modalità test: le analisi usano solo dati locali di questa installazione. Accedi per consultare e sincronizzare le metriche del tuo account.',
+      'Estas análises usam apenas dados de desempenho, como perfil, cenário, tipo de atividade, tentativas e pontuação. Não guardam dados sensíveis.':
+          'Queste analisi usano solo dati sulle prestazioni, come profilo, scenario, tipo di attività, tentativi e punteggio. Non memorizzano dati sensibili.',
       'Ainda não há dados suficientes': 'Non ci sono ancora dati sufficienti',
-      'Submete algumas atividades na página Praticar para gerar análises pedagógicas.': 'Invia alcune attività nella pagina Pratica per generare analisi pedagogiche.',
-      'Modo teste: são mostrados apenas resultados locais. Entra para sincronizar histórico entre dispositivos.': 'Modalità test: vengono mostrati solo risultati locali. Accedi per sincronizzare la cronologia tra i dispositivi.',
-      'Ainda não há resultados disponíveis.': 'Non ci sono ancora risultati disponibili.',
-      'Desafio': 'Sfida', 'Resposta submetida': 'Risposta inviata',
+      'Submete algumas atividades na página Praticar para gerar análises pedagógicas.':
+          'Invia alcune attività nella pagina Pratica per generare analisi pedagogiche.',
+      'Modo teste: são mostrados apenas resultados locais. Entra para sincronizar histórico entre dispositivos.':
+          'Modalità test: vengono mostrati solo risultati locali. Accedi per sincronizzare la cronologia tra i dispositivi.',
+      'Ainda não há resultados disponíveis.':
+          'Non ci sono ancora risultati disponibili.',
+      'Desafio': 'Sfida',
+      'Resposta submetida': 'Risposta inviata',
       'Nota privada local': 'Nota privata locale',
-      'Estas notas ficam apenas neste dispositivo. Não são enviadas para o servidor e não entram na sincronização.': 'Queste note restano solo su questo dispositivo. Non vengono inviate al server né incluse nella sincronizzazione.',
-      'Ainda não existem notas privadas locais.': 'Non ci sono ancora note private locali.',
-      'Cenário opcional': 'Scenario facoltativo', 'Nota': 'Nota',
+      'Estas notas ficam apenas neste dispositivo. Não são enviadas para o servidor e não entram na sincronização.':
+          'Queste note restano solo su questo dispositivo. Non vengono inviate al server né incluse nella sincronizzazione.',
+      'Ainda não existem notas privadas locais.':
+          'Non ci sono ancora note private locali.',
+      'Cenário opcional': 'Scenario facoltativo',
+      'Nota': 'Nota',
       'Escolhe o teu perfil': 'Scegli il tuo profilo',
-      'O DailyTalk.pt adapta os cenários e atividades ao teu papel no contexto escolar.': 'DailyTalk.pt adatta scenari e attività al tuo ruolo nel contesto scolastico.',
-      'Modo teste: o perfil pode ser ajustado localmente, mas só será sincronizado depois de entrares na conta.': 'Modalità test: il profilo può essere modificato localmente, ma verrà sincronizzato solo dopo l’accesso.',
-      'Modo teste ativo. Podes alterar idioma e perfil localmente; para sincronizar, entra ou cria conta.': 'Modalità test attiva. Puoi modificare lingua e profilo localmente; per sincronizzare, accedi o crea un account.',
-      'ATALHOS / FEEDBACK': 'SCORCIATOIE / FEEDBACK', 'Conquistas': 'Traguardi', 'Badges e pontos': 'Badge e punti',
-      'Progresso': 'Progresso', 'Evolução': 'Evoluzione', 'Opinião': 'Opinione', 'Ajuda rápida': 'Aiuto rapido', 'Dicas': 'Suggerimenti',
+      'O DailyTalk.pt adapta os cenários e atividades ao teu papel no contexto escolar.':
+          'DailyTalk.pt adatta scenari e attività al tuo ruolo nel contesto scolastico.',
+      'Modo teste: o perfil pode ser ajustado localmente, mas só será sincronizado depois de entrares na conta.':
+          'Modalità test: il profilo può essere modificato localmente, ma verrà sincronizzato solo dopo l’accesso.',
+      'Modo teste ativo. Podes alterar idioma e perfil localmente; para sincronizar, entra ou cria conta.':
+          'Modalità test attiva. Puoi modificare lingua e profilo localmente; per sincronizzare, accedi o crea un account.',
+      'ATALHOS / FEEDBACK': 'SCORCIATOIE / FEEDBACK',
+      'Conquistas': 'Traguardi',
+      'Badges e pontos': 'Badge e punti',
+      'Progresso': 'Progresso',
+      'Evolução': 'Evoluzione',
+      'Opinião': 'Opinione',
+      'Ajuda rápida': 'Aiuto rapido',
+      'Dicas': 'Suggerimenti',
       'Sobre o DailyTalk.pt': 'Informazioni su DailyTalk.pt',
 
       'Conta e preferências': 'Account e preferenze',
-      'Ver dados do perfil autenticado e terminar sessão.': 'Visualizza i dati del profilo autenticato ed esci.',
-      'Entrar ou criar conta para guardar progresso e sincronizar.': 'Accedi o crea un account per salvare i progressi e sincronizzarli.',
-      'Escolher entre Estudante, Anfitrião ou Professor.': 'Scegli tra Studente, Ospitante o Insegnante.',
-      'Escolher perfil localmente durante o modo teste.': 'Scegli il profilo localmente durante la modalità test.',
-      'Choose your language and the language you want to learn.': 'Scegli la tua lingua e quella che vuoi imparare.',
-      'Alterar idiomas localmente durante o modo teste.': 'Modifica le lingue localmente durante la modalità test.',
+      'Ver dados do perfil autenticado e terminar sessão.':
+          'Visualizza i dati del profilo autenticato ed esci.',
+      'Entrar ou criar conta para guardar progresso e sincronizar.':
+          'Accedi o crea un account per salvare i progressi e sincronizzarli.',
+      'Escolher entre Estudante, Anfitrião ou Professor.':
+          'Scegli tra Studente, Ospitante o Insegnante.',
+      'Escolher perfil localmente durante o modo teste.':
+          'Scegli il profilo localmente durante la modalità test.',
+      'Choose your language and the language you want to learn.':
+          'Scegli la tua lingua e quella che vuoi imparare.',
+      'Alterar idiomas localmente durante o modo teste.':
+          'Modifica le lingue localmente durante la modalità test.',
       'Atividades': 'Attività',
-      'Criar uma atividade com base nas tuas dificuldades.': 'Crea un’attività in base alle tue difficoltà di apprendimento.',
-      'Funcionalidade disponível depois de entrares na conta.': 'Funzione disponibile dopo l’accesso.',
-      'Ver atividades criadas por ti e o seu estado de aprovação.': 'Visualizza le attività create da te e il loro stato di approvazione.',
-      'Disponível com conta, para associar atividades ao teu perfil.': 'Disponibile con un account per associare le attività al tuo profilo.',
+      'Criar uma atividade com base nas tuas dificuldades.':
+          'Crea un’attività in base alle tue difficoltà di apprendimento.',
+      'Funcionalidade disponível depois de entrares na conta.':
+          'Funzione disponibile dopo l’accesso.',
+      'Ver atividades criadas por ti e o seu estado de aprovação.':
+          'Visualizza le attività create da te e il loro stato di approvazione.',
+      'Disponível com conta, para associar atividades ao teu perfil.':
+          'Disponibile con un account per associare le attività al tuo profilo.',
       'Privacidade e dados': 'Privacy e dati',
-      'Guardar notas opcionais apenas neste dispositivo, sem sincronização.': 'Salva note facoltative solo su questo dispositivo, senza sincronizzazione.',
-      'Atualizar dados e enviar submissões pendentes quando houver ligação.': 'Aggiorna i dati e invia le attività in sospeso quando è disponibile una connessione.',
-      'Entra para sincronizar o progresso com a tua conta.': 'Accedi per sincronizzare i progressi con il tuo account.',
-      'Apoio': 'Supporto', 'Ver instruções rápidas de utilização.': 'Visualizza istruzioni rapide per l’uso.',
+      'Guardar notas opcionais apenas neste dispositivo, sem sincronização.':
+          'Salva note facoltative solo su questo dispositivo, senza sincronizzazione.',
+      'Atualizar dados e enviar submissões pendentes quando houver ligação.':
+          'Aggiorna i dati e invia le attività in sospeso quando è disponibile una connessione.',
+      'Entra para sincronizar o progresso com a tua conta.':
+          'Accedi per sincronizzare i progressi con il tuo account.',
+      'Apoio': 'Supporto',
+      'Ver instruções rápidas de utilização.':
+          'Visualizza istruzioni rapide per l’uso.',
       'Informação sobre o DailyTalk.pt.': 'Informazioni su DailyTalk.pt.',
-      'Podes experimentar a aplicação sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.': 'Puoi provare l’applicazione senza account. Per salvare i progressi e sincronizzarli, accedi o crea un account.',
-      'Acede à tua conta para guardar progresso, consultar resultados sincronizados e continuar noutro dispositivo.': 'Accedi al tuo account per salvare i progressi, consultare i risultati sincronizzati e continuare su un altro dispositivo.',
-      'A sessão guardada neste dispositivo não é válida. Entra novamente para continuar.': 'La sessione salvata su questo dispositivo non è valida. Accedi di nuovo per continuare.',
-      'Idioma da app': 'Lingua dell’app', 'Idioma de aprendizagem': 'Lingua di apprendimento',
-      'Perfil guardado neste dispositivo. Entra para sincronizar.': 'Profilo salvato su questo dispositivo. Accedi per sincronizzare.',
-      'A preparar...': 'Preparazione...', 'Gerar código de recuperação': 'Genera codice di recupero',
-      'Modo protótipo: o código foi gerado e será apresentado no ecrã seguinte.': 'Modalità prototipo: il codice è stato generato e sarà mostrato nella schermata successiva.',
-      'Indica o email da tua conta. Nesta versão de protótipo, alojada no plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário será apresentado no ecrã seguinte.': 'Inserisci l’e-mail del tuo account. In questa versione del prototipo ospitata sul piano gratuito Cloudflare, il server non invia e-mail di recupero. Per testare il flusso, il codice temporaneo sarà mostrato nella schermata successiva.',
-      'Código de recuperação': 'Codice di recupero', 'Alterar palavra-passe': 'Cambia password',
-      'Atividade remota': 'Attività remota', 'Sem feedback.': 'Nessun feedback.', 'Atualizar resultados': 'Aggiorna risultati',
-      'Submete uma atividade para consultar o histórico local.': 'Invia un’attività per consultare la cronologia locale.', 'Não disponível': 'Non disponibile',
-      'Tentativas': 'Tentativi', 'Erros': 'Errori', 'Última': 'Ultima', 'Atualizar análises': 'Aggiorna analisi', 'Tipo': 'Tipo',
-      'Submeter resposta': 'Invia risposta', 'Ex.: sala de aula': 'Es.: aula', 'Ex.: Informação importante': 'Es.: Informazione importante',
-      'Escreve aqui a nota privada...': 'Scrivi qui la nota privata...', 'Guardar nota privada': 'Salva nota privata', 'Sem cenário': 'Nessuno scenario',
-      'Conquistas serão detalhadas na área de Resultados.': 'I traguardi saranno dettagliati nell’area Risultati.',
-      'O progresso será apresentado com métricas de aprendizagem.': 'I progressi saranno mostrati con metriche di apprendimento.',
-      'O feedback ajudará a melhorar as atividades.': 'Il feedback aiuterà a migliorare le attività.',
-      'A ajuda rápida explicará como usar a aplicação.': 'L’aiuto rapido spiegherà come usare l’applicazione.',
-      'Prática para Estudante': 'Pratica per Studente', 'Prática para Anfitrião': 'Pratica per Ospitante', 'Prática para Professor': 'Pratica per Insegnante',
+      'Podes experimentar a aplicação sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.':
+          'Puoi provare l’applicazione senza account. Per salvare i progressi e sincronizzarli, accedi o crea un account.',
+      'Acede à tua conta para guardar progresso, consultar resultados sincronizados e continuar noutro dispositivo.':
+          'Accedi al tuo account per salvare i progressi, consultare i risultati sincronizzati e continuare su un altro dispositivo.',
+      'A sessão guardada neste dispositivo não é válida. Entra novamente para continuar.':
+          'La sessione salvata su questo dispositivo non è valida. Accedi di nuovo per continuare.',
+      'Idioma da app': 'Lingua dell’app',
+      'Idioma de aprendizagem': 'Lingua di apprendimento',
+      'Perfil guardado neste dispositivo. Entra para sincronizar.':
+          'Profilo salvato su questo dispositivo. Accedi per sincronizzare.',
+      'A preparar...': 'Preparazione...',
+      'Gerar código de recuperação': 'Genera codice di recupero',
+      'Modo protótipo: o código foi gerado e será apresentado no ecrã seguinte.':
+          'Modalità prototipo: il codice è stato generato e sarà mostrato nella schermata successiva.',
+      'Indica o email da tua conta. Nesta versão de protótipo, alojada no plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário será apresentado no ecrã seguinte.':
+          'Inserisci l’e-mail del tuo account. In questa versione del prototipo ospitata sul piano gratuito Cloudflare, il server non invia e-mail di recupero. Per testare il flusso, il codice temporaneo sarà mostrato nella schermata successiva.',
+      'Código de recuperação': 'Codice di recupero',
+      'Alterar palavra-passe': 'Cambia password',
+      'Atividade remota': 'Attività remota',
+      'Sem feedback.': 'Nessun feedback.',
+      'Atualizar resultados': 'Aggiorna risultati',
+      'Submete uma atividade para consultar o histórico local.':
+          'Invia un’attività per consultare la cronologia locale.',
+      'Não disponível': 'Non disponibile',
+      'Tentativas': 'Tentativi',
+      'Erros': 'Errori',
+      'Última': 'Ultima',
+      'Atualizar análises': 'Aggiorna analisi',
+      'Tipo': 'Tipo',
+      'Submeter resposta': 'Invia risposta',
+      'Ex.: sala de aula': 'Es.: aula',
+      'Ex.: Informação importante': 'Es.: Informazione importante',
+      'Escreve aqui a nota privada...': 'Scrivi qui la nota privata...',
+      'Guardar nota privada': 'Salva nota privata',
+      'Sem cenário': 'Nessuno scenario',
+      'Conquistas serão detalhadas na área de Resultados.':
+          'I traguardi saranno dettagliati nell’area Risultati.',
+      'O progresso será apresentado com métricas de aprendizagem.':
+          'I progressi saranno mostrati con metriche di apprendimento.',
+      'O feedback ajudará a melhorar as atividades.':
+          'Il feedback aiuterà a migliorare le attività.',
+      'A ajuda rápida explicará como usar a aplicação.':
+          'L’aiuto rapido spiegherà come usare l’applicazione.',
+      'Prática para Estudante': 'Pratica per Studente',
+      'Prática para Anfitrião': 'Pratica per Ospitante',
+      'Prática para Professor': 'Pratica per Insegnante',
     },
     'de': {
-      'Indica o email.': 'Gib die E-Mail-Adresse ein.', 'Indica o código de recuperação.': 'Gib den Wiederherstellungscode ein.',
-      'Indica um título para a nota.': 'Gib einen Titel für die Notiz ein.', 'Escreve o conteúdo da nota.': 'Schreibe den Inhalt der Notiz.',
-      'Escreve uma resposta antes de submeter.': 'Schreibe vor dem Senden eine Antwort.',
+      'Indica o email.': 'Gib die E-Mail-Adresse ein.',
+      'Indica o código de recuperação.': 'Gib den Wiederherstellungscode ein.',
+      'Indica um título para a nota.': 'Gib einen Titel für die Notiz ein.',
+      'Escreve o conteúdo da nota.': 'Schreibe den Inhalt der Notiz.',
+      'Escreve uma resposta antes de submeter.':
+          'Schreibe vor dem Senden eine Antwort.',
       'Escolhe os teus idiomas': 'Wähle deine Sprachen',
-      'O DailyTalk.pt adapta as atividades ao idioma que já conheces e ao idioma que queres praticar.': 'DailyTalk.pt passt die Aktivitäten an die Sprache an, die du bereits kennst, und an die Sprache, die du üben möchtest.',
-      'Modo teste: os idiomas podem ser alterados, mas ficam apenas neste dispositivo até entrares na conta.': 'Testmodus: Die Sprachen können geändert werden, bleiben aber nur auf diesem Gerät, bis du dich anmeldest.',
-      'Atenção': 'Achtung', 'Percurso de aprendizagem': 'Lernpfad',
-      'Escolhe idiomas diferentes para que as atividades tenham um objetivo de aprendizagem claro.': 'Wähle unterschiedliche Sprachen, damit die Aktivitäten ein klares Lernziel haben.',
-      'As atividades serão preparadas com base no idioma que conheces e no idioma que queres praticar.': 'Die Aktivitäten werden auf Grundlage der Sprache vorbereitet, die du kennst, und der Sprache, die du üben möchtest.',
+      'O DailyTalk.pt adapta as atividades ao idioma que já conheces e ao idioma que queres praticar.':
+          'DailyTalk.pt passt die Aktivitäten an die Sprache an, die du bereits kennst, und an die Sprache, die du üben möchtest.',
+      'Modo teste: os idiomas podem ser alterados, mas ficam apenas neste dispositivo até entrares na conta.':
+          'Testmodus: Die Sprachen können geändert werden, bleiben aber nur auf diesem Gerät, bis du dich anmeldest.',
+      'Atenção': 'Achtung',
+      'Percurso de aprendizagem': 'Lernpfad',
+      'Escolhe idiomas diferentes para que as atividades tenham um objetivo de aprendizagem claro.':
+          'Wähle unterschiedliche Sprachen, damit die Aktivitäten ein klares Lernziel haben.',
+      'As atividades serão preparadas com base no idioma que conheces e no idioma que queres praticar.':
+          'Die Aktivitäten werden auf Grundlage der Sprache vorbereitet, die du kennst, und der Sprache, die du üben möchtest.',
       'Ainda não tem conta? Criar conta': 'Noch kein Konto? Konto erstellen',
       'Esqueceste a palavra-passe?': 'Passwort vergessen?',
-      'Volta ao ecrã inicial para entrar ou criar conta.': 'Kehre zum Startbildschirm zurück, um dich anzumelden oder ein Konto zu erstellen.',
-      'Palavra-passe alterada com sucesso. Inicia sessão novamente.': 'Passwort erfolgreich geändert. Melde dich erneut an.',
+      'Volta ao ecrã inicial para entrar ou criar conta.':
+          'Kehre zum Startbildschirm zurück, um dich anzumelden oder ein Konto zu erstellen.',
+      'Palavra-passe alterada com sucesso. Inicia sessão novamente.':
+          'Passwort erfolgreich geändert. Melde dich erneut an.',
       'Define uma nova palavra-passe': 'Lege ein neues Passwort fest',
       'Desafio pronto': 'Aufgabe bereit',
-      'A atividade foi preparada. Lê o enunciado, responde e submete para receber feedback.': 'Die Aktivität ist bereit. Lies die Aufgabe, antworte und sende sie ab, um Rückmeldung zu erhalten.',
-      'Resposta da atividade': 'Antwort auf die Aktivität', 'Resultado guardado': 'Ergebnis gespeichert',
+      'A atividade foi preparada. Lê o enunciado, responde e submete para receber feedback.':
+          'Die Aktivität ist bereit. Lies die Aufgabe, antworte und sende sie ab, um Rückmeldung zu erhalten.',
+      'Resposta da atividade': 'Antwort auf die Aktivität',
+      'Resultado guardado': 'Ergebnis gespeichert',
       'URL devolvida pelo deploy': 'Vom Deployment zurückgegebene URL',
-      'Modo teste: as análises usam apenas dados locais desta instalação. Entra para consultar e sincronizar métricas da tua conta.': 'Testmodus: Die Analysen verwenden nur lokale Daten dieser Installation. Melde dich an, um deine Kontometriken anzuzeigen und zu synchronisieren.',
-      'Estas análises usam apenas dados de desempenho, como perfil, cenário, tipo de atividade, tentativas e pontuação. Não guardam dados sensíveis.': 'Diese Analysen verwenden nur Leistungsdaten wie Profil, Szenario, Aktivitätstyp, Versuche und Punktzahl. Sie speichern keine sensiblen Daten.',
-      'Ainda não há dados suficientes': 'Es liegen noch nicht genügend Daten vor',
-      'Submete algumas atividades na página Praticar para gerar análises pedagógicas.': 'Sende einige Aktivitäten auf der Seite Üben ab, um pädagogische Analysen zu erstellen.',
-      'Modo teste: são mostrados apenas resultados locais. Entra para sincronizar histórico entre dispositivos.': 'Testmodus: Es werden nur lokale Ergebnisse angezeigt. Melde dich an, um den Verlauf zwischen Geräten zu synchronisieren.',
-      'Ainda não há resultados disponíveis.': 'Es sind noch keine Ergebnisse verfügbar.',
-      'Desafio': 'Aufgabe', 'Resposta submetida': 'Antwort gesendet',
+      'Modo teste: as análises usam apenas dados locais desta instalação. Entra para consultar e sincronizar métricas da tua conta.':
+          'Testmodus: Die Analysen verwenden nur lokale Daten dieser Installation. Melde dich an, um deine Kontometriken anzuzeigen und zu synchronisieren.',
+      'Estas análises usam apenas dados de desempenho, como perfil, cenário, tipo de atividade, tentativas e pontuação. Não guardam dados sensíveis.':
+          'Diese Analysen verwenden nur Leistungsdaten wie Profil, Szenario, Aktivitätstyp, Versuche und Punktzahl. Sie speichern keine sensiblen Daten.',
+      'Ainda não há dados suficientes':
+          'Es liegen noch nicht genügend Daten vor',
+      'Submete algumas atividades na página Praticar para gerar análises pedagógicas.':
+          'Sende einige Aktivitäten auf der Seite Üben ab, um pädagogische Analysen zu erstellen.',
+      'Modo teste: são mostrados apenas resultados locais. Entra para sincronizar histórico entre dispositivos.':
+          'Testmodus: Es werden nur lokale Ergebnisse angezeigt. Melde dich an, um den Verlauf zwischen Geräten zu synchronisieren.',
+      'Ainda não há resultados disponíveis.':
+          'Es sind noch keine Ergebnisse verfügbar.',
+      'Desafio': 'Aufgabe',
+      'Resposta submetida': 'Antwort gesendet',
       'Nota privada local': 'Lokale private Notiz',
-      'Estas notas ficam apenas neste dispositivo. Não são enviadas para o servidor e não entram na sincronização.': 'Diese Notizen bleiben nur auf diesem Gerät. Sie werden nicht an den Server gesendet und nicht synchronisiert.',
-      'Ainda não existem notas privadas locais.': 'Es gibt noch keine lokalen privaten Notizen.',
-      'Cenário opcional': 'Optionales Szenario', 'Nota': 'Notiz',
+      'Estas notas ficam apenas neste dispositivo. Não são enviadas para o servidor e não entram na sincronização.':
+          'Diese Notizen bleiben nur auf diesem Gerät. Sie werden nicht an den Server gesendet und nicht synchronisiert.',
+      'Ainda não existem notas privadas locais.':
+          'Es gibt noch keine lokalen privaten Notizen.',
+      'Cenário opcional': 'Optionales Szenario',
+      'Nota': 'Notiz',
       'Escolhe o teu perfil': 'Wähle dein Profil',
-      'O DailyTalk.pt adapta os cenários e atividades ao teu papel no contexto escolar.': 'DailyTalk.pt passt Szenarien und Aktivitäten an deine Rolle im schulischen Kontext an.',
-      'Modo teste: o perfil pode ser ajustado localmente, mas só será sincronizado depois de entrares na conta.': 'Testmodus: Das Profil kann lokal geändert werden, wird aber erst nach der Anmeldung synchronisiert.',
-      'Modo teste ativo. Podes alterar idioma e perfil localmente; para sincronizar, entra ou cria conta.': 'Testmodus aktiv. Du kannst Sprache und Profil lokal ändern; zum Synchronisieren melde dich an oder erstelle ein Konto.',
-      'ATALHOS / FEEDBACK': 'SCHNELLZUGRIFFE / FEEDBACK', 'Conquistas': 'Erfolge', 'Badges e pontos': 'Abzeichen und Punkte',
-      'Progresso': 'Fortschritt', 'Evolução': 'Entwicklung', 'Opinião': 'Meinung', 'Ajuda rápida': 'Schnelle Hilfe', 'Dicas': 'Tipps',
+      'O DailyTalk.pt adapta os cenários e atividades ao teu papel no contexto escolar.':
+          'DailyTalk.pt passt Szenarien und Aktivitäten an deine Rolle im schulischen Kontext an.',
+      'Modo teste: o perfil pode ser ajustado localmente, mas só será sincronizado depois de entrares na conta.':
+          'Testmodus: Das Profil kann lokal geändert werden, wird aber erst nach der Anmeldung synchronisiert.',
+      'Modo teste ativo. Podes alterar idioma e perfil localmente; para sincronizar, entra ou cria conta.':
+          'Testmodus aktiv. Du kannst Sprache und Profil lokal ändern; zum Synchronisieren melde dich an oder erstelle ein Konto.',
+      'ATALHOS / FEEDBACK': 'SCHNELLZUGRIFFE / FEEDBACK',
+      'Conquistas': 'Erfolge',
+      'Badges e pontos': 'Abzeichen und Punkte',
+      'Progresso': 'Fortschritt',
+      'Evolução': 'Entwicklung',
+      'Opinião': 'Meinung',
+      'Ajuda rápida': 'Schnelle Hilfe',
+      'Dicas': 'Tipps',
       'Sobre o DailyTalk.pt': 'Über DailyTalk.pt',
 
       'Conta e preferências': 'Konto und Einstellungen',
-      'Ver dados do perfil autenticado e terminar sessão.': 'Daten des angemeldeten Profils anzeigen und abmelden.',
-      'Entrar ou criar conta para guardar progresso e sincronizar.': 'Melde dich an oder erstelle ein Konto, um den Fortschritt zu speichern und zu synchronisieren.',
-      'Escolher entre Estudante, Anfitrião ou Professor.': 'Wähle zwischen Schüler, Gastgeber oder Lehrkraft.',
-      'Escolher perfil localmente durante o modo teste.': 'Profil im Testmodus lokal auswählen.',
-      'Choose your language and the language you want to learn.': 'Wähle deine Sprache und die Sprache, die du lernen möchtest.',
-      'Alterar idiomas localmente durante o modo teste.': 'Sprachen im Testmodus lokal ändern.',
+      'Ver dados do perfil autenticado e terminar sessão.':
+          'Daten des angemeldeten Profils anzeigen und abmelden.',
+      'Entrar ou criar conta para guardar progresso e sincronizar.':
+          'Melde dich an oder erstelle ein Konto, um den Fortschritt zu speichern und zu synchronisieren.',
+      'Escolher entre Estudante, Anfitrião ou Professor.':
+          'Wähle zwischen Schüler, Gastgeber oder Lehrkraft.',
+      'Escolher perfil localmente durante o modo teste.':
+          'Profil im Testmodus lokal auswählen.',
+      'Choose your language and the language you want to learn.':
+          'Wähle deine Sprache und die Sprache, die du lernen möchtest.',
+      'Alterar idiomas localmente durante o modo teste.':
+          'Sprachen im Testmodus lokal ändern.',
       'Atividades': 'Aktivitäten',
-      'Criar uma atividade com base nas tuas dificuldades.': 'Erstelle eine Aktivität auf Grundlage deiner Lernschwierigkeiten.',
-      'Funcionalidade disponível depois de entrares na conta.': 'Funktion nach der Anmeldung verfügbar.',
-      'Ver atividades criadas por ti e o seu estado de aprovação.': 'Von dir erstellte Aktivitäten und ihren Genehmigungsstatus anzeigen.',
-      'Disponível com conta, para associar atividades ao teu perfil.': 'Mit Konto verfügbar, um Aktivitäten deinem Profil zuzuordnen.',
+      'Criar uma atividade com base nas tuas dificuldades.':
+          'Erstelle eine Aktivität auf Grundlage deiner Lernschwierigkeiten.',
+      'Funcionalidade disponível depois de entrares na conta.':
+          'Funktion nach der Anmeldung verfügbar.',
+      'Ver atividades criadas por ti e o seu estado de aprovação.':
+          'Von dir erstellte Aktivitäten und ihren Genehmigungsstatus anzeigen.',
+      'Disponível com conta, para associar atividades ao teu perfil.':
+          'Mit Konto verfügbar, um Aktivitäten deinem Profil zuzuordnen.',
       'Privacidade e dados': 'Datenschutz und Daten',
-      'Guardar notas opcionais apenas neste dispositivo, sem sincronização.': 'Optionale Notizen nur auf diesem Gerät speichern, ohne Synchronisierung.',
-      'Atualizar dados e enviar submissões pendentes quando houver ligação.': 'Daten aktualisieren und ausstehende Einreichungen bei bestehender Verbindung senden.',
-      'Entra para sincronizar o progresso com a tua conta.': 'Melde dich an, um den Fortschritt mit deinem Konto zu synchronisieren.',
-      'Apoio': 'Support', 'Ver instruções rápidas de utilização.': 'Kurzanleitung anzeigen.',
+      'Guardar notas opcionais apenas neste dispositivo, sem sincronização.':
+          'Optionale Notizen nur auf diesem Gerät speichern, ohne Synchronisierung.',
+      'Atualizar dados e enviar submissões pendentes quando houver ligação.':
+          'Daten aktualisieren und ausstehende Einreichungen bei bestehender Verbindung senden.',
+      'Entra para sincronizar o progresso com a tua conta.':
+          'Melde dich an, um den Fortschritt mit deinem Konto zu synchronisieren.',
+      'Apoio': 'Support',
+      'Ver instruções rápidas de utilização.': 'Kurzanleitung anzeigen.',
       'Informação sobre o DailyTalk.pt.': 'Informationen über DailyTalk.pt.',
-      'Podes experimentar a aplicação sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.': 'Du kannst die Anwendung ohne Konto ausprobieren. Um Fortschritt zu speichern und zu synchronisieren, melde dich an oder erstelle ein Konto.',
-      'Acede à tua conta para guardar progresso, consultar resultados sincronizados e continuar noutro dispositivo.': 'Greife auf dein Konto zu, um Fortschritt zu speichern, synchronisierte Ergebnisse anzusehen und auf einem anderen Gerät fortzufahren.',
-      'A sessão guardada neste dispositivo não é válida. Entra novamente para continuar.': 'Die auf diesem Gerät gespeicherte Sitzung ist ungültig. Melde dich erneut an, um fortzufahren.',
-      'Idioma da app': 'App-Sprache', 'Idioma de aprendizagem': 'Lernsprache',
-      'Perfil guardado neste dispositivo. Entra para sincronizar.': 'Profil auf diesem Gerät gespeichert. Melde dich zum Synchronisieren an.',
-      'A preparar...': 'Wird vorbereitet...', 'Gerar código de recuperação': 'Wiederherstellungscode erzeugen',
-      'Modo protótipo: o código foi gerado e será apresentado no ecrã seguinte.': 'Prototypmodus: Der Code wurde erzeugt und wird auf dem nächsten Bildschirm angezeigt.',
-      'Indica o email da tua conta. Nesta versão de protótipo, alojada no plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário será apresentado no ecrã seguinte.': 'Gib die E-Mail-Adresse deines Kontos ein. In dieser auf dem kostenlosen Cloudflare-Tarif gehosteten Prototypversion sendet der Server keine Wiederherstellungs-E-Mails. Zum Testen wird der temporäre Code auf dem nächsten Bildschirm angezeigt.',
-      'Código de recuperação': 'Wiederherstellungscode', 'Alterar palavra-passe': 'Passwort ändern',
-      'Atividade remota': 'Remote-Aktivität', 'Sem feedback.': 'Keine Rückmeldung.', 'Atualizar resultados': 'Ergebnisse aktualisieren',
-      'Submete uma atividade para consultar o histórico local.': 'Sende eine Aktivität ab, um den lokalen Verlauf anzuzeigen.', 'Não disponível': 'Nicht verfügbar',
-      'Tentativas': 'Versuche', 'Erros': 'Fehler', 'Última': 'Letzte', 'Atualizar análises': 'Analysen aktualisieren', 'Tipo': 'Typ',
-      'Submeter resposta': 'Antwort senden', 'Ex.: sala de aula': 'Z. B. Klassenzimmer', 'Ex.: Informação importante': 'Z. B. Wichtige Information',
-      'Escreve aqui a nota privada...': 'Schreibe hier die private Notiz...', 'Guardar nota privada': 'Private Notiz speichern', 'Sem cenário': 'Kein Szenario',
-      'Conquistas serão detalhadas na área de Resultados.': 'Erfolge werden im Bereich Ergebnisse näher beschrieben.',
-      'O progresso será apresentado com métricas de aprendizagem.': 'Der Fortschritt wird mit Lernmetriken dargestellt.',
-      'O feedback ajudará a melhorar as atividades.': 'Feedback hilft, die Aktivitäten zu verbessern.',
-      'A ajuda rápida explicará como usar a aplicação.': 'Die Schnellhilfe erklärt die Nutzung der Anwendung.',
-      'Prática para Estudante': 'Übung für Schüler', 'Prática para Anfitrião': 'Übung für Gastgeber', 'Prática para Professor': 'Übung für Lehrkraft',
+      'Podes experimentar a aplicação sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.':
+          'Du kannst die Anwendung ohne Konto ausprobieren. Um Fortschritt zu speichern und zu synchronisieren, melde dich an oder erstelle ein Konto.',
+      'Acede à tua conta para guardar progresso, consultar resultados sincronizados e continuar noutro dispositivo.':
+          'Greife auf dein Konto zu, um Fortschritt zu speichern, synchronisierte Ergebnisse anzusehen und auf einem anderen Gerät fortzufahren.',
+      'A sessão guardada neste dispositivo não é válida. Entra novamente para continuar.':
+          'Die auf diesem Gerät gespeicherte Sitzung ist ungültig. Melde dich erneut an, um fortzufahren.',
+      'Idioma da app': 'App-Sprache',
+      'Idioma de aprendizagem': 'Lernsprache',
+      'Perfil guardado neste dispositivo. Entra para sincronizar.':
+          'Profil auf diesem Gerät gespeichert. Melde dich zum Synchronisieren an.',
+      'A preparar...': 'Wird vorbereitet...',
+      'Gerar código de recuperação': 'Wiederherstellungscode erzeugen',
+      'Modo protótipo: o código foi gerado e será apresentado no ecrã seguinte.':
+          'Prototypmodus: Der Code wurde erzeugt und wird auf dem nächsten Bildschirm angezeigt.',
+      'Indica o email da tua conta. Nesta versão de protótipo, alojada no plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário será apresentado no ecrã seguinte.':
+          'Gib die E-Mail-Adresse deines Kontos ein. In dieser auf dem kostenlosen Cloudflare-Tarif gehosteten Prototypversion sendet der Server keine Wiederherstellungs-E-Mails. Zum Testen wird der temporäre Code auf dem nächsten Bildschirm angezeigt.',
+      'Código de recuperação': 'Wiederherstellungscode',
+      'Alterar palavra-passe': 'Passwort ändern',
+      'Atividade remota': 'Remote-Aktivität',
+      'Sem feedback.': 'Keine Rückmeldung.',
+      'Atualizar resultados': 'Ergebnisse aktualisieren',
+      'Submete uma atividade para consultar o histórico local.':
+          'Sende eine Aktivität ab, um den lokalen Verlauf anzuzeigen.',
+      'Não disponível': 'Nicht verfügbar',
+      'Tentativas': 'Versuche',
+      'Erros': 'Fehler',
+      'Última': 'Letzte',
+      'Atualizar análises': 'Analysen aktualisieren',
+      'Tipo': 'Typ',
+      'Submeter resposta': 'Antwort senden',
+      'Ex.: sala de aula': 'Z. B. Klassenzimmer',
+      'Ex.: Informação importante': 'Z. B. Wichtige Information',
+      'Escreve aqui a nota privada...': 'Schreibe hier die private Notiz...',
+      'Guardar nota privada': 'Private Notiz speichern',
+      'Sem cenário': 'Kein Szenario',
+      'Conquistas serão detalhadas na área de Resultados.':
+          'Erfolge werden im Bereich Ergebnisse näher beschrieben.',
+      'O progresso será apresentado com métricas de aprendizagem.':
+          'Der Fortschritt wird mit Lernmetriken dargestellt.',
+      'O feedback ajudará a melhorar as atividades.':
+          'Feedback hilft, die Aktivitäten zu verbessern.',
+      'A ajuda rápida explicará como usar a aplicação.':
+          'Die Schnellhilfe erklärt die Nutzung der Anwendung.',
+      'Prática para Estudante': 'Übung für Schüler',
+      'Prática para Anfitrião': 'Übung für Gastgeber',
+      'Prática para Professor': 'Übung für Lehrkraft',
     },
   };
 
@@ -490,506 +835,784 @@ class AppTranslations {
       'Email': 'Email',
       'Quiz': 'Quiz',
       'Nova palavra-passe': 'New password',
-      'Ainda não há resultados disponíveis. Submete uma atividade para consultar o histórico local.': 'No results are available yet. Submit an activity to view the local history.',
-      'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.': 'Saved on this device: {source} → {target}. Sign in to sync.',
+      'Ainda não há resultados disponíveis. Submete uma atividade para consultar o histórico local.':
+          'No results are available yet. Submit an activity to view the local history.',
+      'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.':
+          'Saved on this device: {source} → {target}. Sign in to sync.',
       'Guardado: {source} → {target}': 'Saved: {source} → {target}',
-      'Versão de protótipo\nNo plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário é apresentado aqui.\n\nCódigo: {code}': 'Prototype version\nOn the free Cloudflare plan, the server does not send recovery emails. To allow the flow to be tested, the temporary code is shown here.\n\nCode: {code}',
-      'Cria uma atividade com base nas tuas dificuldades de aprendizagem.': 'Create an activity based on your learning difficulties.',
-      'Aqui serão apresentadas as atividades criadas por ti, o estado de aprovação e a avaliação da comunidade.': 'Your created activities, approval status and community rating will be shown here.',
+      'Versão de protótipo\nNo plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário é apresentado aqui.\n\nCódigo: {code}':
+          'Prototype version\nOn the free Cloudflare plan, the server does not send recovery emails. To allow the flow to be tested, the temporary code is shown here.\n\nCode: {code}',
+      'Cria uma atividade com base nas tuas dificuldades de aprendizagem.':
+          'Create an activity based on your learning difficulties.',
+      'Aqui serão apresentadas as atividades criadas por ti, o estado de aprovação e a avaliação da comunidade.':
+          'Your created activities, approval status and community rating will be shown here.',
       'Português de Portugal': 'Portuguese — Portugal',
       'English - United States': 'English — United States',
       'Spanish - Spain': 'Spanish — Spain',
       'French - France': 'French — France',
       'Italian - Italy': 'Italian — Italy',
       'German - Germany': 'German — Germany',
-      'Escolhe o idioma que usas normalmente. Este idioma pode ser usado para menus, mensagens e feedback.': 'Choose the language you normally use. It is used for menus, messages and feedback.',
-      'Escolhe o idioma que queres treinar em diálogos, áudios, quizzes e desafios.': 'Choose the language you want to practise in dialogues, audio, quizzes and challenges.',
-      'Modo protótipo: usa o código apresentado para testar a recuperação.': 'Prototype mode: use the displayed code to test account recovery.',
+      'Escolhe o idioma que usas normalmente. Este idioma pode ser usado para menus, mensagens e feedback.':
+          'Choose the language you normally use. It is used for menus, messages and feedback.',
+      'Escolhe o idioma que queres treinar em diálogos, áudios, quizzes e desafios.':
+          'Choose the language you want to practise in dialogues, audio, quizzes and challenges.',
+      'Modo protótipo: usa o código apresentado para testar a recuperação.':
+          'Prototype mode: use the displayed code to test account recovery.',
       'Submissão pendente inválida.': 'Invalid pending submission.',
       'Submissão sincronizada.': 'Submission synced.',
-      'Não existem submissões pendentes para sincronizar.': 'There are no pending submissions to sync.',
+      'Não existem submissões pendentes para sincronizar.':
+          'There are no pending submissions to sync.',
       'Sincronizadas': 'Synced',
       'Falhas': 'Failures',
       'Não disponível': 'Unavailable',
       'Sem feedback.': 'No feedback.',
       'desconhecido': 'unknown',
       'Perfil guardado: {profile}': 'Profile saved: {profile}',
-      'Perfil guardado neste dispositivo. Entra para sincronizar.': 'Profile saved on this device. Sign in to sync.',
-      'Conta: {email}\nUsa o código temporário abaixo para concluir o teste de recuperação.': 'Account: {email}\nUse the temporary code below to complete the recovery test.',
+      'Perfil guardado neste dispositivo. Entra para sincronizar.':
+          'Profile saved on this device. Sign in to sync.',
+      'Conta: {email}\nUsa o código temporário abaixo para concluir o teste de recuperação.':
+          'Account: {email}\nUse the temporary code below to complete the recovery test.',
       'Conta: {email}': 'Account: {email}',
-      'Usa a Home para acompanhar o teu percurso e aceder rapidamente às atividades.\n\nEm Praticar, responde a atividades predefinidas para treinares comunicação em contexto escolar.\n\nEm Resultados, acompanha o teu histórico, pontuações e estado de sincronização.\n\nEm Análises, consulta métricas pedagógicas agregadas, sem dados sensíveis.\n\nEm Ajustes, podes gerir conta, perfil, idiomas, notas privadas, sincronização e atividades criadas por ti.\n\nA opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.': 'Use Home to follow your journey and quickly access activities.\n\nIn Practise, answer predefined activities to train communication in a school context.\n\nIn Results, view your history, scores and sync status.\n\nIn Analytics, view aggregated pedagogical metrics without sensitive data.\n\nIn Settings, manage your account, profile, languages, private notes, synchronization and activities you created.\n\nThe Profile option adapts activities for Student, Host or Teacher.',
-      'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\nA aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.\n\nO projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.\n\nA aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.': 'DailyTalk.pt is a serious game for language learning, aimed at children and young people in a school context and Erasmus+ mobility.\n\nThe application helps practise communication in real school-life situations through vocabulary, audio, dialogues, quizzes and challenges.\n\nThe project supports different user profiles, such as Student, Host and Teacher, to better adapt activities to each person’s role.\n\nThe application includes activities created by the DailyTalk.pt team and may evolve to accept community-proposed activities after validation.',
+      'Usa a Home para acompanhar o teu percurso e aceder rapidamente às atividades.\n\nEm Praticar, responde a atividades predefinidas para treinares comunicação em contexto escolar.\n\nEm Resultados, acompanha o teu histórico, pontuações e estado de sincronização.\n\nEm Análises, consulta métricas pedagógicas agregadas, sem dados sensíveis.\n\nEm Ajustes, podes gerir conta, perfil, idiomas, notas privadas, sincronização e atividades criadas por ti.\n\nA opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.':
+          'Use Home to follow your journey and quickly access activities.\n\nIn Practise, answer predefined activities to train communication in a school context.\n\nIn Results, view your history, scores and sync status.\n\nIn Analytics, view aggregated pedagogical metrics without sensitive data.\n\nIn Settings, manage your account, profile, languages, private notes, synchronization and activities you created.\n\nThe Profile option adapts activities for Student, Host or Teacher.',
+      'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\nA aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.\n\nO projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.\n\nA aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.':
+          'DailyTalk.pt is a serious game for language learning, aimed at children and young people in a school context and Erasmus+ mobility.\n\nThe application helps practise communication in real school-life situations through vocabulary, audio, dialogues, quizzes and challenges.\n\nThe project supports different user profiles, such as Student, Host and Teacher, to better adapt activities to each person’s role.\n\nThe application includes activities created by the DailyTalk.pt team and may evolve to accept community-proposed activities after validation.',
       'Chegada à casa': 'Arrival at home',
-      'Primeiros contactos ao chegar à casa ou ao local de acolhimento.': 'First exchanges when arriving at the home or host location.',
+      'Primeiros contactos ao chegar à casa ou ao local de acolhimento.':
+          'First exchanges when arriving at the home or host location.',
       'Quarto': 'Bedroom',
-      'Frases e instruções sobre o quarto, mala, cama e espaço pessoal.': 'Phrases and instructions about the bedroom, luggage, bed and personal space.',
+      'Frases e instruções sobre o quarto, mala, cama e espaço pessoal.':
+          'Phrases and instructions about the bedroom, luggage, bed and personal space.',
       'Casa de banho': 'Bathroom',
-      'Perguntas e respostas sobre localização e utilização da casa de banho.': 'Questions and answers about the location and use of the bathroom.',
+      'Perguntas e respostas sobre localização e utilização da casa de banho.':
+          'Questions and answers about the location and use of the bathroom.',
       'Pequeno-almoço': 'Breakfast',
-      'Comunicação sobre horários, preferências e alimentos do pequeno-almoço.': 'Communication about breakfast times, preferences and food.',
+      'Comunicação sobre horários, preferências e alimentos do pequeno-almoço.':
+          'Communication about breakfast times, preferences and food.',
       'Horários': 'Schedules',
-      'Frases sobre horas de saída, chegada, aulas, refeições e descanso.': 'Phrases about departure and arrival times, lessons, meals and rest.',
+      'Frases sobre horas de saída, chegada, aulas, refeições e descanso.':
+          'Phrases about departure and arrival times, lessons, meals and rest.',
       'Preferências alimentares': 'Food preferences',
-      'Treino linguístico sobre gostos, alimentos preferidos e pedidos simples.': 'Language practice about tastes, favourite foods and simple requests.',
+      'Treino linguístico sobre gostos, alimentos preferidos e pedidos simples.':
+          'Language practice about tastes, favourite foods and simple requests.',
       'Treino sobre alergias': 'Allergy practice',
-      'Apenas treino linguístico. Não deve guardar alergias reais do utilizador.': 'Language practice only. It must not store the user’s real allergies.',
+      'Apenas treino linguístico. Não deve guardar alergias reais do utilizador.':
+          'Language practice only. It must not store the user’s real allergies.',
       'Regras da casa': 'House rules',
-      'Comunicação sobre chaves, portas, horários, espaços e regras básicas.': 'Communication about keys, doors, schedules, spaces and basic rules.',
+      'Comunicação sobre chaves, portas, horários, espaços e regras básicas.':
+          'Communication about keys, doors, schedules, spaces and basic rules.',
       'Animais domésticos': 'Pets',
-      'Frases de aviso e cuidado relacionadas com animais da casa.': 'Warning and care phrases related to household pets.',
+      'Frases de aviso e cuidado relacionadas com animais da casa.':
+          'Warning and care phrases related to household pets.',
       'Transportes': 'Transport',
-      'Perguntas e instruções sobre deslocações, caminhos e transporte.': 'Questions and instructions about travel, directions and transport.',
+      'Perguntas e instruções sobre deslocações, caminhos e transporte.':
+          'Questions and instructions about travel, directions and transport.',
       'Escola': 'School',
-      'Comunicação relacionada com chegada à escola, colegas, salas e rotina escolar.': 'Communication related to arriving at school, classmates, rooms and school routine.',
+      'Comunicação relacionada com chegada à escola, colegas, salas e rotina escolar.':
+          'Communication related to arriving at school, classmates, rooms and school routine.',
       'Sala de aula': 'Classroom',
-      'Atividades de comunicação em sala de aula e interação com professores.': 'Classroom communication activities and interaction with teachers.',
+      'Atividades de comunicação em sala de aula e interação com professores.':
+          'Classroom communication activities and interaction with teachers.',
       'Apresentações': 'Presentations',
-      'Treino de frases para apresentações, trabalhos e participação oral.': 'Phrase practice for presentations, assignments and oral participation.',
+      'Treino de frases para apresentações, trabalhos e participação oral.':
+          'Phrase practice for presentations, assignments and oral participation.',
       'Conversa informal': 'Informal conversation',
-      'Diálogos simples com colegas, anfitriões ou outras pessoas do contexto escolar.': 'Simple dialogues with classmates, hosts or other people in the school context.',
+      'Diálogos simples com colegas, anfitriões ou outras pessoas do contexto escolar.':
+          'Simple dialogues with classmates, hosts or other people in the school context.',
       'Responder sobre alergias': 'Answer about allergies',
-      'Treina uma resposta simples quando alguém pergunta se tens alergias.': 'Practise a simple answer when someone asks whether you have allergies.',
-      'O anfitrião pergunta: “Tens alergia a alguma coisa?” Escreve uma resposta simples no idioma que estás a praticar.': 'The host asks: “Are you allergic to anything?” Write a simple answer in the language you are practising.',
+      'Treina uma resposta simples quando alguém pergunta se tens alergias.':
+          'Practise a simple answer when someone asks whether you have allergies.',
+      'O anfitrião pergunta: “Tens alergia a alguma coisa?” Escreve uma resposta simples no idioma que estás a praticar.':
+          'The host asks: “Are you allergic to anything?” Write a simple answer in the language you are practising.',
       'Ex.: Não, não tenho alergias.': 'E.g.: No, I don’t have any allergies.',
       'Perguntar pela casa de banho': 'Ask where the bathroom is',
-      'Treina uma pergunta útil para encontrar a casa de banho.': 'Practise a useful question to find the bathroom.',
-      'Estás numa casa nova e precisas de perguntar onde fica a casa de banho. Escreve a frase que dirias.': 'You are in a new house and need to ask where the bathroom is. Write the sentence you would say.',
+      'Treina uma pergunta útil para encontrar a casa de banho.':
+          'Practise a useful question to find the bathroom.',
+      'Estás numa casa nova e precisas de perguntar onde fica a casa de banho. Escreve a frase que dirias.':
+          'You are in a new house and need to ask where the bathroom is. Write the sentence you would say.',
       'Ex.: Onde fica a casa de banho?': 'E.g.: Where is the bathroom?',
       'Responder sobre pequeno-almoço': 'Answer about breakfast',
-      'Treina uma resposta sobre aquilo que costumas comer de manhã.': 'Practise an answer about what you usually eat in the morning.',
-      'O anfitrião pergunta: “O que costumas comer ao pequeno-almoço?” Escreve uma resposta simples.': 'The host asks: “What do you usually eat for breakfast?” Write a simple answer.',
-      'Ex.: Costumo comer pão e beber leite.': 'E.g.: I usually eat bread and drink milk.',
+      'Treina uma resposta sobre aquilo que costumas comer de manhã.':
+          'Practise an answer about what you usually eat in the morning.',
+      'O anfitrião pergunta: “O que costumas comer ao pequeno-almoço?” Escreve uma resposta simples.':
+          'The host asks: “What do you usually eat for breakfast?” Write a simple answer.',
+      'Ex.: Costumo comer pão e beber leite.':
+          'E.g.: I usually eat bread and drink milk.',
       'Explicar o quarto': 'Explain the bedroom',
-      'Treina uma frase de acolhimento para mostrar o quarto ao aluno visitante.': 'Practise a welcoming phrase to show the visiting student their bedroom.',
-      'Vais receber um aluno visitante em casa. Escreve uma frase simples para lhe explicar onde fica o quarto.': 'You are going to host a visiting student. Write a simple sentence explaining where the bedroom is.',
-      'Ex.: Este é o teu quarto. Podes deixar a mala aqui.': 'E.g.: This is your bedroom. You can leave your suitcase here.',
+      'Treina uma frase de acolhimento para mostrar o quarto ao aluno visitante.':
+          'Practise a welcoming phrase to show the visiting student their bedroom.',
+      'Vais receber um aluno visitante em casa. Escreve uma frase simples para lhe explicar onde fica o quarto.':
+          'You are going to host a visiting student. Write a simple sentence explaining where the bedroom is.',
+      'Ex.: Este é o teu quarto. Podes deixar a mala aqui.':
+          'E.g.: This is your bedroom. You can leave your suitcase here.',
       'Perguntar sobre pequeno-almoço': 'Ask about breakfast',
-      'Treina uma pergunta simples sobre preferências de pequeno-almoço.': 'Practise a simple question about breakfast preferences.',
-      'Queres saber o que o aluno costuma comer de manhã. Escreve uma pergunta adequada.': 'You want to know what the student usually eats in the morning. Write an appropriate question.',
-      'Ex.: O que costumas comer ao pequeno-almoço?': 'E.g.: What do you usually eat for breakfast?',
+      'Treina uma pergunta simples sobre preferências de pequeno-almoço.':
+          'Practise a simple question about breakfast preferences.',
+      'Queres saber o que o aluno costuma comer de manhã. Escreve uma pergunta adequada.':
+          'You want to know what the student usually eats in the morning. Write an appropriate question.',
+      'Ex.: O que costumas comer ao pequeno-almoço?':
+          'E.g.: What do you usually eat for breakfast?',
       'Explicar horários': 'Explain schedules',
-      'Treina uma instrução curta sobre o horário de saída no dia seguinte.': 'Practise a short instruction about the departure time the next day.',
-      'Tens de explicar ao aluno que amanhã vão sair às 9h. Escreve a frase que dirias.': 'Explain to the student that you will leave at 9 a.m. tomorrow. Write the sentence you would say.',
-      'Ex.: Amanhã vamos sair às nove horas.': 'E.g.: Tomorrow we are leaving at nine o’clock.',
+      'Treina uma instrução curta sobre o horário de saída no dia seguinte.':
+          'Practise a short instruction about the departure time the next day.',
+      'Tens de explicar ao aluno que amanhã vão sair às 9h. Escreve a frase que dirias.':
+          'Explain to the student that you will leave at 9 a.m. tomorrow. Write the sentence you would say.',
+      'Ex.: Amanhã vamos sair às nove horas.':
+          'E.g.: Tomorrow we are leaving at nine o’clock.',
       'Avisar sobre animal doméstico': 'Warn about a pet',
-      'Treina uma frase simples para explicar como lidar com um animal da casa.': 'Practise a simple sentence explaining how to behave around a household pet.',
-      'Há um cão em casa. Escreve uma frase simples para avisar o aluno de que não deve provocar o animal.': 'There is a dog in the house. Write a simple sentence warning the student not to provoke the animal.',
-      'Ex.: O cão é calmo, mas não o provoques.': 'E.g.: The dog is calm, but don’t provoke it.',
+      'Treina uma frase simples para explicar como lidar com um animal da casa.':
+          'Practise a simple sentence explaining how to behave around a household pet.',
+      'Há um cão em casa. Escreve uma frase simples para avisar o aluno de que não deve provocar o animal.':
+          'There is a dog in the house. Write a simple sentence warning the student not to provoke the animal.',
+      'Ex.: O cão é calmo, mas não o provoques.':
+          'E.g.: The dog is calm, but don’t provoke it.',
       'Explicar regras da casa': 'Explain house rules',
-      'Treina uma frase curta sobre uma regra básica da casa.': 'Practise a short sentence about a basic house rule.',
-      'Queres explicar ao aluno onde deve deixar as chaves. Escreve uma frase simples.': 'Explain to the student where to leave the keys. Write a simple sentence.',
-      'Ex.: As chaves ficam aqui, junto à porta.': 'E.g.: The keys stay here, next to the door.',
+      'Treina uma frase curta sobre uma regra básica da casa.':
+          'Practise a short sentence about a basic house rule.',
+      'Queres explicar ao aluno onde deve deixar as chaves. Escreve uma frase simples.':
+          'Explain to the student where to leave the keys. Write a simple sentence.',
+      'Ex.: As chaves ficam aqui, junto à porta.':
+          'E.g.: The keys stay here, next to the door.',
       'Dar instrução em sala de aula': 'Give a classroom instruction',
-      'Treina uma instrução curta e clara para uma atividade escolar.': 'Practise a short and clear instruction for a school activity.',
-      'Estás a orientar uma atividade em sala de aula. Escreve uma instrução simples para os alunos trabalharem em pares.': 'You are leading a classroom activity. Write a simple instruction for students to work in pairs.',
-      'Ex.: Leiam a pergunta e respondam em pares.': 'E.g.: Read the question and answer in pairs.',
-      'Aluno que pratica comunicação em situações reais do quotidiano escolar.': 'A student who practises communication in real school-life situations.',
-      'Pessoa que se prepara para receber e comunicar melhor com o aluno visitante.': 'A person preparing to host and communicate better with the visiting student.',
-      'Perfil pedagógico previsto para acompanhamento, validação e análise.': 'A pedagogical profile intended for monitoring, validation and analysis.',
+      'Treina uma instrução curta e clara para uma atividade escolar.':
+          'Practise a short and clear instruction for a school activity.',
+      'Estás a orientar uma atividade em sala de aula. Escreve uma instrução simples para os alunos trabalharem em pares.':
+          'You are leading a classroom activity. Write a simple instruction for students to work in pairs.',
+      'Ex.: Leiam a pergunta e respondam em pares.':
+          'E.g.: Read the question and answer in pairs.',
+      'Aluno que pratica comunicação em situações reais do quotidiano escolar.':
+          'A student who practises communication in real school-life situations.',
+      'Pessoa que se prepara para receber e comunicar melhor com o aluno visitante.':
+          'A person preparing to host and communicate better with the visiting student.',
+      'Perfil pedagógico previsto para acompanhamento, validação e análise.':
+          'A pedagogical profile intended for monitoring, validation and analysis.',
     },
     'es': {
       'Email': 'Correo electrónico',
       'Quiz': 'Cuestionario',
       'Nova palavra-passe': 'Nueva contraseña',
-      'Ainda não há resultados disponíveis. Submete uma atividade para consultar o histórico local.': 'Todavía no hay resultados disponibles. Envía una actividad para consultar el historial local.',
-      'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.': 'Guardado en este dispositivo: {source} → {target}. Inicia sesión para sincronizar.',
+      'Ainda não há resultados disponíveis. Submete uma atividade para consultar o histórico local.':
+          'Todavía no hay resultados disponibles. Envía una actividad para consultar el historial local.',
+      'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.':
+          'Guardado en este dispositivo: {source} → {target}. Inicia sesión para sincronizar.',
       'Guardado: {source} → {target}': 'Guardado: {source} → {target}',
-      'Versão de protótipo\nNo plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário é apresentado aqui.\n\nCódigo: {code}': 'Versión de prototipo\nEn el plan gratuito de Cloudflare, el servidor no envía correos de recuperación. Para probar el flujo, el código temporal se muestra aquí.\n\nCódigo: {code}',
-      'Cria uma atividade com base nas tuas dificuldades de aprendizagem.': 'Crea una actividad basada en tus dificultades de aprendizaje.',
-      'Aqui serão apresentadas as atividades criadas por ti, o estado de aprovação e a avaliação da comunidade.': 'Aquí se mostrarán las actividades que has creado, su estado de aprobación y la valoración de la comunidad.',
+      'Versão de protótipo\nNo plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário é apresentado aqui.\n\nCódigo: {code}':
+          'Versión de prototipo\nEn el plan gratuito de Cloudflare, el servidor no envía correos de recuperación. Para probar el flujo, el código temporal se muestra aquí.\n\nCódigo: {code}',
+      'Cria uma atividade com base nas tuas dificuldades de aprendizagem.':
+          'Crea una actividad basada en tus dificultades de aprendizaje.',
+      'Aqui serão apresentadas as atividades criadas por ti, o estado de aprovação e a avaliação da comunidade.':
+          'Aquí se mostrarán las actividades que has creado, su estado de aprobación y la valoración de la comunidad.',
       'Português de Portugal': 'Portugués — Portugal',
       'English - United States': 'Inglés — Estados Unidos',
       'Spanish - Spain': 'Español — España',
       'French - France': 'Francés — Francia',
       'Italian - Italy': 'Italiano — Italia',
       'German - Germany': 'Alemán — Alemania',
-      'Escolhe o idioma que usas normalmente. Este idioma pode ser usado para menus, mensagens e feedback.': 'Elige el idioma que utilizas normalmente. Se usará en menús, mensajes y comentarios.',
-      'Escolhe o idioma que queres treinar em diálogos, áudios, quizzes e desafios.': 'Elige el idioma que quieres practicar en diálogos, audios, cuestionarios y desafíos.',
-      'Modo protótipo: usa o código apresentado para testar a recuperação.': 'Modo prototipo: utiliza el código mostrado para probar la recuperación.',
+      'Escolhe o idioma que usas normalmente. Este idioma pode ser usado para menus, mensagens e feedback.':
+          'Elige el idioma que utilizas normalmente. Se usará en menús, mensajes y comentarios.',
+      'Escolhe o idioma que queres treinar em diálogos, áudios, quizzes e desafios.':
+          'Elige el idioma que quieres practicar en diálogos, audios, cuestionarios y desafíos.',
+      'Modo protótipo: usa o código apresentado para testar a recuperação.':
+          'Modo prototipo: utiliza el código mostrado para probar la recuperación.',
       'Submissão pendente inválida.': 'Envío pendiente no válido.',
       'Submissão sincronizada.': 'Envío sincronizado.',
-      'Não existem submissões pendentes para sincronizar.': 'No hay envíos pendientes para sincronizar.',
+      'Não existem submissões pendentes para sincronizar.':
+          'No hay envíos pendientes para sincronizar.',
       'Sincronizadas': 'Sincronizadas',
       'Falhas': 'Fallos',
       'Não disponível': 'No disponible',
       'Sem feedback.': 'Sin comentarios.',
       'desconhecido': 'desconocido',
       'Perfil guardado: {profile}': 'Perfil guardado: {profile}',
-      'Perfil guardado neste dispositivo. Entra para sincronizar.': 'Perfil guardado en este dispositivo. Inicia sesión para sincronizar.',
-      'Conta: {email}\nUsa o código temporário abaixo para concluir o teste de recuperação.': 'Cuenta: {email}\nUtiliza el código temporal que aparece abajo para completar la prueba de recuperación.',
+      'Perfil guardado neste dispositivo. Entra para sincronizar.':
+          'Perfil guardado en este dispositivo. Inicia sesión para sincronizar.',
+      'Conta: {email}\nUsa o código temporário abaixo para concluir o teste de recuperação.':
+          'Cuenta: {email}\nUtiliza el código temporal que aparece abajo para completar la prueba de recuperación.',
       'Conta: {email}': 'Cuenta: {email}',
-      'Usa a Home para acompanhar o teu percurso e aceder rapidamente às atividades.\n\nEm Praticar, responde a atividades predefinidas para treinares comunicação em contexto escolar.\n\nEm Resultados, acompanha o teu histórico, pontuações e estado de sincronização.\n\nEm Análises, consulta métricas pedagógicas agregadas, sem dados sensíveis.\n\nEm Ajustes, podes gerir conta, perfil, idiomas, notas privadas, sincronização e atividades criadas por ti.\n\nA opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.': 'Usa Inicio para seguir tu recorrido y acceder rápidamente a las actividades.\n\nEn Practicar, responde a actividades predefinidas para entrenar la comunicación en un contexto escolar.\n\nEn Resultados, consulta tu historial, puntuaciones y estado de sincronización.\n\nEn Análisis, consulta métricas pedagógicas agregadas sin datos sensibles.\n\nEn Ajustes, puedes gestionar la cuenta, el perfil, los idiomas, las notas privadas, la sincronización y las actividades que has creado.\n\nLa opción Perfil permite adaptar las actividades para Estudiante, Anfitrión o Profesor.',
-      'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\nA aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.\n\nO projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.\n\nA aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.': 'DailyTalk.pt es un juego serio para el aprendizaje de idiomas, dirigido a niños y jóvenes en contexto escolar y de movilidad Erasmus+.\n\nLa aplicación ayuda a practicar la comunicación en situaciones reales de la vida escolar mediante vocabulario, audio, diálogos, cuestionarios y desafíos.\n\nEl proyecto contempla distintos perfiles de uso, como Estudiante, Anfitrión y Profesor, para adaptar mejor las actividades al papel de cada persona.\n\nLa aplicación incluye actividades creadas por el equipo DailyTalk.pt y podrá evolucionar para aceptar actividades propuestas por la comunidad, previa validación.',
+      'Usa a Home para acompanhar o teu percurso e aceder rapidamente às atividades.\n\nEm Praticar, responde a atividades predefinidas para treinares comunicação em contexto escolar.\n\nEm Resultados, acompanha o teu histórico, pontuações e estado de sincronização.\n\nEm Análises, consulta métricas pedagógicas agregadas, sem dados sensíveis.\n\nEm Ajustes, podes gerir conta, perfil, idiomas, notas privadas, sincronização e atividades criadas por ti.\n\nA opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.':
+          'Usa Inicio para seguir tu recorrido y acceder rápidamente a las actividades.\n\nEn Practicar, responde a actividades predefinidas para entrenar la comunicación en un contexto escolar.\n\nEn Resultados, consulta tu historial, puntuaciones y estado de sincronización.\n\nEn Análisis, consulta métricas pedagógicas agregadas sin datos sensibles.\n\nEn Ajustes, puedes gestionar la cuenta, el perfil, los idiomas, las notas privadas, la sincronización y las actividades que has creado.\n\nLa opción Perfil permite adaptar las actividades para Estudiante, Anfitrión o Profesor.',
+      'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\nA aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.\n\nO projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.\n\nA aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.':
+          'DailyTalk.pt es un juego serio para el aprendizaje de idiomas, dirigido a niños y jóvenes en contexto escolar y de movilidad Erasmus+.\n\nLa aplicación ayuda a practicar la comunicación en situaciones reales de la vida escolar mediante vocabulario, audio, diálogos, cuestionarios y desafíos.\n\nEl proyecto contempla distintos perfiles de uso, como Estudiante, Anfitrión y Profesor, para adaptar mejor las actividades al papel de cada persona.\n\nLa aplicación incluye actividades creadas por el equipo DailyTalk.pt y podrá evolucionar para aceptar actividades propuestas por la comunidad, previa validación.',
       'Chegada à casa': 'Llegada a casa',
-      'Primeiros contactos ao chegar à casa ou ao local de acolhimento.': 'Primeros contactos al llegar a la casa o al lugar de acogida.',
+      'Primeiros contactos ao chegar à casa ou ao local de acolhimento.':
+          'Primeros contactos al llegar a la casa o al lugar de acogida.',
       'Quarto': 'Habitación',
-      'Frases e instruções sobre o quarto, mala, cama e espaço pessoal.': 'Frases e instrucciones sobre la habitación, la maleta, la cama y el espacio personal.',
+      'Frases e instruções sobre o quarto, mala, cama e espaço pessoal.':
+          'Frases e instrucciones sobre la habitación, la maleta, la cama y el espacio personal.',
       'Casa de banho': 'Baño',
-      'Perguntas e respostas sobre localização e utilização da casa de banho.': 'Preguntas y respuestas sobre la ubicación y el uso del baño.',
+      'Perguntas e respostas sobre localização e utilização da casa de banho.':
+          'Preguntas y respuestas sobre la ubicación y el uso del baño.',
       'Pequeno-almoço': 'Desayuno',
-      'Comunicação sobre horários, preferências e alimentos do pequeno-almoço.': 'Comunicación sobre horarios, preferencias y alimentos del desayuno.',
+      'Comunicação sobre horários, preferências e alimentos do pequeno-almoço.':
+          'Comunicación sobre horarios, preferencias y alimentos del desayuno.',
       'Horários': 'Horarios',
-      'Frases sobre horas de saída, chegada, aulas, refeições e descanso.': 'Frases sobre horas de salida y llegada, clases, comidas y descanso.',
+      'Frases sobre horas de saída, chegada, aulas, refeições e descanso.':
+          'Frases sobre horas de salida y llegada, clases, comidas y descanso.',
       'Preferências alimentares': 'Preferencias alimentarias',
-      'Treino linguístico sobre gostos, alimentos preferidos e pedidos simples.': 'Práctica lingüística sobre gustos, alimentos preferidos y peticiones sencillas.',
+      'Treino linguístico sobre gostos, alimentos preferidos e pedidos simples.':
+          'Práctica lingüística sobre gustos, alimentos preferidos y peticiones sencillas.',
       'Treino sobre alergias': 'Práctica sobre alergias',
-      'Apenas treino linguístico. Não deve guardar alergias reais do utilizador.': 'Solo práctica lingüística. No debe guardar alergias reales del usuario.',
+      'Apenas treino linguístico. Não deve guardar alergias reais do utilizador.':
+          'Solo práctica lingüística. No debe guardar alergias reales del usuario.',
       'Regras da casa': 'Normas de la casa',
-      'Comunicação sobre chaves, portas, horários, espaços e regras básicas.': 'Comunicación sobre llaves, puertas, horarios, espacios y normas básicas.',
+      'Comunicação sobre chaves, portas, horários, espaços e regras básicas.':
+          'Comunicación sobre llaves, puertas, horarios, espacios y normas básicas.',
       'Animais domésticos': 'Mascotas',
-      'Frases de aviso e cuidado relacionadas com animais da casa.': 'Frases de aviso y cuidado relacionadas con las mascotas de la casa.',
+      'Frases de aviso e cuidado relacionadas com animais da casa.':
+          'Frases de aviso y cuidado relacionadas con las mascotas de la casa.',
       'Transportes': 'Transporte',
-      'Perguntas e instruções sobre deslocações, caminhos e transporte.': 'Preguntas e instrucciones sobre desplazamientos, rutas y transporte.',
+      'Perguntas e instruções sobre deslocações, caminhos e transporte.':
+          'Preguntas e instrucciones sobre desplazamientos, rutas y transporte.',
       'Escola': 'Escuela',
-      'Comunicação relacionada com chegada à escola, colegas, salas e rotina escolar.': 'Comunicación relacionada con la llegada a la escuela, compañeros, aulas y rutina escolar.',
+      'Comunicação relacionada com chegada à escola, colegas, salas e rotina escolar.':
+          'Comunicación relacionada con la llegada a la escuela, compañeros, aulas y rutina escolar.',
       'Sala de aula': 'Aula',
-      'Atividades de comunicação em sala de aula e interação com professores.': 'Actividades de comunicación en el aula e interacción con profesores.',
+      'Atividades de comunicação em sala de aula e interação com professores.':
+          'Actividades de comunicación en el aula e interacción con profesores.',
       'Apresentações': 'Presentaciones',
-      'Treino de frases para apresentações, trabalhos e participação oral.': 'Práctica de frases para presentaciones, trabajos y participación oral.',
+      'Treino de frases para apresentações, trabalhos e participação oral.':
+          'Práctica de frases para presentaciones, trabajos y participación oral.',
       'Conversa informal': 'Conversación informal',
-      'Diálogos simples com colegas, anfitriões ou outras pessoas do contexto escolar.': 'Diálogos sencillos con compañeros, anfitriones u otras personas del contexto escolar.',
+      'Diálogos simples com colegas, anfitriões ou outras pessoas do contexto escolar.':
+          'Diálogos sencillos con compañeros, anfitriones u otras personas del contexto escolar.',
       'Responder sobre alergias': 'Responder sobre alergias',
-      'Treina uma resposta simples quando alguém pergunta se tens alergias.': 'Practica una respuesta sencilla cuando alguien pregunta si tienes alergias.',
-      'O anfitrião pergunta: “Tens alergia a alguma coisa?” Escreve uma resposta simples no idioma que estás a praticar.': 'El anfitrión pregunta: «¿Tienes alergia a algo?». Escribe una respuesta sencilla en el idioma que estás practicando.',
+      'Treina uma resposta simples quando alguém pergunta se tens alergias.':
+          'Practica una respuesta sencilla cuando alguien pregunta si tienes alergias.',
+      'O anfitrião pergunta: “Tens alergia a alguma coisa?” Escreve uma resposta simples no idioma que estás a praticar.':
+          'El anfitrión pregunta: «¿Tienes alergia a algo?». Escribe una respuesta sencilla en el idioma que estás practicando.',
       'Ex.: Não, não tenho alergias.': 'Ej.: No, no tengo alergias.',
       'Perguntar pela casa de banho': 'Preguntar dónde está el baño',
-      'Treina uma pergunta útil para encontrar a casa de banho.': 'Practica una pregunta útil para encontrar el baño.',
-      'Estás numa casa nova e precisas de perguntar onde fica a casa de banho. Escreve a frase que dirias.': 'Estás en una casa nueva y necesitas preguntar dónde está el baño. Escribe la frase que dirías.',
+      'Treina uma pergunta útil para encontrar a casa de banho.':
+          'Practica una pregunta útil para encontrar el baño.',
+      'Estás numa casa nova e precisas de perguntar onde fica a casa de banho. Escreve a frase que dirias.':
+          'Estás en una casa nueva y necesitas preguntar dónde está el baño. Escribe la frase que dirías.',
       'Ex.: Onde fica a casa de banho?': 'Ej.: ¿Dónde está el baño?',
       'Responder sobre pequeno-almoço': 'Responder sobre el desayuno',
-      'Treina uma resposta sobre aquilo que costumas comer de manhã.': 'Practica una respuesta sobre lo que sueles comer por la mañana.',
-      'O anfitrião pergunta: “O que costumas comer ao pequeno-almoço?” Escreve uma resposta simples.': 'El anfitrión pregunta: «¿Qué sueles desayunar?». Escribe una respuesta sencilla.',
-      'Ex.: Costumo comer pão e beber leite.': 'Ej.: Suelo comer pan y beber leche.',
+      'Treina uma resposta sobre aquilo que costumas comer de manhã.':
+          'Practica una respuesta sobre lo que sueles comer por la mañana.',
+      'O anfitrião pergunta: “O que costumas comer ao pequeno-almoço?” Escreve uma resposta simples.':
+          'El anfitrión pregunta: «¿Qué sueles desayunar?». Escribe una respuesta sencilla.',
+      'Ex.: Costumo comer pão e beber leite.':
+          'Ej.: Suelo comer pan y beber leche.',
       'Explicar o quarto': 'Explicar la habitación',
-      'Treina uma frase de acolhimento para mostrar o quarto ao aluno visitante.': 'Practica una frase de bienvenida para mostrar la habitación al alumno visitante.',
-      'Vais receber um aluno visitante em casa. Escreve uma frase simples para lhe explicar onde fica o quarto.': 'Vas a recibir a un alumno visitante en casa. Escribe una frase sencilla para explicarle dónde está la habitación.',
-      'Ex.: Este é o teu quarto. Podes deixar a mala aqui.': 'Ej.: Esta es tu habitación. Puedes dejar la maleta aquí.',
+      'Treina uma frase de acolhimento para mostrar o quarto ao aluno visitante.':
+          'Practica una frase de bienvenida para mostrar la habitación al alumno visitante.',
+      'Vais receber um aluno visitante em casa. Escreve uma frase simples para lhe explicar onde fica o quarto.':
+          'Vas a recibir a un alumno visitante en casa. Escribe una frase sencilla para explicarle dónde está la habitación.',
+      'Ex.: Este é o teu quarto. Podes deixar a mala aqui.':
+          'Ej.: Esta es tu habitación. Puedes dejar la maleta aquí.',
       'Perguntar sobre pequeno-almoço': 'Preguntar sobre el desayuno',
-      'Treina uma pergunta simples sobre preferências de pequeno-almoço.': 'Practica una pregunta sencilla sobre las preferencias para el desayuno.',
-      'Queres saber o que o aluno costuma comer de manhã. Escreve uma pergunta adequada.': 'Quieres saber qué suele comer el alumno por la mañana. Escribe una pregunta adecuada.',
-      'Ex.: O que costumas comer ao pequeno-almoço?': 'Ej.: ¿Qué sueles desayunar?',
+      'Treina uma pergunta simples sobre preferências de pequeno-almoço.':
+          'Practica una pregunta sencilla sobre las preferencias para el desayuno.',
+      'Queres saber o que o aluno costuma comer de manhã. Escreve uma pergunta adequada.':
+          'Quieres saber qué suele comer el alumno por la mañana. Escribe una pregunta adecuada.',
+      'Ex.: O que costumas comer ao pequeno-almoço?':
+          'Ej.: ¿Qué sueles desayunar?',
       'Explicar horários': 'Explicar horarios',
-      'Treina uma instrução curta sobre o horário de saída no dia seguinte.': 'Practica una instrucción breve sobre la hora de salida del día siguiente.',
-      'Tens de explicar ao aluno que amanhã vão sair às 9h. Escreve a frase que dirias.': 'Tienes que explicar al alumno que mañana saldréis a las 9. Escribe la frase que dirías.',
-      'Ex.: Amanhã vamos sair às nove horas.': 'Ej.: Mañana saldremos a las nueve.',
+      'Treina uma instrução curta sobre o horário de saída no dia seguinte.':
+          'Practica una instrucción breve sobre la hora de salida del día siguiente.',
+      'Tens de explicar ao aluno que amanhã vão sair às 9h. Escreve a frase que dirias.':
+          'Tienes que explicar al alumno que mañana saldréis a las 9. Escribe la frase que dirías.',
+      'Ex.: Amanhã vamos sair às nove horas.':
+          'Ej.: Mañana saldremos a las nueve.',
       'Avisar sobre animal doméstico': 'Avisar sobre una mascota',
-      'Treina uma frase simples para explicar como lidar com um animal da casa.': 'Practica una frase sencilla para explicar cómo tratar a una mascota de la casa.',
-      'Há um cão em casa. Escreve uma frase simples para avisar o aluno de que não deve provocar o animal.': 'Hay un perro en casa. Escribe una frase sencilla para advertir al alumno de que no debe provocar al animal.',
-      'Ex.: O cão é calmo, mas não o provoques.': 'Ej.: El perro es tranquilo, pero no lo provoques.',
+      'Treina uma frase simples para explicar como lidar com um animal da casa.':
+          'Practica una frase sencilla para explicar cómo tratar a una mascota de la casa.',
+      'Há um cão em casa. Escreve uma frase simples para avisar o aluno de que não deve provocar o animal.':
+          'Hay un perro en casa. Escribe una frase sencilla para advertir al alumno de que no debe provocar al animal.',
+      'Ex.: O cão é calmo, mas não o provoques.':
+          'Ej.: El perro es tranquilo, pero no lo provoques.',
       'Explicar regras da casa': 'Explicar las normas de la casa',
-      'Treina uma frase curta sobre uma regra básica da casa.': 'Practica una frase breve sobre una norma básica de la casa.',
-      'Queres explicar ao aluno onde deve deixar as chaves. Escreve uma frase simples.': 'Quieres explicar al alumno dónde debe dejar las llaves. Escribe una frase sencilla.',
-      'Ex.: As chaves ficam aqui, junto à porta.': 'Ej.: Las llaves se dejan aquí, junto a la puerta.',
+      'Treina uma frase curta sobre uma regra básica da casa.':
+          'Practica una frase breve sobre una norma básica de la casa.',
+      'Queres explicar ao aluno onde deve deixar as chaves. Escreve uma frase simples.':
+          'Quieres explicar al alumno dónde debe dejar las llaves. Escribe una frase sencilla.',
+      'Ex.: As chaves ficam aqui, junto à porta.':
+          'Ej.: Las llaves se dejan aquí, junto a la puerta.',
       'Dar instrução em sala de aula': 'Dar una instrucción en el aula',
-      'Treina uma instrução curta e clara para uma atividade escolar.': 'Practica una instrucción breve y clara para una actividad escolar.',
-      'Estás a orientar uma atividade em sala de aula. Escreve uma instrução simples para os alunos trabalharem em pares.': 'Estás dirigiendo una actividad en el aula. Escribe una instrucción sencilla para que los alumnos trabajen por parejas.',
-      'Ex.: Leiam a pergunta e respondam em pares.': 'Ej.: Leed la pregunta y responded por parejas.',
-      'Aluno que pratica comunicação em situações reais do quotidiano escolar.': 'Alumno que practica la comunicación en situaciones reales de la vida escolar.',
-      'Pessoa que se prepara para receber e comunicar melhor com o aluno visitante.': 'Persona que se prepara para recibir y comunicarse mejor con el alumno visitante.',
-      'Perfil pedagógico previsto para acompanhamento, validação e análise.': 'Perfil pedagógico destinado al seguimiento, la validación y el análisis.',
+      'Treina uma instrução curta e clara para uma atividade escolar.':
+          'Practica una instrucción breve y clara para una actividad escolar.',
+      'Estás a orientar uma atividade em sala de aula. Escreve uma instrução simples para os alunos trabalharem em pares.':
+          'Estás dirigiendo una actividad en el aula. Escribe una instrucción sencilla para que los alumnos trabajen por parejas.',
+      'Ex.: Leiam a pergunta e respondam em pares.':
+          'Ej.: Leed la pregunta y responded por parejas.',
+      'Aluno que pratica comunicação em situações reais do quotidiano escolar.':
+          'Alumno que practica la comunicación en situaciones reales de la vida escolar.',
+      'Pessoa que se prepara para receber e comunicar melhor com o aluno visitante.':
+          'Persona que se prepara para recibir y comunicarse mejor con el alumno visitante.',
+      'Perfil pedagógico previsto para acompanhamento, validação e análise.':
+          'Perfil pedagógico destinado al seguimiento, la validación y el análisis.',
     },
     'fr': {
       'Email': 'E-mail',
       'Quiz': 'Quiz',
       'Nova palavra-passe': 'Nouveau mot de passe',
-      'Ainda não há resultados disponíveis. Submete uma atividade para consultar o histórico local.': 'Aucun résultat n’est encore disponible. Soumets une activité pour consulter l’historique local.',
-      'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.': 'Enregistré sur cet appareil : {source} → {target}. Connecte-toi pour synchroniser.',
+      'Ainda não há resultados disponíveis. Submete uma atividade para consultar o histórico local.':
+          'Aucun résultat n’est encore disponible. Soumets une activité pour consulter l’historique local.',
+      'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.':
+          'Enregistré sur cet appareil : {source} → {target}. Connecte-toi pour synchroniser.',
       'Guardado: {source} → {target}': 'Enregistré : {source} → {target}',
-      'Versão de protótipo\nNo plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário é apresentado aqui.\n\nCódigo: {code}': 'Version prototype\nAvec l’offre gratuite de Cloudflare, le serveur n’envoie pas d’e-mails de récupération. Pour tester le parcours, le code temporaire est affiché ici.\n\nCode : {code}',
-      'Cria uma atividade com base nas tuas dificuldades de aprendizagem.': 'Crée une activité en fonction de tes difficultés d’apprentissage.',
-      'Aqui serão apresentadas as atividades criadas por ti, o estado de aprovação e a avaliação da comunidade.': 'Les activités que tu as créées, leur état d’approbation et l’évaluation de la communauté seront affichés ici.',
+      'Versão de protótipo\nNo plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário é apresentado aqui.\n\nCódigo: {code}':
+          'Version prototype\nAvec l’offre gratuite de Cloudflare, le serveur n’envoie pas d’e-mails de récupération. Pour tester le parcours, le code temporaire est affiché ici.\n\nCode : {code}',
+      'Cria uma atividade com base nas tuas dificuldades de aprendizagem.':
+          'Crée une activité en fonction de tes difficultés d’apprentissage.',
+      'Aqui serão apresentadas as atividades criadas por ti, o estado de aprovação e a avaliação da comunidade.':
+          'Les activités que tu as créées, leur état d’approbation et l’évaluation de la communauté seront affichés ici.',
       'Português de Portugal': 'Portugais — Portugal',
       'English - United States': 'Anglais — États-Unis',
       'Spanish - Spain': 'Espagnol — Espagne',
       'French - France': 'Français — France',
       'Italian - Italy': 'Italien — Italie',
       'German - Germany': 'Allemand — Allemagne',
-      'Escolhe o idioma que usas normalmente. Este idioma pode ser usado para menus, mensagens e feedback.': 'Choisis la langue que tu utilises habituellement. Elle sera utilisée pour les menus, les messages et les retours.',
-      'Escolhe o idioma que queres treinar em diálogos, áudios, quizzes e desafios.': 'Choisis la langue que tu veux pratiquer dans les dialogues, les audios, les quiz et les défis.',
-      'Modo protótipo: usa o código apresentado para testar a recuperação.': 'Mode prototype : utilise le code affiché pour tester la récupération.',
+      'Escolhe o idioma que usas normalmente. Este idioma pode ser usado para menus, mensagens e feedback.':
+          'Choisis la langue que tu utilises habituellement. Elle sera utilisée pour les menus, les messages et les retours.',
+      'Escolhe o idioma que queres treinar em diálogos, áudios, quizzes e desafios.':
+          'Choisis la langue que tu veux pratiquer dans les dialogues, les audios, les quiz et les défis.',
+      'Modo protótipo: usa o código apresentado para testar a recuperação.':
+          'Mode prototype : utilise le code affiché pour tester la récupération.',
       'Submissão pendente inválida.': 'Soumission en attente non valide.',
       'Submissão sincronizada.': 'Soumission synchronisée.',
-      'Não existem submissões pendentes para sincronizar.': 'Aucune soumission en attente à synchroniser.',
+      'Não existem submissões pendentes para sincronizar.':
+          'Aucune soumission en attente à synchroniser.',
       'Sincronizadas': 'Synchronisées',
       'Falhas': 'Échecs',
       'Não disponível': 'Indisponible',
       'Sem feedback.': 'Aucun retour.',
       'desconhecido': 'inconnu',
       'Perfil guardado: {profile}': 'Profil enregistré : {profile}',
-      'Perfil guardado neste dispositivo. Entra para sincronizar.': 'Profil enregistré sur cet appareil. Connecte-toi pour synchroniser.',
-      'Conta: {email}\nUsa o código temporário abaixo para concluir o teste de recuperação.': 'Compte : {email}\nUtilise le code temporaire ci-dessous pour terminer le test de récupération.',
+      'Perfil guardado neste dispositivo. Entra para sincronizar.':
+          'Profil enregistré sur cet appareil. Connecte-toi pour synchroniser.',
+      'Conta: {email}\nUsa o código temporário abaixo para concluir o teste de recuperação.':
+          'Compte : {email}\nUtilise le code temporaire ci-dessous pour terminer le test de récupération.',
       'Conta: {email}': 'Compte : {email}',
-      'Usa a Home para acompanhar o teu percurso e aceder rapidamente às atividades.\n\nEm Praticar, responde a atividades predefinidas para treinares comunicação em contexto escolar.\n\nEm Resultados, acompanha o teu histórico, pontuações e estado de sincronização.\n\nEm Análises, consulta métricas pedagógicas agregadas, sem dados sensíveis.\n\nEm Ajustes, podes gerir conta, perfil, idiomas, notas privadas, sincronização e atividades criadas por ti.\n\nA opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.': 'Utilise Accueil pour suivre ton parcours et accéder rapidement aux activités.\n\nDans Pratiquer, réponds à des activités prédéfinies pour t’entraîner à communiquer dans un contexte scolaire.\n\nDans Résultats, consulte ton historique, tes scores et l’état de synchronisation.\n\nDans Analyses, consulte des indicateurs pédagogiques agrégés, sans données sensibles.\n\nDans Réglages, tu peux gérer ton compte, ton profil, tes langues, tes notes privées, la synchronisation et les activités que tu as créées.\n\nL’option Profil permet d’adapter les activités à l’Élève, à l’Hôte ou à l’Enseignant.',
-      'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\nA aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.\n\nO projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.\n\nA aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.': 'DailyTalk.pt est un jeu sérieux d’apprentissage des langues destiné aux enfants et aux jeunes en contexte scolaire et de mobilité Erasmus+.\n\nL’application aide à pratiquer la communication dans des situations réelles de la vie scolaire grâce au vocabulaire, à l’audio, aux dialogues, aux quiz et aux défis.\n\nLe projet prend en compte différents profils d’utilisation, tels que l’Élève, l’Hôte et l’Enseignant, afin de mieux adapter les activités au rôle de chacun.\n\nL’application comprend des activités créées par l’équipe DailyTalk.pt et pourra évoluer pour accepter des activités proposées par la communauté, après validation.',
+      'Usa a Home para acompanhar o teu percurso e aceder rapidamente às atividades.\n\nEm Praticar, responde a atividades predefinidas para treinares comunicação em contexto escolar.\n\nEm Resultados, acompanha o teu histórico, pontuações e estado de sincronização.\n\nEm Análises, consulta métricas pedagógicas agregadas, sem dados sensíveis.\n\nEm Ajustes, podes gerir conta, perfil, idiomas, notas privadas, sincronização e atividades criadas por ti.\n\nA opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.':
+          'Utilise Accueil pour suivre ton parcours et accéder rapidement aux activités.\n\nDans Pratiquer, réponds à des activités prédéfinies pour t’entraîner à communiquer dans un contexte scolaire.\n\nDans Résultats, consulte ton historique, tes scores et l’état de synchronisation.\n\nDans Analyses, consulte des indicateurs pédagogiques agrégés, sans données sensibles.\n\nDans Réglages, tu peux gérer ton compte, ton profil, tes langues, tes notes privées, la synchronisation et les activités que tu as créées.\n\nL’option Profil permet d’adapter les activités à l’Élève, à l’Hôte ou à l’Enseignant.',
+      'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\nA aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.\n\nO projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.\n\nA aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.':
+          'DailyTalk.pt est un jeu sérieux d’apprentissage des langues destiné aux enfants et aux jeunes en contexte scolaire et de mobilité Erasmus+.\n\nL’application aide à pratiquer la communication dans des situations réelles de la vie scolaire grâce au vocabulaire, à l’audio, aux dialogues, aux quiz et aux défis.\n\nLe projet prend en compte différents profils d’utilisation, tels que l’Élève, l’Hôte et l’Enseignant, afin de mieux adapter les activités au rôle de chacun.\n\nL’application comprend des activités créées par l’équipe DailyTalk.pt et pourra évoluer pour accepter des activités proposées par la communauté, après validation.',
       'Chegada à casa': 'Arrivée à la maison',
-      'Primeiros contactos ao chegar à casa ou ao local de acolhimento.': 'Premiers échanges à l’arrivée à la maison ou au lieu d’accueil.',
+      'Primeiros contactos ao chegar à casa ou ao local de acolhimento.':
+          'Premiers échanges à l’arrivée à la maison ou au lieu d’accueil.',
       'Quarto': 'Chambre',
-      'Frases e instruções sobre o quarto, mala, cama e espaço pessoal.': 'Phrases et consignes concernant la chambre, la valise, le lit et l’espace personnel.',
+      'Frases e instruções sobre o quarto, mala, cama e espaço pessoal.':
+          'Phrases et consignes concernant la chambre, la valise, le lit et l’espace personnel.',
       'Casa de banho': 'Salle de bains',
-      'Perguntas e respostas sobre localização e utilização da casa de banho.': 'Questions et réponses sur l’emplacement et l’utilisation de la salle de bains.',
+      'Perguntas e respostas sobre localização e utilização da casa de banho.':
+          'Questions et réponses sur l’emplacement et l’utilisation de la salle de bains.',
       'Pequeno-almoço': 'Petit-déjeuner',
-      'Comunicação sobre horários, preferências e alimentos do pequeno-almoço.': 'Communication sur les horaires, les préférences et les aliments du petit-déjeuner.',
+      'Comunicação sobre horários, preferências e alimentos do pequeno-almoço.':
+          'Communication sur les horaires, les préférences et les aliments du petit-déjeuner.',
       'Horários': 'Horaires',
-      'Frases sobre horas de saída, chegada, aulas, refeições e descanso.': 'Phrases sur les heures de départ et d’arrivée, les cours, les repas et le repos.',
+      'Frases sobre horas de saída, chegada, aulas, refeições e descanso.':
+          'Phrases sur les heures de départ et d’arrivée, les cours, les repas et le repos.',
       'Preferências alimentares': 'Préférences alimentaires',
-      'Treino linguístico sobre gostos, alimentos preferidos e pedidos simples.': 'Entraînement linguistique sur les goûts, les aliments préférés et les demandes simples.',
+      'Treino linguístico sobre gostos, alimentos preferidos e pedidos simples.':
+          'Entraînement linguistique sur les goûts, les aliments préférés et les demandes simples.',
       'Treino sobre alergias': 'Entraînement sur les allergies',
-      'Apenas treino linguístico. Não deve guardar alergias reais do utilizador.': 'Entraînement linguistique uniquement. Les allergies réelles de l’utilisateur ne doivent pas être enregistrées.',
+      'Apenas treino linguístico. Não deve guardar alergias reais do utilizador.':
+          'Entraînement linguistique uniquement. Les allergies réelles de l’utilisateur ne doivent pas être enregistrées.',
       'Regras da casa': 'Règles de la maison',
-      'Comunicação sobre chaves, portas, horários, espaços e regras básicas.': 'Communication sur les clés, les portes, les horaires, les espaces et les règles de base.',
+      'Comunicação sobre chaves, portas, horários, espaços e regras básicas.':
+          'Communication sur les clés, les portes, les horaires, les espaces et les règles de base.',
       'Animais domésticos': 'Animaux domestiques',
-      'Frases de aviso e cuidado relacionadas com animais da casa.': 'Phrases d’avertissement et de prudence concernant les animaux de la maison.',
+      'Frases de aviso e cuidado relacionadas com animais da casa.':
+          'Phrases d’avertissement et de prudence concernant les animaux de la maison.',
       'Transportes': 'Transports',
-      'Perguntas e instruções sobre deslocações, caminhos e transporte.': 'Questions et consignes sur les déplacements, les itinéraires et les transports.',
+      'Perguntas e instruções sobre deslocações, caminhos e transporte.':
+          'Questions et consignes sur les déplacements, les itinéraires et les transports.',
       'Escola': 'École',
-      'Comunicação relacionada com chegada à escola, colegas, salas e rotina escolar.': 'Communication liée à l’arrivée à l’école, aux camarades, aux salles et à la routine scolaire.',
+      'Comunicação relacionada com chegada à escola, colegas, salas e rotina escolar.':
+          'Communication liée à l’arrivée à l’école, aux camarades, aux salles et à la routine scolaire.',
       'Sala de aula': 'Salle de classe',
-      'Atividades de comunicação em sala de aula e interação com professores.': 'Activités de communication en classe et interaction avec les enseignants.',
+      'Atividades de comunicação em sala de aula e interação com professores.':
+          'Activités de communication en classe et interaction avec les enseignants.',
       'Apresentações': 'Présentations',
-      'Treino de frases para apresentações, trabalhos e participação oral.': 'Entraînement de phrases pour les présentations, les travaux et la participation orale.',
+      'Treino de frases para apresentações, trabalhos e participação oral.':
+          'Entraînement de phrases pour les présentations, les travaux et la participation orale.',
       'Conversa informal': 'Conversation informelle',
-      'Diálogos simples com colegas, anfitriões ou outras pessoas do contexto escolar.': 'Dialogues simples avec des camarades, des hôtes ou d’autres personnes du contexte scolaire.',
+      'Diálogos simples com colegas, anfitriões ou outras pessoas do contexto escolar.':
+          'Dialogues simples avec des camarades, des hôtes ou d’autres personnes du contexte scolaire.',
       'Responder sobre alergias': 'Répondre au sujet des allergies',
-      'Treina uma resposta simples quando alguém pergunta se tens alergias.': 'Entraîne-toi à répondre simplement lorsqu’on te demande si tu as des allergies.',
-      'O anfitrião pergunta: “Tens alergia a alguma coisa?” Escreve uma resposta simples no idioma que estás a praticar.': 'L’hôte demande : « Es-tu allergique à quelque chose ? » Écris une réponse simple dans la langue que tu pratiques.',
+      'Treina uma resposta simples quando alguém pergunta se tens alergias.':
+          'Entraîne-toi à répondre simplement lorsqu’on te demande si tu as des allergies.',
+      'O anfitrião pergunta: “Tens alergia a alguma coisa?” Escreve uma resposta simples no idioma que estás a praticar.':
+          'L’hôte demande : « Es-tu allergique à quelque chose ? » Écris une réponse simple dans la langue que tu pratiques.',
       'Ex.: Não, não tenho alergias.': 'Ex. : Non, je n’ai pas d’allergies.',
       'Perguntar pela casa de banho': 'Demander où se trouve la salle de bains',
-      'Treina uma pergunta útil para encontrar a casa de banho.': 'Entraîne-toi à poser une question utile pour trouver la salle de bains.',
-      'Estás numa casa nova e precisas de perguntar onde fica a casa de banho. Escreve a frase que dirias.': 'Tu es dans une nouvelle maison et tu dois demander où se trouve la salle de bains. Écris la phrase que tu dirais.',
-      'Ex.: Onde fica a casa de banho?': 'Ex. : Où se trouve la salle de bains ?',
+      'Treina uma pergunta útil para encontrar a casa de banho.':
+          'Entraîne-toi à poser une question utile pour trouver la salle de bains.',
+      'Estás numa casa nova e precisas de perguntar onde fica a casa de banho. Escreve a frase que dirias.':
+          'Tu es dans une nouvelle maison et tu dois demander où se trouve la salle de bains. Écris la phrase que tu dirais.',
+      'Ex.: Onde fica a casa de banho?':
+          'Ex. : Où se trouve la salle de bains ?',
       'Responder sobre pequeno-almoço': 'Répondre au sujet du petit-déjeuner',
-      'Treina uma resposta sobre aquilo que costumas comer de manhã.': 'Entraîne-toi à répondre sur ce que tu manges habituellement le matin.',
-      'O anfitrião pergunta: “O que costumas comer ao pequeno-almoço?” Escreve uma resposta simples.': 'L’hôte demande : « Que manges-tu habituellement au petit-déjeuner ? » Écris une réponse simple.',
-      'Ex.: Costumo comer pão e beber leite.': 'Ex. : Je mange habituellement du pain et je bois du lait.',
+      'Treina uma resposta sobre aquilo que costumas comer de manhã.':
+          'Entraîne-toi à répondre sur ce que tu manges habituellement le matin.',
+      'O anfitrião pergunta: “O que costumas comer ao pequeno-almoço?” Escreve uma resposta simples.':
+          'L’hôte demande : « Que manges-tu habituellement au petit-déjeuner ? » Écris une réponse simple.',
+      'Ex.: Costumo comer pão e beber leite.':
+          'Ex. : Je mange habituellement du pain et je bois du lait.',
       'Explicar o quarto': 'Présenter la chambre',
-      'Treina uma frase de acolhimento para mostrar o quarto ao aluno visitante.': 'Entraîne-toi à utiliser une phrase d’accueil pour montrer sa chambre à l’élève visiteur.',
-      'Vais receber um aluno visitante em casa. Escreve uma frase simples para lhe explicar onde fica o quarto.': 'Tu vas accueillir un élève visiteur chez toi. Écris une phrase simple pour lui indiquer où se trouve sa chambre.',
-      'Ex.: Este é o teu quarto. Podes deixar a mala aqui.': 'Ex. : Voici ta chambre. Tu peux laisser ta valise ici.',
-      'Perguntar sobre pequeno-almoço': 'Poser une question sur le petit-déjeuner',
-      'Treina uma pergunta simples sobre preferências de pequeno-almoço.': 'Entraîne-toi à poser une question simple sur les préférences du petit-déjeuner.',
-      'Queres saber o que o aluno costuma comer de manhã. Escreve uma pergunta adequada.': 'Tu veux savoir ce que l’élève mange habituellement le matin. Écris une question adaptée.',
-      'Ex.: O que costumas comer ao pequeno-almoço?': 'Ex. : Que manges-tu habituellement au petit-déjeuner ?',
+      'Treina uma frase de acolhimento para mostrar o quarto ao aluno visitante.':
+          'Entraîne-toi à utiliser une phrase d’accueil pour montrer sa chambre à l’élève visiteur.',
+      'Vais receber um aluno visitante em casa. Escreve uma frase simples para lhe explicar onde fica o quarto.':
+          'Tu vas accueillir un élève visiteur chez toi. Écris une phrase simple pour lui indiquer où se trouve sa chambre.',
+      'Ex.: Este é o teu quarto. Podes deixar a mala aqui.':
+          'Ex. : Voici ta chambre. Tu peux laisser ta valise ici.',
+      'Perguntar sobre pequeno-almoço':
+          'Poser une question sur le petit-déjeuner',
+      'Treina uma pergunta simples sobre preferências de pequeno-almoço.':
+          'Entraîne-toi à poser une question simple sur les préférences du petit-déjeuner.',
+      'Queres saber o que o aluno costuma comer de manhã. Escreve uma pergunta adequada.':
+          'Tu veux savoir ce que l’élève mange habituellement le matin. Écris une question adaptée.',
+      'Ex.: O que costumas comer ao pequeno-almoço?':
+          'Ex. : Que manges-tu habituellement au petit-déjeuner ?',
       'Explicar horários': 'Expliquer les horaires',
-      'Treina uma instrução curta sobre o horário de saída no dia seguinte.': 'Entraîne-toi à donner une consigne courte sur l’heure de départ du lendemain.',
-      'Tens de explicar ao aluno que amanhã vão sair às 9h. Escreve a frase que dirias.': 'Tu dois expliquer à l’élève que vous partirez demain à 9 h. Écris la phrase que tu dirais.',
-      'Ex.: Amanhã vamos sair às nove horas.': 'Ex. : Demain, nous partirons à neuf heures.',
-      'Avisar sobre animal doméstico': 'Prévenir au sujet d’un animal domestique',
-      'Treina uma frase simples para explicar como lidar com um animal da casa.': 'Entraîne-toi à utiliser une phrase simple pour expliquer comment se comporter avec un animal de la maison.',
-      'Há um cão em casa. Escreve uma frase simples para avisar o aluno de que não deve provocar o animal.': 'Il y a un chien dans la maison. Écris une phrase simple pour prévenir l’élève qu’il ne doit pas provoquer l’animal.',
-      'Ex.: O cão é calmo, mas não o provoques.': 'Ex. : Le chien est calme, mais ne le provoque pas.',
+      'Treina uma instrução curta sobre o horário de saída no dia seguinte.':
+          'Entraîne-toi à donner une consigne courte sur l’heure de départ du lendemain.',
+      'Tens de explicar ao aluno que amanhã vão sair às 9h. Escreve a frase que dirias.':
+          'Tu dois expliquer à l’élève que vous partirez demain à 9 h. Écris la phrase que tu dirais.',
+      'Ex.: Amanhã vamos sair às nove horas.':
+          'Ex. : Demain, nous partirons à neuf heures.',
+      'Avisar sobre animal doméstico':
+          'Prévenir au sujet d’un animal domestique',
+      'Treina uma frase simples para explicar como lidar com um animal da casa.':
+          'Entraîne-toi à utiliser une phrase simple pour expliquer comment se comporter avec un animal de la maison.',
+      'Há um cão em casa. Escreve uma frase simples para avisar o aluno de que não deve provocar o animal.':
+          'Il y a un chien dans la maison. Écris une phrase simple pour prévenir l’élève qu’il ne doit pas provoquer l’animal.',
+      'Ex.: O cão é calmo, mas não o provoques.':
+          'Ex. : Le chien est calme, mais ne le provoque pas.',
       'Explicar regras da casa': 'Expliquer les règles de la maison',
-      'Treina uma frase curta sobre uma regra básica da casa.': 'Entraîne-toi à utiliser une phrase courte sur une règle de base de la maison.',
-      'Queres explicar ao aluno onde deve deixar as chaves. Escreve uma frase simples.': 'Tu veux expliquer à l’élève où il doit laisser les clés. Écris une phrase simple.',
-      'Ex.: As chaves ficam aqui, junto à porta.': 'Ex. : Les clés restent ici, près de la porte.',
+      'Treina uma frase curta sobre uma regra básica da casa.':
+          'Entraîne-toi à utiliser une phrase courte sur une règle de base de la maison.',
+      'Queres explicar ao aluno onde deve deixar as chaves. Escreve uma frase simples.':
+          'Tu veux expliquer à l’élève où il doit laisser les clés. Écris une phrase simple.',
+      'Ex.: As chaves ficam aqui, junto à porta.':
+          'Ex. : Les clés restent ici, près de la porte.',
       'Dar instrução em sala de aula': 'Donner une consigne en classe',
-      'Treina uma instrução curta e clara para uma atividade escolar.': 'Entraîne-toi à donner une consigne courte et claire pour une activité scolaire.',
-      'Estás a orientar uma atividade em sala de aula. Escreve uma instrução simples para os alunos trabalharem em pares.': 'Tu animes une activité en classe. Écris une consigne simple pour que les élèves travaillent en binômes.',
-      'Ex.: Leiam a pergunta e respondam em pares.': 'Ex. : Lisez la question et répondez en binômes.',
-      'Aluno que pratica comunicação em situações reais do quotidiano escolar.': 'Élève qui pratique la communication dans des situations réelles de la vie scolaire.',
-      'Pessoa que se prepara para receber e comunicar melhor com o aluno visitante.': 'Personne qui se prépare à accueillir l’élève visiteur et à mieux communiquer avec lui.',
-      'Perfil pedagógico previsto para acompanhamento, validação e análise.': 'Profil pédagogique destiné au suivi, à la validation et à l’analyse.',
+      'Treina uma instrução curta e clara para uma atividade escolar.':
+          'Entraîne-toi à donner une consigne courte et claire pour une activité scolaire.',
+      'Estás a orientar uma atividade em sala de aula. Escreve uma instrução simples para os alunos trabalharem em pares.':
+          'Tu animes une activité en classe. Écris une consigne simple pour que les élèves travaillent en binômes.',
+      'Ex.: Leiam a pergunta e respondam em pares.':
+          'Ex. : Lisez la question et répondez en binômes.',
+      'Aluno que pratica comunicação em situações reais do quotidiano escolar.':
+          'Élève qui pratique la communication dans des situations réelles de la vie scolaire.',
+      'Pessoa que se prepara para receber e comunicar melhor com o aluno visitante.':
+          'Personne qui se prépare à accueillir l’élève visiteur et à mieux communiquer avec lui.',
+      'Perfil pedagógico previsto para acompanhamento, validação e análise.':
+          'Profil pédagogique destiné au suivi, à la validation et à l’analyse.',
     },
     'it': {
       'Email': 'E-mail',
       'Quiz': 'Quiz',
       'Nova palavra-passe': 'Nuova password',
-      'Ainda não há resultados disponíveis. Submete uma atividade para consultar o histórico local.': 'Non ci sono ancora risultati disponibili. Invia un’attività per consultare la cronologia locale.',
-      'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.': 'Salvato su questo dispositivo: {source} → {target}. Accedi per sincronizzare.',
+      'Ainda não há resultados disponíveis. Submete uma atividade para consultar o histórico local.':
+          'Non ci sono ancora risultati disponibili. Invia un’attività per consultare la cronologia locale.',
+      'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.':
+          'Salvato su questo dispositivo: {source} → {target}. Accedi per sincronizzare.',
       'Guardado: {source} → {target}': 'Salvato: {source} → {target}',
-      'Versão de protótipo\nNo plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário é apresentado aqui.\n\nCódigo: {code}': 'Versione prototipo\nCon il piano gratuito di Cloudflare, il server non invia e-mail di recupero. Per provare il flusso, il codice temporaneo viene mostrato qui.\n\nCodice: {code}',
-      'Cria uma atividade com base nas tuas dificuldades de aprendizagem.': 'Crea un’attività in base alle tue difficoltà di apprendimento.',
-      'Aqui serão apresentadas as atividades criadas por ti, o estado de aprovação e a avaliação da comunidade.': 'Qui verranno mostrate le attività che hai creato, lo stato di approvazione e la valutazione della comunità.',
+      'Versão de protótipo\nNo plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário é apresentado aqui.\n\nCódigo: {code}':
+          'Versione prototipo\nCon il piano gratuito di Cloudflare, il server non invia e-mail di recupero. Per provare il flusso, il codice temporaneo viene mostrato qui.\n\nCodice: {code}',
+      'Cria uma atividade com base nas tuas dificuldades de aprendizagem.':
+          'Crea un’attività in base alle tue difficoltà di apprendimento.',
+      'Aqui serão apresentadas as atividades criadas por ti, o estado de aprovação e a avaliação da comunidade.':
+          'Qui verranno mostrate le attività che hai creato, lo stato di approvazione e la valutazione della comunità.',
       'Português de Portugal': 'Portoghese — Portogallo',
       'English - United States': 'Inglese — Stati Uniti',
       'Spanish - Spain': 'Spagnolo — Spagna',
       'French - France': 'Francese — Francia',
       'Italian - Italy': 'Italiano — Italia',
       'German - Germany': 'Tedesco — Germania',
-      'Escolhe o idioma que usas normalmente. Este idioma pode ser usado para menus, mensagens e feedback.': 'Scegli la lingua che usi normalmente. Verrà usata per menu, messaggi e feedback.',
-      'Escolhe o idioma que queres treinar em diálogos, áudios, quizzes e desafios.': 'Scegli la lingua che vuoi praticare in dialoghi, audio, quiz e sfide.',
-      'Modo protótipo: usa o código apresentado para testar a recuperação.': 'Modalità prototipo: usa il codice mostrato per provare il recupero.',
+      'Escolhe o idioma que usas normalmente. Este idioma pode ser usado para menus, mensagens e feedback.':
+          'Scegli la lingua che usi normalmente. Verrà usata per menu, messaggi e feedback.',
+      'Escolhe o idioma que queres treinar em diálogos, áudios, quizzes e desafios.':
+          'Scegli la lingua che vuoi praticare in dialoghi, audio, quiz e sfide.',
+      'Modo protótipo: usa o código apresentado para testar a recuperação.':
+          'Modalità prototipo: usa il codice mostrato per provare il recupero.',
       'Submissão pendente inválida.': 'Invio in sospeso non valido.',
       'Submissão sincronizada.': 'Invio sincronizzato.',
-      'Não existem submissões pendentes para sincronizar.': 'Non ci sono invii in sospeso da sincronizzare.',
+      'Não existem submissões pendentes para sincronizar.':
+          'Non ci sono invii in sospeso da sincronizzare.',
       'Sincronizadas': 'Sincronizzate',
       'Falhas': 'Errori',
       'Não disponível': 'Non disponibile',
       'Sem feedback.': 'Nessun feedback.',
       'desconhecido': 'sconosciuto',
       'Perfil guardado: {profile}': 'Profilo salvato: {profile}',
-      'Perfil guardado neste dispositivo. Entra para sincronizar.': 'Profilo salvato su questo dispositivo. Accedi per sincronizzare.',
-      'Conta: {email}\nUsa o código temporário abaixo para concluir o teste de recuperação.': 'Account: {email}\nUsa il codice temporaneo qui sotto per completare il test di recupero.',
+      'Perfil guardado neste dispositivo. Entra para sincronizar.':
+          'Profilo salvato su questo dispositivo. Accedi per sincronizzare.',
+      'Conta: {email}\nUsa o código temporário abaixo para concluir o teste de recuperação.':
+          'Account: {email}\nUsa il codice temporaneo qui sotto per completare il test di recupero.',
       'Conta: {email}': 'Account: {email}',
-      'Usa a Home para acompanhar o teu percurso e aceder rapidamente às atividades.\n\nEm Praticar, responde a atividades predefinidas para treinares comunicação em contexto escolar.\n\nEm Resultados, acompanha o teu histórico, pontuações e estado de sincronização.\n\nEm Análises, consulta métricas pedagógicas agregadas, sem dados sensíveis.\n\nEm Ajustes, podes gerir conta, perfil, idiomas, notas privadas, sincronização e atividades criadas por ti.\n\nA opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.': 'Usa Home per seguire il tuo percorso e accedere rapidamente alle attività.\n\nIn Pratica, rispondi ad attività predefinite per allenare la comunicazione in un contesto scolastico.\n\nIn Risultati, consulta la cronologia, i punteggi e lo stato di sincronizzazione.\n\nIn Analisi, consulta metriche pedagogiche aggregate, senza dati sensibili.\n\nIn Impostazioni puoi gestire account, profilo, lingue, note private, sincronizzazione e attività create da te.\n\nL’opzione Profilo consente di adattare le attività per Studente, Ospitante o Insegnante.',
-      'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\nA aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.\n\nO projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.\n\nA aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.': 'DailyTalk.pt è un serious game per l’apprendimento delle lingue, rivolto a bambini e ragazzi in contesto scolastico e di mobilità Erasmus+.\n\nL’applicazione aiuta a praticare la comunicazione in situazioni reali della vita scolastica attraverso vocabolario, audio, dialoghi, quiz e sfide.\n\nIl progetto considera diversi profili di utilizzo, come Studente, Ospitante e Insegnante, per adattare meglio le attività al ruolo di ogni persona.\n\nL’applicazione include attività create dal team DailyTalk.pt e potrà evolvere per accettare attività proposte dalla comunità, previa convalida.',
+      'Usa a Home para acompanhar o teu percurso e aceder rapidamente às atividades.\n\nEm Praticar, responde a atividades predefinidas para treinares comunicação em contexto escolar.\n\nEm Resultados, acompanha o teu histórico, pontuações e estado de sincronização.\n\nEm Análises, consulta métricas pedagógicas agregadas, sem dados sensíveis.\n\nEm Ajustes, podes gerir conta, perfil, idiomas, notas privadas, sincronização e atividades criadas por ti.\n\nA opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.':
+          'Usa Home per seguire il tuo percorso e accedere rapidamente alle attività.\n\nIn Pratica, rispondi ad attività predefinite per allenare la comunicazione in un contesto scolastico.\n\nIn Risultati, consulta la cronologia, i punteggi e lo stato di sincronizzazione.\n\nIn Analisi, consulta metriche pedagogiche aggregate, senza dati sensibili.\n\nIn Impostazioni puoi gestire account, profilo, lingue, note private, sincronizzazione e attività create da te.\n\nL’opzione Profilo consente di adattare le attività per Studente, Ospitante o Insegnante.',
+      'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\nA aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.\n\nO projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.\n\nA aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.':
+          'DailyTalk.pt è un serious game per l’apprendimento delle lingue, rivolto a bambini e ragazzi in contesto scolastico e di mobilità Erasmus+.\n\nL’applicazione aiuta a praticare la comunicazione in situazioni reali della vita scolastica attraverso vocabolario, audio, dialoghi, quiz e sfide.\n\nIl progetto considera diversi profili di utilizzo, come Studente, Ospitante e Insegnante, per adattare meglio le attività al ruolo di ogni persona.\n\nL’applicazione include attività create dal team DailyTalk.pt e potrà evolvere per accettare attività proposte dalla comunità, previa convalida.',
       'Chegada à casa': 'Arrivo a casa',
-      'Primeiros contactos ao chegar à casa ou ao local de acolhimento.': 'Primi scambi all’arrivo a casa o nel luogo di accoglienza.',
+      'Primeiros contactos ao chegar à casa ou ao local de acolhimento.':
+          'Primi scambi all’arrivo a casa o nel luogo di accoglienza.',
       'Quarto': 'Camera',
-      'Frases e instruções sobre o quarto, mala, cama e espaço pessoal.': 'Frasi e istruzioni sulla camera, la valigia, il letto e lo spazio personale.',
+      'Frases e instruções sobre o quarto, mala, cama e espaço pessoal.':
+          'Frasi e istruzioni sulla camera, la valigia, il letto e lo spazio personale.',
       'Casa de banho': 'Bagno',
-      'Perguntas e respostas sobre localização e utilização da casa de banho.': 'Domande e risposte sulla posizione e sull’uso del bagno.',
+      'Perguntas e respostas sobre localização e utilização da casa de banho.':
+          'Domande e risposte sulla posizione e sull’uso del bagno.',
       'Pequeno-almoço': 'Colazione',
-      'Comunicação sobre horários, preferências e alimentos do pequeno-almoço.': 'Comunicazione su orari, preferenze e cibi della colazione.',
+      'Comunicação sobre horários, preferências e alimentos do pequeno-almoço.':
+          'Comunicazione su orari, preferenze e cibi della colazione.',
       'Horários': 'Orari',
-      'Frases sobre horas de saída, chegada, aulas, refeições e descanso.': 'Frasi sugli orari di partenza e arrivo, lezioni, pasti e riposo.',
+      'Frases sobre horas de saída, chegada, aulas, refeições e descanso.':
+          'Frasi sugli orari di partenza e arrivo, lezioni, pasti e riposo.',
       'Preferências alimentares': 'Preferenze alimentari',
-      'Treino linguístico sobre gostos, alimentos preferidos e pedidos simples.': 'Pratica linguistica su gusti, cibi preferiti e richieste semplici.',
+      'Treino linguístico sobre gostos, alimentos preferidos e pedidos simples.':
+          'Pratica linguistica su gusti, cibi preferiti e richieste semplici.',
       'Treino sobre alergias': 'Pratica sulle allergie',
-      'Apenas treino linguístico. Não deve guardar alergias reais do utilizador.': 'Solo pratica linguistica. Non deve salvare le allergie reali dell’utente.',
+      'Apenas treino linguístico. Não deve guardar alergias reais do utilizador.':
+          'Solo pratica linguistica. Non deve salvare le allergie reali dell’utente.',
       'Regras da casa': 'Regole della casa',
-      'Comunicação sobre chaves, portas, horários, espaços e regras básicas.': 'Comunicazione su chiavi, porte, orari, spazi e regole di base.',
+      'Comunicação sobre chaves, portas, horários, espaços e regras básicas.':
+          'Comunicazione su chiavi, porte, orari, spazi e regole di base.',
       'Animais domésticos': 'Animali domestici',
-      'Frases de aviso e cuidado relacionadas com animais da casa.': 'Frasi di avviso e attenzione relative agli animali domestici.',
+      'Frases de aviso e cuidado relacionadas com animais da casa.':
+          'Frasi di avviso e attenzione relative agli animali domestici.',
       'Transportes': 'Trasporti',
-      'Perguntas e instruções sobre deslocações, caminhos e transporte.': 'Domande e istruzioni su spostamenti, indicazioni e trasporti.',
+      'Perguntas e instruções sobre deslocações, caminhos e transporte.':
+          'Domande e istruzioni su spostamenti, indicazioni e trasporti.',
       'Escola': 'Scuola',
-      'Comunicação relacionada com chegada à escola, colegas, salas e rotina escolar.': 'Comunicazione relativa all’arrivo a scuola, ai compagni, alle aule e alla routine scolastica.',
+      'Comunicação relacionada com chegada à escola, colegas, salas e rotina escolar.':
+          'Comunicazione relativa all’arrivo a scuola, ai compagni, alle aule e alla routine scolastica.',
       'Sala de aula': 'Aula',
-      'Atividades de comunicação em sala de aula e interação com professores.': 'Attività di comunicazione in aula e interazione con gli insegnanti.',
+      'Atividades de comunicação em sala de aula e interação com professores.':
+          'Attività di comunicazione in aula e interazione con gli insegnanti.',
       'Apresentações': 'Presentazioni',
-      'Treino de frases para apresentações, trabalhos e participação oral.': 'Pratica di frasi per presentazioni, lavori e partecipazione orale.',
+      'Treino de frases para apresentações, trabalhos e participação oral.':
+          'Pratica di frasi per presentazioni, lavori e partecipazione orale.',
       'Conversa informal': 'Conversazione informale',
-      'Diálogos simples com colegas, anfitriões ou outras pessoas do contexto escolar.': 'Dialoghi semplici con compagni, ospitanti o altre persone del contesto scolastico.',
+      'Diálogos simples com colegas, anfitriões ou outras pessoas do contexto escolar.':
+          'Dialoghi semplici con compagni, ospitanti o altre persone del contesto scolastico.',
       'Responder sobre alergias': 'Rispondere sulle allergie',
-      'Treina uma resposta simples quando alguém pergunta se tens alergias.': 'Esercitati con una risposta semplice quando qualcuno chiede se hai allergie.',
-      'O anfitrião pergunta: “Tens alergia a alguma coisa?” Escreve uma resposta simples no idioma que estás a praticar.': 'L’ospitante chiede: «Sei allergico a qualcosa?». Scrivi una risposta semplice nella lingua che stai praticando.',
+      'Treina uma resposta simples quando alguém pergunta se tens alergias.':
+          'Esercitati con una risposta semplice quando qualcuno chiede se hai allergie.',
+      'O anfitrião pergunta: “Tens alergia a alguma coisa?” Escreve uma resposta simples no idioma que estás a praticar.':
+          'L’ospitante chiede: «Sei allergico a qualcosa?». Scrivi una risposta semplice nella lingua che stai praticando.',
       'Ex.: Não, não tenho alergias.': 'Es.: No, non ho allergie.',
       'Perguntar pela casa de banho': 'Chiedere dov’è il bagno',
-      'Treina uma pergunta útil para encontrar a casa de banho.': 'Esercitati con una domanda utile per trovare il bagno.',
-      'Estás numa casa nova e precisas de perguntar onde fica a casa de banho. Escreve a frase que dirias.': 'Sei in una casa nuova e devi chiedere dov’è il bagno. Scrivi la frase che diresti.',
+      'Treina uma pergunta útil para encontrar a casa de banho.':
+          'Esercitati con una domanda utile per trovare il bagno.',
+      'Estás numa casa nova e precisas de perguntar onde fica a casa de banho. Escreve a frase que dirias.':
+          'Sei in una casa nuova e devi chiedere dov’è il bagno. Scrivi la frase che diresti.',
       'Ex.: Onde fica a casa de banho?': 'Es.: Dov’è il bagno?',
       'Responder sobre pequeno-almoço': 'Rispondere sulla colazione',
-      'Treina uma resposta sobre aquilo que costumas comer de manhã.': 'Esercitati con una risposta su ciò che mangi di solito al mattino.',
-      'O anfitrião pergunta: “O que costumas comer ao pequeno-almoço?” Escreve uma resposta simples.': 'L’ospitante chiede: «Cosa mangi di solito a colazione?». Scrivi una risposta semplice.',
-      'Ex.: Costumo comer pão e beber leite.': 'Es.: Di solito mangio pane e bevo latte.',
+      'Treina uma resposta sobre aquilo que costumas comer de manhã.':
+          'Esercitati con una risposta su ciò che mangi di solito al mattino.',
+      'O anfitrião pergunta: “O que costumas comer ao pequeno-almoço?” Escreve uma resposta simples.':
+          'L’ospitante chiede: «Cosa mangi di solito a colazione?». Scrivi una risposta semplice.',
+      'Ex.: Costumo comer pão e beber leite.':
+          'Es.: Di solito mangio pane e bevo latte.',
       'Explicar o quarto': 'Mostrare la camera',
-      'Treina uma frase de acolhimento para mostrar o quarto ao aluno visitante.': 'Esercitati con una frase di benvenuto per mostrare la camera allo studente in visita.',
-      'Vais receber um aluno visitante em casa. Escreve uma frase simples para lhe explicar onde fica o quarto.': 'Ospiterai uno studente a casa. Scrivi una frase semplice per spiegargli dov’è la camera.',
-      'Ex.: Este é o teu quarto. Podes deixar a mala aqui.': 'Es.: Questa è la tua camera. Puoi lasciare qui la valigia.',
+      'Treina uma frase de acolhimento para mostrar o quarto ao aluno visitante.':
+          'Esercitati con una frase di benvenuto per mostrare la camera allo studente in visita.',
+      'Vais receber um aluno visitante em casa. Escreve uma frase simples para lhe explicar onde fica o quarto.':
+          'Ospiterai uno studente a casa. Scrivi una frase semplice per spiegargli dov’è la camera.',
+      'Ex.: Este é o teu quarto. Podes deixar a mala aqui.':
+          'Es.: Questa è la tua camera. Puoi lasciare qui la valigia.',
       'Perguntar sobre pequeno-almoço': 'Chiedere della colazione',
-      'Treina uma pergunta simples sobre preferências de pequeno-almoço.': 'Esercitati con una domanda semplice sulle preferenze per la colazione.',
-      'Queres saber o que o aluno costuma comer de manhã. Escreve uma pergunta adequada.': 'Vuoi sapere cosa mangia di solito lo studente al mattino. Scrivi una domanda adatta.',
-      'Ex.: O que costumas comer ao pequeno-almoço?': 'Es.: Cosa mangi di solito a colazione?',
+      'Treina uma pergunta simples sobre preferências de pequeno-almoço.':
+          'Esercitati con una domanda semplice sulle preferenze per la colazione.',
+      'Queres saber o que o aluno costuma comer de manhã. Escreve uma pergunta adequada.':
+          'Vuoi sapere cosa mangia di solito lo studente al mattino. Scrivi una domanda adatta.',
+      'Ex.: O que costumas comer ao pequeno-almoço?':
+          'Es.: Cosa mangi di solito a colazione?',
       'Explicar horários': 'Spiegare gli orari',
-      'Treina uma instrução curta sobre o horário de saída no dia seguinte.': 'Esercitati con un’istruzione breve sull’orario di partenza del giorno seguente.',
-      'Tens de explicar ao aluno que amanhã vão sair às 9h. Escreve a frase que dirias.': 'Devi spiegare allo studente che domani partirete alle 9. Scrivi la frase che diresti.',
-      'Ex.: Amanhã vamos sair às nove horas.': 'Es.: Domani partiremo alle nove.',
+      'Treina uma instrução curta sobre o horário de saída no dia seguinte.':
+          'Esercitati con un’istruzione breve sull’orario di partenza del giorno seguente.',
+      'Tens de explicar ao aluno que amanhã vão sair às 9h. Escreve a frase que dirias.':
+          'Devi spiegare allo studente che domani partirete alle 9. Scrivi la frase che diresti.',
+      'Ex.: Amanhã vamos sair às nove horas.':
+          'Es.: Domani partiremo alle nove.',
       'Avisar sobre animal doméstico': 'Avvisare di un animale domestico',
-      'Treina uma frase simples para explicar como lidar com um animal da casa.': 'Esercitati con una frase semplice per spiegare come comportarsi con un animale domestico.',
-      'Há um cão em casa. Escreve uma frase simples para avisar o aluno de que não deve provocar o animal.': 'C’è un cane in casa. Scrivi una frase semplice per avvisare lo studente di non provocare l’animale.',
-      'Ex.: O cão é calmo, mas não o provoques.': 'Es.: Il cane è tranquillo, ma non provocarlo.',
+      'Treina uma frase simples para explicar como lidar com um animal da casa.':
+          'Esercitati con una frase semplice per spiegare come comportarsi con un animale domestico.',
+      'Há um cão em casa. Escreve uma frase simples para avisar o aluno de que não deve provocar o animal.':
+          'C’è un cane in casa. Scrivi una frase semplice per avvisare lo studente di non provocare l’animale.',
+      'Ex.: O cão é calmo, mas não o provoques.':
+          'Es.: Il cane è tranquillo, ma non provocarlo.',
       'Explicar regras da casa': 'Spiegare le regole della casa',
-      'Treina uma frase curta sobre uma regra básica da casa.': 'Esercitati con una frase breve su una regola di base della casa.',
-      'Queres explicar ao aluno onde deve deixar as chaves. Escreve uma frase simples.': 'Vuoi spiegare allo studente dove lasciare le chiavi. Scrivi una frase semplice.',
-      'Ex.: As chaves ficam aqui, junto à porta.': 'Es.: Le chiavi restano qui, vicino alla porta.',
+      'Treina uma frase curta sobre uma regra básica da casa.':
+          'Esercitati con una frase breve su una regola di base della casa.',
+      'Queres explicar ao aluno onde deve deixar as chaves. Escreve uma frase simples.':
+          'Vuoi spiegare allo studente dove lasciare le chiavi. Scrivi una frase semplice.',
+      'Ex.: As chaves ficam aqui, junto à porta.':
+          'Es.: Le chiavi restano qui, vicino alla porta.',
       'Dar instrução em sala de aula': 'Dare un’istruzione in aula',
-      'Treina uma instrução curta e clara para uma atividade escolar.': 'Esercitati con un’istruzione breve e chiara per un’attività scolastica.',
-      'Estás a orientar uma atividade em sala de aula. Escreve uma instrução simples para os alunos trabalharem em pares.': 'Stai guidando un’attività in aula. Scrivi un’istruzione semplice affinché gli studenti lavorino a coppie.',
-      'Ex.: Leiam a pergunta e respondam em pares.': 'Es.: Leggete la domanda e rispondete a coppie.',
-      'Aluno que pratica comunicação em situações reais do quotidiano escolar.': 'Studente che pratica la comunicazione in situazioni reali della vita scolastica.',
-      'Pessoa que se prepara para receber e comunicar melhor com o aluno visitante.': 'Persona che si prepara ad accogliere e comunicare meglio con lo studente in visita.',
-      'Perfil pedagógico previsto para acompanhamento, validação e análise.': 'Profilo pedagogico destinato al monitoraggio, alla convalida e all’analisi.',
+      'Treina uma instrução curta e clara para uma atividade escolar.':
+          'Esercitati con un’istruzione breve e chiara per un’attività scolastica.',
+      'Estás a orientar uma atividade em sala de aula. Escreve uma instrução simples para os alunos trabalharem em pares.':
+          'Stai guidando un’attività in aula. Scrivi un’istruzione semplice affinché gli studenti lavorino a coppie.',
+      'Ex.: Leiam a pergunta e respondam em pares.':
+          'Es.: Leggete la domanda e rispondete a coppie.',
+      'Aluno que pratica comunicação em situações reais do quotidiano escolar.':
+          'Studente che pratica la comunicazione in situazioni reali della vita scolastica.',
+      'Pessoa que se prepara para receber e comunicar melhor com o aluno visitante.':
+          'Persona che si prepara ad accogliere e comunicare meglio con lo studente in visita.',
+      'Perfil pedagógico previsto para acompanhamento, validação e análise.':
+          'Profilo pedagogico destinato al monitoraggio, alla convalida e all’analisi.',
     },
     'de': {
       'Email': 'E-Mail',
       'Quiz': 'Quiz',
       'Nova palavra-passe': 'Neues Passwort',
-      'Ainda não há resultados disponíveis. Submete uma atividade para consultar o histórico local.': 'Es sind noch keine Ergebnisse verfügbar. Reiche eine Aktivität ein, um den lokalen Verlauf anzuzeigen.',
-      'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.': 'Auf diesem Gerät gespeichert: {source} → {target}. Melde dich zum Synchronisieren an.',
+      'Ainda não há resultados disponíveis. Submete uma atividade para consultar o histórico local.':
+          'Es sind noch keine Ergebnisse verfügbar. Reiche eine Aktivität ein, um den lokalen Verlauf anzuzeigen.',
+      'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.':
+          'Auf diesem Gerät gespeichert: {source} → {target}. Melde dich zum Synchronisieren an.',
       'Guardado: {source} → {target}': 'Gespeichert: {source} → {target}',
-      'Versão de protótipo\nNo plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário é apresentado aqui.\n\nCódigo: {code}': 'Prototypversion\nIm kostenlosen Cloudflare-Tarif sendet der Server keine Wiederherstellungs-E-Mails. Zum Testen des Ablaufs wird der temporäre Code hier angezeigt.\n\nCode: {code}',
-      'Cria uma atividade com base nas tuas dificuldades de aprendizagem.': 'Erstelle eine Aktivität auf Grundlage deiner Lernschwierigkeiten.',
-      'Aqui serão apresentadas as atividades criadas por ti, o estado de aprovação e a avaliação da comunidade.': 'Hier werden deine erstellten Aktivitäten, ihr Freigabestatus und die Bewertung der Community angezeigt.',
+      'Versão de protótipo\nNo plano gratuito da Cloudflare, o servidor não envia emails de recuperação. Para permitir testar o fluxo, o código temporário é apresentado aqui.\n\nCódigo: {code}':
+          'Prototypversion\nIm kostenlosen Cloudflare-Tarif sendet der Server keine Wiederherstellungs-E-Mails. Zum Testen des Ablaufs wird der temporäre Code hier angezeigt.\n\nCode: {code}',
+      'Cria uma atividade com base nas tuas dificuldades de aprendizagem.':
+          'Erstelle eine Aktivität auf Grundlage deiner Lernschwierigkeiten.',
+      'Aqui serão apresentadas as atividades criadas por ti, o estado de aprovação e a avaliação da comunidade.':
+          'Hier werden deine erstellten Aktivitäten, ihr Freigabestatus und die Bewertung der Community angezeigt.',
       'Português de Portugal': 'Portugiesisch — Portugal',
       'English - United States': 'Englisch — Vereinigte Staaten',
       'Spanish - Spain': 'Spanisch — Spanien',
       'French - France': 'Französisch — Frankreich',
       'Italian - Italy': 'Italienisch — Italien',
       'German - Germany': 'Deutsch — Deutschland',
-      'Escolhe o idioma que usas normalmente. Este idioma pode ser usado para menus, mensagens e feedback.': 'Wähle die Sprache, die du normalerweise verwendest. Sie wird für Menüs, Nachrichten und Rückmeldungen verwendet.',
-      'Escolhe o idioma que queres treinar em diálogos, áudios, quizzes e desafios.': 'Wähle die Sprache, die du in Dialogen, Audioübungen, Quizzen und Herausforderungen üben möchtest.',
-      'Modo protótipo: usa o código apresentado para testar a recuperação.': 'Prototypmodus: Verwende den angezeigten Code, um die Wiederherstellung zu testen.',
+      'Escolhe o idioma que usas normalmente. Este idioma pode ser usado para menus, mensagens e feedback.':
+          'Wähle die Sprache, die du normalerweise verwendest. Sie wird für Menüs, Nachrichten und Rückmeldungen verwendet.',
+      'Escolhe o idioma que queres treinar em diálogos, áudios, quizzes e desafios.':
+          'Wähle die Sprache, die du in Dialogen, Audioübungen, Quizzen und Herausforderungen üben möchtest.',
+      'Modo protótipo: usa o código apresentado para testar a recuperação.':
+          'Prototypmodus: Verwende den angezeigten Code, um die Wiederherstellung zu testen.',
       'Submissão pendente inválida.': 'Ungültige ausstehende Einreichung.',
       'Submissão sincronizada.': 'Einreichung synchronisiert.',
-      'Não existem submissões pendentes para sincronizar.': 'Es gibt keine ausstehenden Einreichungen zum Synchronisieren.',
+      'Não existem submissões pendentes para sincronizar.':
+          'Es gibt keine ausstehenden Einreichungen zum Synchronisieren.',
       'Sincronizadas': 'Synchronisiert',
       'Falhas': 'Fehler',
       'Não disponível': 'Nicht verfügbar',
       'Sem feedback.': 'Keine Rückmeldung.',
       'desconhecido': 'unbekannt',
       'Perfil guardado: {profile}': 'Profil gespeichert: {profile}',
-      'Perfil guardado neste dispositivo. Entra para sincronizar.': 'Profil auf diesem Gerät gespeichert. Melde dich zum Synchronisieren an.',
-      'Conta: {email}\nUsa o código temporário abaixo para concluir o teste de recuperação.': 'Konto: {email}\nVerwende den temporären Code unten, um den Wiederherstellungstest abzuschließen.',
+      'Perfil guardado neste dispositivo. Entra para sincronizar.':
+          'Profil auf diesem Gerät gespeichert. Melde dich zum Synchronisieren an.',
+      'Conta: {email}\nUsa o código temporário abaixo para concluir o teste de recuperação.':
+          'Konto: {email}\nVerwende den temporären Code unten, um den Wiederherstellungstest abzuschließen.',
       'Conta: {email}': 'Konto: {email}',
-      'Usa a Home para acompanhar o teu percurso e aceder rapidamente às atividades.\n\nEm Praticar, responde a atividades predefinidas para treinares comunicação em contexto escolar.\n\nEm Resultados, acompanha o teu histórico, pontuações e estado de sincronização.\n\nEm Análises, consulta métricas pedagógicas agregadas, sem dados sensíveis.\n\nEm Ajustes, podes gerir conta, perfil, idiomas, notas privadas, sincronização e atividades criadas por ti.\n\nA opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.': 'Verwende Start, um deinen Lernweg zu verfolgen und schnell auf Aktivitäten zuzugreifen.\n\nUnter Üben beantwortest du vordefinierte Aktivitäten, um Kommunikation im schulischen Kontext zu trainieren.\n\nUnter Ergebnisse siehst du deinen Verlauf, deine Punktzahlen und den Synchronisierungsstatus.\n\nUnter Analysen findest du zusammengefasste pädagogische Kennzahlen ohne sensible Daten.\n\nUnter Einstellungen kannst du Konto, Profil, Sprachen, private Notizen, Synchronisierung und deine erstellten Aktivitäten verwalten.\n\nMit der Option Profil werden Aktivitäten für Schüler, Gastgeber oder Lehrkraft angepasst.',
-      'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\nA aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.\n\nO projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.\n\nA aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.': 'DailyTalk.pt ist ein Serious Game zum Sprachenlernen für Kinder und Jugendliche im schulischen Kontext und in der Erasmus+-Mobilität.\n\nDie Anwendung hilft, Kommunikation in realen Situationen des Schulalltags mit Wortschatz, Audio, Dialogen, Quizzen und Herausforderungen zu üben.\n\nDas Projekt berücksichtigt verschiedene Nutzungsprofile wie Schüler, Gastgeber und Lehrkraft, um Aktivitäten besser an die jeweilige Rolle anzupassen.\n\nDie Anwendung enthält Aktivitäten des DailyTalk.pt-Teams und kann künftig nach Prüfung auch von der Community vorgeschlagene Aktivitäten aufnehmen.',
+      'Usa a Home para acompanhar o teu percurso e aceder rapidamente às atividades.\n\nEm Praticar, responde a atividades predefinidas para treinares comunicação em contexto escolar.\n\nEm Resultados, acompanha o teu histórico, pontuações e estado de sincronização.\n\nEm Análises, consulta métricas pedagógicas agregadas, sem dados sensíveis.\n\nEm Ajustes, podes gerir conta, perfil, idiomas, notas privadas, sincronização e atividades criadas por ti.\n\nA opção Perfil permite adaptar atividades para Estudante, Anfitrião ou Professor.':
+          'Verwende Start, um deinen Lernweg zu verfolgen und schnell auf Aktivitäten zuzugreifen.\n\nUnter Üben beantwortest du vordefinierte Aktivitäten, um Kommunikation im schulischen Kontext zu trainieren.\n\nUnter Ergebnisse siehst du deinen Verlauf, deine Punktzahlen und den Synchronisierungsstatus.\n\nUnter Analysen findest du zusammengefasste pädagogische Kennzahlen ohne sensible Daten.\n\nUnter Einstellungen kannst du Konto, Profil, Sprachen, private Notizen, Synchronisierung und deine erstellten Aktivitäten verwalten.\n\nMit der Option Profil werden Aktivitäten für Schüler, Gastgeber oder Lehrkraft angepasst.',
+      'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\nA aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.\n\nO projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.\n\nA aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.':
+          'DailyTalk.pt ist ein Serious Game zum Sprachenlernen für Kinder und Jugendliche im schulischen Kontext und in der Erasmus+-Mobilität.\n\nDie Anwendung hilft, Kommunikation in realen Situationen des Schulalltags mit Wortschatz, Audio, Dialogen, Quizzen und Herausforderungen zu üben.\n\nDas Projekt berücksichtigt verschiedene Nutzungsprofile wie Schüler, Gastgeber und Lehrkraft, um Aktivitäten besser an die jeweilige Rolle anzupassen.\n\nDie Anwendung enthält Aktivitäten des DailyTalk.pt-Teams und kann künftig nach Prüfung auch von der Community vorgeschlagene Aktivitäten aufnehmen.',
       'Chegada à casa': 'Ankunft zu Hause',
-      'Primeiros contactos ao chegar à casa ou ao local de acolhimento.': 'Erste Gespräche bei der Ankunft zu Hause oder am Aufnahmeort.',
+      'Primeiros contactos ao chegar à casa ou ao local de acolhimento.':
+          'Erste Gespräche bei der Ankunft zu Hause oder am Aufnahmeort.',
       'Quarto': 'Schlafzimmer',
-      'Frases e instruções sobre o quarto, mala, cama e espaço pessoal.': 'Sätze und Anweisungen zum Schlafzimmer, Gepäck, Bett und persönlichen Bereich.',
+      'Frases e instruções sobre o quarto, mala, cama e espaço pessoal.':
+          'Sätze und Anweisungen zum Schlafzimmer, Gepäck, Bett und persönlichen Bereich.',
       'Casa de banho': 'Badezimmer',
-      'Perguntas e respostas sobre localização e utilização da casa de banho.': 'Fragen und Antworten zur Lage und Nutzung des Badezimmers.',
+      'Perguntas e respostas sobre localização e utilização da casa de banho.':
+          'Fragen und Antworten zur Lage und Nutzung des Badezimmers.',
       'Pequeno-almoço': 'Frühstück',
-      'Comunicação sobre horários, preferências e alimentos do pequeno-almoço.': 'Kommunikation über Frühstückszeiten, Vorlieben und Lebensmittel.',
+      'Comunicação sobre horários, preferências e alimentos do pequeno-almoço.':
+          'Kommunikation über Frühstückszeiten, Vorlieben und Lebensmittel.',
       'Horários': 'Zeitpläne',
-      'Frases sobre horas de saída, chegada, aulas, refeições e descanso.': 'Sätze über Abfahrts- und Ankunftszeiten, Unterricht, Mahlzeiten und Ruhezeiten.',
+      'Frases sobre horas de saída, chegada, aulas, refeições e descanso.':
+          'Sätze über Abfahrts- und Ankunftszeiten, Unterricht, Mahlzeiten und Ruhezeiten.',
       'Preferências alimentares': 'Essensvorlieben',
-      'Treino linguístico sobre gostos, alimentos preferidos e pedidos simples.': 'Sprachtraining zu Vorlieben, Lieblingsspeisen und einfachen Bitten.',
+      'Treino linguístico sobre gostos, alimentos preferidos e pedidos simples.':
+          'Sprachtraining zu Vorlieben, Lieblingsspeisen und einfachen Bitten.',
       'Treino sobre alergias': 'Allergietraining',
-      'Apenas treino linguístico. Não deve guardar alergias reais do utilizador.': 'Nur Sprachtraining. Tatsächliche Allergien des Nutzers dürfen nicht gespeichert werden.',
+      'Apenas treino linguístico. Não deve guardar alergias reais do utilizador.':
+          'Nur Sprachtraining. Tatsächliche Allergien des Nutzers dürfen nicht gespeichert werden.',
       'Regras da casa': 'Hausregeln',
-      'Comunicação sobre chaves, portas, horários, espaços e regras básicas.': 'Kommunikation über Schlüssel, Türen, Zeitpläne, Räume und grundlegende Regeln.',
+      'Comunicação sobre chaves, portas, horários, espaços e regras básicas.':
+          'Kommunikation über Schlüssel, Türen, Zeitpläne, Räume und grundlegende Regeln.',
       'Animais domésticos': 'Haustiere',
-      'Frases de aviso e cuidado relacionadas com animais da casa.': 'Warn- und Vorsichtssätze im Zusammenhang mit Haustieren.',
+      'Frases de aviso e cuidado relacionadas com animais da casa.':
+          'Warn- und Vorsichtssätze im Zusammenhang mit Haustieren.',
       'Transportes': 'Verkehrsmittel',
-      'Perguntas e instruções sobre deslocações, caminhos e transporte.': 'Fragen und Anweisungen zu Wegen, Richtungen und Verkehrsmitteln.',
+      'Perguntas e instruções sobre deslocações, caminhos e transporte.':
+          'Fragen und Anweisungen zu Wegen, Richtungen und Verkehrsmitteln.',
       'Escola': 'Schule',
-      'Comunicação relacionada com chegada à escola, colegas, salas e rotina escolar.': 'Kommunikation zur Ankunft in der Schule, Mitschülern, Räumen und zum Schulalltag.',
+      'Comunicação relacionada com chegada à escola, colegas, salas e rotina escolar.':
+          'Kommunikation zur Ankunft in der Schule, Mitschülern, Räumen und zum Schulalltag.',
       'Sala de aula': 'Klassenzimmer',
-      'Atividades de comunicação em sala de aula e interação com professores.': 'Kommunikationsaktivitäten im Klassenzimmer und Interaktion mit Lehrkräften.',
+      'Atividades de comunicação em sala de aula e interação com professores.':
+          'Kommunikationsaktivitäten im Klassenzimmer und Interaktion mit Lehrkräften.',
       'Apresentações': 'Präsentationen',
-      'Treino de frases para apresentações, trabalhos e participação oral.': 'Satztraining für Präsentationen, Aufgaben und mündliche Beteiligung.',
+      'Treino de frases para apresentações, trabalhos e participação oral.':
+          'Satztraining für Präsentationen, Aufgaben und mündliche Beteiligung.',
       'Conversa informal': 'Informelles Gespräch',
-      'Diálogos simples com colegas, anfitriões ou outras pessoas do contexto escolar.': 'Einfache Dialoge mit Mitschülern, Gastgebern oder anderen Personen im schulischen Umfeld.',
+      'Diálogos simples com colegas, anfitriões ou outras pessoas do contexto escolar.':
+          'Einfache Dialoge mit Mitschülern, Gastgebern oder anderen Personen im schulischen Umfeld.',
       'Responder sobre alergias': 'Über Allergien antworten',
-      'Treina uma resposta simples quando alguém pergunta se tens alergias.': 'Übe eine einfache Antwort, wenn dich jemand nach Allergien fragt.',
-      'O anfitrião pergunta: “Tens alergia a alguma coisa?” Escreve uma resposta simples no idioma que estás a praticar.': 'Der Gastgeber fragt: „Bist du gegen etwas allergisch?“ Schreibe eine einfache Antwort in der Sprache, die du übst.',
+      'Treina uma resposta simples quando alguém pergunta se tens alergias.':
+          'Übe eine einfache Antwort, wenn dich jemand nach Allergien fragt.',
+      'O anfitrião pergunta: “Tens alergia a alguma coisa?” Escreve uma resposta simples no idioma que estás a praticar.':
+          'Der Gastgeber fragt: „Bist du gegen etwas allergisch?“ Schreibe eine einfache Antwort in der Sprache, die du übst.',
       'Ex.: Não, não tenho alergias.': 'Z. B.: Nein, ich habe keine Allergien.',
       'Perguntar pela casa de banho': 'Nach dem Badezimmer fragen',
-      'Treina uma pergunta útil para encontrar a casa de banho.': 'Übe eine nützliche Frage, um das Badezimmer zu finden.',
-      'Estás numa casa nova e precisas de perguntar onde fica a casa de banho. Escreve a frase que dirias.': 'Du bist in einem neuen Haus und musst fragen, wo sich das Badezimmer befindet. Schreibe den Satz, den du sagen würdest.',
+      'Treina uma pergunta útil para encontrar a casa de banho.':
+          'Übe eine nützliche Frage, um das Badezimmer zu finden.',
+      'Estás numa casa nova e precisas de perguntar onde fica a casa de banho. Escreve a frase que dirias.':
+          'Du bist in einem neuen Haus und musst fragen, wo sich das Badezimmer befindet. Schreibe den Satz, den du sagen würdest.',
       'Ex.: Onde fica a casa de banho?': 'Z. B.: Wo ist das Badezimmer?',
       'Responder sobre pequeno-almoço': 'Über das Frühstück antworten',
-      'Treina uma resposta sobre aquilo que costumas comer de manhã.': 'Übe eine Antwort darüber, was du morgens normalerweise isst.',
-      'O anfitrião pergunta: “O que costumas comer ao pequeno-almoço?” Escreve uma resposta simples.': 'Der Gastgeber fragt: „Was isst du normalerweise zum Frühstück?“ Schreibe eine einfache Antwort.',
-      'Ex.: Costumo comer pão e beber leite.': 'Z. B.: Ich esse normalerweise Brot und trinke Milch.',
+      'Treina uma resposta sobre aquilo que costumas comer de manhã.':
+          'Übe eine Antwort darüber, was du morgens normalerweise isst.',
+      'O anfitrião pergunta: “O que costumas comer ao pequeno-almoço?” Escreve uma resposta simples.':
+          'Der Gastgeber fragt: „Was isst du normalerweise zum Frühstück?“ Schreibe eine einfache Antwort.',
+      'Ex.: Costumo comer pão e beber leite.':
+          'Z. B.: Ich esse normalerweise Brot und trinke Milch.',
       'Explicar o quarto': 'Das Schlafzimmer zeigen',
-      'Treina uma frase de acolhimento para mostrar o quarto ao aluno visitante.': 'Übe einen Begrüßungssatz, um dem Gastschüler sein Schlafzimmer zu zeigen.',
-      'Vais receber um aluno visitante em casa. Escreve uma frase simples para lhe explicar onde fica o quarto.': 'Du wirst einen Gastschüler zu Hause aufnehmen. Schreibe einen einfachen Satz, um zu erklären, wo sich das Schlafzimmer befindet.',
-      'Ex.: Este é o teu quarto. Podes deixar a mala aqui.': 'Z. B.: Das ist dein Schlafzimmer. Du kannst deinen Koffer hier abstellen.',
+      'Treina uma frase de acolhimento para mostrar o quarto ao aluno visitante.':
+          'Übe einen Begrüßungssatz, um dem Gastschüler sein Schlafzimmer zu zeigen.',
+      'Vais receber um aluno visitante em casa. Escreve uma frase simples para lhe explicar onde fica o quarto.':
+          'Du wirst einen Gastschüler zu Hause aufnehmen. Schreibe einen einfachen Satz, um zu erklären, wo sich das Schlafzimmer befindet.',
+      'Ex.: Este é o teu quarto. Podes deixar a mala aqui.':
+          'Z. B.: Das ist dein Schlafzimmer. Du kannst deinen Koffer hier abstellen.',
       'Perguntar sobre pequeno-almoço': 'Nach dem Frühstück fragen',
-      'Treina uma pergunta simples sobre preferências de pequeno-almoço.': 'Übe eine einfache Frage zu Frühstücksvorlieben.',
-      'Queres saber o que o aluno costuma comer de manhã. Escreve uma pergunta adequada.': 'Du möchtest wissen, was der Schüler morgens normalerweise isst. Schreibe eine passende Frage.',
-      'Ex.: O que costumas comer ao pequeno-almoço?': 'Z. B.: Was isst du normalerweise zum Frühstück?',
+      'Treina uma pergunta simples sobre preferências de pequeno-almoço.':
+          'Übe eine einfache Frage zu Frühstücksvorlieben.',
+      'Queres saber o que o aluno costuma comer de manhã. Escreve uma pergunta adequada.':
+          'Du möchtest wissen, was der Schüler morgens normalerweise isst. Schreibe eine passende Frage.',
+      'Ex.: O que costumas comer ao pequeno-almoço?':
+          'Z. B.: Was isst du normalerweise zum Frühstück?',
       'Explicar horários': 'Zeitpläne erklären',
-      'Treina uma instrução curta sobre o horário de saída no dia seguinte.': 'Übe eine kurze Anweisung zur Abfahrtszeit am nächsten Tag.',
-      'Tens de explicar ao aluno que amanhã vão sair às 9h. Escreve a frase que dirias.': 'Erkläre dem Schüler, dass ihr morgen um 9 Uhr losfahrt. Schreibe den Satz, den du sagen würdest.',
-      'Ex.: Amanhã vamos sair às nove horas.': 'Z. B.: Morgen fahren wir um neun Uhr los.',
+      'Treina uma instrução curta sobre o horário de saída no dia seguinte.':
+          'Übe eine kurze Anweisung zur Abfahrtszeit am nächsten Tag.',
+      'Tens de explicar ao aluno que amanhã vão sair às 9h. Escreve a frase que dirias.':
+          'Erkläre dem Schüler, dass ihr morgen um 9 Uhr losfahrt. Schreibe den Satz, den du sagen würdest.',
+      'Ex.: Amanhã vamos sair às nove horas.':
+          'Z. B.: Morgen fahren wir um neun Uhr los.',
       'Avisar sobre animal doméstico': 'Vor einem Haustier warnen',
-      'Treina uma frase simples para explicar como lidar com um animal da casa.': 'Übe einen einfachen Satz, um zu erklären, wie man sich gegenüber einem Haustier verhält.',
-      'Há um cão em casa. Escreve uma frase simples para avisar o aluno de que não deve provocar o animal.': 'Im Haus ist ein Hund. Schreibe einen einfachen Satz, um den Schüler zu warnen, das Tier nicht zu reizen.',
-      'Ex.: O cão é calmo, mas não o provoques.': 'Z. B.: Der Hund ist ruhig, aber reize ihn nicht.',
+      'Treina uma frase simples para explicar como lidar com um animal da casa.':
+          'Übe einen einfachen Satz, um zu erklären, wie man sich gegenüber einem Haustier verhält.',
+      'Há um cão em casa. Escreve uma frase simples para avisar o aluno de que não deve provocar o animal.':
+          'Im Haus ist ein Hund. Schreibe einen einfachen Satz, um den Schüler zu warnen, das Tier nicht zu reizen.',
+      'Ex.: O cão é calmo, mas não o provoques.':
+          'Z. B.: Der Hund ist ruhig, aber reize ihn nicht.',
       'Explicar regras da casa': 'Hausregeln erklären',
-      'Treina uma frase curta sobre uma regra básica da casa.': 'Übe einen kurzen Satz zu einer grundlegenden Hausregel.',
-      'Queres explicar ao aluno onde deve deixar as chaves. Escreve uma frase simples.': 'Du möchtest dem Schüler erklären, wo er die Schlüssel ablegen soll. Schreibe einen einfachen Satz.',
-      'Ex.: As chaves ficam aqui, junto à porta.': 'Z. B.: Die Schlüssel bleiben hier neben der Tür.',
+      'Treina uma frase curta sobre uma regra básica da casa.':
+          'Übe einen kurzen Satz zu einer grundlegenden Hausregel.',
+      'Queres explicar ao aluno onde deve deixar as chaves. Escreve uma frase simples.':
+          'Du möchtest dem Schüler erklären, wo er die Schlüssel ablegen soll. Schreibe einen einfachen Satz.',
+      'Ex.: As chaves ficam aqui, junto à porta.':
+          'Z. B.: Die Schlüssel bleiben hier neben der Tür.',
       'Dar instrução em sala de aula': 'Eine Anweisung im Klassenzimmer geben',
-      'Treina uma instrução curta e clara para uma atividade escolar.': 'Übe eine kurze und klare Anweisung für eine Schulaktivität.',
-      'Estás a orientar uma atividade em sala de aula. Escreve uma instrução simples para os alunos trabalharem em pares.': 'Du leitest eine Aktivität im Klassenzimmer. Schreibe eine einfache Anweisung, damit die Schüler paarweise arbeiten.',
-      'Ex.: Leiam a pergunta e respondam em pares.': 'Z. B.: Lest die Frage und antwortet zu zweit.',
-      'Aluno que pratica comunicação em situações reais do quotidiano escolar.': 'Schüler, der Kommunikation in realen Situationen des Schulalltags übt.',
-      'Pessoa que se prepara para receber e comunicar melhor com o aluno visitante.': 'Person, die sich darauf vorbereitet, den Gastschüler aufzunehmen und besser mit ihm zu kommunizieren.',
-      'Perfil pedagógico previsto para acompanhamento, validação e análise.': 'Pädagogisches Profil für Begleitung, Validierung und Analyse.',
+      'Treina uma instrução curta e clara para uma atividade escolar.':
+          'Übe eine kurze und klare Anweisung für eine Schulaktivität.',
+      'Estás a orientar uma atividade em sala de aula. Escreve uma instrução simples para os alunos trabalharem em pares.':
+          'Du leitest eine Aktivität im Klassenzimmer. Schreibe eine einfache Anweisung, damit die Schüler paarweise arbeiten.',
+      'Ex.: Leiam a pergunta e respondam em pares.':
+          'Z. B.: Lest die Frage und antwortet zu zweit.',
+      'Aluno que pratica comunicação em situações reais do quotidiano escolar.':
+          'Schüler, der Kommunikation in realen Situationen des Schulalltags übt.',
+      'Pessoa que se prepara para receber e comunicar melhor com o aluno visitante.':
+          'Person, die sich darauf vorbereitet, den Gastschüler aufzunehmen und besser mit ihm zu kommunizieren.',
+      'Perfil pedagógico previsto para acompanhamento, validação e análise.':
+          'Pädagogisches Profil für Begleitung, Validierung und Analyse.',
     },
   };
 
@@ -1049,7 +1672,8 @@ class AppTranslations {
       'Conta: ': 'Compte : ',
       'Abrir atividade: ': 'Ouvrir l’activité : ',
       'Erro ao sincronizar: ': 'Erreur de synchronisation : ',
-      'Erro ao guardar idiomas: ': 'Erreur lors de l’enregistrement des langues : ',
+      'Erro ao guardar idiomas: ':
+          'Erreur lors de l’enregistrement des langues : ',
     },
     'it': {
       'Perfil: ': 'Profilo: ',
@@ -1100,14 +1724,18 @@ class AppTranslations {
   };
 
   static const Map<String, String> _en = {
-    'Serious game para aprendizagem de idiomas': 'Serious game for language learning',
-    'Pratica diálogos antes da mobilidade escolar': 'Practise dialogues before school mobility',
-    'Podes experimentar sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.': 'You can try it without an account. To save progress and sync, sign in or create an account.',
+    'Serious game para aprendizagem de idiomas':
+        'Serious game for language learning',
+    'Pratica diálogos antes da mobilidade escolar':
+        'Practise dialogues before school mobility',
+    'Podes experimentar sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.':
+        'You can try it without an account. To save progress and sync, sign in or create an account.',
     'Testar agora': 'Try now',
     'Entrar': 'Sign in',
     'Criar conta': 'Create account',
     'Aceder à tua conta': 'Access your account',
-    'Guarda progresso, resultados e sincroniza entre dispositivos.': 'Save progress and results, and sync across devices.',
+    'Guarda progresso, resultados e sincroniza entre dispositivos.':
+        'Save progress and results, and sync across devices.',
     'Email': 'Email',
     'Password': 'Password',
     'Palavra-passe': 'Password',
@@ -1117,7 +1745,8 @@ class AppTranslations {
     'Continuar com Google': 'Continue with Google',
     'ou': 'or',
     'Integração futura': 'Future integration',
-    'Nesta versão de protótipo, o acesso com Google Account ainda não está disponível. A funcionalidade está prevista para uma versão futura, permitindo uma autenticação mais rápida e segura.': 'In this prototype version, Google Account sign-in is not available yet. The feature is planned for a future version to provide faster and safer authentication.',
+    'Nesta versão de protótipo, o acesso com Google Account ainda não está disponível. A funcionalidade está prevista para uma versão futura, permitindo uma autenticação mais rápida e segura.':
+        'In this prototype version, Google Account sign-in is not available yet. The feature is planned for a future version to provide faster and safer authentication.',
     'Compreendi': 'Got it',
     'Indica um email válido.': 'Enter a valid email.',
     'Indica a password.': 'Enter the password.',
@@ -1126,14 +1755,16 @@ class AppTranslations {
     'Cria o teu perfil': 'Create your profile',
     'Nome': 'Name',
     'Indica o nome.': 'Enter the name.',
-    'A password deve ter pelo menos 6 caracteres.': 'The password must be at least 6 characters long.',
+    'A password deve ter pelo menos 6 caracteres.':
+        'The password must be at least 6 characters long.',
     'Perfil inicial': 'Initial profile',
     'Estudante': 'Student',
     'Anfitrião': 'Host',
     'Professor': 'Teacher',
     'A criar...': 'Creating...',
     'Recuperar palavra-passe': 'Recover password',
-    'Indica o e-mail associado à tua conta.': 'Enter the email linked to your account.',
+    'Indica o e-mail associado à tua conta.':
+        'Enter the email linked to your account.',
     'Enviar código': 'Send code',
     'A enviar...': 'Sending...',
     'Código enviado': 'Code sent',
@@ -1164,10 +1795,14 @@ class AppTranslations {
     'Meus Resultados': 'My Results',
     'Análises': 'Analytics',
     'Ajustes': 'Settings',
-    'Responde a atividades predefinidas e melhora a tua comunicação.': 'Complete predefined activities and improve your communication.',
-    'Consulta o teu histórico de atividades e pontuações.': 'View your activity and score history.',
-    'Consulta métricas de aprendizagem e acompanhamento pedagógico.': 'View learning and pedagogical monitoring metrics.',
-    'Configura a aplicação e acede a opções secundárias.': 'Configure the application and access secondary options.',
+    'Responde a atividades predefinidas e melhora a tua comunicação.':
+        'Complete predefined activities and improve your communication.',
+    'Consulta o teu histórico de atividades e pontuações.':
+        'View your activity and score history.',
+    'Consulta métricas de aprendizagem e acompanhamento pedagógico.':
+        'View learning and pedagogical monitoring metrics.',
+    'Configura a aplicação e acede a opções secundárias.':
+        'Configure the application and access secondary options.',
     'Voltar': 'Back',
     'Conta': 'Account',
     'Perfil': 'Profile',
@@ -1180,38 +1815,49 @@ class AppTranslations {
     'Preferências locais': 'Local preferences',
     'Funcionalidades com conta': 'Account features',
     'Conta necessária': 'Account required',
-    'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.': 'This feature requires an account to save and sync your data.',
+    'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.':
+        'This feature requires an account to save and sync your data.',
     'Continuar a testar': 'Continue testing',
     'Sincronização concluída.': 'Sync completed.',
     'Estás em modo teste': 'You are in test mode',
-    'Podes experimentar a aplicação e alterar preferências locais. Entra ou cria uma conta para guardar e sincronizar o progresso.': 'You can try the application and change local preferences. Sign in or create an account to save and sync progress.',
+    'Podes experimentar a aplicação e alterar preferências locais. Entra ou cria uma conta para guardar e sincronizar o progresso.':
+        'You can try the application and change local preferences. Sign in or create an account to save and sync progress.',
     'Ainda não entraste': 'You are not signed in yet',
-    'Entra ou cria uma conta para guardar progresso, resultados e preferências.': 'Sign in or create an account to save progress, results and preferences.',
+    'Entra ou cria uma conta para guardar progresso, resultados e preferências.':
+        'Sign in or create an account to save progress, results and preferences.',
     'Sessão não encontrada': 'Session not found',
-    'Não foi possível carregar os dados da conta.': 'Could not load account data.',
+    'Não foi possível carregar os dados da conta.':
+        'Could not load account data.',
     'Dados da conta': 'Account details',
     'Terminar sessão': 'Sign out',
     'Idioma da aplicação': 'Application language',
     'Idioma a praticar': 'Practice language',
     'Escolhe os idiomas': 'Choose the languages',
-    'Define o idioma da interface e o idioma que queres praticar.': 'Set the interface language and the language you want to practise.',
-    'Em modo teste, estas preferências ficam apenas neste dispositivo.': 'In test mode, these preferences remain only on this device.',
-    'Idioma da aplicação e idioma a praticar devem ser diferentes.': 'The application language and practice language must be different.',
+    'Define o idioma da interface e o idioma que queres praticar.':
+        'Set the interface language and the language you want to practise.',
+    'Em modo teste, estas preferências ficam apenas neste dispositivo.':
+        'In test mode, these preferences remain only on this device.',
+    'Idioma da aplicação e idioma a praticar devem ser diferentes.':
+        'The application language and practice language must be different.',
     'Escolhe dois idiomas diferentes.': 'Choose two different languages.',
     'Guardar idiomas': 'Save languages',
     'A guardar...': 'Saving...',
-    'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.': 'Saved on this device: {source} → {target}. Sign in to sync.',
+    'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.':
+        'Saved on this device: {source} → {target}. Sign in to sync.',
     'Guardado: {source} → {target}': 'Saved: {source} → {target}',
     'Seleciona o teu perfil': 'Select your profile',
-    'Escolhe o papel que melhor representa a tua experiência.': 'Choose the role that best represents your experience.',
+    'Escolhe o papel que melhor representa a tua experiência.':
+        'Choose the role that best represents your experience.',
     'Guardar perfil': 'Save profile',
     'Perfil guardado: {profile}': 'Profile saved: {profile}',
     'Resultados temporários': 'Temporary results',
-    'Em modo teste, os resultados ficam apenas nesta sessão. Entra para guardar e sincronizar o histórico.': 'In test mode, results remain only in this session. Sign in to save and sync your history.',
+    'Em modo teste, os resultados ficam apenas nesta sessão. Entra para guardar e sincronizar o histórico.':
+        'In test mode, results remain only in this session. Sign in to save and sync your history.',
     'Sem resultados disponíveis.': 'No results available.',
     'Atualizar': 'Refresh',
     'Análises pedagógicas': 'Pedagogical analytics',
-    'As análises completas ficam disponíveis depois de entrares numa conta.': 'Full analytics become available after you sign in to an account.',
+    'As análises completas ficam disponíveis depois de entrares numa conta.':
+        'Full analytics become available after you sign in to an account.',
     'A carregar...': 'Loading...',
     'Sem dados para apresentar.': 'No data to display.',
     'Atividade': 'Activity',
@@ -1234,7 +1880,8 @@ class AppTranslations {
     'Comunidade': 'Community',
     'Local': 'Local',
     'Configura o desafio': 'Configure the challenge',
-    'Escolhe o contexto, o idioma, a dificuldade e o tipo de atividade antes de começar.': 'Choose the context, language, difficulty and activity type before starting.',
+    'Escolhe o contexto, o idioma, a dificuldade e o tipo de atividade antes de começar.':
+        'Choose the context, language, difficulty and activity type before starting.',
     'Cenário': 'Scenario',
     'Dificuldade': 'Difficulty',
     'Inicial': 'Beginner',
@@ -1245,10 +1892,12 @@ class AppTranslations {
     'A iniciar...': 'Starting...',
     'Indica o cenário da atividade.': 'Enter the activity scenario.',
     'Escreve a tua resposta': 'Write your answer',
-    'Ex.: resposta ao diálogo, quiz ou atividade...': 'E.g. an answer to the dialogue, quiz or activity...',
+    'Ex.: resposta ao diálogo, quiz ou atividade...':
+        'E.g. an answer to the dialogue, quiz or activity...',
     'Submeter atividade': 'Submit activity',
     'A submeter...': 'Submitting...',
-    'Nota privada guardada apenas neste dispositivo.': 'Private note saved only on this device.',
+    'Nota privada guardada apenas neste dispositivo.':
+        'Private note saved only on this device.',
     'Nova nota privada': 'New private note',
     'Título': 'Title',
     'Conteúdo': 'Content',
@@ -1261,275 +1910,723 @@ class AppTranslations {
   };
 
   static const Map<String, String> _es = {
-    'Serious game para aprendizagem de idiomas': 'Juego serio para el aprendizaje de idiomas',
-    'Pratica diálogos antes da mobilidade escolar': 'Practica diálogos antes de la movilidad escolar',
-    'Podes experimentar sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.': 'Puedes probar sin cuenta. Para guardar el progreso y sincronizar, inicia sesión o crea una cuenta.',
-    'Testar agora': 'Probar ahora', 'Entrar': 'Iniciar sesión', 'Criar conta': 'Crear cuenta',
+    'Serious game para aprendizagem de idiomas':
+        'Juego serio para el aprendizaje de idiomas',
+    'Pratica diálogos antes da mobilidade escolar':
+        'Practica diálogos antes de la movilidad escolar',
+    'Podes experimentar sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.':
+        'Puedes probar sin cuenta. Para guardar el progreso y sincronizar, inicia sesión o crea una cuenta.',
+    'Testar agora': 'Probar ahora',
+    'Entrar': 'Iniciar sesión',
+    'Criar conta': 'Crear cuenta',
     'Aceder à tua conta': 'Accede a tu cuenta',
-    'Guarda progresso, resultados e sincroniza entre dispositivos.': 'Guarda el progreso y los resultados, y sincroniza entre dispositivos.',
-    'Password': 'Contraseña', 'Palavra-passe': 'Contraseña', 'Esqueci a palavra-passe': 'He olvidado la contraseña',
-    'A entrar...': 'Iniciando sesión...', 'Ainda não tens conta?': '¿Aún no tienes cuenta?', 'Continuar com Google': 'Continuar con Google', 'ou': 'o',
+    'Guarda progresso, resultados e sincroniza entre dispositivos.':
+        'Guarda el progreso y los resultados, y sincroniza entre dispositivos.',
+    'Password': 'Contraseña',
+    'Palavra-passe': 'Contraseña',
+    'Esqueci a palavra-passe': 'He olvidado la contraseña',
+    'A entrar...': 'Iniciando sesión...',
+    'Ainda não tens conta?': '¿Aún no tienes cuenta?',
+    'Continuar com Google': 'Continuar con Google',
+    'ou': 'o',
     'Integração futura': 'Integración futura',
-    'Nesta versão de protótipo, o acesso com Google Account ainda não está disponível. A funcionalidade está prevista para uma versão futura, permitindo uma autenticação mais rápida e segura.': 'En esta versión del prototipo, el acceso con Google Account aún no está disponible. La función está prevista para una versión futura y permitirá una autenticación más rápida y segura.',
-    'Compreendi': 'Entendido', 'Indica um email válido.': 'Introduce un correo electrónico válido.', 'Indica a password.': 'Introduce la contraseña.',
-    'Mostrar password': 'Mostrar contraseña', 'Ocultar password': 'Ocultar contraseña',
-    'Cria o teu perfil': 'Crea tu perfil', 'Nome': 'Nombre', 'Indica o nome.': 'Introduce el nombre.',
-    'A password deve ter pelo menos 6 caracteres.': 'La contraseña debe tener al menos 6 caracteres.',
-    'Perfil inicial': 'Perfil inicial', 'Estudante': 'Estudiante', 'Anfitrião': 'Anfitrión', 'Professor': 'Profesor', 'A criar...': 'Creando...',
-    'Recuperar palavra-passe': 'Recuperar contraseña', 'Indica o e-mail associado à tua conta.': 'Introduce el correo asociado a tu cuenta.',
-    'Enviar código': 'Enviar código', 'A enviar...': 'Enviando...', 'Código enviado': 'Código enviado',
-    'Definir nova palavra-passe': 'Definir nueva contraseña', 'Código temporário': 'Código temporal', 'Nova password': 'Nueva contraseña',
-    'Confirmar password': 'Confirmar contraseña', 'As passwords não coincidem.': 'Las contraseñas no coinciden.',
-    'Alterar password': 'Cambiar contraseña', 'A alterar...': 'Cambiando...', 'Password alterada com sucesso.': 'Contraseña modificada correctamente.',
-    'Modo teste · progresso não guardado': 'Modo de prueba · progreso no guardado',
-    'UNIDADE 5': 'UNIDAD 5', 'Tema: Comunicação e amizades': 'Tema: Comunicación y amistades',
-    '3 de 6 atividades concluídas': '3 de 6 actividades completadas', 'MAPA DE ATIVIDADES': 'MAPA DE ACTIVIDADES',
-    'Vocabulário': 'Vocabulario', 'Áudio': 'Audio', 'Diálogo': 'Diálogo', 'Revisão': 'Repaso', 'Desafio Final': 'Desafío final',
-    'Atalhos': 'Accesos directos', 'Home': 'Inicio', 'Praticar': 'Practicar', 'Resultados': 'Resultados', 'Meus Resultados': 'Mis resultados',
-    'Análises': 'Análisis', 'Ajustes': 'Ajustes',
-    'Responde a atividades predefinidas e melhora a tua comunicação.': 'Responde a actividades predefinidas y mejora tu comunicación.',
-    'Consulta o teu histórico de atividades e pontuações.': 'Consulta tu historial de actividades y puntuaciones.',
-    'Consulta métricas de aprendizagem e acompanhamento pedagógico.': 'Consulta métricas de aprendizaje y seguimiento pedagógico.',
-    'Configura a aplicação e acede a opções secundárias.': 'Configura la aplicación y accede a opciones secundarias.',
-    'Voltar': 'Volver', 'Conta': 'Cuenta', 'Perfil': 'Perfil', 'Criar atividade': 'Crear actividad', 'Minhas atividades': 'Mis actividades',
-    'Notas privadas': 'Notas privadas', 'Sincronizar': 'Sincronizar', 'Ajuda': 'Ayuda', 'Sobre': 'Acerca de',
-    'Preferências locais': 'Preferencias locales', 'Funcionalidades com conta': 'Funciones con cuenta', 'Conta necessária': 'Cuenta necesaria',
-    'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.': 'Esta función necesita una cuenta para guardar y sincronizar tus datos.',
-    'Continuar a testar': 'Seguir probando', 'Sincronização concluída.': 'Sincronización completada.',
+    'Nesta versão de protótipo, o acesso com Google Account ainda não está disponível. A funcionalidade está prevista para uma versão futura, permitindo uma autenticação mais rápida e segura.':
+        'En esta versión del prototipo, el acceso con Google Account aún no está disponible. La función está prevista para una versión futura y permitirá una autenticación más rápida y segura.',
+    'Compreendi': 'Entendido',
+    'Indica um email válido.': 'Introduce un correo electrónico válido.',
+    'Indica a password.': 'Introduce la contraseña.',
+    'Mostrar password': 'Mostrar contraseña',
+    'Ocultar password': 'Ocultar contraseña',
+    'Cria o teu perfil': 'Crea tu perfil',
+    'Nome': 'Nombre',
+    'Indica o nome.': 'Introduce el nombre.',
+    'A password deve ter pelo menos 6 caracteres.':
+        'La contraseña debe tener al menos 6 caracteres.',
+    'Perfil inicial': 'Perfil inicial',
+    'Estudante': 'Estudiante',
+    'Anfitrião': 'Anfitrión',
+    'Professor': 'Profesor',
+    'A criar...': 'Creando...',
+    'Recuperar palavra-passe': 'Recuperar contraseña',
+    'Indica o e-mail associado à tua conta.':
+        'Introduce el correo asociado a tu cuenta.',
+    'Enviar código': 'Enviar código',
+    'A enviar...': 'Enviando...',
+    'Código enviado': 'Código enviado',
+    'Definir nova palavra-passe': 'Definir nueva contraseña',
+    'Código temporário': 'Código temporal',
+    'Nova password': 'Nueva contraseña',
+    'Confirmar password': 'Confirmar contraseña',
+    'As passwords não coincidem.': 'Las contraseñas no coinciden.',
+    'Alterar password': 'Cambiar contraseña',
+    'A alterar...': 'Cambiando...',
+    'Password alterada com sucesso.': 'Contraseña modificada correctamente.',
+    'Modo teste · progresso não guardado':
+        'Modo de prueba · progreso no guardado',
+    'UNIDADE 5': 'UNIDAD 5',
+    'Tema: Comunicação e amizades': 'Tema: Comunicación y amistades',
+    '3 de 6 atividades concluídas': '3 de 6 actividades completadas',
+    'MAPA DE ATIVIDADES': 'MAPA DE ACTIVIDADES',
+    'Vocabulário': 'Vocabulario',
+    'Áudio': 'Audio',
+    'Diálogo': 'Diálogo',
+    'Revisão': 'Repaso',
+    'Desafio Final': 'Desafío final',
+    'Atalhos': 'Accesos directos',
+    'Home': 'Inicio',
+    'Praticar': 'Practicar',
+    'Resultados': 'Resultados',
+    'Meus Resultados': 'Mis resultados',
+    'Análises': 'Análisis',
+    'Ajustes': 'Ajustes',
+    'Responde a atividades predefinidas e melhora a tua comunicação.':
+        'Responde a actividades predefinidas y mejora tu comunicación.',
+    'Consulta o teu histórico de atividades e pontuações.':
+        'Consulta tu historial de actividades y puntuaciones.',
+    'Consulta métricas de aprendizagem e acompanhamento pedagógico.':
+        'Consulta métricas de aprendizaje y seguimiento pedagógico.',
+    'Configura a aplicação e acede a opções secundárias.':
+        'Configura la aplicación y accede a opciones secundarias.',
+    'Voltar': 'Volver',
+    'Conta': 'Cuenta',
+    'Perfil': 'Perfil',
+    'Criar atividade': 'Crear actividad',
+    'Minhas atividades': 'Mis actividades',
+    'Notas privadas': 'Notas privadas',
+    'Sincronizar': 'Sincronizar',
+    'Ajuda': 'Ayuda',
+    'Sobre': 'Acerca de',
+    'Preferências locais': 'Preferencias locales',
+    'Funcionalidades com conta': 'Funciones con cuenta',
+    'Conta necessária': 'Cuenta necesaria',
+    'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.':
+        'Esta función necesita una cuenta para guardar y sincronizar tus datos.',
+    'Continuar a testar': 'Seguir probando',
+    'Sincronização concluída.': 'Sincronización completada.',
     'Estás em modo teste': 'Estás en modo de prueba',
-    'Podes experimentar a aplicação e alterar preferências locais. Entra ou cria uma conta para guardar e sincronizar o progresso.': 'Puedes probar la aplicación y cambiar preferencias locales. Inicia sesión o crea una cuenta para guardar y sincronizar el progreso.',
+    'Podes experimentar a aplicação e alterar preferências locais. Entra ou cria uma conta para guardar e sincronizar o progresso.':
+        'Puedes probar la aplicación y cambiar preferencias locales. Inicia sesión o crea una cuenta para guardar y sincronizar el progreso.',
     'Ainda não entraste': 'Aún no has iniciado sesión',
-    'Entra ou cria uma conta para guardar progresso, resultados e preferências.': 'Inicia sesión o crea una cuenta para guardar el progreso, los resultados y las preferencias.',
-    'Sessão não encontrada': 'Sesión no encontrada', 'Não foi possível carregar os dados da conta.': 'No se pudieron cargar los datos de la cuenta.',
-    'Dados da conta': 'Datos de la cuenta', 'Terminar sessão': 'Cerrar sesión',
-    'Idioma da aplicação': 'Idioma de la aplicación', 'Idioma a praticar': 'Idioma a practicar', 'Escolhe os idiomas': 'Elige los idiomas',
-    'Define o idioma da interface e o idioma que queres praticar.': 'Define el idioma de la interfaz y el idioma que quieres practicar.',
-    'Em modo teste, estas preferências ficam apenas neste dispositivo.': 'En modo de prueba, estas preferencias se guardan solo en este dispositivo.',
-    'Idioma da aplicação e idioma a praticar devem ser diferentes.': 'El idioma de la aplicación y el idioma de práctica deben ser diferentes.',
-    'Escolhe dois idiomas diferentes.': 'Elige dos idiomas diferentes.', 'Guardar idiomas': 'Guardar idiomas', 'A guardar...': 'Guardando...',
-    'Seleciona o teu perfil': 'Selecciona tu perfil', 'Escolhe o papel que melhor representa a tua experiência.': 'Elige el papel que mejor representa tu experiencia.',
-    'Guardar perfil': 'Guardar perfil', 'Resultados temporários': 'Resultados temporales',
-    'Em modo teste, os resultados ficam apenas nesta sessão. Entra para guardar e sincronizar o histórico.': 'En modo de prueba, los resultados quedan solo en esta sesión. Inicia sesión para guardar y sincronizar el historial.',
-    'Sem resultados disponíveis.': 'No hay resultados disponibles.', 'Atualizar': 'Actualizar', 'Análises pedagógicas': 'Análisis pedagógicos',
-    'As análises completas ficam disponíveis depois de entrares numa conta.': 'Los análisis completos estarán disponibles después de iniciar sesión.',
-    'A carregar...': 'Cargando...', 'Sem dados para apresentar.': 'No hay datos que mostrar.',
-    'Atividade': 'Actividad', 'Pontuação': 'Puntuación', 'Estado': 'Estado', 'Data': 'Fecha', 'A tua resposta': 'Tu respuesta',
-    'Enviar resposta': 'Enviar respuesta', 'A enviar resposta...': 'Enviando respuesta...', 'Feedback': 'Comentarios',
-    'Pendente': 'Pendiente', 'Sincronizado': 'Sincronizado', 'Falhou': 'Falló', 'Rascunho': 'Borrador', 'Em revisão': 'En revisión',
-    'Aprovada': 'Aprobada', 'Rejeitada': 'Rechazada', 'Equipa DailyTalk.pt': 'Equipo DailyTalk.pt', 'Predefinida': 'Predefinida',
-    'Comunidade': 'Comunidad', 'Local': 'Local', 'Configura o desafio': 'Configura el desafío',
-    'Escolhe o contexto, o idioma, a dificuldade e o tipo de atividade antes de começar.': 'Elige el contexto, el idioma, la dificultad y el tipo de actividad antes de empezar.',
-    'Cenário': 'Escenario', 'Dificuldade': 'Dificultad', 'Inicial': 'Inicial', 'Média': 'Media', 'Avançada': 'Avanzada',
-    'Tipo de atividade': 'Tipo de actividad', 'Iniciar atividade': 'Iniciar actividad', 'A iniciar...': 'Iniciando...',
-    'Indica o cenário da atividade.': 'Indica el escenario de la actividad.', 'Escreve a tua resposta': 'Escribe tu respuesta',
-    'Ex.: resposta ao diálogo, quiz ou atividade...': 'Ej.: respuesta al diálogo, quiz o actividad...', 'Submeter atividade': 'Enviar actividad',
-    'A submeter...': 'Enviando...', 'Nota privada guardada apenas neste dispositivo.': 'Nota privada guardada solo en este dispositivo.',
-    'Nova nota privada': 'Nueva nota privada', 'Título': 'Título', 'Conteúdo': 'Contenido', 'Guardar nota': 'Guardar nota', 'Apagar': 'Eliminar',
-    'Sem notas privadas.': 'No hay notas privadas.', 'Fechar': 'Cerrar', 'DailyTalk.pt — Ajuda': 'DailyTalk.pt — Ayuda', 'DailyTalk.pt — Sobre': 'DailyTalk.pt — Acerca de',
+    'Entra ou cria uma conta para guardar progresso, resultados e preferências.':
+        'Inicia sesión o crea una cuenta para guardar el progreso, los resultados y las preferencias.',
+    'Sessão não encontrada': 'Sesión no encontrada',
+    'Não foi possível carregar os dados da conta.':
+        'No se pudieron cargar los datos de la cuenta.',
+    'Dados da conta': 'Datos de la cuenta',
+    'Terminar sessão': 'Cerrar sesión',
+    'Idioma da aplicação': 'Idioma de la aplicación',
+    'Idioma a praticar': 'Idioma a practicar',
+    'Escolhe os idiomas': 'Elige los idiomas',
+    'Define o idioma da interface e o idioma que queres praticar.':
+        'Define el idioma de la interfaz y el idioma que quieres practicar.',
+    'Em modo teste, estas preferências ficam apenas neste dispositivo.':
+        'En modo de prueba, estas preferencias se guardan solo en este dispositivo.',
+    'Idioma da aplicação e idioma a praticar devem ser diferentes.':
+        'El idioma de la aplicación y el idioma de práctica deben ser diferentes.',
+    'Escolhe dois idiomas diferentes.': 'Elige dos idiomas diferentes.',
+    'Guardar idiomas': 'Guardar idiomas',
+    'A guardar...': 'Guardando...',
+    'Seleciona o teu perfil': 'Selecciona tu perfil',
+    'Escolhe o papel que melhor representa a tua experiência.':
+        'Elige el papel que mejor representa tu experiencia.',
+    'Guardar perfil': 'Guardar perfil',
+    'Resultados temporários': 'Resultados temporales',
+    'Em modo teste, os resultados ficam apenas nesta sessão. Entra para guardar e sincronizar o histórico.':
+        'En modo de prueba, los resultados quedan solo en esta sesión. Inicia sesión para guardar y sincronizar el historial.',
+    'Sem resultados disponíveis.': 'No hay resultados disponibles.',
+    'Atualizar': 'Actualizar',
+    'Análises pedagógicas': 'Análisis pedagógicos',
+    'As análises completas ficam disponíveis depois de entrares numa conta.':
+        'Los análisis completos estarán disponibles después de iniciar sesión.',
+    'A carregar...': 'Cargando...',
+    'Sem dados para apresentar.': 'No hay datos que mostrar.',
+    'Atividade': 'Actividad',
+    'Pontuação': 'Puntuación',
+    'Estado': 'Estado',
+    'Data': 'Fecha',
+    'A tua resposta': 'Tu respuesta',
+    'Enviar resposta': 'Enviar respuesta',
+    'A enviar resposta...': 'Enviando respuesta...',
+    'Feedback': 'Comentarios',
+    'Pendente': 'Pendiente',
+    'Sincronizado': 'Sincronizado',
+    'Falhou': 'Falló',
+    'Rascunho': 'Borrador',
+    'Em revisão': 'En revisión',
+    'Aprovada': 'Aprobada',
+    'Rejeitada': 'Rechazada',
+    'Equipa DailyTalk.pt': 'Equipo DailyTalk.pt',
+    'Predefinida': 'Predefinida',
+    'Comunidade': 'Comunidad',
+    'Local': 'Local',
+    'Configura o desafio': 'Configura el desafío',
+    'Escolhe o contexto, o idioma, a dificuldade e o tipo de atividade antes de começar.':
+        'Elige el contexto, el idioma, la dificultad y el tipo de actividad antes de empezar.',
+    'Cenário': 'Escenario',
+    'Dificuldade': 'Dificultad',
+    'Inicial': 'Inicial',
+    'Média': 'Media',
+    'Avançada': 'Avanzada',
+    'Tipo de atividade': 'Tipo de actividad',
+    'Iniciar atividade': 'Iniciar actividad',
+    'A iniciar...': 'Iniciando...',
+    'Indica o cenário da atividade.': 'Indica el escenario de la actividad.',
+    'Escreve a tua resposta': 'Escribe tu respuesta',
+    'Ex.: resposta ao diálogo, quiz ou atividade...':
+        'Ej.: respuesta al diálogo, quiz o actividad...',
+    'Submeter atividade': 'Enviar actividad',
+    'A submeter...': 'Enviando...',
+    'Nota privada guardada apenas neste dispositivo.':
+        'Nota privada guardada solo en este dispositivo.',
+    'Nova nota privada': 'Nueva nota privada',
+    'Título': 'Título',
+    'Conteúdo': 'Contenido',
+    'Guardar nota': 'Guardar nota',
+    'Apagar': 'Eliminar',
+    'Sem notas privadas.': 'No hay notas privadas.',
+    'Fechar': 'Cerrar',
+    'DailyTalk.pt — Ajuda': 'DailyTalk.pt — Ayuda',
+    'DailyTalk.pt — Sobre': 'DailyTalk.pt — Acerca de',
   };
 
   static const Map<String, String> _fr = {
-    'Serious game para aprendizagem de idiomas': 'Jeu sérieux pour l’apprentissage des langues',
-    'Pratica diálogos antes da mobilidade escolar': 'Entraîne-toi aux dialogues avant la mobilité scolaire',
-    'Podes experimentar sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.': 'Tu peux essayer sans compte. Pour enregistrer ta progression et la synchroniser, connecte-toi ou crée un compte.',
-    'Testar agora': 'Essayer maintenant', 'Entrar': 'Se connecter', 'Criar conta': 'Créer un compte',
+    'Serious game para aprendizagem de idiomas':
+        'Jeu sérieux pour l’apprentissage des langues',
+    'Pratica diálogos antes da mobilidade escolar':
+        'Entraîne-toi aux dialogues avant la mobilité scolaire',
+    'Podes experimentar sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.':
+        'Tu peux essayer sans compte. Pour enregistrer ta progression et la synchroniser, connecte-toi ou crée un compte.',
+    'Testar agora': 'Essayer maintenant',
+    'Entrar': 'Se connecter',
+    'Criar conta': 'Créer un compte',
     'Aceder à tua conta': 'Accéder à ton compte',
-    'Guarda progresso, resultados e sincroniza entre dispositivos.': 'Enregistre ta progression et tes résultats, et synchronise-les entre tes appareils.',
-    'Password': 'Mot de passe', 'Palavra-passe': 'Mot de passe', 'Esqueci a palavra-passe': 'J’ai oublié mon mot de passe',
-    'A entrar...': 'Connexion...', 'Ainda não tens conta?': 'Tu n’as pas encore de compte ?', 'Continuar com Google': 'Continuer avec Google', 'ou': 'ou',
+    'Guarda progresso, resultados e sincroniza entre dispositivos.':
+        'Enregistre ta progression et tes résultats, et synchronise-les entre tes appareils.',
+    'Password': 'Mot de passe',
+    'Palavra-passe': 'Mot de passe',
+    'Esqueci a palavra-passe': 'J’ai oublié mon mot de passe',
+    'A entrar...': 'Connexion...',
+    'Ainda não tens conta?': 'Tu n’as pas encore de compte ?',
+    'Continuar com Google': 'Continuer avec Google',
+    'ou': 'ou',
     'Integração futura': 'Intégration future',
-    'Nesta versão de protótipo, o acesso com Google Account ainda não está disponível. A funcionalidade está prevista para uma versão futura, permitindo uma autenticação mais rápida e segura.': 'Dans cette version du prototype, la connexion avec Google Account n’est pas encore disponible. Cette fonction est prévue pour une prochaine version afin de proposer une authentification plus rapide et plus sûre.',
-    'Compreendi': 'Compris', 'Indica um email válido.': 'Saisis une adresse e-mail valide.', 'Indica a password.': 'Saisis le mot de passe.',
-    'Mostrar password': 'Afficher le mot de passe', 'Ocultar password': 'Masquer le mot de passe',
-    'Cria o teu perfil': 'Crée ton profil', 'Nome': 'Nom', 'Indica o nome.': 'Indique le nom.',
-    'A password deve ter pelo menos 6 caracteres.': 'Le mot de passe doit comporter au moins 6 caractères.',
-    'Perfil inicial': 'Profil initial', 'Estudante': 'Élève', 'Anfitrião': 'Hôte', 'Professor': 'Enseignant', 'A criar...': 'Création...',
-    'Recuperar palavra-passe': 'Récupérer le mot de passe', 'Indica o e-mail associado à tua conta.': 'Saisis l’adresse e-mail associée à ton compte.',
-    'Enviar código': 'Envoyer le code', 'A enviar...': 'Envoi...', 'Código enviado': 'Code envoyé',
-    'Definir nova palavra-passe': 'Définir un nouveau mot de passe', 'Código temporário': 'Code temporaire', 'Nova password': 'Nouveau mot de passe',
-    'Confirmar password': 'Confirmer le mot de passe', 'As passwords não coincidem.': 'Les mots de passe ne correspondent pas.',
-    'Alterar password': 'Modifier le mot de passe', 'A alterar...': 'Modification...', 'Password alterada com sucesso.': 'Mot de passe modifié avec succès.',
-    'Modo teste · progresso não guardado': 'Mode test · progression non enregistrée',
-    'UNIDADE 5': 'UNITÉ 5', 'Tema: Comunicação e amizades': 'Thème : Communication et amitiés',
-    '3 de 6 atividades concluídas': '3 activités sur 6 terminées', 'MAPA DE ATIVIDADES': 'CARTE DES ACTIVITÉS',
-    'Vocabulário': 'Vocabulaire', 'Áudio': 'Audio', 'Diálogo': 'Dialogue', 'Revisão': 'Révision', 'Desafio Final': 'Défi final',
-    'Atalhos': 'Raccourcis', 'Home': 'Accueil', 'Praticar': 'Pratiquer', 'Resultados': 'Résultats', 'Meus Resultados': 'Mes résultats',
-    'Análises': 'Analyses', 'Ajustes': 'Réglages',
-    'Responde a atividades predefinidas e melhora a tua comunicação.': 'Réponds à des activités prédéfinies et améliore ta communication.',
-    'Consulta o teu histórico de atividades e pontuações.': 'Consulte ton historique d’activités et de scores.',
-    'Consulta métricas de aprendizagem e acompanhamento pedagógico.': 'Consulte les indicateurs d’apprentissage et de suivi pédagogique.',
-    'Configura a aplicação e acede a opções secundárias.': 'Configure l’application et accède aux options secondaires.',
-    'Voltar': 'Retour', 'Conta': 'Compte', 'Perfil': 'Profil', 'Criar atividade': 'Créer une activité', 'Minhas atividades': 'Mes activités',
-    'Notas privadas': 'Notes privées', 'Sincronizar': 'Synchroniser', 'Ajuda': 'Aide', 'Sobre': 'À propos',
-    'Preferências locais': 'Préférences locales', 'Funcionalidades com conta': 'Fonctions avec compte', 'Conta necessária': 'Compte requis',
-    'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.': 'Cette fonction nécessite un compte pour enregistrer et synchroniser tes données.',
-    'Continuar a testar': 'Continuer à essayer', 'Sincronização concluída.': 'Synchronisation terminée.',
+    'Nesta versão de protótipo, o acesso com Google Account ainda não está disponível. A funcionalidade está prevista para uma versão futura, permitindo uma autenticação mais rápida e segura.':
+        'Dans cette version du prototype, la connexion avec Google Account n’est pas encore disponible. Cette fonction est prévue pour une prochaine version afin de proposer une authentification plus rapide et plus sûre.',
+    'Compreendi': 'Compris',
+    'Indica um email válido.': 'Saisis une adresse e-mail valide.',
+    'Indica a password.': 'Saisis le mot de passe.',
+    'Mostrar password': 'Afficher le mot de passe',
+    'Ocultar password': 'Masquer le mot de passe',
+    'Cria o teu perfil': 'Crée ton profil',
+    'Nome': 'Nom',
+    'Indica o nome.': 'Indique le nom.',
+    'A password deve ter pelo menos 6 caracteres.':
+        'Le mot de passe doit comporter au moins 6 caractères.',
+    'Perfil inicial': 'Profil initial',
+    'Estudante': 'Élève',
+    'Anfitrião': 'Hôte',
+    'Professor': 'Enseignant',
+    'A criar...': 'Création...',
+    'Recuperar palavra-passe': 'Récupérer le mot de passe',
+    'Indica o e-mail associado à tua conta.':
+        'Saisis l’adresse e-mail associée à ton compte.',
+    'Enviar código': 'Envoyer le code',
+    'A enviar...': 'Envoi...',
+    'Código enviado': 'Code envoyé',
+    'Definir nova palavra-passe': 'Définir un nouveau mot de passe',
+    'Código temporário': 'Code temporaire',
+    'Nova password': 'Nouveau mot de passe',
+    'Confirmar password': 'Confirmer le mot de passe',
+    'As passwords não coincidem.': 'Les mots de passe ne correspondent pas.',
+    'Alterar password': 'Modifier le mot de passe',
+    'A alterar...': 'Modification...',
+    'Password alterada com sucesso.': 'Mot de passe modifié avec succès.',
+    'Modo teste · progresso não guardado':
+        'Mode test · progression non enregistrée',
+    'UNIDADE 5': 'UNITÉ 5',
+    'Tema: Comunicação e amizades': 'Thème : Communication et amitiés',
+    '3 de 6 atividades concluídas': '3 activités sur 6 terminées',
+    'MAPA DE ATIVIDADES': 'CARTE DES ACTIVITÉS',
+    'Vocabulário': 'Vocabulaire',
+    'Áudio': 'Audio',
+    'Diálogo': 'Dialogue',
+    'Revisão': 'Révision',
+    'Desafio Final': 'Défi final',
+    'Atalhos': 'Raccourcis',
+    'Home': 'Accueil',
+    'Praticar': 'Pratiquer',
+    'Resultados': 'Résultats',
+    'Meus Resultados': 'Mes résultats',
+    'Análises': 'Analyses',
+    'Ajustes': 'Réglages',
+    'Responde a atividades predefinidas e melhora a tua comunicação.':
+        'Réponds à des activités prédéfinies et améliore ta communication.',
+    'Consulta o teu histórico de atividades e pontuações.':
+        'Consulte ton historique d’activités et de scores.',
+    'Consulta métricas de aprendizagem e acompanhamento pedagógico.':
+        'Consulte les indicateurs d’apprentissage et de suivi pédagogique.',
+    'Configura a aplicação e acede a opções secundárias.':
+        'Configure l’application et accède aux options secondaires.',
+    'Voltar': 'Retour',
+    'Conta': 'Compte',
+    'Perfil': 'Profil',
+    'Criar atividade': 'Créer une activité',
+    'Minhas atividades': 'Mes activités',
+    'Notas privadas': 'Notes privées',
+    'Sincronizar': 'Synchroniser',
+    'Ajuda': 'Aide',
+    'Sobre': 'À propos',
+    'Preferências locais': 'Préférences locales',
+    'Funcionalidades com conta': 'Fonctions avec compte',
+    'Conta necessária': 'Compte requis',
+    'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.':
+        'Cette fonction nécessite un compte pour enregistrer et synchroniser tes données.',
+    'Continuar a testar': 'Continuer à essayer',
+    'Sincronização concluída.': 'Synchronisation terminée.',
     'Estás em modo teste': 'Tu es en mode test',
-    'Podes experimentar a aplicação e alterar preferências locais. Entra ou cria uma conta para guardar e sincronizar o progresso.': 'Tu peux essayer l’application et modifier les préférences locales. Connecte-toi ou crée un compte pour enregistrer et synchroniser ta progression.',
+    'Podes experimentar a aplicação e alterar preferências locais. Entra ou cria uma conta para guardar e sincronizar o progresso.':
+        'Tu peux essayer l’application et modifier les préférences locales. Connecte-toi ou crée un compte pour enregistrer et synchroniser ta progression.',
     'Ainda não entraste': 'Tu n’es pas encore connecté',
-    'Entra ou cria uma conta para guardar progresso, resultados e preferências.': 'Connecte-toi ou crée un compte pour enregistrer la progression, les résultats et les préférences.',
-    'Sessão não encontrada': 'Session introuvable', 'Não foi possível carregar os dados da conta.': 'Impossible de charger les données du compte.',
-    'Dados da conta': 'Données du compte', 'Terminar sessão': 'Se déconnecter',
-    'Idioma da aplicação': 'Langue de l’application', 'Idioma a praticar': 'Langue à pratiquer', 'Escolhe os idiomas': 'Choisis les langues',
-    'Define o idioma da interface e o idioma que queres praticar.': 'Définis la langue de l’interface et celle que tu veux pratiquer.',
-    'Em modo teste, estas preferências ficam apenas neste dispositivo.': 'En mode test, ces préférences restent uniquement sur cet appareil.',
-    'Idioma da aplicação e idioma a praticar devem ser diferentes.': 'La langue de l’application et la langue à pratiquer doivent être différentes.',
-    'Escolhe dois idiomas diferentes.': 'Choisis deux langues différentes.', 'Guardar idiomas': 'Enregistrer les langues', 'A guardar...': 'Enregistrement...',
-    'Seleciona o teu perfil': 'Sélectionne ton profil', 'Escolhe o papel que melhor representa a tua experiência.': 'Choisis le rôle qui représente le mieux ton expérience.',
-    'Guardar perfil': 'Enregistrer le profil', 'Resultados temporários': 'Résultats temporaires',
-    'Em modo teste, os resultados ficam apenas nesta sessão. Entra para guardar e sincronizar o histórico.': 'En mode test, les résultats restent uniquement dans cette session. Connecte-toi pour enregistrer et synchroniser l’historique.',
-    'Sem resultados disponíveis.': 'Aucun résultat disponible.', 'Atualizar': 'Actualiser', 'Análises pedagógicas': 'Analyses pédagogiques',
-    'As análises completas ficam disponíveis depois de entrares numa conta.': 'Les analyses complètes sont disponibles après connexion à un compte.',
-    'A carregar...': 'Chargement...', 'Sem dados para apresentar.': 'Aucune donnée à afficher.',
-    'Atividade': 'Activité', 'Pontuação': 'Score', 'Estado': 'État', 'Data': 'Date', 'A tua resposta': 'Ta réponse',
-    'Enviar resposta': 'Envoyer la réponse', 'A enviar resposta...': 'Envoi de la réponse...', 'Feedback': 'Retour',
-    'Pendente': 'En attente', 'Sincronizado': 'Synchronisé', 'Falhou': 'Échec', 'Rascunho': 'Brouillon', 'Em revisão': 'En révision',
-    'Aprovada': 'Approuvée', 'Rejeitada': 'Rejetée', 'Equipa DailyTalk.pt': 'Équipe DailyTalk.pt', 'Predefinida': 'Prédéfinie',
-    'Comunidade': 'Communauté', 'Local': 'Local', 'Configura o desafio': 'Configure le défi',
-    'Escolhe o contexto, o idioma, a dificuldade e o tipo de atividade antes de começar.': 'Choisis le contexte, la langue, la difficulté et le type d’activité avant de commencer.',
-    'Cenário': 'Scénario', 'Dificuldade': 'Difficulté', 'Inicial': 'Débutant', 'Média': 'Intermédiaire', 'Avançada': 'Avancée',
-    'Tipo de atividade': 'Type d’activité', 'Iniciar atividade': 'Démarrer l’activité', 'A iniciar...': 'Démarrage...',
-    'Indica o cenário da atividade.': 'Indique le scénario de l’activité.', 'Escreve a tua resposta': 'Écris ta réponse',
-    'Ex.: resposta ao diálogo, quiz ou atividade...': 'Ex. : réponse au dialogue, quiz ou activité...', 'Submeter atividade': 'Envoyer l’activité',
-    'A submeter...': 'Envoi...', 'Nota privada guardada apenas neste dispositivo.': 'Note privée enregistrée uniquement sur cet appareil.',
-    'Nova nota privada': 'Nouvelle note privée', 'Título': 'Titre', 'Conteúdo': 'Contenu', 'Guardar nota': 'Enregistrer la note', 'Apagar': 'Supprimer',
-    'Sem notas privadas.': 'Aucune note privée.', 'Fechar': 'Fermer', 'DailyTalk.pt — Ajuda': 'DailyTalk.pt — Aide', 'DailyTalk.pt — Sobre': 'DailyTalk.pt — À propos',
+    'Entra ou cria uma conta para guardar progresso, resultados e preferências.':
+        'Connecte-toi ou crée un compte pour enregistrer la progression, les résultats et les préférences.',
+    'Sessão não encontrada': 'Session introuvable',
+    'Não foi possível carregar os dados da conta.':
+        'Impossible de charger les données du compte.',
+    'Dados da conta': 'Données du compte',
+    'Terminar sessão': 'Se déconnecter',
+    'Idioma da aplicação': 'Langue de l’application',
+    'Idioma a praticar': 'Langue à pratiquer',
+    'Escolhe os idiomas': 'Choisis les langues',
+    'Define o idioma da interface e o idioma que queres praticar.':
+        'Définis la langue de l’interface et celle que tu veux pratiquer.',
+    'Em modo teste, estas preferências ficam apenas neste dispositivo.':
+        'En mode test, ces préférences restent uniquement sur cet appareil.',
+    'Idioma da aplicação e idioma a praticar devem ser diferentes.':
+        'La langue de l’application et la langue à pratiquer doivent être différentes.',
+    'Escolhe dois idiomas diferentes.': 'Choisis deux langues différentes.',
+    'Guardar idiomas': 'Enregistrer les langues',
+    'A guardar...': 'Enregistrement...',
+    'Seleciona o teu perfil': 'Sélectionne ton profil',
+    'Escolhe o papel que melhor representa a tua experiência.':
+        'Choisis le rôle qui représente le mieux ton expérience.',
+    'Guardar perfil': 'Enregistrer le profil',
+    'Resultados temporários': 'Résultats temporaires',
+    'Em modo teste, os resultados ficam apenas nesta sessão. Entra para guardar e sincronizar o histórico.':
+        'En mode test, les résultats restent uniquement dans cette session. Connecte-toi pour enregistrer et synchroniser l’historique.',
+    'Sem resultados disponíveis.': 'Aucun résultat disponible.',
+    'Atualizar': 'Actualiser',
+    'Análises pedagógicas': 'Analyses pédagogiques',
+    'As análises completas ficam disponíveis depois de entrares numa conta.':
+        'Les analyses complètes sont disponibles après connexion à un compte.',
+    'A carregar...': 'Chargement...',
+    'Sem dados para apresentar.': 'Aucune donnée à afficher.',
+    'Atividade': 'Activité',
+    'Pontuação': 'Score',
+    'Estado': 'État',
+    'Data': 'Date',
+    'A tua resposta': 'Ta réponse',
+    'Enviar resposta': 'Envoyer la réponse',
+    'A enviar resposta...': 'Envoi de la réponse...',
+    'Feedback': 'Retour',
+    'Pendente': 'En attente',
+    'Sincronizado': 'Synchronisé',
+    'Falhou': 'Échec',
+    'Rascunho': 'Brouillon',
+    'Em revisão': 'En révision',
+    'Aprovada': 'Approuvée',
+    'Rejeitada': 'Rejetée',
+    'Equipa DailyTalk.pt': 'Équipe DailyTalk.pt',
+    'Predefinida': 'Prédéfinie',
+    'Comunidade': 'Communauté',
+    'Local': 'Local',
+    'Configura o desafio': 'Configure le défi',
+    'Escolhe o contexto, o idioma, a dificuldade e o tipo de atividade antes de começar.':
+        'Choisis le contexte, la langue, la difficulté et le type d’activité avant de commencer.',
+    'Cenário': 'Scénario',
+    'Dificuldade': 'Difficulté',
+    'Inicial': 'Débutant',
+    'Média': 'Intermédiaire',
+    'Avançada': 'Avancée',
+    'Tipo de atividade': 'Type d’activité',
+    'Iniciar atividade': 'Démarrer l’activité',
+    'A iniciar...': 'Démarrage...',
+    'Indica o cenário da atividade.': 'Indique le scénario de l’activité.',
+    'Escreve a tua resposta': 'Écris ta réponse',
+    'Ex.: resposta ao diálogo, quiz ou atividade...':
+        'Ex. : réponse au dialogue, quiz ou activité...',
+    'Submeter atividade': 'Envoyer l’activité',
+    'A submeter...': 'Envoi...',
+    'Nota privada guardada apenas neste dispositivo.':
+        'Note privée enregistrée uniquement sur cet appareil.',
+    'Nova nota privada': 'Nouvelle note privée',
+    'Título': 'Titre',
+    'Conteúdo': 'Contenu',
+    'Guardar nota': 'Enregistrer la note',
+    'Apagar': 'Supprimer',
+    'Sem notas privadas.': 'Aucune note privée.',
+    'Fechar': 'Fermer',
+    'DailyTalk.pt — Ajuda': 'DailyTalk.pt — Aide',
+    'DailyTalk.pt — Sobre': 'DailyTalk.pt — À propos',
   };
 
   static const Map<String, String> _it = {
-    'Serious game para aprendizagem de idiomas': 'Serious game per l’apprendimento delle lingue',
-    'Pratica diálogos antes da mobilidade escolar': 'Esercitati con i dialoghi prima della mobilità scolastica',
-    'Podes experimentar sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.': 'Puoi provare senza un account. Per salvare i progressi e sincronizzarli, accedi o crea un account.',
-    'Testar agora': 'Prova ora', 'Entrar': 'Accedi', 'Criar conta': 'Crea account',
+    'Serious game para aprendizagem de idiomas':
+        'Serious game per l’apprendimento delle lingue',
+    'Pratica diálogos antes da mobilidade escolar':
+        'Esercitati con i dialoghi prima della mobilità scolastica',
+    'Podes experimentar sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.':
+        'Puoi provare senza un account. Per salvare i progressi e sincronizzarli, accedi o crea un account.',
+    'Testar agora': 'Prova ora',
+    'Entrar': 'Accedi',
+    'Criar conta': 'Crea account',
     'Aceder à tua conta': 'Accedi al tuo account',
-    'Guarda progresso, resultados e sincroniza entre dispositivos.': 'Salva progressi e risultati e sincronizzali tra i dispositivi.',
-    'Password': 'Password', 'Palavra-passe': 'Password', 'Esqueci a palavra-passe': 'Ho dimenticato la password',
-    'A entrar...': 'Accesso...', 'Ainda não tens conta?': 'Non hai ancora un account?', 'Continuar com Google': 'Continua con Google', 'ou': 'oppure',
+    'Guarda progresso, resultados e sincroniza entre dispositivos.':
+        'Salva progressi e risultati e sincronizzali tra i dispositivi.',
+    'Password': 'Password',
+    'Palavra-passe': 'Password',
+    'Esqueci a palavra-passe': 'Ho dimenticato la password',
+    'A entrar...': 'Accesso...',
+    'Ainda não tens conta?': 'Non hai ancora un account?',
+    'Continuar com Google': 'Continua con Google',
+    'ou': 'oppure',
     'Integração futura': 'Integrazione futura',
-    'Nesta versão de protótipo, o acesso com Google Account ainda não está disponível. A funcionalidade está prevista para uma versão futura, permitindo uma autenticação mais rápida e segura.': 'In questa versione del prototipo, l’accesso con Google Account non è ancora disponibile. La funzione è prevista per una versione futura e consentirà un’autenticazione più rapida e sicura.',
-    'Compreendi': 'Ho capito', 'Indica um email válido.': 'Inserisci un indirizzo e-mail valido.', 'Indica a password.': 'Inserisci la password.',
-    'Mostrar password': 'Mostra password', 'Ocultar password': 'Nascondi password',
-    'Cria o teu perfil': 'Crea il tuo profilo', 'Nome': 'Nome', 'Indica o nome.': 'Inserisci il nome.',
-    'A password deve ter pelo menos 6 caracteres.': 'La password deve contenere almeno 6 caratteri.',
-    'Perfil inicial': 'Profilo iniziale', 'Estudante': 'Studente', 'Anfitrião': 'Ospitante', 'Professor': 'Insegnante', 'A criar...': 'Creazione...',
-    'Recuperar palavra-passe': 'Recupera password', 'Indica o e-mail associado à tua conta.': 'Inserisci l’e-mail associata al tuo account.',
-    'Enviar código': 'Invia codice', 'A enviar...': 'Invio...', 'Código enviado': 'Codice inviato',
-    'Definir nova palavra-passe': 'Imposta nuova password', 'Código temporário': 'Codice temporaneo', 'Nova password': 'Nuova password',
-    'Confirmar password': 'Conferma password', 'As passwords não coincidem.': 'Le password non coincidono.',
-    'Alterar password': 'Cambia password', 'A alterar...': 'Modifica...', 'Password alterada com sucesso.': 'Password modificata con successo.',
-    'Modo teste · progresso não guardado': 'Modalità test · progressi non salvati',
-    'UNIDADE 5': 'UNITÀ 5', 'Tema: Comunicação e amizades': 'Tema: Comunicazione e amicizie',
-    '3 de 6 atividades concluídas': '3 attività su 6 completate', 'MAPA DE ATIVIDADES': 'MAPPA DELLE ATTIVITÀ',
-    'Vocabulário': 'Vocabolario', 'Áudio': 'Audio', 'Diálogo': 'Dialogo', 'Revisão': 'Ripasso', 'Desafio Final': 'Sfida finale',
-    'Atalhos': 'Scorciatoie', 'Home': 'Home', 'Praticar': 'Pratica', 'Resultados': 'Risultati', 'Meus Resultados': 'I miei risultati',
-    'Análises': 'Analisi', 'Ajustes': 'Impostazioni',
-    'Responde a atividades predefinidas e melhora a tua comunicação.': 'Completa attività predefinite e migliora la tua comunicazione.',
-    'Consulta o teu histórico de atividades e pontuações.': 'Consulta la cronologia delle attività e dei punteggi.',
-    'Consulta métricas de aprendizagem e acompanhamento pedagógico.': 'Consulta le metriche di apprendimento e monitoraggio pedagogico.',
-    'Configura a aplicação e acede a opções secundárias.': 'Configura l’applicazione e accedi alle opzioni secondarie.',
-    'Voltar': 'Indietro', 'Conta': 'Account', 'Perfil': 'Profilo', 'Criar atividade': 'Crea attività', 'Minhas atividades': 'Le mie attività',
-    'Notas privadas': 'Note private', 'Sincronizar': 'Sincronizza', 'Ajuda': 'Aiuto', 'Sobre': 'Informazioni',
-    'Preferências locais': 'Preferenze locali', 'Funcionalidades com conta': 'Funzioni con account', 'Conta necessária': 'Account necessario',
-    'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.': 'Questa funzione richiede un account per salvare e sincronizzare i tuoi dati.',
-    'Continuar a testar': 'Continua a provare', 'Sincronização concluída.': 'Sincronizzazione completata.',
+    'Nesta versão de protótipo, o acesso com Google Account ainda não está disponível. A funcionalidade está prevista para uma versão futura, permitindo uma autenticação mais rápida e segura.':
+        'In questa versione del prototipo, l’accesso con Google Account non è ancora disponibile. La funzione è prevista per una versione futura e consentirà un’autenticazione più rapida e sicura.',
+    'Compreendi': 'Ho capito',
+    'Indica um email válido.': 'Inserisci un indirizzo e-mail valido.',
+    'Indica a password.': 'Inserisci la password.',
+    'Mostrar password': 'Mostra password',
+    'Ocultar password': 'Nascondi password',
+    'Cria o teu perfil': 'Crea il tuo profilo',
+    'Nome': 'Nome',
+    'Indica o nome.': 'Inserisci il nome.',
+    'A password deve ter pelo menos 6 caracteres.':
+        'La password deve contenere almeno 6 caratteri.',
+    'Perfil inicial': 'Profilo iniziale',
+    'Estudante': 'Studente',
+    'Anfitrião': 'Ospitante',
+    'Professor': 'Insegnante',
+    'A criar...': 'Creazione...',
+    'Recuperar palavra-passe': 'Recupera password',
+    'Indica o e-mail associado à tua conta.':
+        'Inserisci l’e-mail associata al tuo account.',
+    'Enviar código': 'Invia codice',
+    'A enviar...': 'Invio...',
+    'Código enviado': 'Codice inviato',
+    'Definir nova palavra-passe': 'Imposta nuova password',
+    'Código temporário': 'Codice temporaneo',
+    'Nova password': 'Nuova password',
+    'Confirmar password': 'Conferma password',
+    'As passwords não coincidem.': 'Le password non coincidono.',
+    'Alterar password': 'Cambia password',
+    'A alterar...': 'Modifica...',
+    'Password alterada com sucesso.': 'Password modificata con successo.',
+    'Modo teste · progresso não guardado':
+        'Modalità test · progressi non salvati',
+    'UNIDADE 5': 'UNITÀ 5',
+    'Tema: Comunicação e amizades': 'Tema: Comunicazione e amicizie',
+    '3 de 6 atividades concluídas': '3 attività su 6 completate',
+    'MAPA DE ATIVIDADES': 'MAPPA DELLE ATTIVITÀ',
+    'Vocabulário': 'Vocabolario',
+    'Áudio': 'Audio',
+    'Diálogo': 'Dialogo',
+    'Revisão': 'Ripasso',
+    'Desafio Final': 'Sfida finale',
+    'Atalhos': 'Scorciatoie',
+    'Home': 'Home',
+    'Praticar': 'Pratica',
+    'Resultados': 'Risultati',
+    'Meus Resultados': 'I miei risultati',
+    'Análises': 'Analisi',
+    'Ajustes': 'Impostazioni',
+    'Responde a atividades predefinidas e melhora a tua comunicação.':
+        'Completa attività predefinite e migliora la tua comunicazione.',
+    'Consulta o teu histórico de atividades e pontuações.':
+        'Consulta la cronologia delle attività e dei punteggi.',
+    'Consulta métricas de aprendizagem e acompanhamento pedagógico.':
+        'Consulta le metriche di apprendimento e monitoraggio pedagogico.',
+    'Configura a aplicação e acede a opções secundárias.':
+        'Configura l’applicazione e accedi alle opzioni secondarie.',
+    'Voltar': 'Indietro',
+    'Conta': 'Account',
+    'Perfil': 'Profilo',
+    'Criar atividade': 'Crea attività',
+    'Minhas atividades': 'Le mie attività',
+    'Notas privadas': 'Note private',
+    'Sincronizar': 'Sincronizza',
+    'Ajuda': 'Aiuto',
+    'Sobre': 'Informazioni',
+    'Preferências locais': 'Preferenze locali',
+    'Funcionalidades com conta': 'Funzioni con account',
+    'Conta necessária': 'Account necessario',
+    'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.':
+        'Questa funzione richiede un account per salvare e sincronizzare i tuoi dati.',
+    'Continuar a testar': 'Continua a provare',
+    'Sincronização concluída.': 'Sincronizzazione completata.',
     'Estás em modo teste': 'Sei in modalità test',
-    'Podes experimentar a aplicação e alterar preferências locais. Entra ou cria uma conta para guardar e sincronizar o progresso.': 'Puoi provare l’applicazione e modificare le preferenze locali. Accedi o crea un account per salvare e sincronizzare i progressi.',
+    'Podes experimentar a aplicação e alterar preferências locais. Entra ou cria uma conta para guardar e sincronizar o progresso.':
+        'Puoi provare l’applicazione e modificare le preferenze locali. Accedi o crea un account per salvare e sincronizzare i progressi.',
     'Ainda não entraste': 'Non hai ancora effettuato l’accesso',
-    'Entra ou cria uma conta para guardar progresso, resultados e preferências.': 'Accedi o crea un account per salvare progressi, risultati e preferenze.',
-    'Sessão não encontrada': 'Sessione non trovata', 'Não foi possível carregar os dados da conta.': 'Impossibile caricare i dati dell’account.',
-    'Dados da conta': 'Dati dell’account', 'Terminar sessão': 'Esci',
-    'Idioma da aplicação': 'Lingua dell’applicazione', 'Idioma a praticar': 'Lingua da praticare', 'Escolhe os idiomas': 'Scegli le lingue',
-    'Define o idioma da interface e o idioma que queres praticar.': 'Imposta la lingua dell’interfaccia e la lingua che vuoi praticare.',
-    'Em modo teste, estas preferências ficam apenas neste dispositivo.': 'In modalità test, queste preferenze restano solo su questo dispositivo.',
-    'Idioma da aplicação e idioma a praticar devem ser diferentes.': 'La lingua dell’applicazione e quella da praticare devono essere diverse.',
-    'Escolhe dois idiomas diferentes.': 'Scegli due lingue diverse.', 'Guardar idiomas': 'Salva lingue', 'A guardar...': 'Salvataggio...',
-    'Seleciona o teu perfil': 'Seleziona il tuo profilo', 'Escolhe o papel que melhor representa a tua experiência.': 'Scegli il ruolo che rappresenta meglio la tua esperienza.',
-    'Guardar perfil': 'Salva profilo', 'Resultados temporários': 'Risultati temporanei',
-    'Em modo teste, os resultados ficam apenas nesta sessão. Entra para guardar e sincronizar o histórico.': 'In modalità test, i risultati restano solo in questa sessione. Accedi per salvare e sincronizzare la cronologia.',
-    'Sem resultados disponíveis.': 'Nessun risultato disponibile.', 'Atualizar': 'Aggiorna', 'Análises pedagógicas': 'Analisi pedagogiche',
-    'As análises completas ficam disponíveis depois de entrares numa conta.': 'Le analisi complete sono disponibili dopo l’accesso a un account.',
-    'A carregar...': 'Caricamento...', 'Sem dados para apresentar.': 'Nessun dato da mostrare.',
-    'Atividade': 'Attività', 'Pontuação': 'Punteggio', 'Estado': 'Stato', 'Data': 'Data', 'A tua resposta': 'La tua risposta',
-    'Enviar resposta': 'Invia risposta', 'A enviar resposta...': 'Invio risposta...', 'Feedback': 'Feedback',
-    'Pendente': 'In attesa', 'Sincronizado': 'Sincronizzato', 'Falhou': 'Non riuscito', 'Rascunho': 'Bozza', 'Em revisão': 'In revisione',
-    'Aprovada': 'Approvata', 'Rejeitada': 'Rifiutata', 'Equipa DailyTalk.pt': 'Team DailyTalk.pt', 'Predefinida': 'Predefinita',
-    'Comunidade': 'Comunità', 'Local': 'Locale', 'Configura o desafio': 'Configura la sfida',
-    'Escolhe o contexto, o idioma, a dificuldade e o tipo de atividade antes de começar.': 'Scegli il contesto, la lingua, la difficoltà e il tipo di attività prima di iniziare.',
-    'Cenário': 'Scenario', 'Dificuldade': 'Difficoltà', 'Inicial': 'Iniziale', 'Média': 'Media', 'Avançada': 'Avanzata',
-    'Tipo de atividade': 'Tipo di attività', 'Iniciar atividade': 'Avvia attività', 'A iniciar...': 'Avvio...',
-    'Indica o cenário da atividade.': 'Indica lo scenario dell’attività.', 'Escreve a tua resposta': 'Scrivi la tua risposta',
-    'Ex.: resposta ao diálogo, quiz ou atividade...': 'Es.: risposta al dialogo, quiz o attività...', 'Submeter atividade': 'Invia attività',
-    'A submeter...': 'Invio...', 'Nota privada guardada apenas neste dispositivo.': 'Nota privata salvata solo su questo dispositivo.',
-    'Nova nota privada': 'Nuova nota privata', 'Título': 'Titolo', 'Conteúdo': 'Contenuto', 'Guardar nota': 'Salva nota', 'Apagar': 'Elimina',
-    'Sem notas privadas.': 'Nessuna nota privata.', 'Fechar': 'Chiudi', 'DailyTalk.pt — Ajuda': 'DailyTalk.pt — Aiuto', 'DailyTalk.pt — Sobre': 'DailyTalk.pt — Informazioni',
+    'Entra ou cria uma conta para guardar progresso, resultados e preferências.':
+        'Accedi o crea un account per salvare progressi, risultati e preferenze.',
+    'Sessão não encontrada': 'Sessione non trovata',
+    'Não foi possível carregar os dados da conta.':
+        'Impossibile caricare i dati dell’account.',
+    'Dados da conta': 'Dati dell’account',
+    'Terminar sessão': 'Esci',
+    'Idioma da aplicação': 'Lingua dell’applicazione',
+    'Idioma a praticar': 'Lingua da praticare',
+    'Escolhe os idiomas': 'Scegli le lingue',
+    'Define o idioma da interface e o idioma que queres praticar.':
+        'Imposta la lingua dell’interfaccia e la lingua che vuoi praticare.',
+    'Em modo teste, estas preferências ficam apenas neste dispositivo.':
+        'In modalità test, queste preferenze restano solo su questo dispositivo.',
+    'Idioma da aplicação e idioma a praticar devem ser diferentes.':
+        'La lingua dell’applicazione e quella da praticare devono essere diverse.',
+    'Escolhe dois idiomas diferentes.': 'Scegli due lingue diverse.',
+    'Guardar idiomas': 'Salva lingue',
+    'A guardar...': 'Salvataggio...',
+    'Seleciona o teu perfil': 'Seleziona il tuo profilo',
+    'Escolhe o papel que melhor representa a tua experiência.':
+        'Scegli il ruolo che rappresenta meglio la tua esperienza.',
+    'Guardar perfil': 'Salva profilo',
+    'Resultados temporários': 'Risultati temporanei',
+    'Em modo teste, os resultados ficam apenas nesta sessão. Entra para guardar e sincronizar o histórico.':
+        'In modalità test, i risultati restano solo in questa sessione. Accedi per salvare e sincronizzare la cronologia.',
+    'Sem resultados disponíveis.': 'Nessun risultato disponibile.',
+    'Atualizar': 'Aggiorna',
+    'Análises pedagógicas': 'Analisi pedagogiche',
+    'As análises completas ficam disponíveis depois de entrares numa conta.':
+        'Le analisi complete sono disponibili dopo l’accesso a un account.',
+    'A carregar...': 'Caricamento...',
+    'Sem dados para apresentar.': 'Nessun dato da mostrare.',
+    'Atividade': 'Attività',
+    'Pontuação': 'Punteggio',
+    'Estado': 'Stato',
+    'Data': 'Data',
+    'A tua resposta': 'La tua risposta',
+    'Enviar resposta': 'Invia risposta',
+    'A enviar resposta...': 'Invio risposta...',
+    'Feedback': 'Feedback',
+    'Pendente': 'In attesa',
+    'Sincronizado': 'Sincronizzato',
+    'Falhou': 'Non riuscito',
+    'Rascunho': 'Bozza',
+    'Em revisão': 'In revisione',
+    'Aprovada': 'Approvata',
+    'Rejeitada': 'Rifiutata',
+    'Equipa DailyTalk.pt': 'Team DailyTalk.pt',
+    'Predefinida': 'Predefinita',
+    'Comunidade': 'Comunità',
+    'Local': 'Locale',
+    'Configura o desafio': 'Configura la sfida',
+    'Escolhe o contexto, o idioma, a dificuldade e o tipo de atividade antes de começar.':
+        'Scegli il contesto, la lingua, la difficoltà e il tipo di attività prima di iniziare.',
+    'Cenário': 'Scenario',
+    'Dificuldade': 'Difficoltà',
+    'Inicial': 'Iniziale',
+    'Média': 'Media',
+    'Avançada': 'Avanzata',
+    'Tipo de atividade': 'Tipo di attività',
+    'Iniciar atividade': 'Avvia attività',
+    'A iniciar...': 'Avvio...',
+    'Indica o cenário da atividade.': 'Indica lo scenario dell’attività.',
+    'Escreve a tua resposta': 'Scrivi la tua risposta',
+    'Ex.: resposta ao diálogo, quiz ou atividade...':
+        'Es.: risposta al dialogo, quiz o attività...',
+    'Submeter atividade': 'Invia attività',
+    'A submeter...': 'Invio...',
+    'Nota privada guardada apenas neste dispositivo.':
+        'Nota privata salvata solo su questo dispositivo.',
+    'Nova nota privada': 'Nuova nota privata',
+    'Título': 'Titolo',
+    'Conteúdo': 'Contenuto',
+    'Guardar nota': 'Salva nota',
+    'Apagar': 'Elimina',
+    'Sem notas privadas.': 'Nessuna nota privata.',
+    'Fechar': 'Chiudi',
+    'DailyTalk.pt — Ajuda': 'DailyTalk.pt — Aiuto',
+    'DailyTalk.pt — Sobre': 'DailyTalk.pt — Informazioni',
   };
 
   static const Map<String, String> _de = {
-    'Serious game para aprendizagem de idiomas': 'Serious Game zum Sprachenlernen',
-    'Pratica diálogos antes da mobilidade escolar': 'Übe Dialoge vor dem schulischen Austausch',
-    'Podes experimentar sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.': 'Du kannst die App ohne Konto ausprobieren. Um den Fortschritt zu speichern und zu synchronisieren, melde dich an oder erstelle ein Konto.',
-    'Testar agora': 'Jetzt testen', 'Entrar': 'Anmelden', 'Criar conta': 'Konto erstellen',
+    'Serious game para aprendizagem de idiomas':
+        'Serious Game zum Sprachenlernen',
+    'Pratica diálogos antes da mobilidade escolar':
+        'Übe Dialoge vor dem schulischen Austausch',
+    'Podes experimentar sem conta. Para guardar progresso e sincronizar, entra ou cria uma conta.':
+        'Du kannst die App ohne Konto ausprobieren. Um den Fortschritt zu speichern und zu synchronisieren, melde dich an oder erstelle ein Konto.',
+    'Testar agora': 'Jetzt testen',
+    'Entrar': 'Anmelden',
+    'Criar conta': 'Konto erstellen',
     'Aceder à tua conta': 'Auf dein Konto zugreifen',
-    'Guarda progresso, resultados e sincroniza entre dispositivos.': 'Speichere Fortschritt und Ergebnisse und synchronisiere sie zwischen Geräten.',
-    'Password': 'Passwort', 'Palavra-passe': 'Passwort', 'Esqueci a palavra-passe': 'Passwort vergessen',
-    'A entrar...': 'Anmeldung...', 'Ainda não tens conta?': 'Noch kein Konto?', 'Continuar com Google': 'Mit Google fortfahren', 'ou': 'oder',
+    'Guarda progresso, resultados e sincroniza entre dispositivos.':
+        'Speichere Fortschritt und Ergebnisse und synchronisiere sie zwischen Geräten.',
+    'Password': 'Passwort',
+    'Palavra-passe': 'Passwort',
+    'Esqueci a palavra-passe': 'Passwort vergessen',
+    'A entrar...': 'Anmeldung...',
+    'Ainda não tens conta?': 'Noch kein Konto?',
+    'Continuar com Google': 'Mit Google fortfahren',
+    'ou': 'oder',
     'Integração futura': 'Zukünftige Integration',
-    'Nesta versão de protótipo, o acesso com Google Account ainda não está disponível. A funcionalidade está prevista para uma versão futura, permitindo uma autenticação mais rápida e segura.': 'In dieser Prototypversion ist die Anmeldung mit einem Google Account noch nicht verfügbar. Die Funktion ist für eine spätere Version vorgesehen und ermöglicht eine schnellere und sicherere Authentifizierung.',
-    'Compreendi': 'Verstanden', 'Indica um email válido.': 'Gib eine gültige E-Mail-Adresse ein.', 'Indica a password.': 'Gib das Passwort ein.',
-    'Mostrar password': 'Passwort anzeigen', 'Ocultar password': 'Passwort ausblenden',
-    'Cria o teu perfil': 'Erstelle dein Profil', 'Nome': 'Name', 'Indica o nome.': 'Gib den Namen ein.',
-    'A password deve ter pelo menos 6 caracteres.': 'Das Passwort muss mindestens 6 Zeichen lang sein.',
-    'Perfil inicial': 'Startprofil', 'Estudante': 'Schüler', 'Anfitrião': 'Gastgeber', 'Professor': 'Lehrkraft', 'A criar...': 'Wird erstellt...',
-    'Recuperar palavra-passe': 'Passwort wiederherstellen', 'Indica o e-mail associado à tua conta.': 'Gib die mit deinem Konto verknüpfte E-Mail-Adresse ein.',
-    'Enviar código': 'Code senden', 'A enviar...': 'Wird gesendet...', 'Código enviado': 'Code gesendet',
-    'Definir nova palavra-passe': 'Neues Passwort festlegen', 'Código temporário': 'Temporärer Code', 'Nova password': 'Neues Passwort',
-    'Confirmar password': 'Passwort bestätigen', 'As passwords não coincidem.': 'Die Passwörter stimmen nicht überein.',
-    'Alterar password': 'Passwort ändern', 'A alterar...': 'Wird geändert...', 'Password alterada com sucesso.': 'Passwort erfolgreich geändert.',
-    'Modo teste · progresso não guardado': 'Testmodus · Fortschritt nicht gespeichert',
-    'UNIDADE 5': 'EINHEIT 5', 'Tema: Comunicação e amizades': 'Thema: Kommunikation und Freundschaften',
-    '3 de 6 atividades concluídas': '3 von 6 Aktivitäten abgeschlossen', 'MAPA DE ATIVIDADES': 'AKTIVITÄTSKARTE',
-    'Vocabulário': 'Wortschatz', 'Áudio': 'Audio', 'Diálogo': 'Dialog', 'Revisão': 'Wiederholung', 'Desafio Final': 'Abschlussaufgabe',
-    'Atalhos': 'Schnellzugriffe', 'Home': 'Start', 'Praticar': 'Üben', 'Resultados': 'Ergebnisse', 'Meus Resultados': 'Meine Ergebnisse',
-    'Análises': 'Analysen', 'Ajustes': 'Einstellungen',
-    'Responde a atividades predefinidas e melhora a tua comunicação.': 'Bearbeite vordefinierte Aktivitäten und verbessere deine Kommunikation.',
-    'Consulta o teu histórico de atividades e pontuações.': 'Sieh dir deinen Aktivitäts- und Punkteverlauf an.',
-    'Consulta métricas de aprendizagem e acompanhamento pedagógico.': 'Sieh dir Lern- und pädagogische Begleitmetriken an.',
-    'Configura a aplicação e acede a opções secundárias.': 'Konfiguriere die App und öffne weitere Optionen.',
-    'Voltar': 'Zurück', 'Conta': 'Konto', 'Perfil': 'Profil', 'Criar atividade': 'Aktivität erstellen', 'Minhas atividades': 'Meine Aktivitäten',
-    'Notas privadas': 'Private Notizen', 'Sincronizar': 'Synchronisieren', 'Ajuda': 'Hilfe', 'Sobre': 'Über',
-    'Preferências locais': 'Lokale Einstellungen', 'Funcionalidades com conta': 'Kontofunktionen', 'Conta necessária': 'Konto erforderlich',
-    'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.': 'Diese Funktion benötigt ein Konto, um deine Daten zu speichern und zu synchronisieren.',
-    'Continuar a testar': 'Weiter testen', 'Sincronização concluída.': 'Synchronisierung abgeschlossen.',
+    'Nesta versão de protótipo, o acesso com Google Account ainda não está disponível. A funcionalidade está prevista para uma versão futura, permitindo uma autenticação mais rápida e segura.':
+        'In dieser Prototypversion ist die Anmeldung mit einem Google Account noch nicht verfügbar. Die Funktion ist für eine spätere Version vorgesehen und ermöglicht eine schnellere und sicherere Authentifizierung.',
+    'Compreendi': 'Verstanden',
+    'Indica um email válido.': 'Gib eine gültige E-Mail-Adresse ein.',
+    'Indica a password.': 'Gib das Passwort ein.',
+    'Mostrar password': 'Passwort anzeigen',
+    'Ocultar password': 'Passwort ausblenden',
+    'Cria o teu perfil': 'Erstelle dein Profil',
+    'Nome': 'Name',
+    'Indica o nome.': 'Gib den Namen ein.',
+    'A password deve ter pelo menos 6 caracteres.':
+        'Das Passwort muss mindestens 6 Zeichen lang sein.',
+    'Perfil inicial': 'Startprofil',
+    'Estudante': 'Schüler',
+    'Anfitrião': 'Gastgeber',
+    'Professor': 'Lehrkraft',
+    'A criar...': 'Wird erstellt...',
+    'Recuperar palavra-passe': 'Passwort wiederherstellen',
+    'Indica o e-mail associado à tua conta.':
+        'Gib die mit deinem Konto verknüpfte E-Mail-Adresse ein.',
+    'Enviar código': 'Code senden',
+    'A enviar...': 'Wird gesendet...',
+    'Código enviado': 'Code gesendet',
+    'Definir nova palavra-passe': 'Neues Passwort festlegen',
+    'Código temporário': 'Temporärer Code',
+    'Nova password': 'Neues Passwort',
+    'Confirmar password': 'Passwort bestätigen',
+    'As passwords não coincidem.': 'Die Passwörter stimmen nicht überein.',
+    'Alterar password': 'Passwort ändern',
+    'A alterar...': 'Wird geändert...',
+    'Password alterada com sucesso.': 'Passwort erfolgreich geändert.',
+    'Modo teste · progresso não guardado':
+        'Testmodus · Fortschritt nicht gespeichert',
+    'UNIDADE 5': 'EINHEIT 5',
+    'Tema: Comunicação e amizades': 'Thema: Kommunikation und Freundschaften',
+    '3 de 6 atividades concluídas': '3 von 6 Aktivitäten abgeschlossen',
+    'MAPA DE ATIVIDADES': 'AKTIVITÄTSKARTE',
+    'Vocabulário': 'Wortschatz',
+    'Áudio': 'Audio',
+    'Diálogo': 'Dialog',
+    'Revisão': 'Wiederholung',
+    'Desafio Final': 'Abschlussaufgabe',
+    'Atalhos': 'Schnellzugriffe',
+    'Home': 'Start',
+    'Praticar': 'Üben',
+    'Resultados': 'Ergebnisse',
+    'Meus Resultados': 'Meine Ergebnisse',
+    'Análises': 'Analysen',
+    'Ajustes': 'Einstellungen',
+    'Responde a atividades predefinidas e melhora a tua comunicação.':
+        'Bearbeite vordefinierte Aktivitäten und verbessere deine Kommunikation.',
+    'Consulta o teu histórico de atividades e pontuações.':
+        'Sieh dir deinen Aktivitäts- und Punkteverlauf an.',
+    'Consulta métricas de aprendizagem e acompanhamento pedagógico.':
+        'Sieh dir Lern- und pädagogische Begleitmetriken an.',
+    'Configura a aplicação e acede a opções secundárias.':
+        'Konfiguriere die App und öffne weitere Optionen.',
+    'Voltar': 'Zurück',
+    'Conta': 'Konto',
+    'Perfil': 'Profil',
+    'Criar atividade': 'Aktivität erstellen',
+    'Minhas atividades': 'Meine Aktivitäten',
+    'Notas privadas': 'Private Notizen',
+    'Sincronizar': 'Synchronisieren',
+    'Ajuda': 'Hilfe',
+    'Sobre': 'Über',
+    'Preferências locais': 'Lokale Einstellungen',
+    'Funcionalidades com conta': 'Kontofunktionen',
+    'Conta necessária': 'Konto erforderlich',
+    'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.':
+        'Diese Funktion benötigt ein Konto, um deine Daten zu speichern und zu synchronisieren.',
+    'Continuar a testar': 'Weiter testen',
+    'Sincronização concluída.': 'Synchronisierung abgeschlossen.',
     'Estás em modo teste': 'Du bist im Testmodus',
-    'Podes experimentar a aplicação e alterar preferências locais. Entra ou cria uma conta para guardar e sincronizar o progresso.': 'Du kannst die App ausprobieren und lokale Einstellungen ändern. Melde dich an oder erstelle ein Konto, um deinen Fortschritt zu speichern und zu synchronisieren.',
+    'Podes experimentar a aplicação e alterar preferências locais. Entra ou cria uma conta para guardar e sincronizar o progresso.':
+        'Du kannst die App ausprobieren und lokale Einstellungen ändern. Melde dich an oder erstelle ein Konto, um deinen Fortschritt zu speichern und zu synchronisieren.',
     'Ainda não entraste': 'Du bist noch nicht angemeldet',
-    'Entra ou cria uma conta para guardar progresso, resultados e preferências.': 'Melde dich an oder erstelle ein Konto, um Fortschritt, Ergebnisse und Einstellungen zu speichern.',
-    'Sessão não encontrada': 'Sitzung nicht gefunden', 'Não foi possível carregar os dados da conta.': 'Die Kontodaten konnten nicht geladen werden.',
-    'Dados da conta': 'Kontodaten', 'Terminar sessão': 'Abmelden',
-    'Idioma da aplicação': 'App-Sprache', 'Idioma a praticar': 'Übungssprache', 'Escolhe os idiomas': 'Wähle die Sprachen',
-    'Define o idioma da interface e o idioma que queres praticar.': 'Lege die Sprache der Benutzeroberfläche und die Sprache fest, die du üben möchtest.',
-    'Em modo teste, estas preferências ficam apenas neste dispositivo.': 'Im Testmodus bleiben diese Einstellungen nur auf diesem Gerät.',
-    'Idioma da aplicação e idioma a praticar devem ser diferentes.': 'App-Sprache und Übungssprache müssen unterschiedlich sein.',
-    'Escolhe dois idiomas diferentes.': 'Wähle zwei unterschiedliche Sprachen.', 'Guardar idiomas': 'Sprachen speichern', 'A guardar...': 'Wird gespeichert...',
-    'Seleciona o teu perfil': 'Wähle dein Profil', 'Escolhe o papel que melhor representa a tua experiência.': 'Wähle die Rolle, die deine Erfahrung am besten beschreibt.',
-    'Guardar perfil': 'Profil speichern', 'Resultados temporários': 'Temporäre Ergebnisse',
-    'Em modo teste, os resultados ficam apenas nesta sessão. Entra para guardar e sincronizar o histórico.': 'Im Testmodus bleiben die Ergebnisse nur in dieser Sitzung. Melde dich an, um den Verlauf zu speichern und zu synchronisieren.',
-    'Sem resultados disponíveis.': 'Keine Ergebnisse verfügbar.', 'Atualizar': 'Aktualisieren', 'Análises pedagógicas': 'Pädagogische Analysen',
-    'As análises completas ficam disponíveis depois de entrares numa conta.': 'Vollständige Analysen sind nach der Anmeldung bei einem Konto verfügbar.',
-    'A carregar...': 'Wird geladen...', 'Sem dados para apresentar.': 'Keine Daten zum Anzeigen.',
-    'Atividade': 'Aktivität', 'Pontuação': 'Punktzahl', 'Estado': 'Status', 'Data': 'Datum', 'A tua resposta': 'Deine Antwort',
-    'Enviar resposta': 'Antwort senden', 'A enviar resposta...': 'Antwort wird gesendet...', 'Feedback': 'Rückmeldung',
-    'Pendente': 'Ausstehend', 'Sincronizado': 'Synchronisiert', 'Falhou': 'Fehlgeschlagen', 'Rascunho': 'Entwurf', 'Em revisão': 'In Prüfung',
-    'Aprovada': 'Genehmigt', 'Rejeitada': 'Abgelehnt', 'Equipa DailyTalk.pt': 'DailyTalk.pt-Team', 'Predefinida': 'Vordefiniert',
-    'Comunidade': 'Community', 'Local': 'Lokal', 'Configura o desafio': 'Konfiguriere die Aufgabe',
-    'Escolhe o contexto, o idioma, a dificuldade e o tipo de atividade antes de começar.': 'Wähle vor dem Start Kontext, Sprache, Schwierigkeit und Aktivitätstyp.',
-    'Cenário': 'Szenario', 'Dificuldade': 'Schwierigkeit', 'Inicial': 'Anfänger', 'Média': 'Mittel', 'Avançada': 'Fortgeschritten',
-    'Tipo de atividade': 'Aktivitätstyp', 'Iniciar atividade': 'Aktivität starten', 'A iniciar...': 'Wird gestartet...',
-    'Indica o cenário da atividade.': 'Gib das Szenario der Aktivität an.', 'Escreve a tua resposta': 'Schreibe deine Antwort',
-    'Ex.: resposta ao diálogo, quiz ou atividade...': 'Z. B. Antwort auf Dialog, Quiz oder Aktivität...', 'Submeter atividade': 'Aktivität senden',
-    'A submeter...': 'Wird gesendet...', 'Nota privada guardada apenas neste dispositivo.': 'Private Notiz nur auf diesem Gerät gespeichert.',
-    'Nova nota privada': 'Neue private Notiz', 'Título': 'Titel', 'Conteúdo': 'Inhalt', 'Guardar nota': 'Notiz speichern', 'Apagar': 'Löschen',
-    'Sem notas privadas.': 'Keine privaten Notizen.', 'Fechar': 'Schließen', 'DailyTalk.pt — Ajuda': 'DailyTalk.pt — Hilfe', 'DailyTalk.pt — Sobre': 'DailyTalk.pt — Über',
+    'Entra ou cria uma conta para guardar progresso, resultados e preferências.':
+        'Melde dich an oder erstelle ein Konto, um Fortschritt, Ergebnisse und Einstellungen zu speichern.',
+    'Sessão não encontrada': 'Sitzung nicht gefunden',
+    'Não foi possível carregar os dados da conta.':
+        'Die Kontodaten konnten nicht geladen werden.',
+    'Dados da conta': 'Kontodaten',
+    'Terminar sessão': 'Abmelden',
+    'Idioma da aplicação': 'App-Sprache',
+    'Idioma a praticar': 'Übungssprache',
+    'Escolhe os idiomas': 'Wähle die Sprachen',
+    'Define o idioma da interface e o idioma que queres praticar.':
+        'Lege die Sprache der Benutzeroberfläche und die Sprache fest, die du üben möchtest.',
+    'Em modo teste, estas preferências ficam apenas neste dispositivo.':
+        'Im Testmodus bleiben diese Einstellungen nur auf diesem Gerät.',
+    'Idioma da aplicação e idioma a praticar devem ser diferentes.':
+        'App-Sprache und Übungssprache müssen unterschiedlich sein.',
+    'Escolhe dois idiomas diferentes.': 'Wähle zwei unterschiedliche Sprachen.',
+    'Guardar idiomas': 'Sprachen speichern',
+    'A guardar...': 'Wird gespeichert...',
+    'Seleciona o teu perfil': 'Wähle dein Profil',
+    'Escolhe o papel que melhor representa a tua experiência.':
+        'Wähle die Rolle, die deine Erfahrung am besten beschreibt.',
+    'Guardar perfil': 'Profil speichern',
+    'Resultados temporários': 'Temporäre Ergebnisse',
+    'Em modo teste, os resultados ficam apenas nesta sessão. Entra para guardar e sincronizar o histórico.':
+        'Im Testmodus bleiben die Ergebnisse nur in dieser Sitzung. Melde dich an, um den Verlauf zu speichern und zu synchronisieren.',
+    'Sem resultados disponíveis.': 'Keine Ergebnisse verfügbar.',
+    'Atualizar': 'Aktualisieren',
+    'Análises pedagógicas': 'Pädagogische Analysen',
+    'As análises completas ficam disponíveis depois de entrares numa conta.':
+        'Vollständige Analysen sind nach der Anmeldung bei einem Konto verfügbar.',
+    'A carregar...': 'Wird geladen...',
+    'Sem dados para apresentar.': 'Keine Daten zum Anzeigen.',
+    'Atividade': 'Aktivität',
+    'Pontuação': 'Punktzahl',
+    'Estado': 'Status',
+    'Data': 'Datum',
+    'A tua resposta': 'Deine Antwort',
+    'Enviar resposta': 'Antwort senden',
+    'A enviar resposta...': 'Antwort wird gesendet...',
+    'Feedback': 'Rückmeldung',
+    'Pendente': 'Ausstehend',
+    'Sincronizado': 'Synchronisiert',
+    'Falhou': 'Fehlgeschlagen',
+    'Rascunho': 'Entwurf',
+    'Em revisão': 'In Prüfung',
+    'Aprovada': 'Genehmigt',
+    'Rejeitada': 'Abgelehnt',
+    'Equipa DailyTalk.pt': 'DailyTalk.pt-Team',
+    'Predefinida': 'Vordefiniert',
+    'Comunidade': 'Community',
+    'Local': 'Lokal',
+    'Configura o desafio': 'Konfiguriere die Aufgabe',
+    'Escolhe o contexto, o idioma, a dificuldade e o tipo de atividade antes de começar.':
+        'Wähle vor dem Start Kontext, Sprache, Schwierigkeit und Aktivitätstyp.',
+    'Cenário': 'Szenario',
+    'Dificuldade': 'Schwierigkeit',
+    'Inicial': 'Anfänger',
+    'Média': 'Mittel',
+    'Avançada': 'Fortgeschritten',
+    'Tipo de atividade': 'Aktivitätstyp',
+    'Iniciar atividade': 'Aktivität starten',
+    'A iniciar...': 'Wird gestartet...',
+    'Indica o cenário da atividade.': 'Gib das Szenario der Aktivität an.',
+    'Escreve a tua resposta': 'Schreibe deine Antwort',
+    'Ex.: resposta ao diálogo, quiz ou atividade...':
+        'Z. B. Antwort auf Dialog, Quiz oder Aktivität...',
+    'Submeter atividade': 'Aktivität senden',
+    'A submeter...': 'Wird gesendet...',
+    'Nota privada guardada apenas neste dispositivo.':
+        'Private Notiz nur auf diesem Gerät gespeichert.',
+    'Nova nota privada': 'Neue private Notiz',
+    'Título': 'Titel',
+    'Conteúdo': 'Inhalt',
+    'Guardar nota': 'Notiz speichern',
+    'Apagar': 'Löschen',
+    'Sem notas privadas.': 'Keine privaten Notizen.',
+    'Fechar': 'Schließen',
+    'DailyTalk.pt — Ajuda': 'DailyTalk.pt — Hilfe',
+    'DailyTalk.pt — Sobre': 'DailyTalk.pt — Über',
   };
 }
 
@@ -1599,7 +2696,9 @@ class AppText extends StatelessWidget {
       overflow: overflow,
       textScaler: textScaler,
       maxLines: maxLines,
-      semanticsLabel: semanticsLabel == null ? null : context.tr(semanticsLabel!),
+      semanticsLabel: semanticsLabel == null
+          ? null
+          : context.tr(semanticsLabel!),
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       selectionColor: selectionColor,

@@ -18,22 +18,17 @@ class LocalPrivateNotesDao {
   }) async {
     final now = DateTime.now().toIso8601String();
 
-    return db.insert(
-      'local_private_notes',
-      {
-        'title': title,
-        'note_text': noteText,
-        'scenario': scenario,
-        'created_at': now,
-        'updated_at': now,
-      },
-    );
+    return db.insert('local_private_notes', {
+      'title': title,
+      'note_text': noteText,
+      'scenario': scenario,
+      'created_at': now,
+      'updated_at': now,
+    });
   }
 
   /// Lista as notas privadas locais mais recentes.
-  Future<List<Map<String, Object?>>> getRecentNotes({
-    int limit = 20,
-  }) async {
+  Future<List<Map<String, Object?>>> getRecentNotes({int limit = 20}) async {
     return db.query(
       'local_private_notes',
       orderBy: 'updated_at DESC',
@@ -63,11 +58,7 @@ class LocalPrivateNotesDao {
 
   /// Apaga uma nota privada local.
   Future<int> deleteNote(int id) async {
-    return db.delete(
-      'local_private_notes',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return db.delete('local_private_notes', where: 'id = ?', whereArgs: [id]);
   }
 
   /// Apaga todas as notas privadas locais.

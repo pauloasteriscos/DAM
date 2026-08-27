@@ -15,10 +15,7 @@ import 'reset_password_page.dart';
 /// - botão principal em gradiente azul;
 /// - rodapé visual decorativo.
 class ForgotPasswordPage extends StatefulWidget {
-  const ForgotPasswordPage({
-    super.key,
-    this.initialEmail,
-  });
+  const ForgotPasswordPage({super.key, this.initialEmail});
 
   final String? initialEmail;
 
@@ -49,7 +46,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     _emailController.dispose();
     super.dispose();
   }
-
 
   String _friendlyErrorMessage(Object error) {
     final message = error.toString();
@@ -142,10 +138,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         titleSpacing: 0,
         title: const AppText(
           'Recuperar palavra-passe',
-          style: TextStyle(
-            fontSize: 23,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 23, fontWeight: FontWeight.w500),
         ),
       ),
       body: Stack(
@@ -268,10 +261,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF52D8FF),
-              Color(0xFF168CFF),
-            ],
+            colors: [Color(0xFF52D8FF), Color(0xFF168CFF)],
           ),
           boxShadow: [
             BoxShadow(
@@ -343,9 +333,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           horizontal: 18,
           vertical: 20,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
           borderSide: BorderSide(
@@ -355,24 +343,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
-          borderSide: const BorderSide(
-            color: _accentColor,
-            width: 1.8,
-          ),
+          borderSide: const BorderSide(color: _accentColor, width: 1.8),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
-          borderSide: const BorderSide(
-            color: Colors.redAccent,
-            width: 1.35,
-          ),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.35),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
-          borderSide: const BorderSide(
-            color: Colors.redAccent,
-            width: 1.8,
-          ),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.8),
         ),
       ),
     );
@@ -394,10 +373,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               : const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF49D7FF),
-                    Color(0xFF168CFF),
-                  ],
+                  colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
                 ),
           boxShadow: _isLoading
               ? []
@@ -420,16 +396,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     color: Colors.white,
                   ),
                 )
-              : const Icon(
-                  Icons.send_outlined,
-                  size: 24,
-                ),
+              : const Icon(Icons.send_outlined, size: 24),
           label: AppText(
             _isLoading ? 'A preparar...' : 'Gerar código de recuperação',
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
           ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -453,9 +423,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.redAccent.withValues(alpha: 0.85),
-        ),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.85)),
       ),
       child: AppText(
         message,

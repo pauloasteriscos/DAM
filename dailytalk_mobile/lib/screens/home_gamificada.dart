@@ -90,14 +90,11 @@ class HomeGamificada extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildHeader(compact: true),
-                    if (isTestMode) _buildTestModeBanner(context, compact: true),
+                    if (isTestMode)
+                      _buildTestModeBanner(context, compact: true),
                     _buildCompactProgressCard(compact: true),
                     _buildMapTitle(compact: true),
-                    _buildActivityMap(
-                      context,
-                      lessons,
-                      compact: true,
-                    ),
+                    _buildActivityMap(context, lessons, compact: true),
                     const SizedBox(height: 10),
                     _buildShortcutsPanel(context),
                   ],
@@ -115,10 +112,7 @@ class HomeGamificada extends StatelessWidget {
                 // O mapa recebe a maior parte da área disponível.
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(
-                      top: 4,
-                      bottom: 18,
-                    ),
+                    padding: const EdgeInsets.only(top: 4, bottom: 18),
                     child: Column(
                       children: [
                         _buildActivityMap(context, lessons),
@@ -139,12 +133,7 @@ class HomeGamificada extends StatelessWidget {
   /// Cabeçalho superior com logo, nome da app e menu.
   Widget _buildHeader({bool compact = false}) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        compact ? 6 : 8,
-        10,
-        compact ? 4 : 8,
-      ),
+      padding: EdgeInsets.fromLTRB(16, compact ? 6 : 8, 10, compact ? 4 : 8),
       child: Row(
         children: [
           Container(
@@ -185,19 +174,13 @@ class HomeGamificada extends StatelessWidget {
     );
   }
 
-
   /// Aviso compacto apresentado quando o utilizador está a experimentar sem conta.
   ///
   /// A informação continua visível, mas deixa de competir com o mapa de
   /// atividades. O objetivo é informar sem quebrar a experiência gamificada.
   Widget _buildTestModeBanner(BuildContext context, {bool compact = false}) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        compact ? 0 : 2,
-        16,
-        compact ? 4 : 6,
-      ),
+      padding: EdgeInsets.fromLTRB(16, compact ? 0 : 2, 16, compact ? 4 : 6),
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.symmetric(
@@ -242,10 +225,7 @@ class HomeGamificada extends StatelessWidget {
               onPressed: () => _goToAuthentication(context),
               style: TextButton.styleFrom(
                 foregroundColor: Colors.lightBlueAccent,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 textStyle: TextStyle(
@@ -271,9 +251,7 @@ class HomeGamificada extends StatelessWidget {
     if (callback == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: AppText(
-            'Volta ao ecrã inicial para entrar ou criar conta.',
-          ),
+          content: AppText('Volta ao ecrã inicial para entrar ou criar conta.'),
         ),
       );
       return;
@@ -282,9 +260,7 @@ class HomeGamificada extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => LoginFormPage(
-          onAuthenticated: callback,
-        ),
+        builder: (context) => LoginFormPage(onAuthenticated: callback),
       ),
     );
   }
@@ -292,12 +268,7 @@ class HomeGamificada extends StatelessWidget {
   /// Cartão azul superior, agora mais compacto.
   Widget _buildCompactProgressCard({bool compact = false}) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        compact ? 6 : 8,
-        16,
-        compact ? 6 : 10,
-      ),
+      padding: EdgeInsets.fromLTRB(16, compact ? 6 : 8, 16, compact ? 6 : 10),
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.fromLTRB(
@@ -407,12 +378,7 @@ class HomeGamificada extends StatelessWidget {
   /// Título visual da área principal de atividades.
   Widget _buildMapTitle({bool compact = false}) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        compact ? 2 : 6,
-        16,
-        compact ? 0 : 4,
-      ),
+      padding: EdgeInsets.fromLTRB(16, compact ? 2 : 6, 16, compact ? 0 : 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -443,95 +409,94 @@ class HomeGamificada extends StatelessWidget {
   }
 
   /// Mapa vertical gamificado.
-///
-/// No mobile, o mapa acompanha a largura disponível.
-/// Na Web/desktop, a largura máxima é limitada para evitar que os nós
-/// fiquem demasiado afastados nas extremidades do ecrã.
-Widget _buildActivityMap(
-  BuildContext context,
-  List<LessonItem> lessons, {
-  bool compact = false,
-}) {
-  return Center(
-    child: ConstrainedBox(
-      constraints: const BoxConstraints(
-        // Ajusta este valor se quiseres o mapa mais aberto ou mais compacto.
-        // 760 mantém os nós alternados, mas visualmente próximos no Web.
-        maxWidth: 760,
-      ),
-      child: Column(
-        children: List.generate(lessons.length, (index) {
-          final lesson = lessons[index];
+  ///
+  /// No mobile, o mapa acompanha a largura disponível.
+  /// Na Web/desktop, a largura máxima é limitada para evitar que os nós
+  /// fiquem demasiado afastados nas extremidades do ecrã.
+  Widget _buildActivityMap(
+    BuildContext context,
+    List<LessonItem> lessons, {
+    bool compact = false,
+  }) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          // Ajusta este valor se quiseres o mapa mais aberto ou mais compacto.
+          // 760 mantém os nós alternados, mas visualmente próximos no Web.
+          maxWidth: 760,
+        ),
+        child: Column(
+          children: List.generate(lessons.length, (index) {
+            final lesson = lessons[index];
 
-          // Alterna entre esquerda e direita para simular um percurso.
-          final alignLeft = index % 2 == 0;
+            // Alterna entre esquerda e direita para simular um percurso.
+            final alignLeft = index % 2 == 0;
 
-          return Padding(
-            padding: EdgeInsets.symmetric(vertical: compact ? 8 : 14),
-            child: Align(
-              alignment:
-                  alignLeft ? Alignment.centerLeft : Alignment.centerRight,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: alignLeft ? (compact ? 28 : 42) : 0,
-                  right: alignLeft ? 0 : (compact ? 28 : 42),
-                ),
-                child: LessonNode(
-                  lesson: lesson,
-                  onTap: () {
-                    if (lesson.type == LessonType.vocabulario) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const VocabularyPairsPage(),
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: compact ? 8 : 14),
+              child: Align(
+                alignment: alignLeft
+                    ? Alignment.centerLeft
+                    : Alignment.centerRight,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: alignLeft ? (compact ? 28 : 42) : 0,
+                    right: alignLeft ? 0 : (compact ? 28 : 42),
+                  ),
+                  child: LessonNode(
+                    lesson: lesson,
+                    onTap: () {
+                      if (lesson.type == LessonType.vocabulario) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const VocabularyPairsPage(),
+                          ),
+                        );
+                        return;
+                      }
+
+                      if (lesson.type == LessonType.dialogo) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const DialoguePage(),
+                          ),
+                        );
+                        return;
+                      }
+
+                      if (lesson.type == LessonType.quiz) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const QuizPage(),
+                          ),
+                        );
+                        return;
+                      }
+
+                      if (lesson.type == LessonType.revisao) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const RevisionPage(),
+                          ),
+                        );
+                        return;
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: AppText('Abrir atividade: ${lesson.title}'),
                         ),
                       );
-                      return;
-                    }
-
-                    if (lesson.type == LessonType.dialogo) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const DialoguePage(),
-                        ),
-                      );
-                      return;
-                    }
-
-                    if (lesson.type == LessonType.quiz) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const QuizPage(),
-                        ),
-                      );
-                      return;
-                    }
-
-                    if (lesson.type == LessonType.revisao) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const RevisionPage(),
-                        ),
-                      );
-                      return;
-                    }
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: AppText(
-                          'Abrir atividade: ${lesson.title}',
-                        ),
-                      ),
-                    );
-                  },
+                    },
+                  ),
                 ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   /// Painel compacto de atalhos e feedback.
   ///
@@ -545,9 +510,7 @@ Widget _buildActivityMap(
         decoration: BoxDecoration(
           color: const Color(0xFF10232D),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: Colors.lightBlue.withValues(alpha: 0.35),
-          ),
+          border: Border.all(color: Colors.lightBlue.withValues(alpha: 0.35)),
         ),
         child: Column(
           children: [
@@ -627,11 +590,9 @@ Widget _buildActivityMap(
   }
 
   void _showShortcutMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: AppText(message),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: AppText(message)));
   }
 }
 
@@ -658,9 +619,7 @@ class _ShortcutButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(14),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: 72,
-          ),
+          constraints: const BoxConstraints(minHeight: 72),
           child: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -671,11 +630,7 @@ class _ShortcutButton extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  color: Colors.lightBlueAccent,
-                  size: 28,
-                ),
+                Icon(icon, color: Colors.lightBlueAccent, size: 28),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(

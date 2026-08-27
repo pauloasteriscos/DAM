@@ -3,7 +3,6 @@ import 'dart:convert';
 import '../api/dailytalk_api_service.dart';
 import '../dao/submission_dao.dart';
 
-/// Resultado da execução de um comando de sincronização.
 class SyncCommandResult {
   const SyncCommandResult({
     required this.success,
@@ -18,107 +17,14 @@ class SyncCommandResult {
   final int failedCount;
 }
 
-/// Interface base para comandos de sincronização.
-///
-/// Cada comando encapsula uma operação que pode ser executada
-/// posteriormente, como reenviar uma submissão pendente.
 abstract class SyncCommand {
   Future<SyncCommandResult> execute();
 }
 
-/// Comando responsável por sincronizar uma submissão pendente.
-class SubmitPendingSubmissionCommand implements SyncCommand {
-  SubmitPendingSubmissionCommand({
-    required this.apiService,
-    required this.submissionDao,
-    required this.submission,
-  });
-
-  final DailyTalkApiService apiService;
-  final SubmissionDao submissionDao;
-  final Map<String, Object?> submission;
-
-  @override
-  Future<SyncCommandResult> execute() async {
-    final submissionId = submission['id'] as int?;
-    final remoteActivityId = submission['remote_activity_id']?.toString();
-    final submissionJson = submission['submission_json']?.toString();
-
-    if (submissionId == null ||
-        remoteActivityId == null ||
-        remoteActivityId.isEmpty ||
-        submissionJson == null ||
-        submissionJson.isEmpty) {
-      return const SyncCommandResult(
-        success: false,
-        message: 'Submissão pendente inválida.',
-        failedCount: 1,
-      );
-    }
-
-    try {
-      final decoded = jsonDecode(submissionJson);
-
-      if (decoded is! Map) {
-        throw Exception('Formato inválido da submissão pendente.');
-      }
-
-      final submissionPayload = Map<String, dynamic>.from(decoded);
-
-      final response = await apiService.submitActivity(
-        activityId: remoteActivityId,
-        submission: submissionPayload,
-      );
-
-      final score = _extractScore(response);
-      final feedbackText = response['feedback']?.toString();
-      final metrics = response['metrics'] is Map
-          ? Map<String, dynamic>.from(response['metrics'] as Map)
-          : null;
-
-      await submissionDao.markAsSyncedWithResult(
-        submissionId: submissionId,
-        remoteActivityId: remoteActivityId,
-        score: score,
-        feedbackText: feedbackText,
-        metrics: metrics,
-      );
-
-      return const SyncCommandResult(
-        success: true,
-        message: 'Submissão sincronizada.',
-        syncedCount: 1,
-      );
-    } catch (error) {
-      await submissionDao.markAsFailed(
-        submissionId: submissionId,
-        error: error.toString(),
-      );
-
-      return SyncCommandResult(
-        success: false,
-        message: error.toString(),
-        failedCount: 1,
-      );
-    }
-  }
-
-  double? _extractScore(Map<String, dynamic> response) {
-    final value = response['score'];
-
-    if (value == null) {
-      return null;
-    }
-
-    if (value is num) {
-      return value.toDouble();
-    }
-
-    return double.tryParse(value.toString());
-  }
-}
-
-/// Comando composto responsável por sincronizar todas as submissões pendentes.
+/// Sincroniza o progresso num único lote assinado e cifrado.
+///
+/// O lote reduz o número de pedidos HTTP e mantém idempotência através do
+/// clientSubmissionId estável de cada registo local.
 class SyncPendingSubmissionsCommand implements SyncCommand {
   SyncPendingSubmissionsCommand({
     required this.apiService,
@@ -128,40 +34,120 @@ class SyncPendingSubmissionsCommand implements SyncCommand {
   final DailyTalkApiService apiService;
   final SubmissionDao submissionDao;
 
-  @override
-  Future<SyncCommandResult> execute() async {
-    final pendingSubmissions = await submissionDao.getPendingSubmissions();
+  static Future<SyncCommandResult>? _activeExecution;
 
-    if (pendingSubmissions.isEmpty) {
+  @override
+  Future<SyncCommandResult> execute() {
+    final active = _activeExecution;
+    if (active != null) return active;
+
+    final execution = _executeOnce();
+    _activeExecution = execution;
+    return execution.whenComplete(() {
+      if (identical(_activeExecution, execution)) {
+        _activeExecution = null;
+      }
+    });
+  }
+
+  Future<SyncCommandResult> _executeOnce() async {
+    final pending = await submissionDao.getPendingSubmissions(limit: 50);
+    if (pending.isEmpty) {
       return const SyncCommandResult(
         success: true,
         message: 'Não existem submissões pendentes para sincronizar.',
       );
     }
 
-    var syncedCount = 0;
-    var failedCount = 0;
+    final validItems = <Map<String, dynamic>>[];
+    final validLocalIds = <int>[];
+    var invalidCount = 0;
 
-    for (final submission in pendingSubmissions) {
-      final command = SubmitPendingSubmissionCommand(
-        apiService: apiService,
-        submissionDao: submissionDao,
-        submission: submission,
-      );
+    for (final row in pending) {
+      final localId = row['id'] as int?;
+      final clientId = row['client_submission_id']?.toString();
+      final remoteActivityId = row['remote_activity_id']?.toString();
+      final rawSubmission = row['submission_json']?.toString();
+      final createdAt = row['created_at']?.toString();
 
-      final result = await command.execute();
+      try {
+        if (localId == null ||
+            clientId == null ||
+            clientId.isEmpty ||
+            remoteActivityId == null ||
+            remoteActivityId.isEmpty ||
+            rawSubmission == null ||
+            rawSubmission.isEmpty ||
+            createdAt == null) {
+          throw const FormatException('Submissão pendente incompleta.');
+        }
+        final decoded = jsonDecode(rawSubmission);
+        if (decoded is! Map) {
+          throw const FormatException('Payload local inválido.');
+        }
 
-      syncedCount += result.syncedCount;
-      failedCount += result.failedCount;
+        validItems.add({
+          'clientSubmissionId': clientId,
+          'remoteActivityId': remoteActivityId,
+          'createdAt': DateTime.parse(createdAt).toUtc().toIso8601String(),
+          'submission': Map<String, dynamic>.from(decoded),
+        });
+        validLocalIds.add(localId);
+      } catch (error) {
+        invalidCount += 1;
+        if (localId != null) {
+          await submissionDao.markAsFailed(
+            submissionId: localId,
+            error: error.toString(),
+          );
+        }
+      }
     }
 
-    return SyncCommandResult(
-      success: failedCount == 0,
-      syncedCount: syncedCount,
-      failedCount: failedCount,
-      message: failedCount == 0
-          ? 'Sincronização concluída com sucesso.'
-          : 'Sincronização concluída com falhas.',
-    );
+    if (validItems.isEmpty) {
+      return SyncCommandResult(
+        success: false,
+        message: 'As submissões pendentes são inválidas.',
+        failedCount: invalidCount,
+      );
+    }
+
+    try {
+      final response = await apiService.secureSyncProgress(validItems);
+      final rawResults = response['results'];
+      if (rawResults is! List) {
+        throw const FormatException('Resposta do lote sem resultados.');
+      }
+      final results = rawResults
+          .map((item) => Map<String, dynamic>.from(item as Map))
+          .toList();
+      await submissionDao.applySecureSyncResults(results);
+
+      final syncedCount = results
+          .where(
+            (item) =>
+                item['status'] == 'accepted' || item['status'] == 'duplicate',
+          )
+          .length;
+      final rejectedCount = results.length - syncedCount;
+      final failedCount = invalidCount + rejectedCount;
+
+      return SyncCommandResult(
+        success: failedCount == 0,
+        syncedCount: syncedCount,
+        failedCount: failedCount,
+        message: failedCount == 0
+            ? 'Progresso sincronizado com segurança.'
+            : 'Sincronização concluída com alguns itens rejeitados.',
+      );
+    } catch (error) {
+      await submissionDao.markBatchAsFailed(validLocalIds, error.toString());
+      return SyncCommandResult(
+        success: false,
+        message:
+            'O progresso continua guardado neste dispositivo. A sincronização será retomada quando for possível.',
+        failedCount: validItems.length + invalidCount,
+      );
+    }
   }
 }

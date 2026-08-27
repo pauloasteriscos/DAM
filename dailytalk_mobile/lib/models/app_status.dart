@@ -3,18 +3,9 @@
 /// Estes valores devem ser usados em vez de strings soltas como:
 /// 'pending', 'synced' e 'failed'.
 enum SubmissionSyncStatus {
-  pending(
-    databaseValue: 'pending',
-    label: 'Pendente',
-  ),
-  synced(
-    databaseValue: 'synced',
-    label: 'Sincronizado',
-  ),
-  failed(
-    databaseValue: 'failed',
-    label: 'Falhou',
-  );
+  pending(databaseValue: 'pending', label: 'Pendente'),
+  synced(databaseValue: 'synced', label: 'Sincronizado'),
+  failed(databaseValue: 'failed', label: 'Falhou');
 
   const SubmissionSyncStatus({
     required this.databaseValue,
@@ -47,22 +38,10 @@ enum SubmissionSyncStatus {
 ///
 /// Estes estados serão úteis para "Minhas atividades".
 enum CommunityActivityStatus {
-  draft(
-    databaseValue: 'draft',
-    label: 'Rascunho',
-  ),
-  underReview(
-    databaseValue: 'under_review',
-    label: 'Em revisão',
-  ),
-  approved(
-    databaseValue: 'approved',
-    label: 'Aprovada',
-  ),
-  rejected(
-    databaseValue: 'rejected',
-    label: 'Rejeitada',
-  );
+  draft(databaseValue: 'draft', label: 'Rascunho'),
+  underReview(databaseValue: 'under_review', label: 'Em revisão'),
+  approved(databaseValue: 'approved', label: 'Aprovada'),
+  rejected(databaseValue: 'rejected', label: 'Rejeitada');
 
   const CommunityActivityStatus({
     required this.databaseValue,
@@ -96,27 +75,12 @@ enum CommunityActivityStatus {
 /// Ajuda a distinguir atividades criadas pela equipa, predefinidas,
 /// criadas pela comunidade ou locais.
 enum ActivitySourceType {
-  developer(
-    databaseValue: 'developer',
-    label: 'Equipa DailyTalk.pt',
-  ),
-  predefined(
-    databaseValue: 'predefined',
-    label: 'Predefinida',
-  ),
-  community(
-    databaseValue: 'community',
-    label: 'Comunidade',
-  ),
-  local(
-    databaseValue: 'local',
-    label: 'Local',
-  );
+  developer(databaseValue: 'developer', label: 'Equipa DailyTalk.pt'),
+  predefined(databaseValue: 'predefined', label: 'Predefinida'),
+  community(databaseValue: 'community', label: 'Comunidade'),
+  local(databaseValue: 'local', label: 'Local');
 
-  const ActivitySourceType({
-    required this.databaseValue,
-    required this.label,
-  });
+  const ActivitySourceType({required this.databaseValue, required this.label});
 
   final String databaseValue;
   final String label;

@@ -15,10 +15,7 @@ import 'register_page.dart';
 /// Nesta versão de protótipo, o botão Google apenas apresenta feedback
 /// informativo, porque a integração SSO ainda não está implementada.
 class LoginFormPage extends StatefulWidget {
-  const LoginFormPage({
-    super.key,
-    required this.onAuthenticated,
-  });
+  const LoginFormPage({super.key, required this.onAuthenticated});
 
   final VoidCallback onAuthenticated;
 
@@ -67,10 +64,9 @@ class _LoginFormPageState extends State<LoginFormPage> {
         return;
       }
 
-      await AppLocaleScope.read(context).setLanguageCode(
-        user.preferences.appLanguageCode,
-        persist: true,
-      );
+      await AppLocaleScope.read(
+        context,
+      ).setLanguageCode(user.preferences.appLanguageCode, persist: true);
 
       if (!mounted) {
         return;
@@ -105,9 +101,8 @@ class _LoginFormPageState extends State<LoginFormPage> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => RegisterPage(
-          onAuthenticated: widget.onAuthenticated,
-        ),
+        builder: (context) =>
+            RegisterPage(onAuthenticated: widget.onAuthenticated),
       ),
     );
   }
@@ -188,10 +183,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
         titleSpacing: 0,
         title: const AppText(
           'Entrar',
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
         ),
       ),
       body: Stack(
@@ -465,9 +457,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
           horizontal: 16,
           vertical: 16,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(28)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
           borderSide: BorderSide(
@@ -477,24 +467,15 @@ class _LoginFormPageState extends State<LoginFormPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
-          borderSide: const BorderSide(
-            color: _accentColor,
-            width: 1.8,
-          ),
+          borderSide: const BorderSide(color: _accentColor, width: 1.8),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
-          borderSide: const BorderSide(
-            color: Colors.redAccent,
-            width: 1.35,
-          ),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.35),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
-          borderSide: const BorderSide(
-            color: Colors.redAccent,
-            width: 1.8,
-          ),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.8),
         ),
       ),
     );
@@ -516,10 +497,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
               : const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF49D7FF),
-                    Color(0xFF168CFF),
-                  ],
+                  colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
                 ),
           boxShadow: _isLoading
               ? []
@@ -545,10 +523,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
               : const Icon(Icons.login, size: 24),
           label: AppText(
             _isLoading ? 'A entrar...' : 'Entrar',
-            style: const TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800),
           ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -569,9 +544,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
   Widget _buildDivider() {
     return Row(
       children: [
-        Expanded(
-          child: Divider(color: Colors.white.withValues(alpha: 0.22)),
-        ),
+        Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.22))),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: AppText(
@@ -582,9 +555,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
             ),
           ),
         ),
-        Expanded(
-          child: Divider(color: Colors.white.withValues(alpha: 0.22)),
-        ),
+        Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.22))),
       ],
     );
   }
@@ -597,10 +568,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
         icon: const Icon(Icons.account_circle_outlined, size: 22),
         label: const AppText(
           'Continuar com Google',
-          style: TextStyle(
-            fontSize: 16.5,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800),
         ),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.white,
@@ -624,9 +592,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.redAccent.withValues(alpha: 0.85),
-        ),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.85)),
       ),
       child: AppText(
         message,

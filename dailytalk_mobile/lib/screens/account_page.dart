@@ -107,10 +107,7 @@ class _AccountPageState extends State<AccountPage> {
         titleSpacing: 0,
         title: const AppText(
           'Conta',
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
         ),
       ),
       body: Stack(
@@ -169,9 +166,7 @@ class _AccountPageState extends State<AccountPage> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return const Center(
-                    child: CircularProgressIndicator(
-                      color: _accentColor,
-                    ),
+                    child: CircularProgressIndicator(color: _accentColor),
                   );
                 }
 
@@ -215,10 +210,7 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  Widget _buildGuestState({
-    required String title,
-    required String message,
-  }) {
+  Widget _buildGuestState({required String title, required String message}) {
     return SafeArea(
       child: Center(
         child: SingleChildScrollView(
@@ -268,10 +260,7 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  Widget _buildProfileCard({
-    required AuthUser user,
-    required bool isCompact,
-  }) {
+  Widget _buildProfileCard({required AuthUser user, required bool isCompact}) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(isCompact ? 18 : 22),
@@ -324,10 +313,7 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  Widget _buildCircleIcon({
-    required IconData icon,
-    required Color color,
-  }) {
+  Widget _buildCircleIcon({required IconData icon, required Color color}) {
     return Container(
       width: 88,
       height: 88,
@@ -336,10 +322,7 @@ class _AccountPageState extends State<AccountPage> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF52D8FF),
-            Color(0xFF168CFF),
-          ],
+          colors: [Color(0xFF52D8FF), Color(0xFF168CFF)],
         ),
         boxShadow: [
           BoxShadow(
@@ -355,11 +338,7 @@ class _AccountPageState extends State<AccountPage> {
           color: Color(0xFF092333),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          icon,
-          color: color,
-          size: 48,
-        ),
+        child: Icon(icon, color: color, size: 48),
       ),
     );
   }
@@ -372,10 +351,7 @@ class _AccountPageState extends State<AccountPage> {
         icon: const Icon(Icons.logout, size: 23),
         label: const AppText(
           'Terminar sessão',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
         ),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.redAccent,
@@ -401,10 +377,7 @@ class _AccountPageState extends State<AccountPage> {
           gradient: const LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
-            colors: [
-              Color(0xFF49D7FF),
-              Color(0xFF168CFF),
-            ],
+            colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
           ),
           boxShadow: [
             BoxShadow(
@@ -419,10 +392,7 @@ class _AccountPageState extends State<AccountPage> {
           icon: const Icon(Icons.login, size: 23),
           label: const AppText(
             'Entrar',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
           ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -446,10 +416,7 @@ class _AccountPageState extends State<AccountPage> {
         icon: const Icon(Icons.person_add_alt_1_outlined, size: 23),
         label: const AppText(
           'Criar conta',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
         ),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.white,
@@ -505,17 +472,11 @@ class _InfoRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.10),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: Colors.white.withValues(alpha: 0.68),
-            size: 23,
-          ),
+          Icon(icon, color: Colors.white.withValues(alpha: 0.68), size: 23),
           const SizedBox(width: 10),
           Expanded(
             child: AppText(

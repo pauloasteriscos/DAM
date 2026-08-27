@@ -209,10 +209,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF52D8FF),
-                Color(0xFF168CFF),
-              ],
+              colors: [Color(0xFF52D8FF), Color(0xFF168CFF)],
             ),
             boxShadow: [
               BoxShadow(
@@ -332,9 +329,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
         fontSize: 16,
         fontWeight: FontWeight.w500,
       ),
-      hintStyle: TextStyle(
-        color: Colors.white.withValues(alpha: 0.34),
-      ),
+      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.34)),
       prefixIcon: Padding(
         padding: const EdgeInsets.only(left: 14, right: 8),
         child: Icon(
@@ -343,19 +338,11 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
           size: 25,
         ),
       ),
-      prefixIconConstraints: const BoxConstraints(
-        minWidth: 56,
-        minHeight: 56,
-      ),
+      prefixIconConstraints: const BoxConstraints(minWidth: 56, minHeight: 56),
       filled: true,
       fillColor: _fieldColor.withValues(alpha: 0.78),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 17,
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(24),
         borderSide: BorderSide(
@@ -365,24 +352,15 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(24),
-        borderSide: const BorderSide(
-          color: _accentColor,
-          width: 1.8,
-        ),
+        borderSide: const BorderSide(color: _accentColor, width: 1.8),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(24),
-        borderSide: const BorderSide(
-          color: Colors.redAccent,
-          width: 1.35,
-        ),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.35),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(24),
-        borderSide: const BorderSide(
-          color: Colors.redAccent,
-          width: 1.8,
-        ),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.8),
       ),
     );
   }
@@ -405,10 +383,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
               : const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF49D7FF),
-                    Color(0xFF168CFF),
-                  ],
+                  colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
                 ),
           boxShadow: _isLoading
               ? []
@@ -431,16 +406,10 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
                     color: Colors.white,
                   ),
                 )
-              : const Icon(
-                  Icons.play_arrow,
-                  size: 25,
-                ),
+              : const Icon(Icons.play_arrow, size: 25),
           label: AppText(
             _isLoading ? 'A iniciar...' : 'Iniciar atividade',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
           ),
           style: ElevatedButton.styleFrom(
             elevation: 0,
@@ -466,9 +435,7 @@ class _ActivityConfigContentState extends State<ActivityConfigContent> {
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.redAccent.withValues(alpha: 0.85),
-        ),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.85)),
       ),
       child: AppText(
         _errorMessage!,

@@ -8,11 +8,7 @@ import 'lesson_badge.dart';
 
 /// Widget que representa cada atividade do percurso gamificado.
 class LessonNode extends StatelessWidget {
-  const LessonNode({
-    super.key,
-    required this.lesson,
-    required this.onTap,
-  });
+  const LessonNode({super.key, required this.lesson, required this.onTap});
 
   final LessonItem lesson;
   final VoidCallback onTap;

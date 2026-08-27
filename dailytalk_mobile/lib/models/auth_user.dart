@@ -17,6 +17,14 @@ class AuthUser {
   final String role;
   final AuthUserPreferences preferences;
 
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'email': email,
+    'role': role,
+    'preferences': preferences.toJson(),
+  };
+
   factory AuthUser.fromJson(Map<String, dynamic> json) {
     return AuthUser(
       id: json['id']?.toString() ?? '',
@@ -45,6 +53,13 @@ class AuthUserPreferences {
   final String learningLanguageCode;
   final String selectedProfile;
   final String difficultyLevel;
+
+  Map<String, dynamic> toJson() => {
+    'appLanguageCode': appLanguageCode,
+    'learningLanguageCode': learningLanguageCode,
+    'selectedProfile': selectedProfile,
+    'difficultyLevel': difficultyLevel,
+  };
 
   factory AuthUserPreferences.fromJson(Map<String, dynamic> json) {
     return AuthUserPreferences(

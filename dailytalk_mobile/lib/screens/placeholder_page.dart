@@ -119,15 +119,9 @@ class PlaceholderPage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFF06345C),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: _accentColor.withValues(alpha: 0.35),
-                ),
+                border: Border.all(color: _accentColor.withValues(alpha: 0.35)),
               ),
-              child: const Icon(
-                Icons.menu_book,
-                color: Colors.amber,
-                size: 28,
-              ),
+              child: const Icon(Icons.menu_book, color: Colors.amber, size: 28),
             ),
 
           const SizedBox(width: 12),
@@ -221,10 +215,7 @@ class PlaceholderPage extends StatelessWidget {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF52D8FF),
-                  Color(0xFF168CFF),
-                ],
+                colors: [Color(0xFF52D8FF), Color(0xFF168CFF)],
               ),
               boxShadow: [
                 BoxShadow(
@@ -240,11 +231,7 @@ class PlaceholderPage extends StatelessWidget {
                 color: Color(0xFF092333),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                color: _accentColor,
-                size: iconSize * 0.52,
-              ),
+              child: Icon(icon, color: _accentColor, size: iconSize * 0.52),
             ),
           ),
 

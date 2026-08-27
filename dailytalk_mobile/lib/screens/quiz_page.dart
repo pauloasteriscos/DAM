@@ -166,7 +166,9 @@ class _QuizPageState extends State<QuizPage> {
     final answers = <_QuizAnswer>[
       _QuizAnswer(
         id: question.correctAnswer.id,
-        text: question.correctAnswer.textFor(_translationKey(_learningLanguageCode)),
+        text: question.correctAnswer.textFor(
+          _translationKey(_learningLanguageCode),
+        ),
         isCorrect: true,
       ),
       ...question.distractors.map(
@@ -245,11 +247,9 @@ class _QuizPageState extends State<QuizPage> {
 
   /// Ação provisória para o botão de áudio.
   void _playAudioPlaceholder() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: AppText(_ui('audioSoon')),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: AppText(_ui('audioSoon'))));
   }
 
   @override
@@ -262,10 +262,7 @@ class _QuizPageState extends State<QuizPage> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: <Color>[
-                Color(0xFF061823),
-                Color(0xFF0D1B22),
-              ],
+              colors: <Color>[Color(0xFF061823), Color(0xFF0D1B22)],
             ),
           ),
           child: Center(
@@ -311,9 +308,7 @@ class _QuizPageState extends State<QuizPage> {
               height: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: _accentColor.withValues(alpha: 0.35),
-                ),
+                border: Border.all(color: _accentColor.withValues(alpha: 0.35)),
               ),
               child: const Icon(
                 Icons.arrow_back_ios_new,
@@ -342,11 +337,7 @@ class _QuizPageState extends State<QuizPage> {
               ),
             ],
           ),
-          child: const Icon(
-            Icons.menu_book,
-            color: Colors.amber,
-            size: 32,
-          ),
+          child: const Icon(Icons.menu_book, color: Colors.amber, size: 32),
         ),
         const SizedBox(width: 14),
         const Expanded(
@@ -507,11 +498,7 @@ class _QuizPageState extends State<QuizPage> {
             color: _accentColor.withValues(alpha: 0.14),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Icon(
-            question.icon,
-            color: _accentColor,
-            size: 26,
-          ),
+          child: Icon(question.icon, color: _accentColor, size: 26),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -580,9 +567,7 @@ class _QuizPageState extends State<QuizPage> {
                 _primaryBlue.withValues(alpha: 0.08),
               ],
             ),
-            border: Border.all(
-              color: _accentColor.withValues(alpha: 0.22),
-            ),
+            border: Border.all(color: _accentColor.withValues(alpha: 0.22)),
           ),
           child: Stack(
             children: [
@@ -609,11 +594,7 @@ class _QuizPageState extends State<QuizPage> {
         if (compact) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              scenarioText,
-              const SizedBox(height: 12),
-              visual,
-            ],
+            children: [scenarioText, const SizedBox(height: 12), visual],
           );
         }
 
@@ -640,11 +621,7 @@ class _QuizPageState extends State<QuizPage> {
             color: _accentColor.withValues(alpha: 0.14),
             borderRadius: BorderRadius.circular(13),
           ),
-          child: const Icon(
-            Icons.quiz_outlined,
-            color: _accentColor,
-            size: 22,
-          ),
+          child: const Icon(Icons.quiz_outlined, color: _accentColor, size: 22),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -866,16 +843,16 @@ class _QuizPageState extends State<QuizPage> {
     final buttonText = !_hasAnswered
         ? _ui('confirm')
         : _isLastQuestion
-            ? _ui('finish')
-            : _ui('next');
+        ? _ui('finish')
+        : _ui('next');
 
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: !_hasAnswered
             ? canConfirm
-                ? _confirmAnswer
-                : null
+                  ? _confirmAnswer
+                  : null
             : _nextQuestion,
         style: ElevatedButton.styleFrom(
           backgroundColor: _accentColor,
@@ -890,10 +867,7 @@ class _QuizPageState extends State<QuizPage> {
         ),
         child: AppText(
           buttonText,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
         ),
       ),
     );
@@ -1033,10 +1007,7 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 
-  BoxDecoration _softBoxDecoration({
-    Color? color,
-    Color? borderColor,
-  }) {
+  BoxDecoration _softBoxDecoration({Color? color, Color? borderColor}) {
     return BoxDecoration(
       color: color ?? _panelColor.withValues(alpha: 0.72),
       borderRadius: BorderRadius.circular(18),
@@ -1181,10 +1152,7 @@ class _QuizAnswer {
 }
 
 class _LocalizedText {
-  const _LocalizedText({
-    required this.id,
-    required this.translations,
-  });
+  const _LocalizedText({required this.id, required this.translations});
 
   final String id;
   final Map<String, String> translations;
@@ -1215,8 +1183,10 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'audioSoon': 'O áudio desta pergunta será integrado numa próxima versão.',
     'loadingLanguages': 'A carregar os idiomas definidos no perfil...',
     'chooseAnswer': 'Escolhe a melhor resposta no idioma que estás a praticar.',
-    'correct': 'Correto. Esta é uma resposta natural para a situação apresentada.',
-    'wrong': 'Ainda não é a melhor opção. Observa a resposta correta antes de avançar.',
+    'correct':
+        'Correto. Esta é uma resposta natural para a situação apresentada.',
+    'wrong':
+        'Ainda não é a melhor opção. Observa a resposta correta antes de avançar.',
     'points': 'Pontos',
     'streak': 'Sequência',
     'lives': 'Vidas',
@@ -1234,11 +1204,14 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'of': 'of',
     'contextLabel': 'Everyday conversations · Erasmus+',
     'listen': 'Listen',
-    'audioSoon': 'Audio for this question will be integrated in a future version.',
+    'audioSoon':
+        'Audio for this question will be integrated in a future version.',
     'loadingLanguages': 'Loading the languages defined in your profile...',
-    'chooseAnswer': 'Choose the best answer in the language you are practising.',
+    'chooseAnswer':
+        'Choose the best answer in the language you are practising.',
     'correct': 'Correct. This is a natural answer for the situation shown.',
-    'wrong': 'That is not the best option yet. Check the correct answer before continuing.',
+    'wrong':
+        'That is not the best option yet. Check the correct answer before continuing.',
     'points': 'Points',
     'streak': 'Streak',
     'lives': 'Lives',
@@ -1256,11 +1229,15 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'of': 'de',
     'contextLabel': 'Conversaciones del día a día · Erasmus+',
     'listen': 'Escuchar',
-    'audioSoon': 'El audio de esta pregunta se integrará en una próxima versión.',
+    'audioSoon':
+        'El audio de esta pregunta se integrará en una próxima versión.',
     'loadingLanguages': 'Cargando los idiomas definidos en tu perfil...',
-    'chooseAnswer': 'Elige la mejor respuesta en el idioma que estás practicando.',
-    'correct': 'Correcto. Es una respuesta natural para la situación presentada.',
-    'wrong': 'Todavía no es la mejor opción. Observa la respuesta correcta antes de continuar.',
+    'chooseAnswer':
+        'Elige la mejor respuesta en el idioma que estás practicando.',
+    'correct':
+        'Correcto. Es una respuesta natural para la situación presentada.',
+    'wrong':
+        'Todavía no es la mejor opción. Observa la respuesta correcta antes de continuar.',
     'points': 'Puntos',
     'streak': 'Racha',
     'lives': 'Vidas',
@@ -1278,11 +1255,15 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'of': 'sur',
     'contextLabel': 'Conversations du quotidien · Erasmus+',
     'listen': 'Écouter',
-    'audioSoon': 'L’audio de cette question sera intégré dans une prochaine version.',
+    'audioSoon':
+        'L’audio de cette question sera intégré dans une prochaine version.',
     'loadingLanguages': 'Chargement des langues définies dans ton profil...',
-    'chooseAnswer': 'Choisis la meilleure réponse dans la langue que tu pratiques.',
-    'correct': 'Correct. C’est une réponse naturelle pour la situation présentée.',
-    'wrong': 'Ce n’est pas encore la meilleure option. Regarde la bonne réponse avant de continuer.',
+    'chooseAnswer':
+        'Choisis la meilleure réponse dans la langue que tu pratiques.',
+    'correct':
+        'Correct. C’est une réponse naturelle pour la situation présentée.',
+    'wrong':
+        'Ce n’est pas encore la meilleure option. Regarde la bonne réponse avant de continuer.',
     'points': 'Points',
     'streak': 'Série',
     'lives': 'Vies',
@@ -1300,11 +1281,15 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'of': 'di',
     'contextLabel': 'Conversazioni quotidiane · Erasmus+',
     'listen': 'Ascolta',
-    'audioSoon': 'L’audio di questa domanda sarà integrato in una prossima versione.',
+    'audioSoon':
+        'L’audio di questa domanda sarà integrato in una prossima versione.',
     'loadingLanguages': 'Caricamento delle lingue definite nel profilo...',
-    'chooseAnswer': 'Scegli la risposta migliore nella lingua che stai praticando.',
-    'correct': 'Corretto. È una risposta naturale per la situazione presentata.',
-    'wrong': 'Non è ancora l’opzione migliore. Guarda la risposta corretta prima di continuare.',
+    'chooseAnswer':
+        'Scegli la risposta migliore nella lingua che stai praticando.',
+    'correct':
+        'Corretto. È una risposta naturale per la situazione presentata.',
+    'wrong':
+        'Non è ancora l’opzione migliore. Guarda la risposta corretta prima di continuare.',
     'points': 'Punti',
     'streak': 'Serie',
     'lives': 'Vite',
@@ -1322,11 +1307,14 @@ const Map<String, Map<String, String>> _uiTexts = <String, Map<String, String>>{
     'of': 'von',
     'contextLabel': 'Alltagsgespräche · Erasmus+',
     'listen': 'Anhören',
-    'audioSoon': 'Audio für diese Frage wird in einer nächsten Version integriert.',
+    'audioSoon':
+        'Audio für diese Frage wird in einer nächsten Version integriert.',
     'loadingLanguages': 'Die im Profil festgelegten Sprachen werden geladen...',
     'chooseAnswer': 'Wähle die beste Antwort in der Sprache, die du übst.',
-    'correct': 'Richtig. Das ist eine natürliche Antwort für die gezeigte Situation.',
-    'wrong': 'Das ist noch nicht die beste Option. Sieh dir die richtige Antwort an, bevor du weitergehst.',
+    'correct':
+        'Richtig. Das ist eine natürliche Antwort für die gezeigte Situation.',
+    'wrong':
+        'Das ist noch nicht die beste Option. Sieh dir die richtige Antwort an, bevor du weitergehst.',
     'points': 'Punkte',
     'streak': 'Serie',
     'lives': 'Leben',
@@ -1408,12 +1396,18 @@ const List<_QuizQuestion> _quizBank = <_QuizQuestion>[
     scenario: _LocalizedText(
       id: 'scenario_science_room',
       translations: <String, String>{
-        'pt': 'Chegaste à escola e não sabes onde fica a sala de ciências. Queres perguntar a um colega.',
-        'en': 'You arrived at school and do not know where the science room is. You want to ask a classmate.',
-        'es': 'Has llegado a la escuela y no sabes dónde está la sala de ciencias. Quieres preguntarle a un compañero.',
-        'fr': 'Tu es arrivé à l’école et tu ne sais pas où se trouve la salle de sciences. Tu veux demander à un camarade.',
-        'it': 'Sei arrivato a scuola e non sai dov’è l’aula di scienze. Vuoi chiederlo a un compagno.',
-        'de': 'Du bist in der Schule angekommen und weißt nicht, wo der Naturwissenschaftsraum ist. Du möchtest einen Mitschüler fragen.',
+        'pt':
+            'Chegaste à escola e não sabes onde fica a sala de ciências. Queres perguntar a um colega.',
+        'en':
+            'You arrived at school and do not know where the science room is. You want to ask a classmate.',
+        'es':
+            'Has llegado a la escuela y no sabes dónde está la sala de ciencias. Quieres preguntarle a un compañero.',
+        'fr':
+            'Tu es arrivé à l’école et tu ne sais pas où se trouve la salle de sciences. Tu veux demander à un camarade.',
+        'it':
+            'Sei arrivato a scuola e non sai dov’è l’aula di scienze. Vuoi chiederlo a un compagno.',
+        'de':
+            'Du bist in der Schule angekommen und weißt nicht, wo der Naturwissenschaftsraum ist. Du möchtest einen Mitschüler fragen.',
       },
     ),
     prompt: _promptChoosePhrase,
@@ -1472,12 +1466,18 @@ const List<_QuizQuestion> _quizBank = <_QuizQuestion>[
     scenario: _LocalizedText(
       id: 'scenario_repeat_please',
       translations: <String, String>{
-        'pt': 'O professor explicou uma instrução rapidamente e tu não compreendeste tudo.',
-        'en': 'The teacher explained an instruction quickly and you did not understand everything.',
-        'es': 'El profesor explicó una instrucción rápidamente y no entendiste todo.',
-        'fr': 'Le professeur a expliqué une consigne rapidement et tu n’as pas tout compris.',
-        'it': 'L’insegnante ha spiegato un’istruzione velocemente e non hai capito tutto.',
-        'de': 'Der Lehrer hat eine Anweisung schnell erklärt und du hast nicht alles verstanden.',
+        'pt':
+            'O professor explicou uma instrução rapidamente e tu não compreendeste tudo.',
+        'en':
+            'The teacher explained an instruction quickly and you did not understand everything.',
+        'es':
+            'El profesor explicó una instrucción rápidamente y no entendiste todo.',
+        'fr':
+            'Le professeur a expliqué une consigne rapidement et tu n’as pas tout compris.',
+        'it':
+            'L’insegnante ha spiegato un’istruzione velocemente e non hai capito tutto.',
+        'de':
+            'Der Lehrer hat eine Anweisung schnell erklärt und du hast nicht alles verstanden.',
       },
     ),
     prompt: _promptBestAnswer,
@@ -1536,12 +1536,17 @@ const List<_QuizQuestion> _quizBank = <_QuizQuestion>[
     scenario: _LocalizedText(
       id: 'scenario_food_allergy',
       translations: <String, String>{
-        'pt': 'A família anfitriã pergunta se tens alguma alergia antes do jantar.',
+        'pt':
+            'A família anfitriã pergunta se tens alguma alergia antes do jantar.',
         'en': 'The host family asks if you have any allergy before dinner.',
-        'es': 'La familia anfitriona pregunta si tienes alguna alergia antes de la cena.',
-        'fr': 'La famille d’accueil demande si tu as une allergie avant le dîner.',
-        'it': 'La famiglia ospitante chiede se hai qualche allergia prima della cena.',
-        'de': 'Die Gastfamilie fragt vor dem Abendessen, ob du eine Allergie hast.',
+        'es':
+            'La familia anfitriona pregunta si tienes alguna alergia antes de la cena.',
+        'fr':
+            'La famille d’accueil demande si tu as une allergie avant le dîner.',
+        'it':
+            'La famiglia ospitante chiede se hai qualche allergia prima della cena.',
+        'de':
+            'Die Gastfamilie fragt vor dem Abendessen, ob du eine Allergie hast.',
       },
     ),
     prompt: _promptBestAnswer,
@@ -1600,12 +1605,18 @@ const List<_QuizQuestion> _quizBank = <_QuizQuestion>[
     scenario: _LocalizedText(
       id: 'scenario_breakfast_time',
       translations: <String, String>{
-        'pt': 'É o primeiro dia em casa da família anfitriã e queres saber a hora do pequeno-almoço.',
-        'en': 'It is your first day at the host family’s home and you want to know breakfast time.',
-        'es': 'Es tu primer día en casa de la familia anfitriona y quieres saber la hora del desayuno.',
-        'fr': 'C’est ton premier jour chez la famille d’accueil et tu veux connaître l’heure du petit-déjeuner.',
-        'it': 'È il tuo primo giorno a casa della famiglia ospitante e vuoi sapere l’orario della colazione.',
-        'de': 'Es ist dein erster Tag bei der Gastfamilie und du möchtest wissen, wann es Frühstück gibt.',
+        'pt':
+            'É o primeiro dia em casa da família anfitriã e queres saber a hora do pequeno-almoço.',
+        'en':
+            'It is your first day at the host family’s home and you want to know breakfast time.',
+        'es':
+            'Es tu primer día en casa de la familia anfitriona y quieres saber la hora del desayuno.',
+        'fr':
+            'C’est ton premier jour chez la famille d’accueil et tu veux connaître l’heure du petit-déjeuner.',
+        'it':
+            'È il tuo primo giorno a casa della famiglia ospitante e vuoi sapere l’orario della colazione.',
+        'de':
+            'Es ist dein erster Tag bei der Gastfamilie und du möchtest wissen, wann es Frühstück gibt.',
       },
     ),
     prompt: _promptChoosePhrase,
@@ -1729,11 +1740,16 @@ const List<_QuizQuestion> _quizBank = <_QuizQuestion>[
       id: 'scenario_thank_you',
       translations: <String, String>{
         'pt': 'Um colega ajudou-te a encontrar a sala certa. Queres agradecer.',
-        'en': 'A classmate helped you find the right room. You want to say thank you.',
-        'es': 'Un compañero te ayudó a encontrar la sala correcta. Quieres agradecer.',
-        'fr': 'Un camarade t’a aidé à trouver la bonne salle. Tu veux le remercier.',
-        'it': 'Un compagno ti ha aiutato a trovare l’aula giusta. Vuoi ringraziare.',
-        'de': 'Ein Mitschüler hat dir geholfen, den richtigen Raum zu finden. Du möchtest dich bedanken.',
+        'en':
+            'A classmate helped you find the right room. You want to say thank you.',
+        'es':
+            'Un compañero te ayudó a encontrar la sala correcta. Quieres agradecer.',
+        'fr':
+            'Un camarade t’a aidé à trouver la bonne salle. Tu veux le remercier.',
+        'it':
+            'Un compagno ti ha aiutato a trovare l’aula giusta. Vuoi ringraziare.',
+        'de':
+            'Ein Mitschüler hat dir geholfen, den richtigen Raum zu finden. Du möchtest dich bedanken.',
       },
     ),
     prompt: _promptChoosePhrase,

@@ -116,8 +116,8 @@ class AppLocaleScope extends InheritedNotifier<AppLocaleController> {
   }
 
   static AppLocaleController read(BuildContext context) {
-    final element =
-        context.getElementForInheritedWidgetOfExactType<AppLocaleScope>();
+    final element = context
+        .getElementForInheritedWidgetOfExactType<AppLocaleScope>();
 
     assert(
       element != null,

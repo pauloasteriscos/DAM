@@ -1,18 +1,23 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../../config/app_config.dart';
+
 /// Classe central de acesso à base de dados local SQLite.
 ///
 /// Esta implementação usa sqflite diretamente, sem Drift.
 /// A base é usada para cache local, submissões pendentes,
 /// resultados, análises, fila de sincronização e configurações locais.
+///
+/// PRD mantém `dailytalk_mobile.db`; DEV usa `dailytalk_mobile_dev.db`.
+/// Assim, uma fila criada em DEV nunca pode ser sincronizada para PRD.
 class AppDatabase {
   AppDatabase._privateConstructor();
 
   static final AppDatabase instance = AppDatabase._privateConstructor();
 
-  static const String _databaseName = 'dailytalk_mobile.db';
-  static const int _databaseVersion = 2;
+  static String get _databaseName => AppConfig.localDatabaseName;
+  static const int _databaseVersion = 3;
 
   static Database? _database;
 
@@ -60,21 +65,52 @@ class AppDatabase {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       final batch = db.batch();
-
       _createLocalPrivateNotesTable(batch);
       _createLocalPrivateNotesIndexes(batch);
-
-      final now = DateTime.now().toIso8601String();
-
-      batch.insert('app_settings', {
-        'key': 'database_version',
-        'value': newVersion.toString(),
-        'value_type': 'number',
-        'updated_at': now,
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
-
       await batch.commit(noResult: true);
     }
+
+    if (oldVersion < 3) {
+      // O identificador estável permite reenviar o mesmo progresso sem criar
+      // duplicados no servidor, mesmo após falhas de rede ou atualização.
+      try {
+        await db.execute(
+          'ALTER TABLE submissions ADD COLUMN client_submission_id TEXT',
+        );
+      } catch (_) {
+        // A coluna pode já existir num ambiente de desenvolvimento intermédio.
+      }
+
+      final rows = await db.query(
+        'submissions',
+        columns: ['id', 'client_submission_id'],
+      );
+      for (final row in rows) {
+        final current = row['client_submission_id']?.toString();
+        if (current != null && current.isNotEmpty) continue;
+
+        final id = row['id'];
+        final generated = 'legacy-$id-${DateTime.now().microsecondsSinceEpoch}';
+        await db.update(
+          'submissions',
+          {'client_submission_id': generated},
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      }
+      await db.execute(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_submissions_client_submission_id '
+        'ON submissions(client_submission_id)',
+      );
+    }
+
+    final now = DateTime.now().toIso8601String();
+    await db.insert('app_settings', {
+      'key': 'database_version',
+      'value': newVersion.toString(),
+      'value_type': 'number',
+      'updated_at': now,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   /// Fecha a base de dados.
@@ -138,6 +174,7 @@ class AppDatabase {
     batch.execute('''
       CREATE TABLE IF NOT EXISTS submissions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        client_submission_id TEXT NOT NULL UNIQUE,
         activity_id INTEGER NOT NULL,
         student_id INTEGER,
         remote_activity_id TEXT NOT NULL,
@@ -272,6 +309,10 @@ class AppDatabase {
 
     batch.execute(
       'CREATE INDEX IF NOT EXISTS idx_submissions_sync_status ON submissions(sync_status)',
+    );
+
+    batch.execute(
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_submissions_client_submission_id ON submissions(client_submission_id)',
     );
 
     batch.execute(

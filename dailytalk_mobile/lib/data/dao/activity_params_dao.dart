@@ -70,26 +70,20 @@ class ActivityParamsDao {
     };
 
     if (existing.isEmpty) {
-      return db.insert('activity_params', {
-        ...data,
-        'created_at': now,
-      });
+      return db.insert('activity_params', {...data, 'created_at': now});
     }
 
     final id = existing.first['id'] as int;
 
-    await db.update(
-      'activity_params',
-      data,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.update('activity_params', data, where: 'id = ?', whereArgs: [id]);
 
     return id;
   }
 
   /// Lista parâmetros associados a uma atividade.
-  Future<List<Map<String, Object?>>> getParamsForActivity(int activityId) async {
+  Future<List<Map<String, Object?>>> getParamsForActivity(
+    int activityId,
+  ) async {
     return db.query(
       'activity_params',
       where: 'activity_id = ?',

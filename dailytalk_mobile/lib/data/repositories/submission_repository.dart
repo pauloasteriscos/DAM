@@ -10,10 +10,7 @@ import '../dao/submission_dao.dart';
 /// - gravação do resultado;
 /// - marcação do estado de sincronização.
 class SubmissionRepository {
-  SubmissionRepository({
-    required this.apiService,
-    required this.submissionDao,
-  });
+  SubmissionRepository({required this.apiService, required this.submissionDao});
 
   final DailyTalkApiService apiService;
   final SubmissionDao submissionDao;
@@ -38,10 +35,7 @@ class SubmissionRepository {
       'targetLanguageCode': targetLanguageCode,
       'submittedAt': DateTime.now().toIso8601String(),
       'answers': [
-        {
-          'field': 'response',
-          'value': answerText,
-        },
+        {'field': 'response', 'value': answerText},
       ],
     };
 

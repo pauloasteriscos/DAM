@@ -61,9 +61,6 @@ class StudentDao {
 
   /// Lista alunos conhecidos localmente.
   Future<List<Map<String, Object?>>> getAllStudents() async {
-    return db.query(
-      'students',
-      orderBy: 'updated_at DESC',
-    );
+    return db.query('students', orderBy: 'updated_at DESC');
   }
 }
