@@ -1,0 +1,38 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dailytalk-api-phase0-test",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-05-24",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "dev": {
+    "ip": "127.0.0.1",
+    "port": 8791,
+    "local_protocol": "http"
+  },
+  "observability": {
+    "enabled": false
+  },
+  "vars": {
+    "APP_ENV": "DEV",
+    "JWT_SECRET": "phase0-test-only-secret-do-not-use-outside-tests-2026",
+    "JWT_EXPIRES_SECONDS": "900",
+    "DEVICE_SESSION_EXPIRES_DAYS": "730",
+    "DPOP_MAX_AGE_SECONDS": "300",
+    "AUTO_CREATE_SECURITY_SCHEMA": "false",
+    "ALLOW_LEGACY_DEVICE_ENROLLMENT": "true",
+    "SYNC_MAX_BATCH_SIZE": "50",
+    "SYNC_SERVER_SIGNING_KEY_ID": "sync-sign-v1",
+    "SYNC_SERVER_AGREEMENT_KEY_ID": "sync-enc-v1",
+    "CORS_ORIGIN": "http://localhost:5555,http://127.0.0.1:5555",
+    "PASSWORD_RESET_DEBUG": "false"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "dailytalk-test",
+      "database_id": "00000000-0000-0000-0000-000000000001"
+    }
+  ]
+}
