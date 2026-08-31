@@ -36,6 +36,16 @@ class AppDatabase {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, _databaseName);
 
+    return _openDatabaseAtPath(path);
+  }
+
+  /// Abre uma base isolada usando exatamente o schema e as migrações reais.
+  /// Usado exclusivamente pelos testes automatizados de migração da Fase 0.
+  Future<Database> openDatabaseForTesting(String path) {
+    return _openDatabaseAtPath(path);
+  }
+
+  Future<Database> _openDatabaseAtPath(String path) {
     return openDatabase(
       path,
       version: _databaseVersion,
@@ -73,14 +83,18 @@ class AppDatabase {
     if (oldVersion < 3) {
       // O identificador estável permite reenviar o mesmo progresso sem criar
       // duplicados no servidor, mesmo após falhas de rede ou atualização.
-      try {
+      final submissionColumns = await db.rawQuery(
+        'PRAGMA table_info(submissions)',
+      );
+      final hasClientSubmissionId = submissionColumns.any(
+        (row) => row['name'] == 'client_submission_id',
+      );
+
+      if (!hasClientSubmissionId) {
         await db.execute(
           'ALTER TABLE submissions ADD COLUMN client_submission_id TEXT',
         );
-      } catch (_) {
-        // A coluna pode já existir num ambiente de desenvolvimento intermédio.
       }
-
       final rows = await db.query(
         'submissions',
         columns: ['id', 'client_submission_id'],
