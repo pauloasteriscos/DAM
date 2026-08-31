@@ -11,8 +11,9 @@
                     "keys:generate":  "node scripts/generate-sync-keys.mjs",
                     "cf-typegen:production":  "wrangler types --config wrangler.production.jsonc",
                     "test:api":  "node --test --test-concurrency=1 test/api.integration.test.mjs",
-                    "test:phase0":  "npm run typecheck \u0026\u0026 npm run test:api",
-                    "test":  "npm run test:api"
+                    "test":  "npm run test:api",
+                    "test:security":  "node --test --test-concurrency=1 test/security.integration.test.mjs",
+                    "test:phase0":  "npm run typecheck \u0026\u0026 npm run test:api \u0026\u0026 npm run test:security"
                 },
     "dependencies":  {
                          "chanfana":  "^3.3.0",
