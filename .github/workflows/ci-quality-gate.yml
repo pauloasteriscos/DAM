@@ -1,4 +1,4 @@
-name: DailyTalk Phase 0 CI
+name: CI - Quality Gate
 
 on:
   push:
@@ -13,12 +13,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: phase0-ci-${{ github.workflow }}-${{ github.ref }}
+  group: quality-gate-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   api:
-    name: API - Phase 0
+    name: API - Typecheck, Security & Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -48,7 +48,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Block changes to published D1 baseline
+      - name: Protect published D1 baseline
         shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -80,11 +80,11 @@ jobs:
       - name: Audit npm dependencies
         run: npm audit
 
-      - name: Run Phase 0 API gate
+      - name: Run API quality gate
         run: npm run test:phase0
 
   flutter:
-    name: Flutter - Phase 0
+    name: Flutter - Analyze & Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
