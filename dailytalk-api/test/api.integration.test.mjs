@@ -11,7 +11,13 @@ const PERSIST_DIR = path.join(ROOT, ".wrangler", "phase0-test-state");
 const CONFIG_FILE = "wrangler.test.jsonc";
 const ENV_HEADER = "X-DailyTalk-Environment";
 const TEST_PASSWORD = "Phase0-Test-Password-2026!";
-const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
+const wranglerCli = path.join(
+  ROOT,
+  "node_modules",
+  "wrangler",
+  "bin",
+  "wrangler.js",
+);
 
 let worker = null;
 let workerLog = "";
@@ -55,10 +61,15 @@ async function removePersistDir({ finalCleanup = false } = {}) {
 
 function runCommand(args, { timeoutMs = 60000 } = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(npxCommand, args, {
+    if (args[0] !== "wrangler") {
+      throw new Error(`Comando inesperado no harness: ${args.join(" ")}`);
+    }
+
+    const wranglerArgs = args.slice(1);
+    const child = spawn(process.execPath, [wranglerCli, ...wranglerArgs], {
       cwd: ROOT,
       stdio: ["ignore", "pipe", "pipe"],
-      shell: process.platform === "win32",
+      shell: false,
       windowsHide: true,
     });
 
@@ -178,9 +189,9 @@ async function startIsolatedWorker() {
 
   workerLog = "";
   worker = spawn(
-    npxCommand,
+    process.execPath,
     [
-      "wrangler",
+      wranglerCli,
       "dev",
       "--config",
       CONFIG_FILE,
@@ -192,7 +203,7 @@ async function startIsolatedWorker() {
     {
       cwd: ROOT,
       stdio: ["ignore", "pipe", "pipe"],
-      shell: process.platform === "win32",
+      shell: false,
       windowsHide: true,
     },
   );

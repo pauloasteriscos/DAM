@@ -13,7 +13,13 @@ const ENV_HEADER = "X-DailyTalk-Environment";
 const TEST_PASSWORD = "Phase0-Security-Test-Password-2026!";
 const SERVER_SIGNING_KID = "phase0-server-signing-v1";
 const SERVER_AGREEMENT_KID = "phase0-server-agreement-v1";
-const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
+const wranglerCli = path.join(
+  ROOT,
+  "node_modules",
+  "wrangler",
+  "bin",
+  "wrangler.js",
+);
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
@@ -417,10 +423,15 @@ function appendWorkerLog(chunk) {
 
 function runCommand(args, { timeoutMs = 60000 } = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(npxCommand, args, {
+    if (args[0] !== "wrangler") {
+      throw new Error(`Comando inesperado no harness: ${args.join(" ")}`);
+    }
+
+    const wranglerArgs = args.slice(1);
+    const child = spawn(process.execPath, [wranglerCli, ...wranglerArgs], {
       cwd: ROOT,
       stdio: ["ignore", "pipe", "pipe"],
-      shell: process.platform === "win32",
+      shell: false,
       windowsHide: true,
     });
 
@@ -624,9 +635,9 @@ async function startWorker() {
 
   workerLog = "";
   worker = spawn(
-    npxCommand,
+    process.execPath,
     [
-      "wrangler",
+      wranglerCli,
       "dev",
       "--config",
       CONFIG_FILE,
@@ -638,7 +649,7 @@ async function startWorker() {
     {
       cwd: ROOT,
       stdio: ["ignore", "pipe", "pipe"],
-      shell: process.platform === "win32",
+      shell: false,
       windowsHide: true,
     },
   );
