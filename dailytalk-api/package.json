@@ -13,7 +13,8 @@
                     "test:api":  "node --test --test-concurrency=1 test/api.integration.test.mjs",
                     "test":  "npm run test:api",
                     "test:security":  "node --test --test-concurrency=1 test/security.integration.test.mjs",
-                    "test:phase0":  "npm run typecheck \u0026\u0026 npm run test:api \u0026\u0026 npm run test:security"
+                    "test:migrations":  "node --test --test-concurrency=1 test/d1.migrations.test.mjs",
+                    "test:phase0":  "npm run typecheck \u0026\u0026 npm run test:api \u0026\u0026 npm run test:security \u0026\u0026 npm run test:migrations"
                 },
     "dependencies":  {
                          "chanfana":  "^3.3.0",

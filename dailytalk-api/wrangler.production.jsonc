@@ -29,7 +29,9 @@
     {
       "binding": "DB",
       "database_name": "dailytalk-db",
-      "database_id": "8ae71c83-12cc-4701-857e-6f719e6f806b"
+      "database_id": "8ae71c83-12cc-4701-857e-6f719e6f806b",
+      "migrations_dir": "migrations",
+      "migrations_table": "d1_migrations"
     }
   ],
   "routes": [
