@@ -1,0 +1,120 @@
+name: DailyTalk Phase 0 CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase0-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API - Phase 0
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: dailytalk-api
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: dailytalk-api/package-lock.json
+
+      - name: Show environment
+        run: |
+          node --version
+          npm --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Block changes to published D1 baseline
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            BASE_SHA="$PR_BASE_SHA"
+          elif [ "$EVENT_NAME" = "push" ]; then
+            BASE_SHA="$BEFORE_SHA"
+          else
+            echo "Manual run: immutable-baseline diff check skipped."
+            exit 0
+          fi
+
+          if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            echo "No comparable base SHA available; immutable-baseline diff check skipped."
+            exit 0
+          fi
+
+          if git diff --name-only "$BASE_SHA" "$CURRENT_SHA" --             dailytalk-api/migrations/0001_baseline.sql             | grep -Fxq "dailytalk-api/migrations/0001_baseline.sql"; then
+            echo "::error::0001_baseline.sql is published and immutable. Create a new numbered migration instead."
+            exit 1
+          fi
+
+          echo "0001_baseline.sql unchanged."
+
+      - name: Audit npm dependencies
+        run: npm audit
+
+      - name: Run Phase 0 API gate
+        run: npm run test:phase0
+
+  flutter:
+    name: Flutter - Phase 0
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: dailytalk_mobile
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.41.7"
+          cache: true
+
+      - name: Show environment
+        run: |
+          flutter --version
+          dart --version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze Flutter
+        run: flutter analyze
+
+      - name: Run Flutter tests
+        run: flutter test -r expanded --concurrency=1
