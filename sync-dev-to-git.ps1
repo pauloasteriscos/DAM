@@ -24,6 +24,8 @@ $ExcludeDirs = @(
     "node_modules",
     ".wrangler",
     "coverage",
+    ".gradle",
+    ".kotlin",
     "cloudflare_dist",
     "dist",
     "ephemeral",
@@ -40,6 +42,9 @@ $ExcludeFiles = @(
     ".flutter-plugins",
     ".flutter-plugins-dependencies",
 
+    "gradlew",
+    "gradlew.bat",
+    "gradle-wrapper.jar",
     "*.log",
     "*.tmp",
     "*.bak",

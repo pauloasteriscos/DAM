@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:dailytalk_mobile/config/app_config.dart';
 import 'package:dailytalk_mobile/screens/settings_content.dart';
 import 'package:dailytalk_mobile/state/app_locale_controller.dart';
 import 'package:dailytalk_mobile/state/app_session_controller.dart';
@@ -61,5 +62,20 @@ void main() {
     expect(find.text('Continuar a testar'), findsOneWidget);
     expect(find.text('Criar conta'), findsOneWidget);
     expect(find.text('Entrar'), findsOneWidget);
+  });
+
+  testWidgets('Sobre apresenta a versão atual da aplicação', (tester) async {
+    await tester.pumpWidget(_buildSettingsInTestMode());
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final about = find.text('Sobre');
+    await tester.ensureVisible(about);
+    await tester.pump(const Duration(milliseconds: 150));
+
+    await tester.tap(about);
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Sobre o DailyTalk.pt'), findsOneWidget);
+    expect(find.text('Versão ${AppConfig.appVersion}'), findsOneWidget);
   });
 }

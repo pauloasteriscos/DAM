@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../config/app_config.dart';
 import '../l10n/app_localizations.dart';
 
 /// Diálogos comuns de Ajuda e Sobre do DailyTalk.pt.
@@ -60,12 +61,28 @@ class DailyTalkSupportDialogs {
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
           ),
           content: const SingleChildScrollView(
-            child: AppText(
-              'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\n'
-              'A aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.\n\n'
-              'O projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.\n\n'
-              'A aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.',
-              style: TextStyle(color: Colors.white70, height: 1.4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppText(
+                  'O DailyTalk.pt é um serious game para aprendizagem de idiomas, orientado para crianças e jovens em contexto escolar e mobilidade Erasmus+.\n\n'
+                  'A aplicação ajuda a praticar comunicação em situações reais do quotidiano escolar, através de vocabulário, áudio, diálogos, quizzes e desafios.\n\n'
+                  'O projeto considera diferentes perfis de utilização, como Estudante, Anfitrião e Professor, para adaptar melhor as atividades ao papel de cada pessoa.\n\n'
+                  'A aplicação inclui atividades criadas pela equipa DailyTalk.pt e poderá evoluir para aceitar atividades propostas pela comunidade, com validação antes de ficarem disponíveis.',
+                  style: TextStyle(color: Colors.white70, height: 1.4),
+                ),
+                SizedBox(height: 20),
+                Divider(color: Colors.white24, height: 1),
+                SizedBox(height: 12),
+                AppText(
+                  'Versão ${AppConfig.appVersion}',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
           actions: [
