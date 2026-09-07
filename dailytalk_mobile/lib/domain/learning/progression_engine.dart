@@ -50,8 +50,8 @@ final class ProgressionResult {
 
 /// Contrato do motor de progressão da Fase 1.
 ///
-/// A implementação concreta será Dart puro e permanecerá separada de Flutter,
-/// SQLite, rede, Controller e ChangeNotifier.
+/// Implementações permanecem em Dart puro e separadas de Flutter, SQLite,
+/// rede, Controller e ChangeNotifier.
 abstract interface class ProgressionEngine {
   ProgressionResult evaluate(ProgressionRequest request);
 }
