@@ -40,6 +40,19 @@ LearningPath _path(List<Stage> stages) {
       for (final element in stage.elements)
         if (element.activityId != null) element.activityId!,
   };
+  final competencyIds = <CompetencyId>{};
+  for (final stage in stages) {
+    for (final element in stage.elements) {
+      final prerequisites = element.prerequisites;
+      if (prerequisites != null) {
+        _collectPrerequisiteReferences(
+          prerequisites,
+          activityIds,
+          competencyIds,
+        );
+      }
+    }
+  }
   return LearningPath(
     id: LearningPathId('phase1.increment-02'),
     schemaVersion: SchemaVersion(1),
@@ -53,15 +66,37 @@ LearningPath _path(List<Stage> stages) {
       ),
     ],
     activities: activityIds.map(_activity),
-    competencies: const [],
+    competencies: competencyIds.map(
+      (id) => Competency(
+        id: id,
+        title: LocalizedText({'pt-PT': id.value}),
+        description: LocalizedText({'pt-PT': 'Competência de teste.'}),
+      ),
+    ),
   );
 }
 
+void _collectPrerequisiteReferences(
+  PrerequisiteRule rule,
+  Set<ActivityId> activityIds,
+  Set<CompetencyId> competencyIds,
+) {
+  if (rule is ActivityCompletedRequirement) {
+    activityIds.add(rule.activityId);
+  } else if (rule is CompetencyAchievedRequirement) {
+    competencyIds.add(rule.competencyId);
+  } else if (rule is PrerequisiteGroup) {
+    for (final child in rule.rules) {
+      _collectPrerequisiteReferences(child, activityIds, competencyIds);
+    }
+  }
+}
+
 Stage _stage(String id, List<PathElement> elements) => Stage(
-  id: StageId('stage.$id'),
-  title: LocalizedText({'pt-PT': id}),
-  elements: elements,
-);
+      id: StageId('stage.$id'),
+      title: LocalizedText({'pt-PT': id}),
+      elements: elements,
+    );
 
 ProgressionResult _evaluate(
   List<PathElement> elements, {
@@ -80,51 +115,39 @@ ProgressionResult _evaluate(
 }
 
 void main() {
-  test(
-    'aplica precedência dos quatro estados e desbloqueio local imediato',
-    () {
-      final gate = ActivityId('activity.gate');
-      final completed = _element('completed');
-      final active = _element(
-        'active',
-        prerequisites: ActivityCompletedRequirement(
-          ActivityId('activity.missing'),
-        ),
-      );
-      final unlocked = _element(
-        'unlocked',
-        prerequisites: ActivityCompletedRequirement(gate),
-      );
-      final locked = _element(
-        'locked',
-        prerequisites: ActivityCompletedRequirement(
-          ActivityId('activity.missing'),
-        ),
-      );
+  test('aplica precedência dos quatro estados e desbloqueio local imediato', () {
+    final gate = ActivityId('activity.gate');
+    final completed = _element('completed');
+    final active = _element(
+      'active',
+      prerequisites: ActivityCompletedRequirement(
+        ActivityId('activity.missing'),
+      ),
+    );
+    final unlocked = _element(
+      'unlocked',
+      prerequisites: ActivityCompletedRequirement(gate),
+    );
+    final locked = _element(
+      'locked',
+      prerequisites: ActivityCompletedRequirement(
+        ActivityId('activity.missing'),
+      ),
+    );
 
-      final result = _evaluate(
-        [completed, active, unlocked, locked],
-        facts: ProgressionFacts(
-          completedActivities: [completed.activityId!, gate],
-        ),
-        inProgress: [active.activityId!],
-      );
+    final result = _evaluate(
+      [completed, active, unlocked, locked],
+      facts: ProgressionFacts(
+        completedActivities: [completed.activityId!, gate],
+      ),
+      inProgress: [active.activityId!],
+    );
 
-      expect(
-        result.decisions[completed.id]?.state,
-        LearningActivityState.completed,
-      );
-      expect(
-        result.decisions[active.id]?.state,
-        LearningActivityState.inProgress,
-      );
-      expect(
-        result.decisions[unlocked.id]?.state,
-        LearningActivityState.available,
-      );
-      expect(result.decisions[locked.id]?.state, LearningActivityState.locked);
-    },
-  );
+    expect(result.decisions[completed.id]?.state, LearningActivityState.completed);
+    expect(result.decisions[active.id]?.state, LearningActivityState.inProgress);
+    expect(result.decisions[unlocked.id]?.state, LearningActivityState.available);
+    expect(result.decisions[locked.id]?.state, LearningActivityState.locked);
+  });
 
   test('avalia grupos de pré-requisitos ALL e ANY', () {
     final first = ActivityId('activity.first');
@@ -144,10 +167,10 @@ void main() {
       ]),
     );
 
-    final result = _evaluate([
-      all,
-      any,
-    ], facts: ProgressionFacts(completedActivities: [first]));
+    final result = _evaluate(
+      [all, any],
+      facts: ProgressionFacts(completedActivities: [first]),
+    );
 
     expect(result.decisions[all.id]?.state, LearningActivityState.locked);
     expect(result.decisions[any.id]?.state, LearningActivityState.available);
@@ -172,20 +195,14 @@ void main() {
       'dialogue',
       preference: PracticePreference.dialogue,
     );
-    final result = _evaluate([
-      vocabulary,
-      dialogue,
-    ], preference: PracticePreference.dialogue);
+    final result = _evaluate(
+      [vocabulary, dialogue],
+      preference: PracticePreference.dialogue,
+    );
 
     expect(result.recommendations, [dialogue.id, vocabulary.id]);
-    expect(
-      result.decisions[vocabulary.id]?.state,
-      LearningActivityState.available,
-    );
-    expect(
-      result.decisions[dialogue.id]?.state,
-      LearningActivityState.available,
-    );
+    expect(result.decisions[vocabulary.id]?.state, LearningActivityState.available);
+    expect(result.decisions[dialogue.id]?.state, LearningActivityState.available);
   });
 
   test('prioriza a retoma de atividade em curso', () {

@@ -13,8 +13,8 @@ final class ProgressionRequest {
     this.practicePreference = PracticePreference.balanced,
     Iterable<ActivityId> activitiesInProgress = const <ActivityId>[],
   }) : activitiesInProgress = UnmodifiableSetView(
-         Set<ActivityId>.of(activitiesInProgress),
-       );
+          Set<ActivityId>.of(activitiesInProgress),
+        );
 
   final LearningPath learningPath;
   final ProgressionFacts facts;
@@ -23,10 +23,18 @@ final class ProgressionRequest {
 }
 
 /// Razão estável e testável associada a uma decisão de progressão.
-enum ProgressionReason { prerequisitesNotMet, ready, attemptStarted, completed }
+enum ProgressionReason {
+  prerequisitesNotMet,
+  ready,
+  attemptStarted,
+  completed,
+}
 
 final class PathElementDecision {
-  const PathElementDecision({required this.state, required this.reason});
+  const PathElementDecision({
+    required this.state,
+    required this.reason,
+  });
 
   final LearningActivityState state;
   final ProgressionReason reason;
@@ -37,10 +45,10 @@ final class ProgressionResult {
   ProgressionResult({
     required Map<PathElementId, PathElementDecision> decisions,
     Iterable<PathElementId> recommendations = const <PathElementId>[],
-  }) : decisions = UnmodifiableMapView(
-         Map<PathElementId, PathElementDecision>.of(decisions),
-       ),
-       recommendations = List<PathElementId>.unmodifiable(recommendations);
+  })  : decisions = UnmodifiableMapView(
+          Map<PathElementId, PathElementDecision>.of(decisions),
+        ),
+        recommendations = List<PathElementId>.unmodifiable(recommendations);
 
   final Map<PathElementId, PathElementDecision> decisions;
 
@@ -51,7 +59,8 @@ final class ProgressionResult {
 /// Contrato do motor de progressão da Fase 1.
 ///
 /// Implementações permanecem em Dart puro e separadas de Flutter, SQLite,
-/// rede, Controller e ChangeNotifier.
+/// rede, Controller e ChangeNotifier. O percurso deve possuir integridade
+/// global antes de ser avaliado.
 abstract interface class ProgressionEngine {
   ProgressionResult evaluate(ProgressionRequest request);
 }

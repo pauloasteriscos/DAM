@@ -1,5 +1,6 @@
 import 'domain_ids.dart';
 import 'learning_enums.dart';
+import 'learning_path_validator.dart';
 import 'learning_models.dart';
 import 'progression_engine.dart';
 
@@ -9,20 +10,22 @@ import 'progression_engine.dart';
 /// Preferências afetam apenas a ordem das recomendações, nunca a
 /// disponibilidade curricular.
 final class DefaultProgressionEngine implements ProgressionEngine {
-  const DefaultProgressionEngine();
+  const DefaultProgressionEngine({
+    LearningPathValidator validator = const LearningPathValidator(),
+  }) : _validator = validator;
+
+  final LearningPathValidator _validator;
 
   @override
   ProgressionResult evaluate(ProgressionRequest request) {
+    _validator.validate(request.learningPath);
+
     final decisions = <PathElementId, PathElementDecision>{};
     final candidates = <PathElement>[];
 
     for (final journey in request.learningPath.journeys) {
       for (final stage in journey.stages) {
         for (final element in stage.elements) {
-          if (decisions.containsKey(element.id)) {
-            throw ArgumentError('PathElementId duplicado: ${element.id}.');
-          }
-
           final decision = _decisionFor(element, request);
           decisions[element.id] = decision;
 
