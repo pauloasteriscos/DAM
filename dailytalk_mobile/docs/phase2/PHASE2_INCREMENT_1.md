@@ -67,7 +67,9 @@ O pacote canónico `phase1_example_path.v1.json` utilizado neste incremento poss
 SHA-256:
 
 ```text
-4b49ee5530948ca2ec9c7052e83d3b094e63b624b79fe5dc7fc557b29ff20ef3
+6d5bee9037aecaf70773e484076ad646d6b05d7f01bf0f00b8f5a70e798de968
+
+O hash acima corresponde ao ficheiro canónico em UTF-8 com finais de linha LF, conforme `.gitattributes`.
 ```
 
 ## Evidência antes da consolidação final

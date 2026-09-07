@@ -10,7 +10,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 const _assetPath = 'assets/content/phase1_example_path.v1.json';
 const _officialV1Sha256 =
-    '4b49ee5530948ca2ec9c7052e83d3b094e63b624b79fe5dc7fc557b29ff20ef3';
+    '6d5bee9037aecaf70773e484076ad646d6b05d7f01bf0f00b8f5a70e798de968';
 const _pathId = 'student.fr-fr.phase1';
 
 String _v1Source() => File(_assetPath).readAsStringSync();
