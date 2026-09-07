@@ -17,7 +17,7 @@ class AppDatabase {
   static final AppDatabase instance = AppDatabase._privateConstructor();
 
   static String get _databaseName => AppConfig.localDatabaseName;
-  static const int _databaseVersion = 3;
+  static const int _databaseVersion = 4;
 
   static Database? _database;
 
@@ -40,7 +40,7 @@ class AppDatabase {
   }
 
   /// Abre uma base isolada usando exatamente o schema e as migrações reais.
-  /// Usado exclusivamente pelos testes automatizados de migração da Fase 0.
+  /// Usado pelos testes automatizados das migrações acumuladas do SQLite.
   Future<Database> openDatabaseForTesting(String path) {
     return _openDatabaseAtPath(path);
   }
@@ -116,6 +116,15 @@ class AppDatabase {
         'CREATE UNIQUE INDEX IF NOT EXISTS idx_submissions_client_submission_id '
         'ON submissions(client_submission_id)',
       );
+    }
+
+    if (oldVersion < 4) {
+      // Fase 2.1A: fundação SQLite do catálogo oficial. A migração é
+      // estritamente aditiva e não altera as tabelas históricas.
+      final batch = db.batch();
+      _createLearningContentTables(batch);
+      _createLearningContentIndexes(batch);
+      await batch.commit(noResult: true);
     }
 
     final now = DateTime.now().toIso8601String();
@@ -273,6 +282,7 @@ class AppDatabase {
       )
     ''');
 
+    _createLearningContentTables(batch);
     _createLocalPrivateNotesTable(batch);
 
     batch.execute('''
@@ -281,6 +291,42 @@ class AppDatabase {
         value TEXT,
         value_type TEXT NOT NULL DEFAULT 'text',
         updated_at TEXT NOT NULL
+      )
+    ''');
+  }
+
+  /// Cria a fundação SQLite dos pacotes oficiais de aprendizagem.
+  ///
+  /// A Fase 2.1A estabiliza apenas o schema. Importação, validação de
+  /// integridade, ativação e fallback são responsabilidades das subfases
+  /// seguintes.
+  void _createLearningContentTables(Batch batch) {
+    batch.execute('''
+      CREATE TABLE IF NOT EXISTS learning_content_packages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        learning_path_id TEXT NOT NULL,
+        package_version INTEGER NOT NULL CHECK(package_version >= 1),
+        schema_version INTEGER NOT NULL CHECK(schema_version >= 1),
+        content_hash TEXT NOT NULL CHECK(length(content_hash) = 64),
+        payload_json TEXT NOT NULL,
+        source TEXT NOT NULL DEFAULT 'remote',
+        imported_at TEXT NOT NULL,
+        UNIQUE(learning_path_id, package_version),
+        UNIQUE(id, learning_path_id)
+      )
+    ''');
+
+    batch.execute('''
+      CREATE TABLE IF NOT EXISTS learning_content_catalog (
+        learning_path_id TEXT PRIMARY KEY,
+        active_package_id INTEGER NOT NULL,
+        previous_package_id INTEGER,
+        activated_at TEXT NOT NULL,
+        FOREIGN KEY (active_package_id, learning_path_id)
+          REFERENCES learning_content_packages(id, learning_path_id) ON DELETE RESTRICT,
+        FOREIGN KEY (previous_package_id, learning_path_id)
+          REFERENCES learning_content_packages(id, learning_path_id) ON DELETE RESTRICT,
+        CHECK(previous_package_id IS NULL OR previous_package_id <> active_package_id)
       )
     ''');
   }
@@ -341,7 +387,21 @@ class AppDatabase {
       'CREATE INDEX IF NOT EXISTS idx_sync_queue_status ON sync_queue(sync_status)',
     );
 
+    _createLearningContentIndexes(batch);
     _createLocalPrivateNotesIndexes(batch);
+  }
+
+  /// Índices da fundação local do catálogo (Fase 2.1A).
+  void _createLearningContentIndexes(Batch batch) {
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_learning_content_packages_path_hash '
+      'ON learning_content_packages(learning_path_id, content_hash)',
+    );
+
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_learning_content_catalog_active '
+      'ON learning_content_catalog(active_package_id)',
+    );
   }
 
   /// Cria índices para as notas privadas locais.

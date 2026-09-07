@@ -1,0 +1,3 @@
+# Pacotes oficiais de conteúdo são verificados por SHA-256 sobre os bytes exatos.
+# Forçar LF evita alterações de hash causadas apenas pelo checkout em Windows.
+dailytalk_mobile/assets/content/*.json text eol=lf

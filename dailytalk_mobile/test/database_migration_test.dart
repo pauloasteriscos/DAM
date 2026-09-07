@@ -23,7 +23,9 @@ void main() {
   });
 
   setUp(() async {
-    tempDir = await Directory.systemTemp.createTemp('dailytalk-sqlite-migration-');
+    tempDir = await Directory.systemTemp.createTemp(
+      'dailytalk-sqlite-migration-',
+    );
   });
 
   tearDown(() async {
@@ -32,12 +34,12 @@ void main() {
     }
   });
 
-  group('DailyTalk SQLite — Fase 0 — migrações', () {
-    test('base nova v3 cria schema esperado e invariantes locais', () async {
-      final path = p.join(tempDir.path, 'fresh-v3.db');
+  group('DailyTalk SQLite — Fase 2.1A — fundação do catálogo', () {
+    test('base nova v4 cria schema esperado e invariantes locais', () async {
+      final path = p.join(tempDir.path, 'fresh-v4.db');
       final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-      expect(await db.getVersion(), 3);
+      expect(await db.getVersion(), 4);
       expect(await _foreignKeysEnabled(db), isTrue);
       expect(await _integrityCheck(db), 'ok');
 
@@ -55,12 +57,26 @@ void main() {
           'sync_queue',
           'local_private_notes',
           'app_settings',
+          'learning_content_packages',
+          'learning_content_catalog',
         ]),
       );
 
-      expect(await _columnExists(db, 'submissions', 'client_submission_id'), isTrue);
+      expect(
+        await _columnExists(db, 'submissions', 'client_submission_id'),
+        isTrue,
+      );
       expect(
         await _indexExists(db, 'idx_submissions_client_submission_id'),
+        isTrue,
+      );
+
+      expect(
+        await _indexExists(db, 'idx_learning_content_packages_path_hash'),
+        isTrue,
+      );
+      expect(
+        await _indexExists(db, 'idx_learning_content_catalog_active'),
         isTrue,
       );
 
@@ -70,51 +86,57 @@ void main() {
         whereArgs: ['database_version'],
       );
       expect(settings, hasLength(1));
-      expect(settings.single['value'], '3');
+      expect(settings.single['value'], '4');
 
       await db.close();
     });
 
-    test('v1 → v3 preserva dados e acrescenta notas + clientSubmissionId', () async {
-      final path = await _createHistoricalDatabase(tempDir, version: 1);
+    test(
+      'v1 → v4 preserva dados e acrescenta catálogo + notas + clientSubmissionId',
+      () async {
+        final path = await _createHistoricalDatabase(tempDir, version: 1);
 
-      final db = await AppDatabase.instance.openDatabaseForTesting(path);
+        final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-      expect(await db.getVersion(), 3);
-      expect(await _foreignKeysEnabled(db), isTrue);
-      expect(await _integrityCheck(db), 'ok');
+        expect(await db.getVersion(), 4);
+        expect(await _foreignKeysEnabled(db), isTrue);
+        expect(await _integrityCheck(db), 'ok');
 
-      await _assertHistoricDataPreserved(db);
+        await _assertHistoricDataPreserved(db);
 
-      expect(await _tableExists(db, 'local_private_notes'), isTrue);
-      expect(await _columnExists(db, 'submissions', 'client_submission_id'), isTrue);
-      expect(
-        await _indexExists(db, 'idx_submissions_client_submission_id'),
-        isTrue,
-      );
+        expect(await _tableExists(db, 'local_private_notes'), isTrue);
+        expect(
+          await _columnExists(db, 'submissions', 'client_submission_id'),
+          isTrue,
+        );
+        expect(
+          await _indexExists(db, 'idx_submissions_client_submission_id'),
+          isTrue,
+        );
 
-      final submissions = await db.query(
-        'submissions',
-        where: 'id = ?',
-        whereArgs: [_historicSubmissionId],
-      );
-      expect(submissions, hasLength(1));
-      final clientId = submissions.single['client_submission_id']?.toString();
-      expect(clientId, isNotNull);
-      expect(clientId, isNotEmpty);
-      expect(clientId, startsWith('legacy-1-'));
+        final submissions = await db.query(
+          'submissions',
+          where: 'id = ?',
+          whereArgs: [_historicSubmissionId],
+        );
+        expect(submissions, hasLength(1));
+        final clientId = submissions.single['client_submission_id']?.toString();
+        expect(clientId, isNotNull);
+        expect(clientId, isNotEmpty);
+        expect(clientId, startsWith('legacy-1-'));
 
-      await _assertDatabaseVersionSetting(db, '3');
+        await _assertDatabaseVersionSetting(db, '4');
 
-      await db.close();
-    });
+        await db.close();
+      },
+    );
 
-    test('v2 → v3 preserva nota privada, progresso e fila pendente', () async {
+    test('v2 → v4 preserva nota privada, progresso e fila pendente', () async {
       final path = await _createHistoricalDatabase(tempDir, version: 2);
 
       final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-      expect(await db.getVersion(), 3);
+      expect(await db.getVersion(), 4);
       expect(await _integrityCheck(db), 'ok');
 
       await _assertHistoricDataPreserved(db);
@@ -125,7 +147,10 @@ void main() {
         whereArgs: ['Nota privada histórica'],
       );
       expect(notes, hasLength(1));
-      expect(notes.single['note_text'], 'Conteúdo que nunca deve ser sincronizado');
+      expect(
+        notes.single['note_text'],
+        'Conteúdo que nunca deve ser sincronizado',
+      );
 
       final submissions = await db.query(
         'submissions',
@@ -148,7 +173,7 @@ void main() {
       expect(clientId, isNotNull);
       expect(clientId, isNotEmpty);
 
-      await _assertDatabaseVersionSetting(db, '3');
+      await _assertDatabaseVersionSetting(db, '4');
 
       await db.close();
     });
@@ -172,7 +197,7 @@ void main() {
 
         db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-        expect(await db.getVersion(), 3);
+        expect(await db.getVersion(), 4);
         final rows = await db.query(
           'submissions',
           columns: ['client_submission_id'],
@@ -192,86 +217,53 @@ void main() {
       },
     );
 
-    test('v3 → v3 reabre sem alterar progresso local', () async {
-      final path = p.join(tempDir.path, 'reopen-v3.db');
+    test('v3 → v4 preserva progresso e cria catálogo aditivamente', () async {
+      final path = await _createHistoricalV3Database(tempDir);
+      final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-      var db = await AppDatabase.instance.openDatabaseForTesting(path);
-      final now = DateTime.utc(2026, 8, 31, 10, 0).toIso8601String();
+      expect(await db.getVersion(), 4);
+      await _assertHistoricDataPreserved(db);
 
-      await db.insert('activities', {
-        'id': 42,
-        'remote_activity_id': 'fase0-v3-activity',
-        'title': 'Atividade v3',
-        'type': 'vocabulary',
-        'language_code': 'fr-FR',
-        'difficulty': 'beginner',
-        'source': 'remote',
-        'is_cached': 1,
-        'is_active': 1,
-        'created_at': now,
-        'updated_at': now,
-      });
-
-      await db.insert('submissions', {
-        'id': 42,
-        'client_submission_id': 'stable-client-id-v3',
-        'activity_id': 42,
-        'student_id': null,
-        'remote_activity_id': 'fase0-v3-activity',
-        'submission_json': '{"score":0.75}',
-        'sync_status': 'pending',
-        'attempt_count': 3,
-        'last_error': 'offline',
-        'created_at': now,
-        'updated_at': now,
-      });
-
-      await db.close();
-
-      db = await AppDatabase.instance.openDatabaseForTesting(path);
-
-      expect(await db.getVersion(), 3);
-      final rows = await db.query(
+      final submissions = await db.query(
         'submissions',
+        columns: ['client_submission_id', 'sync_status', 'attempt_count'],
         where: 'id = ?',
-        whereArgs: [42],
+        whereArgs: [_historicSubmissionId],
       );
+      expect(submissions, hasLength(1));
+      expect(submissions.single['client_submission_id'], 'historic-stable-v3');
+      expect(submissions.single['sync_status'], 'pending');
+      expect(submissions.single['attempt_count'], 2);
 
-      expect(rows, hasLength(1));
-      expect(rows.single['client_submission_id'], 'stable-client-id-v3');
-      expect(rows.single['sync_status'], 'pending');
-      expect(rows.single['attempt_count'], 3);
-      expect(rows.single['last_error'], 'offline');
+      expect(await _tableExists(db, 'learning_content_packages'), isTrue);
+      expect(await _tableExists(db, 'learning_content_catalog'), isTrue);
       expect(await _integrityCheck(db), 'ok');
+      await _assertDatabaseVersionSetting(db, '4');
 
       await db.close();
     });
 
-    test('índice único pós-migração impede clientSubmissionId duplicado', () async {
-      final path = await _createHistoricalDatabase(tempDir, version: 2);
+    test('catálogo rejeita ponteiro para pacote de outro percurso', () async {
+      final path = p.join(tempDir.path, 'catalog-foreign-key.db');
       final db = await AppDatabase.instance.openDatabaseForTesting(path);
+      final now = DateTime.utc(2026, 9, 7, 15).toIso8601String();
 
-      final migrated = await db.query(
-        'submissions',
-        columns: ['client_submission_id'],
-        where: 'id = ?',
-        whereArgs: [_historicSubmissionId],
-      );
-      final clientId = migrated.single['client_submission_id'] as String;
-
-      final now = DateTime.utc(2026, 8, 31, 10, 30).toIso8601String();
+      final packageId = await db.insert('learning_content_packages', {
+        'learning_path_id': 'path-a',
+        'package_version': 1,
+        'schema_version': 1,
+        'content_hash': List.filled(64, 'a').join(),
+        'payload_json': '{}',
+        'source': 'test',
+        'imported_at': now,
+      });
 
       await expectLater(
-        db.insert('submissions', {
-          'client_submission_id': clientId,
-          'activity_id': _historicActivityId,
-          'student_id': _historicStudentId,
-          'remote_activity_id': _historicRemoteActivityId,
-          'submission_json': '{"duplicate":true}',
-          'sync_status': 'pending',
-          'attempt_count': 0,
-          'created_at': now,
-          'updated_at': now,
+        db.insert('learning_content_catalog', {
+          'learning_path_id': 'path-b',
+          'active_package_id': packageId,
+          'previous_package_id': null,
+          'activated_at': now,
         }),
         throwsA(isA<DatabaseException>()),
       );
@@ -279,7 +271,74 @@ void main() {
       expect(await _integrityCheck(db), 'ok');
       await db.close();
     });
+
+    test(
+      'índice único pós-migração impede clientSubmissionId duplicado',
+      () async {
+        final path = await _createHistoricalDatabase(tempDir, version: 2);
+        final db = await AppDatabase.instance.openDatabaseForTesting(path);
+
+        final migrated = await db.query(
+          'submissions',
+          columns: ['client_submission_id'],
+          where: 'id = ?',
+          whereArgs: [_historicSubmissionId],
+        );
+        final clientId = migrated.single['client_submission_id'] as String;
+
+        final now = DateTime.utc(2026, 8, 31, 10, 30).toIso8601String();
+
+        await expectLater(
+          db.insert('submissions', {
+            'client_submission_id': clientId,
+            'activity_id': _historicActivityId,
+            'student_id': _historicStudentId,
+            'remote_activity_id': _historicRemoteActivityId,
+            'submission_json': '{"duplicate":true}',
+            'sync_status': 'pending',
+            'attempt_count': 0,
+            'created_at': now,
+            'updated_at': now,
+          }),
+          throwsA(isA<DatabaseException>()),
+        );
+
+        expect(await _integrityCheck(db), 'ok');
+        await db.close();
+      },
+    );
   });
+}
+
+Future<String> _createHistoricalV3Database(Directory directory) async {
+  final path = await _createHistoricalDatabase(directory, version: 2);
+  final db = await databaseFactoryFfi.openDatabase(path);
+
+  await db.execute(
+    'ALTER TABLE submissions ADD COLUMN client_submission_id TEXT',
+  );
+  await db.update(
+    'submissions',
+    {'client_submission_id': 'historic-stable-v3'},
+    where: 'id = ?',
+    whereArgs: [_historicSubmissionId],
+  );
+  await db.execute(
+    'CREATE UNIQUE INDEX IF NOT EXISTS idx_submissions_client_submission_id '
+    'ON submissions(client_submission_id)',
+  );
+  await db.update(
+    'app_settings',
+    {
+      'value': '3',
+      'updated_at': DateTime.utc(2026, 8, 31, 9).toIso8601String(),
+    },
+    where: 'key = ?',
+    whereArgs: ['database_version'],
+  );
+  await db.execute('PRAGMA user_version = 3');
+  await db.close();
+  return path;
 }
 
 Future<String> _createHistoricalDatabase(
@@ -690,7 +749,10 @@ Future<void> _assertHistoricDataPreserved(Database db) async {
     whereArgs: [_historicSubmissionId],
   );
   expect(submissions, hasLength(1));
-  expect(submissions.single['submission_json'], '{"answers":[1,2,3],"score":0.8}');
+  expect(
+    submissions.single['submission_json'],
+    '{"answers":[1,2,3],"score":0.8}',
+  );
   expect(submissions.single['sync_status'], 'pending');
   expect(submissions.single['attempt_count'], 2);
   expect(submissions.single['last_error'], 'network-offline');
@@ -713,11 +775,7 @@ Future<void> _assertHistoricDataPreserved(Database db) async {
   expect(analytics.single['total_interactions'], 5);
   expect(analytics.single['activity_time_seconds'], 120);
 
-  final queue = await db.query(
-    'sync_queue',
-    where: 'id = ?',
-    whereArgs: [1],
-  );
+  final queue = await db.query('sync_queue', where: 'id = ?', whereArgs: [1]);
   expect(queue, hasLength(1));
   expect(queue.single['payload_json'], '{"historic":true}');
   expect(queue.single['sync_status'], 'pending');
@@ -779,11 +837,7 @@ Future<bool> _indexExists(Database db, String index) async {
   return rows.isNotEmpty;
 }
 
-Future<bool> _columnExists(
-  Database db,
-  String table,
-  String column,
-) async {
+Future<bool> _columnExists(Database db, String table, String column) async {
   final rows = await db.rawQuery('PRAGMA table_info($table)');
   return rows.any((row) => row['name'] == column);
 }
