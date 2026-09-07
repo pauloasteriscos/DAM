@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dailytalk.pt/schemas/learning-path/v1",
+  "title": "DailyTalk Learning Path v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "defaultLocale",
+    "title",
+    "journeys",
+    "activities",
+    "competencies"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "id": {"$ref": "#/$defs/domainId"},
+    "defaultLocale": {"type": "string", "minLength": 1},
+    "title": {"$ref": "#/$defs/localizedText"},
+    "journeys": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/journey"}
+    },
+    "activities": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/activity"}
+    },
+    "competencies": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/competency"}
+    }
+  },
+  "$defs": {
+    "domainId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*$"
+    },
+    "localizedText": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "competency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "description"],
+      "properties": {
+        "id": {"$ref": "#/$defs/domainId"},
+        "title": {"$ref": "#/$defs/localizedText"},
+        "description": {"$ref": "#/$defs/localizedText"}
+      }
+    },
+    "activityRevision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "activityId",
+        "revisionNumber",
+        "title",
+        "instructions",
+        "visibility",
+        "competencies"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/domainId"},
+        "activityId": {"$ref": "#/$defs/domainId"},
+        "revisionNumber": {"type": "integer", "minimum": 1},
+        "title": {"$ref": "#/$defs/localizedText"},
+        "instructions": {"$ref": "#/$defs/localizedText"},
+        "visibility": {
+          "enum": ["private", "community", "public"]
+        },
+        "competencies": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/domainId"}
+        }
+      }
+    },
+    "activity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "origin",
+        "currentRevisionId",
+        "revisions"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/domainId"},
+        "type": {
+          "enum": [
+            "vocabulary",
+            "dialogue",
+            "speech",
+            "quiz",
+            "review",
+            "integratedChallenge"
+          ]
+        },
+        "origin": {"enum": ["official", "personal", "community"]},
+        "currentRevisionId": {"$ref": "#/$defs/domainId"},
+        "revisions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/activityRevision"}
+        }
+      }
+    },
+    "activityCompleted": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "activityId"],
+      "properties": {
+        "type": {"const": "activityCompleted"},
+        "activityId": {"$ref": "#/$defs/domainId"}
+      }
+    },
+    "competencyAchieved": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "competencyId"],
+      "properties": {
+        "type": {"const": "competencyAchieved"},
+        "competencyId": {"$ref": "#/$defs/domainId"}
+      }
+    },
+    "prerequisiteGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "operator", "rules"],
+      "properties": {
+        "type": {"const": "group"},
+        "operator": {"enum": ["all", "any"]},
+        "rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/prerequisite"}
+        }
+      }
+    },
+    "prerequisite": {
+      "oneOf": [
+        {"$ref": "#/$defs/activityCompleted"},
+        {"$ref": "#/$defs/competencyAchieved"},
+        {"$ref": "#/$defs/prerequisiteGroup"}
+      ]
+    },
+    "pathElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type"],
+      "properties": {
+        "id": {"$ref": "#/$defs/domainId"},
+        "type": {
+          "enum": ["activity", "checkpoint", "scene", "reward"]
+        },
+        "activityId": {"$ref": "#/$defs/domainId"},
+        "prerequisites": {"$ref": "#/$defs/prerequisite"},
+        "practicePreference": {
+          "enum": ["balanced", "vocabulary", "dialogue", "speech"]
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"type": {"const": "activity"}}},
+          "then": {"required": ["activityId"]},
+          "else": {"not": {"required": ["activityId"]}}
+        }
+      ]
+    },
+    "stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "elements"],
+      "properties": {
+        "id": {"$ref": "#/$defs/domainId"},
+        "title": {"$ref": "#/$defs/localizedText"},
+        "elements": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/pathElement"}
+        }
+      }
+    },
+    "journey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "stages"],
+      "properties": {
+        "id": {"$ref": "#/$defs/domainId"},
+        "title": {"$ref": "#/$defs/localizedText"},
+        "stages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/stage"}
+        }
+      }
+    }
+  }
+}

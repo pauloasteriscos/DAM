@@ -36,11 +36,10 @@ final class LearningPathValidationIssue {
 
 /// Resultado imutável que permite inspecionar todos os problemas encontrados.
 final class LearningPathValidationResult {
-  LearningPathValidationResult(
-    Iterable<LearningPathValidationIssue> issues,
-  ) : issues = UnmodifiableListView(
-          List<LearningPathValidationIssue>.of(issues),
-        );
+  LearningPathValidationResult(Iterable<LearningPathValidationIssue> issues)
+    : issues = UnmodifiableListView(
+        List<LearningPathValidationIssue>.of(issues),
+      );
 
   final List<LearningPathValidationIssue> issues;
 
@@ -53,9 +52,9 @@ final class LearningPathValidationResult {
 /// inválido como [ArgumentError].
 final class LearningPathValidationException extends ArgumentError {
   LearningPathValidationException._(this.issues)
-      : super(
-          'Percurso inválido: ${issues.map((issue) => issue.toString()).join('; ')}',
-        );
+    : super(
+        'Percurso inválido: ${issues.map((issue) => issue.toString()).join('; ')}',
+      );
 
   factory LearningPathValidationException(
     Iterable<LearningPathValidationIssue> issues,
@@ -90,8 +89,7 @@ final class LearningPathValidator {
             issues.add(
               LearningPathValidationIssue(
                 code: LearningPathValidationCode.missingRevisionCompetency,
-                location:
-                    'activity:${activity.id}/revision:${revision.id}',
+                location: 'activity:${activity.id}/revision:${revision.id}',
                 reference: competencyId.value,
               ),
             );
@@ -219,9 +217,7 @@ final class LearningPathValidator {
     }
   }
 
-  List<ActivityId>? _findCycle(
-    Map<ActivityId, Set<ActivityId>> dependencies,
-  ) {
+  List<ActivityId>? _findCycle(Map<ActivityId, Set<ActivityId>> dependencies) {
     final visited = <ActivityId>{};
     final active = <ActivityId>{};
     final stack = <ActivityId>[];

@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "id": "student.fr-fr.phase1",
+  "defaultLocale": "pt-PT",
+  "title": {
+    "pt-PT": "Primeiros dias em França",
+    "fr-FR": "Premiers jours en France"
+  },
+  "journeys": [
+    {
+      "id": "arrival.journey",
+      "title": {
+        "pt-PT": "Chegada e acolhimento",
+        "fr-FR": "Arrivée et accueil"
+      },
+      "stages": [
+        {
+          "id": "arrival.stage-01",
+          "title": {
+            "pt-PT": "Primeiro contacto"
+          },
+          "elements": [
+            {
+              "id": "arrival.vocabulary-01.element",
+              "type": "activity",
+              "activityId": "arrival.vocabulary-01",
+              "practicePreference": "vocabulary"
+            },
+            {
+              "id": "arrival.dialogue-01.element",
+              "type": "activity",
+              "activityId": "arrival.dialogue-01",
+              "practicePreference": "dialogue"
+            },
+            {
+              "id": "arrival.speech-01.element",
+              "type": "activity",
+              "activityId": "arrival.speech-01",
+              "practicePreference": "speech"
+            }
+          ]
+        },
+        {
+          "id": "arrival.stage-02",
+          "title": {
+            "pt-PT": "Comunicar à chegada"
+          },
+          "elements": [
+            {
+              "id": "arrival.vocabulary-02.element",
+              "type": "activity",
+              "activityId": "arrival.vocabulary-02",
+              "prerequisites": {
+                "type": "activityCompleted",
+                "activityId": "arrival.vocabulary-01"
+              },
+              "practicePreference": "vocabulary"
+            },
+            {
+              "id": "arrival.dialogue-02.element",
+              "type": "activity",
+              "activityId": "arrival.dialogue-02",
+              "prerequisites": {
+                "type": "group",
+                "operator": "any",
+                "rules": [
+                  {
+                    "type": "activityCompleted",
+                    "activityId": "arrival.vocabulary-01"
+                  },
+                  {
+                    "type": "activityCompleted",
+                    "activityId": "arrival.dialogue-01"
+                  }
+                ]
+              },
+              "practicePreference": "dialogue"
+            },
+            {
+              "id": "arrival.speech-02.element",
+              "type": "activity",
+              "activityId": "arrival.speech-02",
+              "prerequisites": {
+                "type": "group",
+                "operator": "all",
+                "rules": [
+                  {
+                    "type": "activityCompleted",
+                    "activityId": "arrival.speech-01"
+                  },
+                  {
+                    "type": "competencyAchieved",
+                    "competencyId": "arrival.pronunciation-basics"
+                  }
+                ]
+              },
+              "practicePreference": "speech"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "activities": [
+    {
+      "id": "arrival.vocabulary-01",
+      "type": "vocabulary",
+      "origin": "official",
+      "currentRevisionId": "arrival.vocabulary-01.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.vocabulary-01.revision-01",
+          "activityId": "arrival.vocabulary-01",
+          "revisionNumber": 1,
+          "title": {"pt-PT": "Palavras de acolhimento"},
+          "instructions": {"pt-PT": "Associe cada expressão ao significado."},
+          "visibility": "public",
+          "competencies": ["arrival.greeting-basics"]
+        }
+      ]
+    },
+    {
+      "id": "arrival.dialogue-01",
+      "type": "dialogue",
+      "origin": "official",
+      "currentRevisionId": "arrival.dialogue-01.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.dialogue-01.revision-01",
+          "activityId": "arrival.dialogue-01",
+          "revisionNumber": 1,
+          "title": {"pt-PT": "Apresentar-se"},
+          "instructions": {"pt-PT": "Complete o diálogo de apresentação."},
+          "visibility": "public",
+          "competencies": ["arrival.greeting-basics"]
+        }
+      ]
+    },
+    {
+      "id": "arrival.speech-01",
+      "type": "speech",
+      "origin": "official",
+      "currentRevisionId": "arrival.speech-01.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.speech-01.revision-01",
+          "activityId": "arrival.speech-01",
+          "revisionNumber": 1,
+          "title": {"pt-PT": "Dizer olá"},
+          "instructions": {"pt-PT": "Repita as saudações apresentadas."},
+          "visibility": "public",
+          "competencies": ["arrival.pronunciation-basics"]
+        }
+      ]
+    },
+    {
+      "id": "arrival.vocabulary-02",
+      "type": "vocabulary",
+      "origin": "official",
+      "currentRevisionId": "arrival.vocabulary-02.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.vocabulary-02.revision-01",
+          "activityId": "arrival.vocabulary-02",
+          "revisionNumber": 1,
+          "title": {"pt-PT": "Objetos da casa"},
+          "instructions": {"pt-PT": "Identifique os objetos apresentados."},
+          "visibility": "public",
+          "competencies": ["arrival.home-vocabulary"]
+        }
+      ]
+    },
+    {
+      "id": "arrival.dialogue-02",
+      "type": "dialogue",
+      "origin": "official",
+      "currentRevisionId": "arrival.dialogue-02.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.dialogue-02.revision-01",
+          "activityId": "arrival.dialogue-02",
+          "revisionNumber": 1,
+          "title": {"pt-PT": "Conhecer a família"},
+          "instructions": {"pt-PT": "Escolha respostas adequadas no diálogo."},
+          "visibility": "public",
+          "competencies": ["arrival.greeting-basics"]
+        }
+      ]
+    },
+    {
+      "id": "arrival.speech-02",
+      "type": "speech",
+      "origin": "official",
+      "currentRevisionId": "arrival.speech-02.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.speech-02.revision-01",
+          "activityId": "arrival.speech-02",
+          "revisionNumber": 1,
+          "title": {"pt-PT": "Pedir ajuda"},
+          "instructions": {"pt-PT": "Pronuncie as frases para pedir ajuda."},
+          "visibility": "public",
+          "competencies": ["arrival.pronunciation-basics"]
+        }
+      ]
+    }
+  ],
+  "competencies": [
+    {
+      "id": "arrival.greeting-basics",
+      "title": {"pt-PT": "Cumprimentos básicos"},
+      "description": {"pt-PT": "Reconhecer e usar cumprimentos simples."}
+    },
+    {
+      "id": "arrival.pronunciation-basics",
+      "title": {"pt-PT": "Pronúncia inicial"},
+      "description": {"pt-PT": "Pronunciar expressões essenciais de forma compreensível."}
+    },
+    {
+      "id": "arrival.home-vocabulary",
+      "title": {"pt-PT": "Vocabulário da casa"},
+      "description": {"pt-PT": "Reconhecer objetos comuns numa casa de acolhimento."}
+    }
+  ]
+}
