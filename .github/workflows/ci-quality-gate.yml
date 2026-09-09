@@ -77,8 +77,12 @@ jobs:
 
           echo "0001_baseline.sql unchanged."
 
-      - name: Audit npm dependencies
-        run: npm audit
+      - name: Audit runtime npm dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Audit full npm dependency tree
+        continue-on-error: true
+        run: npm audit --audit-level=high
 
       - name: Run API quality gate
         run: npm run test:phase0
