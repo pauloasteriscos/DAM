@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
 import { rm } from "node:fs/promises";
 import path from "node:path";
@@ -276,6 +277,8 @@ test(
     let userToken = "";
     let userEmail = "";
     let submissionId = "";
+    let contentPackageMetadata = null;
+    let contentPackageEtag = "";
 
     await t.test("health responde e aplica headers operacionais", async () => {
       const { response, payload } = await apiRequest("/api/health");
@@ -295,6 +298,12 @@ test(
       assert.equal(payload.name, "DailyTalk.pt API");
       assert.ok(Array.isArray(payload.endpoints));
       assert.ok(payload.endpoints.includes("GET /api/health"));
+      assert.ok(payload.endpoints.includes("GET /api/content/catalog"));
+      assert.ok(
+        payload.endpoints.includes(
+          "GET /api/content/packages/:pathId/:packageVersion",
+        ),
+      );
     });
 
     await t.test("endpoint protegido exige declaração explícita DEV", async () => {
@@ -331,6 +340,141 @@ test(
         response.headers.get("access-control-allow-origin"),
         "http://localhost:5555",
       );
+    });
+
+    await t.test("catálogo oficial publica metadata da versão mais recente v2", async () => {
+      const { response, payload } = await apiRequest("/api/content/catalog");
+
+      assert.equal(response.status, 200);
+      assert.equal(payload.success, true);
+      assert.equal(payload.catalogVersion, 1);
+      assert.ok(Array.isArray(payload.packages));
+
+      const metadata = payload.packages.find(
+        (item) => item.pathId === "student.fr-fr.phase1",
+      );
+
+      assert.ok(metadata);
+      assert.equal(metadata.schemaVersion, 1);
+      assert.equal(metadata.packageVersion, 2);
+      assert.equal(
+        metadata.sha256,
+        "c9f22e0fac4585aa90bb161ac609a3055e3f2fd11d0b16c3537b4c4068d77e0c",
+      );
+      assert.equal(metadata.sizeBytes, 8043);
+      assert.equal(metadata.contentType, "application/json");
+      assert.equal(
+        metadata.downloadPath,
+        "/api/content/packages/student.fr-fr.phase1/2",
+      );
+      assert.equal(metadata.immutable, true);
+      assert.equal(response.headers.get("cache-control"), "no-store");
+
+      contentPackageMetadata = metadata;
+    });
+
+    await t.test("pacote oficial devolve bytes exatos e headers de integridade", async () => {
+      assert.ok(contentPackageMetadata);
+
+      const response = await fetch(
+        `${API_BASE}${contentPackageMetadata.downloadPath}`,
+        { headers: { [ENV_HEADER]: "DEV" } },
+      );
+
+      assert.equal(response.status, 200);
+      assert.equal(
+        response.headers.get("content-type"),
+        "application/json; charset=utf-8",
+      );
+      assert.equal(
+        response.headers.get("cache-control"),
+        "public, max-age=31536000, immutable",
+      );
+      assert.equal(response.headers.get("pragma"), null);
+      assert.equal(
+        response.headers.get("x-content-sha256"),
+        contentPackageMetadata.sha256,
+      );
+      assert.equal(
+        response.headers.get("x-content-package-version"),
+        String(contentPackageMetadata.packageVersion),
+      );
+      assert.equal(
+        response.headers.get("x-content-schema-version"),
+        String(contentPackageMetadata.schemaVersion),
+      );
+
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      const actualSha256 = createHash("sha256")
+        .update(bytes)
+        .digest("hex");
+
+      assert.equal(bytes.byteLength, contentPackageMetadata.sizeBytes);
+      assert.equal(actualSha256, contentPackageMetadata.sha256);
+
+      const decoded = JSON.parse(new TextDecoder().decode(bytes));
+      assert.equal(decoded.schemaVersion, 1);
+      assert.equal(decoded.id, contentPackageMetadata.pathId);
+
+      contentPackageEtag = response.headers.get("etag") ?? "";
+      assert.equal(
+        contentPackageEtag,
+        `"sha256-${contentPackageMetadata.sha256}"`,
+      );
+    });
+
+    await t.test("versão anterior v1 continua disponível e imutável", async () => {
+      const response = await fetch(
+        `${API_BASE}/api/content/packages/student.fr-fr.phase1/1`,
+        { headers: { [ENV_HEADER]: "DEV" } },
+      );
+
+      assert.equal(response.status, 200);
+      assert.equal(
+        response.headers.get("x-content-sha256"),
+        "6d5bee9037aecaf70773e484076ad646d6b05d7f01bf0f00b8f5a70e798de968",
+      );
+      assert.equal(response.headers.get("x-content-package-version"), "1");
+
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      assert.equal(bytes.byteLength, 7024);
+      assert.equal(
+        createHash("sha256").update(bytes).digest("hex"),
+        "6d5bee9037aecaf70773e484076ad646d6b05d7f01bf0f00b8f5a70e798de968",
+      );
+    });
+
+    await t.test("pacote imutável suporta revalidação condicional por ETag", async () => {
+      assert.ok(contentPackageMetadata);
+      assert.ok(contentPackageEtag);
+
+      const response = await fetch(
+        `${API_BASE}${contentPackageMetadata.downloadPath}`,
+        {
+          headers: {
+            [ENV_HEADER]: "DEV",
+            "If-None-Match": contentPackageEtag,
+          },
+        },
+      );
+
+      assert.equal(response.status, 304);
+      assert.equal(await response.text(), "");
+      assert.equal(response.headers.get("etag"), contentPackageEtag);
+      assert.equal(
+        response.headers.get("cache-control"),
+        "public, max-age=31536000, immutable",
+      );
+    });
+
+    await t.test("pacote inexistente é rejeitado sem fallback silencioso", async () => {
+      const { response, payload } = await apiRequest(
+        "/api/content/packages/student.fr-fr.phase1/999",
+      );
+
+      assert.equal(response.status, 404);
+      assert.match(String(payload.error), /não encontrado/i);
+      assert.equal(response.headers.get("cache-control"), "no-store");
     });
 
     await t.test("rota autenticada rejeita ausência de token", async () => {

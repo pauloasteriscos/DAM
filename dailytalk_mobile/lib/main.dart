@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'config/feature_flags.dart';
+import 'data/content/learning_content_bootstrap.dart';
 import 'data/database/database_factory_config.dart';
 import 'screens/auth_gate.dart';
 import 'state/app_locale_controller.dart';
@@ -13,11 +17,36 @@ Future<void> main() async {
   // Configura a base de dados conforme a plataforma atual.
   await configureDatabaseFactory();
 
+  // A primeira execução prepara o pacote oficial local sem depender da rede.
+  // Uma falha de conteúdo não impede autenticação/diagnóstico da aplicação.
+  try {
+    await LearningContentBootstrapService.instance.ensureLocalBaseline();
+  } catch (error, stackTrace) {
+    debugPrint('Falha ao preparar conteúdo oficial local: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
+
   // Lê o idioma guardado antes de construir o primeiro ecrã. Desta forma, a
   // aplicação não apresenta primeiro português e só depois muda de idioma.
   await AppLocaleController.instance.initialize();
 
   runApp(const DailyTalkApp());
+
+  // A atualização remota é deliberadamente posterior ao primeiro frame e
+  // controlada por feature flag. A aprendizagem continua sobre SQLite.
+  if (FeatureFlags.isEnabled(FeatureFlag.remoteContentCatalog)) {
+    unawaited(_refreshOfficialContentInBackground());
+  }
+}
+
+Future<void> _refreshOfficialContentInBackground() async {
+  try {
+    await LearningContentBootstrapService.instance.refreshOfficialContent();
+  } catch (error, stackTrace) {
+    // Falha transitória de rede/conteúdo nunca elimina a última versão local.
+    debugPrint('Atualização de conteúdo oficial adiada: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
 }
 
 /// Aplicação principal do DailyTalk.pt.

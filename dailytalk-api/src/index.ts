@@ -34,6 +34,12 @@ import {
   type OkpPublicJwk,
 } from "./security/jose";
 import { ensureSecuritySchema } from "./security/schema";
+import {
+  findOfficialContentPackage,
+  listLatestOfficialContentPackages,
+  officialContentCatalogVersion,
+  officialContentPackageEtag,
+} from "./content/official_content";
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 const textEncoder = new TextEncoder();
@@ -241,10 +247,17 @@ app.use(
       "Content-Type",
       "Authorization",
       "DPoP",
+      "If-None-Match",
       environmentHeaderName,
     ],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    exposeHeaders: [environmentHeaderName],
+    exposeHeaders: [
+      environmentHeaderName,
+      "ETag",
+      "X-Content-SHA256",
+      "X-Content-Package-Version",
+      "X-Content-Schema-Version",
+    ],
     maxAge: 86400,
   }),
 );
@@ -324,8 +337,14 @@ app.use("*", async (c, next) => {
 
 app.use("*", async (c, next) => {
   await next();
-  c.header("Cache-Control", "no-store");
-  c.header("Pragma", "no-cache");
+
+  // As respostas dinâmicas continuam fechadas por defeito. Rotas que
+  // publicam artefactos imutáveis podem definir uma política explícita.
+  if (!c.res.headers.has("Cache-Control")) {
+    c.header("Cache-Control", "no-store");
+    c.header("Pragma", "no-cache");
+  }
+
   c.header("X-Content-Type-Options", "nosniff");
   c.header("Referrer-Policy", "no-referrer");
 });
@@ -336,6 +355,8 @@ app.get("/", (c) =>
     ok: true,
     endpoints: [
       "GET /api/health",
+      "GET /api/content/catalog",
+      "GET /api/content/packages/:pathId/:packageVersion",
       "GET /api/json-params",
       "GET /api/deploy",
       "POST /api/auth/register",
@@ -357,6 +378,60 @@ app.get("/", (c) =>
 );
 
 app.get("/api/health", (c) => c.json({ ok: true }));
+
+app.get("/api/content/catalog", (c) =>
+  c.json({
+    success: true,
+    catalogVersion: officialContentCatalogVersion,
+    packages: listLatestOfficialContentPackages(),
+  }),
+);
+
+app.get("/api/content/packages/:pathId/:packageVersion", (c) => {
+  const pathId = c.req.param("pathId");
+  const packageVersionRaw = c.req.param("packageVersion");
+
+  if (!/^[a-z0-9][a-z0-9._-]{0,199}$/.test(pathId)) {
+    return c.json({ error: "Identificador de percurso inválido" }, 400);
+  }
+
+  if (!/^[1-9]\d*$/.test(packageVersionRaw)) {
+    return c.json({ error: "Versão de pacote inválida" }, 400);
+  }
+
+  const packageVersion = Number(packageVersionRaw);
+  if (!Number.isSafeInteger(packageVersion)) {
+    return c.json({ error: "Versão de pacote inválida" }, 400);
+  }
+
+  const contentPackage = findOfficialContentPackage(pathId, packageVersion);
+  if (!contentPackage) {
+    return c.json({ error: "Pacote de conteúdo não encontrado" }, 404);
+  }
+
+  const etag = officialContentPackageEtag(contentPackage.metadata.sha256);
+  const ifNoneMatch = c.req.header("If-None-Match")
+    ?.split(",")
+    .map((value) => value.trim());
+
+  const headers = new Headers({
+    "Content-Type": `${contentPackage.metadata.contentType}; charset=utf-8`,
+    "Cache-Control": "public, max-age=31536000, immutable",
+    ETag: etag,
+    "X-Content-SHA256": contentPackage.metadata.sha256,
+    "X-Content-Package-Version": String(contentPackage.metadata.packageVersion),
+    "X-Content-Schema-Version": String(contentPackage.metadata.schemaVersion),
+  });
+
+  if (ifNoneMatch?.includes("*") || ifNoneMatch?.includes(etag)) {
+    return new Response(null, { status: 304, headers });
+  }
+
+  return new Response(contentPackage.bytes, {
+    status: 200,
+    headers,
+  });
+});
 
 app.get("/api/json-params", (c) =>
   c.json([
