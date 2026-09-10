@@ -4,6 +4,11 @@
 
 DailyTalk.pt é uma plataforma educativa criada para ajudar crianças e jovens em mobilidade Erasmus+ a comunicar melhor em situações do dia a dia: chegada, acolhimento, refeições, rotina, instruções, cultura e interação com famílias e colegas.
 
+A tecnologia não é o ponto de partida, mas sim o meio para proporcionar uma melhor experiência de aprendizagem, e aqui utilizamos o que há de melhor para entregar os benefícios.
+
+Nosso pensamento principal é:
+**“Que benefícios relevantes podemos oferecer ao estudante e até onde podemos melhorar a sua experiência de aprendizagem?”**.
+
 O projeto é também uma demonstração prática de como conhecimentos adquiridos ao longo do **Mestrado em Engenharia Informática e Tecnologia Web (MEIW), em associação entre a Universidade Aberta (UAb) e a Universidade de Trás-os-Montes e Alto Douro (UTAD)** podem ser combinados para transformar uma necessidade real numa solução progressivamente mais completa, segura, robusta e preparada para produção.
 
 > Os conteúdos e as aprendizagens foram vastos, mas foram selecionados criteriosamente e aplicados apenas quando faziam sentido para o problema. O objetivo nunca foi implementar tecnologia por implementar. Cada decisão técnica existe para resolver um problema concreto de forma sólida e robusta: aprender melhor, funcionar offline, responder rapidamente, proteger sessões, evitar perda de progresso, permitir evolução segura e manter o sistema compreensível e sustentável.
