@@ -17,7 +17,7 @@ class AppDatabase {
   static final AppDatabase instance = AppDatabase._privateConstructor();
 
   static String get _databaseName => AppConfig.localDatabaseName;
-  static const int _databaseVersion = 4;
+  static const int _databaseVersion = 5;
 
   static Database? _database;
 
@@ -124,6 +124,15 @@ class AppDatabase {
       final batch = db.batch();
       _createLearningContentTables(batch);
       _createLearningContentIndexes(batch);
+      await batch.commit(noResult: true);
+    }
+
+    if (oldVersion < 5) {
+      // Fase 2.3: manifesto e cache binário de assets de conteúdo.
+      // A migração continua aditiva e preserva pacotes/catálogo existentes.
+      final batch = db.batch();
+      _createLearningContentAssetTables(batch);
+      _createLearningContentAssetIndexes(batch);
       await batch.commit(noResult: true);
     }
 
@@ -283,6 +292,7 @@ class AppDatabase {
     ''');
 
     _createLearningContentTables(batch);
+    _createLearningContentAssetTables(batch);
     _createLocalPrivateNotesTable(batch);
 
     batch.execute('''
@@ -327,6 +337,55 @@ class AppDatabase {
         FOREIGN KEY (previous_package_id, learning_path_id)
           REFERENCES learning_content_packages(id, learning_path_id) ON DELETE RESTRICT,
         CHECK(previous_package_id IS NULL OR previous_package_id <> active_package_id)
+      )
+    ''');
+  }
+
+  /// Cria o manifesto e o cache binário de assets associados a pacotes
+  /// oficiais. Os bytes são content-addressed por SHA-256 e permanecem
+  /// separados do JSON do percurso.
+  void _createLearningContentAssetTables(Batch batch) {
+    batch.execute('''
+      CREATE TABLE IF NOT EXISTS learning_content_asset_manifests (
+        package_id INTEGER PRIMARY KEY,
+        manifest_version INTEGER NOT NULL CHECK(manifest_version >= 1),
+        manifest_hash TEXT NOT NULL CHECK(length(manifest_hash) = 64),
+        manifest_json TEXT NOT NULL,
+        imported_at TEXT NOT NULL,
+        FOREIGN KEY (package_id)
+          REFERENCES learning_content_packages(id) ON DELETE CASCADE
+      )
+    ''');
+
+    batch.execute('''
+      CREATE TABLE IF NOT EXISTS learning_content_asset_entries (
+        package_id INTEGER NOT NULL,
+        asset_id TEXT NOT NULL,
+        revision_id TEXT NOT NULL,
+        role TEXT NOT NULL,
+        content_hash TEXT NOT NULL CHECK(length(content_hash) = 64),
+        size_bytes INTEGER NOT NULL CHECK(size_bytes >= 1),
+        content_type TEXT NOT NULL,
+        download_path TEXT NOT NULL,
+        required INTEGER NOT NULL DEFAULT 1 CHECK(required IN (0, 1)),
+        sort_order INTEGER NOT NULL DEFAULT 0 CHECK(sort_order >= 0),
+        PRIMARY KEY (package_id, asset_id),
+        FOREIGN KEY (package_id)
+          REFERENCES learning_content_asset_manifests(package_id)
+          ON DELETE CASCADE
+      )
+    ''');
+
+    batch.execute('''
+      CREATE TABLE IF NOT EXISTS learning_content_asset_cache (
+        content_hash TEXT PRIMARY KEY CHECK(length(content_hash) = 64),
+        content_type TEXT NOT NULL,
+        size_bytes INTEGER NOT NULL CHECK(size_bytes >= 1),
+        bytes BLOB NOT NULL,
+        source TEXT NOT NULL,
+        downloaded_at TEXT NOT NULL,
+        last_verified_at TEXT NOT NULL,
+        last_accessed_at TEXT NOT NULL
       )
     ''');
   }
@@ -388,6 +447,7 @@ class AppDatabase {
     );
 
     _createLearningContentIndexes(batch);
+    _createLearningContentAssetIndexes(batch);
     _createLocalPrivateNotesIndexes(batch);
   }
 
@@ -401,6 +461,24 @@ class AppDatabase {
     batch.execute(
       'CREATE INDEX IF NOT EXISTS idx_learning_content_catalog_active '
       'ON learning_content_catalog(active_package_id)',
+    );
+  }
+
+  /// Índices do manifesto/cache de assets (Fase 2.3).
+  void _createLearningContentAssetIndexes(Batch batch) {
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_learning_content_asset_entries_revision_role '
+      'ON learning_content_asset_entries(package_id, revision_id, role)',
+    );
+
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_learning_content_asset_entries_hash '
+      'ON learning_content_asset_entries(content_hash)',
+    );
+
+    batch.execute(
+      'CREATE INDEX IF NOT EXISTS idx_learning_content_asset_cache_access '
+      'ON learning_content_asset_cache(last_accessed_at)',
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'config/feature_flags.dart';
+import 'data/content/learning_content_assets.dart';
 import 'data/content/learning_content_bootstrap.dart';
 import 'data/database/database_factory_config.dart';
 import 'screens/auth_gate.dart';
@@ -45,6 +46,21 @@ Future<void> _refreshOfficialContentInBackground() async {
   } catch (error, stackTrace) {
     // Falha transitória de rede/conteúdo nunca elimina a última versão local.
     debugPrint('Atualização de conteúdo oficial adiada: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
+
+  if (!FeatureFlags.isEnabled(FeatureFlag.remoteContentAssets)) {
+    return;
+  }
+
+  try {
+    await LearningContentAssetService.instance.refreshActiveAssets(
+      LearningContentBootstrapService.officialLearningPathId,
+    );
+  } catch (error, stackTrace) {
+    // Assets são enriquecimento: a atividade textual permanece utilizável e
+    // qualquer cache válido anterior fica preservado.
+    debugPrint('Atualização de assets oficiais adiada: $error');
     debugPrintStack(stackTrace: stackTrace);
   }
 }

@@ -40,6 +40,13 @@ import {
   officialContentCatalogVersion,
   officialContentPackageEtag,
 } from "./content/official_content";
+import {
+  findOfficialAssetBlob,
+  findOfficialAssetManifest,
+  listLatestOfficialAssetManifests,
+  officialAssetCatalogVersion,
+  officialAssetEtag,
+} from "./content/official_assets";
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 const textEncoder = new TextEncoder();
@@ -257,6 +264,10 @@ app.use(
       "X-Content-SHA256",
       "X-Content-Package-Version",
       "X-Content-Schema-Version",
+      "X-Asset-Manifest-SHA256",
+      "X-Asset-Manifest-Version",
+      "X-Asset-SHA256",
+      "X-Asset-Size",
     ],
     maxAge: 86400,
   }),
@@ -357,6 +368,9 @@ app.get("/", (c) =>
       "GET /api/health",
       "GET /api/content/catalog",
       "GET /api/content/packages/:pathId/:packageVersion",
+      "GET /api/content/assets/catalog",
+      "GET /api/content/assets/manifests/:pathId/:packageVersion",
+      "GET /api/content/assets/blobs/:sha256",
       "GET /api/json-params",
       "GET /api/deploy",
       "POST /api/auth/register",
@@ -428,6 +442,95 @@ app.get("/api/content/packages/:pathId/:packageVersion", (c) => {
   }
 
   return new Response(contentPackage.bytes, {
+    status: 200,
+    headers,
+  });
+});
+
+app.get("/api/content/assets/catalog", (c) =>
+  c.json({
+    success: true,
+    assetCatalogVersion: officialAssetCatalogVersion,
+    manifests: listLatestOfficialAssetManifests(),
+  }),
+);
+
+app.get("/api/content/assets/manifests/:pathId/:packageVersion", (c) => {
+  const pathId = c.req.param("pathId");
+  const packageVersionRaw = c.req.param("packageVersion");
+
+  if (!/^[a-z0-9][a-z0-9._-]{0,199}$/.test(pathId)) {
+    return c.json({ error: "Identificador de percurso inválido" }, 400);
+  }
+
+  if (!/^[1-9]\d*$/.test(packageVersionRaw)) {
+    return c.json({ error: "Versão de pacote inválida" }, 400);
+  }
+
+  const packageVersion = Number(packageVersionRaw);
+  if (!Number.isSafeInteger(packageVersion)) {
+    return c.json({ error: "Versão de pacote inválida" }, 400);
+  }
+
+  const manifest = findOfficialAssetManifest(pathId, packageVersion);
+  if (!manifest) {
+    return c.json({ error: "Manifesto de assets não encontrado" }, 404);
+  }
+
+  const etag = officialAssetEtag(manifest.metadata.sha256);
+  const ifNoneMatch = c.req.header("If-None-Match")
+    ?.split(",")
+    .map((value) => value.trim());
+
+  const headers = new Headers({
+    "Content-Type": `${manifest.metadata.contentType}; charset=utf-8`,
+    "Cache-Control": "public, max-age=31536000, immutable",
+    ETag: etag,
+    "X-Asset-Manifest-SHA256": manifest.metadata.sha256,
+    "X-Asset-Manifest-Version": String(manifest.metadata.manifestVersion),
+    "X-Content-Package-Version": String(manifest.metadata.packageVersion),
+  });
+
+  if (ifNoneMatch?.includes("*") || ifNoneMatch?.includes(etag)) {
+    return new Response(null, { status: 304, headers });
+  }
+
+  return new Response(manifest.bytes, {
+    status: 200,
+    headers,
+  });
+});
+
+app.get("/api/content/assets/blobs/:sha256", (c) => {
+  const sha256 = c.req.param("sha256").trim().toLowerCase();
+
+  if (!/^[0-9a-f]{64}$/.test(sha256)) {
+    return c.json({ error: "SHA-256 de asset inválido" }, 400);
+  }
+
+  const asset = findOfficialAssetBlob(sha256);
+  if (!asset) {
+    return c.json({ error: "Asset de conteúdo não encontrado" }, 404);
+  }
+
+  const etag = officialAssetEtag(asset.metadata.sha256);
+  const ifNoneMatch = c.req.header("If-None-Match")
+    ?.split(",")
+    .map((value) => value.trim());
+
+  const headers = new Headers({
+    "Content-Type": asset.metadata.contentType,
+    "Cache-Control": "public, max-age=31536000, immutable",
+    ETag: etag,
+    "X-Asset-SHA256": asset.metadata.sha256,
+    "X-Asset-Size": String(asset.metadata.sizeBytes),
+  });
+
+  if (ifNoneMatch?.includes("*") || ifNoneMatch?.includes(etag)) {
+    return new Response(null, { status: 304, headers });
+  }
+
+  return new Response(asset.bytes, {
     status: 200,
     headers,
   });

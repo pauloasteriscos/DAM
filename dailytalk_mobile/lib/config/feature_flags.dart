@@ -1,5 +1,6 @@
 enum FeatureFlag {
   remoteContentCatalog,
+  remoteContentAssets,
   progressionEngineV2,
   dynamicLearningMap,
   communityActivities,
@@ -8,12 +9,14 @@ enum FeatureFlag {
 class FeatureFlagSnapshot {
   const FeatureFlagSnapshot({
     required this.remoteContentCatalog,
+    required this.remoteContentAssets,
     required this.progressionEngineV2,
     required this.dynamicLearningMap,
     required this.communityActivities,
   });
 
   final bool remoteContentCatalog;
+  final bool remoteContentAssets;
   final bool progressionEngineV2;
   final bool dynamicLearningMap;
   final bool communityActivities;
@@ -21,6 +24,7 @@ class FeatureFlagSnapshot {
   bool raw(FeatureFlag flag) {
     return switch (flag) {
       FeatureFlag.remoteContentCatalog => remoteContentCatalog,
+      FeatureFlag.remoteContentAssets => remoteContentAssets,
       FeatureFlag.progressionEngineV2 => progressionEngineV2,
       FeatureFlag.dynamicLearningMap => dynamicLearningMap,
       FeatureFlag.communityActivities => communityActivities,
@@ -30,25 +34,29 @@ class FeatureFlagSnapshot {
   bool isEnabled(FeatureFlag flag) {
     return switch (flag) {
       FeatureFlag.remoteContentCatalog => remoteContentCatalog,
+      FeatureFlag.remoteContentAssets =>
+        remoteContentAssets && remoteContentCatalog,
       FeatureFlag.progressionEngineV2 => progressionEngineV2,
       FeatureFlag.dynamicLearningMap =>
-        dynamicLearningMap &&
-            remoteContentCatalog &&
-            progressionEngineV2,
+        dynamicLearningMap && remoteContentCatalog && progressionEngineV2,
       FeatureFlag.communityActivities => communityActivities,
     };
   }
 
   Set<FeatureFlag> get enabled => {
-        for (final flag in FeatureFlag.values)
-          if (isEnabled(flag)) flag,
-      };
+    for (final flag in FeatureFlag.values)
+      if (isEnabled(flag)) flag,
+  };
 }
 
 abstract final class FeatureFlags {
   static const FeatureFlagSnapshot build = FeatureFlagSnapshot(
     remoteContentCatalog: bool.fromEnvironment(
       'DAILYTALK_FEATURE_REMOTE_CONTENT_CATALOG',
+      defaultValue: false,
+    ),
+    remoteContentAssets: bool.fromEnvironment(
+      'DAILYTALK_FEATURE_REMOTE_CONTENT_ASSETS',
       defaultValue: false,
     ),
     progressionEngineV2: bool.fromEnvironment(

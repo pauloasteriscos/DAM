@@ -34,12 +34,12 @@ void main() {
     }
   });
 
-  group('DailyTalk SQLite — Fase 2.1A — fundação do catálogo', () {
-    test('base nova v4 cria schema esperado e invariantes locais', () async {
-      final path = p.join(tempDir.path, 'fresh-v4.db');
+  group('DailyTalk SQLite — Fase 2.3 — catálogo e assets', () {
+    test('base nova v5 cria schema esperado e invariantes locais', () async {
+      final path = p.join(tempDir.path, 'fresh-v5.db');
       final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-      expect(await db.getVersion(), 4);
+      expect(await db.getVersion(), 5);
       expect(await _foreignKeysEnabled(db), isTrue);
       expect(await _integrityCheck(db), 'ok');
 
@@ -59,6 +59,9 @@ void main() {
           'app_settings',
           'learning_content_packages',
           'learning_content_catalog',
+          'learning_content_asset_manifests',
+          'learning_content_asset_entries',
+          'learning_content_asset_cache',
         ]),
       );
 
@@ -79,6 +82,21 @@ void main() {
         await _indexExists(db, 'idx_learning_content_catalog_active'),
         isTrue,
       );
+      expect(
+        await _indexExists(
+          db,
+          'idx_learning_content_asset_entries_revision_role',
+        ),
+        isTrue,
+      );
+      expect(
+        await _indexExists(db, 'idx_learning_content_asset_entries_hash'),
+        isTrue,
+      );
+      expect(
+        await _indexExists(db, 'idx_learning_content_asset_cache_access'),
+        isTrue,
+      );
 
       final settings = await db.query(
         'app_settings',
@@ -86,19 +104,19 @@ void main() {
         whereArgs: ['database_version'],
       );
       expect(settings, hasLength(1));
-      expect(settings.single['value'], '4');
+      expect(settings.single['value'], '5');
 
       await db.close();
     });
 
     test(
-      'v1 → v4 preserva dados e acrescenta catálogo + notas + clientSubmissionId',
+      'v1 → v5 preserva dados e acrescenta catálogo + assets + notas',
       () async {
         final path = await _createHistoricalDatabase(tempDir, version: 1);
 
         final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-        expect(await db.getVersion(), 4);
+        expect(await db.getVersion(), 5);
         expect(await _foreignKeysEnabled(db), isTrue);
         expect(await _integrityCheck(db), 'ok');
 
@@ -125,18 +143,18 @@ void main() {
         expect(clientId, isNotEmpty);
         expect(clientId, startsWith('legacy-1-'));
 
-        await _assertDatabaseVersionSetting(db, '4');
+        await _assertDatabaseVersionSetting(db, '5');
 
         await db.close();
       },
     );
 
-    test('v2 → v4 preserva nota privada, progresso e fila pendente', () async {
+    test('v2 → v5 preserva nota privada, progresso e fila pendente', () async {
       final path = await _createHistoricalDatabase(tempDir, version: 2);
 
       final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-      expect(await db.getVersion(), 4);
+      expect(await db.getVersion(), 5);
       expect(await _integrityCheck(db), 'ok');
 
       await _assertHistoricDataPreserved(db);
@@ -173,7 +191,7 @@ void main() {
       expect(clientId, isNotNull);
       expect(clientId, isNotEmpty);
 
-      await _assertDatabaseVersionSetting(db, '4');
+      await _assertDatabaseVersionSetting(db, '5');
 
       await db.close();
     });
@@ -197,7 +215,7 @@ void main() {
 
         db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-        expect(await db.getVersion(), 4);
+        expect(await db.getVersion(), 5);
         final rows = await db.query(
           'submissions',
           columns: ['client_submission_id'],
@@ -217,31 +235,114 @@ void main() {
       },
     );
 
-    test('v3 → v4 preserva progresso e cria catálogo aditivamente', () async {
-      final path = await _createHistoricalV3Database(tempDir);
-      final db = await AppDatabase.instance.openDatabaseForTesting(path);
+    test(
+      'v3 → v5 preserva progresso e cria catálogo/assets aditivamente',
+      () async {
+        final path = await _createHistoricalV3Database(tempDir);
+        final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-      expect(await db.getVersion(), 4);
-      await _assertHistoricDataPreserved(db);
+        expect(await db.getVersion(), 5);
+        await _assertHistoricDataPreserved(db);
 
-      final submissions = await db.query(
-        'submissions',
-        columns: ['client_submission_id', 'sync_status', 'attempt_count'],
-        where: 'id = ?',
-        whereArgs: [_historicSubmissionId],
-      );
-      expect(submissions, hasLength(1));
-      expect(submissions.single['client_submission_id'], 'historic-stable-v3');
-      expect(submissions.single['sync_status'], 'pending');
-      expect(submissions.single['attempt_count'], 2);
+        final submissions = await db.query(
+          'submissions',
+          columns: ['client_submission_id', 'sync_status', 'attempt_count'],
+          where: 'id = ?',
+          whereArgs: [_historicSubmissionId],
+        );
+        expect(submissions, hasLength(1));
+        expect(
+          submissions.single['client_submission_id'],
+          'historic-stable-v3',
+        );
+        expect(submissions.single['sync_status'], 'pending');
+        expect(submissions.single['attempt_count'], 2);
 
-      expect(await _tableExists(db, 'learning_content_packages'), isTrue);
-      expect(await _tableExists(db, 'learning_content_catalog'), isTrue);
-      expect(await _integrityCheck(db), 'ok');
-      await _assertDatabaseVersionSetting(db, '4');
+        expect(await _tableExists(db, 'learning_content_packages'), isTrue);
+        expect(await _tableExists(db, 'learning_content_catalog'), isTrue);
+        expect(await _integrityCheck(db), 'ok');
+        await _assertDatabaseVersionSetting(db, '5');
 
-      await db.close();
-    });
+        await db.close();
+      },
+    );
+
+    test(
+      'v4 → v5 preserva pacote/catálogo e acrescenta cache de assets',
+      () async {
+        final path = p.join(tempDir.path, 'historical-v4.db');
+
+        var db = await AppDatabase.instance.openDatabaseForTesting(path);
+        final now = DateTime.utc(2026, 9, 9, 12).toIso8601String();
+        final packageId = await db.insert('learning_content_packages', {
+          'learning_path_id': 'student.fr-fr.phase1',
+          'package_version': 2,
+          'schema_version': 1,
+          'content_hash': List.filled(64, 'a').join(),
+          'payload_json': '{}',
+          'source': 'historical-v4',
+          'imported_at': now,
+        });
+        await db.insert('learning_content_catalog', {
+          'learning_path_id': 'student.fr-fr.phase1',
+          'active_package_id': packageId,
+          'previous_package_id': null,
+          'activated_at': now,
+        });
+
+        await db.execute('DROP TABLE learning_content_asset_entries');
+        await db.execute('DROP TABLE learning_content_asset_manifests');
+        await db.execute('DROP TABLE learning_content_asset_cache');
+        await db.execute('PRAGMA user_version = 4');
+        await db.update(
+          'app_settings',
+          {'value': '4', 'updated_at': now},
+          where: 'key = ?',
+          whereArgs: ['database_version'],
+        );
+        await db.close();
+
+        db = await AppDatabase.instance.openDatabaseForTesting(path);
+
+        expect(await db.getVersion(), 5);
+        expect(
+          await _tableExists(db, 'learning_content_asset_manifests'),
+          isTrue,
+        );
+        expect(
+          await _tableExists(db, 'learning_content_asset_entries'),
+          isTrue,
+        );
+        expect(await _tableExists(db, 'learning_content_asset_cache'), isTrue);
+        expect(
+          await _indexExists(
+            db,
+            'idx_learning_content_asset_entries_revision_role',
+          ),
+          isTrue,
+        );
+
+        final packages = await db.query(
+          'learning_content_packages',
+          where: 'id = ?',
+          whereArgs: [packageId],
+        );
+        expect(packages, hasLength(1));
+        expect(packages.single['source'], 'historical-v4');
+
+        final catalog = await db.query(
+          'learning_content_catalog',
+          where: 'learning_path_id = ?',
+          whereArgs: ['student.fr-fr.phase1'],
+        );
+        expect(catalog, hasLength(1));
+        expect(catalog.single['active_package_id'], packageId);
+
+        expect(await _integrityCheck(db), 'ok');
+        await _assertDatabaseVersionSetting(db, '5');
+        await db.close();
+      },
+    );
 
     test('catálogo rejeita ponteiro para pacote de outro percurso', () async {
       final path = p.join(tempDir.path, 'catalog-foreign-key.db');

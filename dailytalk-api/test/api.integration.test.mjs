@@ -279,6 +279,9 @@ test(
     let submissionId = "";
     let contentPackageMetadata = null;
     let contentPackageEtag = "";
+    let assetManifestMetadata = null;
+    let assetManifestEtag = "";
+    let assetDescriptors = [];
 
     await t.test("health responde e aplica headers operacionais", async () => {
       const { response, payload } = await apiRequest("/api/health");
@@ -302,6 +305,17 @@ test(
       assert.ok(
         payload.endpoints.includes(
           "GET /api/content/packages/:pathId/:packageVersion",
+        ),
+      );
+      assert.ok(payload.endpoints.includes("GET /api/content/assets/catalog"));
+      assert.ok(
+        payload.endpoints.includes(
+          "GET /api/content/assets/manifests/:pathId/:packageVersion",
+        ),
+      );
+      assert.ok(
+        payload.endpoints.includes(
+          "GET /api/content/assets/blobs/:sha256",
         ),
       );
     });
@@ -470,6 +484,169 @@ test(
     await t.test("pacote inexistente é rejeitado sem fallback silencioso", async () => {
       const { response, payload } = await apiRequest(
         "/api/content/packages/student.fr-fr.phase1/999",
+      );
+
+      assert.equal(response.status, 404);
+      assert.match(String(payload.error), /não encontrado/i);
+      assert.equal(response.headers.get("cache-control"), "no-store");
+    });
+
+    await t.test("catálogo de assets publica manifesto do pacote v2", async () => {
+      const { response, payload } = await apiRequest(
+        "/api/content/assets/catalog",
+      );
+
+      assert.equal(response.status, 200);
+      assert.equal(payload.success, true);
+      assert.equal(payload.assetCatalogVersion, 1);
+      assert.ok(Array.isArray(payload.manifests));
+
+      const metadata = payload.manifests.find(
+        (item) => item.pathId === "student.fr-fr.phase1",
+      );
+      assert.ok(metadata);
+      assert.equal(metadata.packageVersion, 2);
+      assert.equal(metadata.manifestVersion, 1);
+      assert.equal(
+        metadata.sha256,
+        "d9ac2ce729a71cbacab669bb971c9511e340e0f7a140299ad80d5faee540aac9",
+      );
+      assert.equal(metadata.sizeBytes, 1029);
+      assert.equal(metadata.contentType, "application/json");
+      assert.equal(
+        metadata.downloadPath,
+        "/api/content/assets/manifests/student.fr-fr.phase1/2",
+      );
+      assert.equal(metadata.immutable, true);
+      assert.equal(response.headers.get("cache-control"), "no-store");
+
+      assetManifestMetadata = metadata;
+    });
+
+    await t.test("manifesto de assets é imutável e íntegro", async () => {
+      assert.ok(assetManifestMetadata);
+
+      const response = await fetch(
+        `${API_BASE}${assetManifestMetadata.downloadPath}`,
+        { headers: { [ENV_HEADER]: "DEV" } },
+      );
+
+      assert.equal(response.status, 200);
+      assert.equal(
+        response.headers.get("content-type"),
+        "application/json; charset=utf-8",
+      );
+      assert.equal(
+        response.headers.get("cache-control"),
+        "public, max-age=31536000, immutable",
+      );
+      assert.equal(
+        response.headers.get("x-asset-manifest-sha256"),
+        assetManifestMetadata.sha256,
+      );
+      assert.equal(response.headers.get("x-asset-manifest-version"), "1");
+      assert.equal(response.headers.get("x-content-package-version"), "2");
+
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      assert.equal(bytes.byteLength, assetManifestMetadata.sizeBytes);
+      assert.equal(
+        createHash("sha256").update(bytes).digest("hex"),
+        assetManifestMetadata.sha256,
+      );
+
+      const decoded = JSON.parse(new TextDecoder().decode(bytes));
+      assert.equal(decoded.manifestVersion, 1);
+      assert.equal(decoded.pathId, "student.fr-fr.phase1");
+      assert.equal(decoded.packageVersion, 2);
+      assert.equal(decoded.assets.length, 2);
+      assert.deepEqual(
+        decoded.assets.map((item) => item.role),
+        ["illustration", "pronunciation"],
+      );
+
+      assetDescriptors = decoded.assets;
+      assetManifestEtag = response.headers.get("etag") ?? "";
+      assert.equal(
+        assetManifestEtag,
+        `"sha256-${assetManifestMetadata.sha256}"`,
+      );
+    });
+
+    await t.test("blobs de imagem e áudio correspondem ao manifesto", async () => {
+      assert.equal(assetDescriptors.length, 2);
+
+      for (const descriptor of assetDescriptors) {
+        const response = await fetch(
+          `${API_BASE}${descriptor.downloadPath}`,
+          { headers: { [ENV_HEADER]: "DEV" } },
+        );
+
+        assert.equal(response.status, 200);
+        assert.equal(
+          response.headers.get("content-type"),
+          descriptor.contentType,
+        );
+        assert.equal(
+          response.headers.get("cache-control"),
+          "public, max-age=31536000, immutable",
+        );
+        assert.equal(
+          response.headers.get("x-asset-sha256"),
+          descriptor.sha256,
+        );
+        assert.equal(
+          response.headers.get("x-asset-size"),
+          String(descriptor.sizeBytes),
+        );
+        assert.equal(
+          response.headers.get("etag"),
+          `"sha256-${descriptor.sha256}"`,
+        );
+
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        assert.equal(bytes.byteLength, descriptor.sizeBytes);
+        assert.equal(
+          createHash("sha256").update(bytes).digest("hex"),
+          descriptor.sha256,
+        );
+      }
+    });
+
+    await t.test("manifesto e blob suportam ETag sem reenviar bytes", async () => {
+      assert.ok(assetManifestMetadata);
+      assert.ok(assetManifestEtag);
+      assert.equal(assetDescriptors.length, 2);
+
+      const manifestResponse = await fetch(
+        `${API_BASE}${assetManifestMetadata.downloadPath}`,
+        {
+          headers: {
+            [ENV_HEADER]: "DEV",
+            "If-None-Match": assetManifestEtag,
+          },
+        },
+      );
+      assert.equal(manifestResponse.status, 304);
+      assert.equal(await manifestResponse.text(), "");
+
+      const descriptor = assetDescriptors[0];
+      const blobResponse = await fetch(
+        `${API_BASE}${descriptor.downloadPath}`,
+        {
+          headers: {
+            [ENV_HEADER]: "DEV",
+            "If-None-Match": `"sha256-${descriptor.sha256}"`,
+          },
+        },
+      );
+      assert.equal(blobResponse.status, 304);
+      assert.equal((await blobResponse.arrayBuffer()).byteLength, 0);
+    });
+
+    await t.test("asset inexistente é rejeitado sem fallback silencioso", async () => {
+      const missingHash = "f".repeat(64);
+      const { response, payload } = await apiRequest(
+        `/api/content/assets/blobs/${missingHash}`,
       );
 
       assert.equal(response.status, 404);
