@@ -1,0 +1,788 @@
+{
+  "schemaVersion": 1,
+  "id": "student.fr-fr.phase1",
+  "defaultLocale": "pt-PT",
+  "title": {
+    "pt-PT": "Primeiros dias em França",
+    "fr-FR": "Premiers jours en France"
+  },
+  "journeys": [
+    {
+      "id": "arrival.journey",
+      "title": {
+        "pt-PT": "Primeiros dias em França",
+        "fr-FR": "Premiers jours en France"
+      },
+      "stages": [
+        {
+          "id": "arrival.stage-01",
+          "title": {
+            "pt-PT": "Chegar e apresentar-se",
+            "fr-FR": "Arriver et se présenter"
+          },
+          "elements": [
+            {
+              "id": "arrival.vocabulary-01.element",
+              "type": "activity",
+              "activityId": "arrival.vocabulary-01",
+              "practicePreference": "vocabulary"
+            },
+            {
+              "id": "arrival.dialogue-01.element",
+              "type": "activity",
+              "activityId": "arrival.dialogue-01",
+              "practicePreference": "dialogue"
+            },
+            {
+              "id": "arrival.speech-01.element",
+              "type": "activity",
+              "activityId": "arrival.speech-01",
+              "practicePreference": "speech"
+            }
+          ]
+        },
+        {
+          "id": "arrival.stage-02",
+          "title": {
+            "pt-PT": "Conhecer a casa",
+            "fr-FR": "Découvrir la maison"
+          },
+          "elements": [
+            {
+              "id": "arrival.vocabulary-02.element",
+              "type": "activity",
+              "activityId": "arrival.vocabulary-02",
+              "prerequisites": {
+                "type": "activityCompleted",
+                "activityId": "arrival.vocabulary-01"
+              },
+              "practicePreference": "vocabulary"
+            },
+            {
+              "id": "arrival.dialogue-02.element",
+              "type": "activity",
+              "activityId": "arrival.dialogue-02",
+              "prerequisites": {
+                "type": "group",
+                "operator": "any",
+                "rules": [
+                  {
+                    "type": "activityCompleted",
+                    "activityId": "arrival.vocabulary-01"
+                  },
+                  {
+                    "type": "activityCompleted",
+                    "activityId": "arrival.dialogue-01"
+                  }
+                ]
+              },
+              "practicePreference": "dialogue"
+            },
+            {
+              "id": "arrival.speech-02.element",
+              "type": "activity",
+              "activityId": "arrival.speech-02",
+              "prerequisites": {
+                "type": "group",
+                "operator": "all",
+                "rules": [
+                  {
+                    "type": "activityCompleted",
+                    "activityId": "arrival.speech-01"
+                  },
+                  {
+                    "type": "competencyAchieved",
+                    "competencyId": "arrival.pronunciation-basics"
+                  }
+                ]
+              },
+              "practicePreference": "speech"
+            },
+            {
+              "id": "arrival.quiz-01.element",
+              "type": "activity",
+              "activityId": "arrival.quiz-01",
+              "prerequisites": {
+                "type": "competencyAchieved",
+                "competencyId": "arrival.greeting-basics"
+              },
+              "practicePreference": "balanced"
+            },
+            {
+              "id": "arrival.review-01.element",
+              "type": "activity",
+              "activityId": "arrival.review-01",
+              "prerequisites": {
+                "type": "group",
+                "operator": "all",
+                "rules": [
+                  {
+                    "type": "group",
+                    "operator": "any",
+                    "rules": [
+                      {
+                        "type": "activityCompleted",
+                        "activityId": "arrival.vocabulary-02"
+                      },
+                      {
+                        "type": "activityCompleted",
+                        "activityId": "arrival.dialogue-02"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "group",
+                    "operator": "any",
+                    "rules": [
+                      {
+                        "type": "activityCompleted",
+                        "activityId": "arrival.speech-02"
+                      },
+                      {
+                        "type": "activityCompleted",
+                        "activityId": "arrival.quiz-01"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "practicePreference": "balanced"
+            }
+          ]
+        },
+        {
+          "id": "arrival.stage-03",
+          "title": {
+            "pt-PT": "Refeições e rotina",
+            "fr-FR": "Repas et routine"
+          },
+          "elements": [
+            {
+              "id": "arrival.vocabulary-03.element",
+              "type": "activity",
+              "activityId": "arrival.vocabulary-03",
+              "prerequisites": {
+                "type": "activityCompleted",
+                "activityId": "arrival.review-01"
+              },
+              "practicePreference": "vocabulary"
+            },
+            {
+              "id": "arrival.dialogue-03.element",
+              "type": "activity",
+              "activityId": "arrival.dialogue-03",
+              "prerequisites": {
+                "type": "activityCompleted",
+                "activityId": "arrival.review-01"
+              },
+              "practicePreference": "dialogue"
+            },
+            {
+              "id": "arrival.speech-03.element",
+              "type": "activity",
+              "activityId": "arrival.speech-03",
+              "prerequisites": {
+                "type": "activityCompleted",
+                "activityId": "arrival.review-01"
+              },
+              "practicePreference": "speech"
+            },
+            {
+              "id": "arrival.quiz-02.element",
+              "type": "activity",
+              "activityId": "arrival.quiz-02",
+              "prerequisites": {
+                "type": "group",
+                "operator": "all",
+                "rules": [
+                  {
+                    "type": "competencyAchieved",
+                    "competencyId": "arrival.meal-vocabulary"
+                  },
+                  {
+                    "type": "competencyAchieved",
+                    "competencyId": "arrival.meal-interaction"
+                  }
+                ]
+              },
+              "practicePreference": "balanced"
+            }
+          ]
+        },
+        {
+          "id": "arrival.stage-04",
+          "title": {
+            "pt-PT": "Ganhar autonomia",
+            "fr-FR": "Gagner en autonomie"
+          },
+          "elements": [
+            {
+              "id": "arrival.vocabulary-04.element",
+              "type": "activity",
+              "activityId": "arrival.vocabulary-04",
+              "prerequisites": {
+                "type": "activityCompleted",
+                "activityId": "arrival.quiz-02"
+              },
+              "practicePreference": "vocabulary"
+            },
+            {
+              "id": "arrival.dialogue-04.element",
+              "type": "activity",
+              "activityId": "arrival.dialogue-04",
+              "prerequisites": {
+                "type": "activityCompleted",
+                "activityId": "arrival.quiz-02"
+              },
+              "practicePreference": "dialogue"
+            },
+            {
+              "id": "arrival.speech-04.element",
+              "type": "activity",
+              "activityId": "arrival.speech-04",
+              "prerequisites": {
+                "type": "activityCompleted",
+                "activityId": "arrival.quiz-02"
+              },
+              "practicePreference": "speech"
+            },
+            {
+              "id": "arrival.integrated-01.element",
+              "type": "activity",
+              "activityId": "arrival.integrated-01",
+              "prerequisites": {
+                "type": "group",
+                "operator": "all",
+                "rules": [
+                  {
+                    "type": "activityCompleted",
+                    "activityId": "arrival.quiz-02"
+                  },
+                  {
+                    "type": "competencyAchieved",
+                    "competencyId": "arrival.schedule-basics"
+                  },
+                  {
+                    "type": "competencyAchieved",
+                    "competencyId": "arrival.help-basics"
+                  }
+                ]
+              },
+              "practicePreference": "balanced"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "activities": [
+    {
+      "id": "arrival.vocabulary-01",
+      "type": "vocabulary",
+      "origin": "official",
+      "currentRevisionId": "arrival.vocabulary-01.revision-03",
+      "revisions": [
+        {
+          "id": "arrival.vocabulary-01.revision-01",
+          "activityId": "arrival.vocabulary-01",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Palavras de acolhimento"
+          },
+          "instructions": {
+            "pt-PT": "Associe cada expressão ao significado."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.greeting-basics"
+          ]
+        },
+        {
+          "id": "arrival.vocabulary-01.revision-02",
+          "activityId": "arrival.vocabulary-01",
+          "revisionNumber": 2,
+          "title": {
+            "pt-PT": "Palavras de acolhimento — edição revista"
+          },
+          "instructions": {
+            "pt-PT": "Associe cada expressão ao significado na versão revista."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.greeting-basics"
+          ]
+        },
+        {
+          "id": "arrival.vocabulary-01.revision-03",
+          "activityId": "arrival.vocabulary-01",
+          "revisionNumber": 3,
+          "title": {
+            "pt-PT": "Cumprimentos essenciais",
+            "fr-FR": "Salutations essentielles"
+          },
+          "instructions": {
+            "pt-PT": "Associe as expressões essenciais de chegada ao significado correto.",
+            "fr-FR": "Associe les expressions essentielles de l’arrivée à leur sens correct."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.greeting-basics"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.dialogue-01",
+      "type": "dialogue",
+      "origin": "official",
+      "currentRevisionId": "arrival.dialogue-01.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.dialogue-01.revision-01",
+          "activityId": "arrival.dialogue-01",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Apresentar-se"
+          },
+          "instructions": {
+            "pt-PT": "Complete o diálogo de apresentação."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.greeting-basics"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.speech-01",
+      "type": "speech",
+      "origin": "official",
+      "currentRevisionId": "arrival.speech-01.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.speech-01.revision-01",
+          "activityId": "arrival.speech-01",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Dizer olá"
+          },
+          "instructions": {
+            "pt-PT": "Repita as saudações apresentadas."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.pronunciation-basics"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.vocabulary-02",
+      "type": "vocabulary",
+      "origin": "official",
+      "currentRevisionId": "arrival.vocabulary-02.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.vocabulary-02.revision-01",
+          "activityId": "arrival.vocabulary-02",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Objetos da casa"
+          },
+          "instructions": {
+            "pt-PT": "Identifique os objetos apresentados."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.home-vocabulary"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.dialogue-02",
+      "type": "dialogue",
+      "origin": "official",
+      "currentRevisionId": "arrival.dialogue-02.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.dialogue-02.revision-01",
+          "activityId": "arrival.dialogue-02",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Conhecer a família"
+          },
+          "instructions": {
+            "pt-PT": "Escolha respostas adequadas no diálogo."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.greeting-basics"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.speech-02",
+      "type": "speech",
+      "origin": "official",
+      "currentRevisionId": "arrival.speech-02.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.speech-02.revision-01",
+          "activityId": "arrival.speech-02",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Pedir ajuda"
+          },
+          "instructions": {
+            "pt-PT": "Pronuncie as frases para pedir ajuda."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.pronunciation-basics"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.quiz-01",
+      "type": "quiz",
+      "origin": "official",
+      "currentRevisionId": "arrival.quiz-01.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.quiz-01.revision-01",
+          "activityId": "arrival.quiz-01",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Responder no primeiro contacto",
+            "fr-FR": "Répondre au premier contact"
+          },
+          "instructions": {
+            "pt-PT": "Escolha a resposta mais adequada para uma situação de chegada e apresentação.",
+            "fr-FR": "Choisis la réponse la plus adaptée à une situation d’arrivée et de présentation."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.greeting-basics"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.review-01",
+      "type": "review",
+      "origin": "official",
+      "currentRevisionId": "arrival.review-01.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.review-01.revision-01",
+          "activityId": "arrival.review-01",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Rever chegada e casa",
+            "fr-FR": "Réviser l’arrivée et la maison"
+          },
+          "instructions": {
+            "pt-PT": "Reveja cumprimentos, apresentação e vocabulário essencial da casa de acolhimento.",
+            "fr-FR": "Révise les salutations, la présentation et le vocabulaire essentiel de la maison d’accueil."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.greeting-basics",
+            "arrival.home-vocabulary"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.vocabulary-03",
+      "type": "vocabulary",
+      "origin": "official",
+      "currentRevisionId": "arrival.vocabulary-03.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.vocabulary-03.revision-01",
+          "activityId": "arrival.vocabulary-03",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "À mesa e nas refeições",
+            "fr-FR": "À table et pendant les repas"
+          },
+          "instructions": {
+            "pt-PT": "Associe palavras e expressões úteis para o pequeno-almoço, almoço e jantar.",
+            "fr-FR": "Associe les mots et expressions utiles pour le petit-déjeuner, le déjeuner et le dîner."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.meal-vocabulary"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.dialogue-03",
+      "type": "dialogue",
+      "origin": "official",
+      "currentRevisionId": "arrival.dialogue-03.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.dialogue-03.revision-01",
+          "activityId": "arrival.dialogue-03",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Combinar o pequeno-almoço",
+            "fr-FR": "Organiser le petit-déjeuner"
+          },
+          "instructions": {
+            "pt-PT": "Complete um diálogo sobre horário, alimentos e preferências do pequeno-almoço.",
+            "fr-FR": "Complète un dialogue sur l’horaire, les aliments et les préférences du petit-déjeuner."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.meal-interaction"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.speech-03",
+      "type": "speech",
+      "origin": "official",
+      "currentRevisionId": "arrival.speech-03.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.speech-03.revision-01",
+          "activityId": "arrival.speech-03",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Dizer preferências à mesa",
+            "fr-FR": "Exprimer ses préférences à table"
+          },
+          "instructions": {
+            "pt-PT": "Pratique oralmente frases curtas para aceitar, recusar ou pedir algo durante uma refeição.",
+            "fr-FR": "Entraîne-toi à dire de courtes phrases pour accepter, refuser ou demander quelque chose pendant un repas."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.pronunciation-basics",
+            "arrival.meal-interaction"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.quiz-02",
+      "type": "quiz",
+      "origin": "official",
+      "currentRevisionId": "arrival.quiz-02.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.quiz-02.revision-01",
+          "activityId": "arrival.quiz-02",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Refeições e rotina",
+            "fr-FR": "Repas et routine"
+          },
+          "instructions": {
+            "pt-PT": "Escolha expressões adequadas em situações de refeição e organização da rotina diária.",
+            "fr-FR": "Choisis les expressions adaptées aux repas et à l’organisation de la routine quotidienne."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.meal-vocabulary",
+            "arrival.meal-interaction"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.vocabulary-04",
+      "type": "vocabulary",
+      "origin": "official",
+      "currentRevisionId": "arrival.vocabulary-04.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.vocabulary-04.revision-01",
+          "activityId": "arrival.vocabulary-04",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Horas e rotina",
+            "fr-FR": "Horaires et routine"
+          },
+          "instructions": {
+            "pt-PT": "Associe horas, momentos do dia e expressões usadas para combinar horários.",
+            "fr-FR": "Associe les heures, les moments de la journée et les expressions utilisées pour convenir d’un horaire."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.schedule-basics"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.dialogue-04",
+      "type": "dialogue",
+      "origin": "official",
+      "currentRevisionId": "arrival.dialogue-04.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.dialogue-04.revision-01",
+          "activityId": "arrival.dialogue-04",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Pedir ajuda e orientação",
+            "fr-FR": "Demander de l’aide et s’orienter"
+          },
+          "instructions": {
+            "pt-PT": "Complete um diálogo para pedir ajuda, encontrar um local e confirmar uma indicação.",
+            "fr-FR": "Complète un dialogue pour demander de l’aide, trouver un lieu et confirmer une indication."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.help-basics"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.speech-04",
+      "type": "speech",
+      "origin": "official",
+      "currentRevisionId": "arrival.speech-04.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.speech-04.revision-01",
+          "activityId": "arrival.speech-04",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Pedir para repetir",
+            "fr-FR": "Demander de répéter"
+          },
+          "instructions": {
+            "pt-PT": "Pratique frases para pedir que alguém repita, fale mais devagar ou confirme uma informação.",
+            "fr-FR": "Entraîne-toi à demander de répéter, de parler plus lentement ou de confirmer une information."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.pronunciation-basics",
+            "arrival.help-basics"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arrival.integrated-01",
+      "type": "integratedChallenge",
+      "origin": "official",
+      "currentRevisionId": "arrival.integrated-01.revision-01",
+      "revisions": [
+        {
+          "id": "arrival.integrated-01.revision-01",
+          "activityId": "arrival.integrated-01",
+          "revisionNumber": 1,
+          "title": {
+            "pt-PT": "Missão: primeiro dia completo",
+            "fr-FR": "Mission : première journée complète"
+          },
+          "instructions": {
+            "pt-PT": "Resolva uma sequência integrada de chegada, refeição, horários e pedido de ajuda.",
+            "fr-FR": "Résous une séquence intégrée d’arrivée, de repas, d’horaires et de demande d’aide."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.integrated-first-days"
+          ]
+        }
+      ]
+    }
+  ],
+  "competencies": [
+    {
+      "id": "arrival.greeting-basics",
+      "title": {
+        "pt-PT": "Cumprimentos básicos"
+      },
+      "description": {
+        "pt-PT": "Reconhecer e usar cumprimentos simples."
+      }
+    },
+    {
+      "id": "arrival.pronunciation-basics",
+      "title": {
+        "pt-PT": "Pronúncia inicial"
+      },
+      "description": {
+        "pt-PT": "Pronunciar expressões essenciais de forma compreensível."
+      }
+    },
+    {
+      "id": "arrival.home-vocabulary",
+      "title": {
+        "pt-PT": "Vocabulário da casa"
+      },
+      "description": {
+        "pt-PT": "Reconhecer objetos comuns numa casa de acolhimento."
+      }
+    },
+    {
+      "id": "arrival.meal-vocabulary",
+      "title": {
+        "pt-PT": "Vocabulário de refeições",
+        "fr-FR": "Vocabulaire des repas"
+      },
+      "description": {
+        "pt-PT": "Reconhecer alimentos, refeições e expressões frequentes à mesa.",
+        "fr-FR": "Reconnaître les aliments, les repas et les expressions fréquentes à table."
+      }
+    },
+    {
+      "id": "arrival.meal-interaction",
+      "title": {
+        "pt-PT": "Interação durante refeições",
+        "fr-FR": "Interaction pendant les repas"
+      },
+      "description": {
+        "pt-PT": "Participar em trocas simples sobre horários, preferências e pedidos durante refeições.",
+        "fr-FR": "Participer à des échanges simples sur les horaires, les préférences et les demandes pendant les repas."
+      }
+    },
+    {
+      "id": "arrival.schedule-basics",
+      "title": {
+        "pt-PT": "Horários e rotina",
+        "fr-FR": "Horaires et routine"
+      },
+      "description": {
+        "pt-PT": "Compreender e comunicar horas e momentos essenciais da rotina diária.",
+        "fr-FR": "Comprendre et communiquer les heures et les moments essentiels de la routine quotidienne."
+      }
+    },
+    {
+      "id": "arrival.help-basics",
+      "title": {
+        "pt-PT": "Pedir ajuda e clarificação",
+        "fr-FR": "Demander de l’aide et une clarification"
+      },
+      "description": {
+        "pt-PT": "Pedir ajuda, repetição ou orientação de forma simples e educada.",
+        "fr-FR": "Demander de l’aide, une répétition ou une orientation de manière simple et polie."
+      }
+    },
+    {
+      "id": "arrival.integrated-first-days",
+      "title": {
+        "pt-PT": "Autonomia nos primeiros dias",
+        "fr-FR": "Autonomie pendant les premiers jours"
+      },
+      "description": {
+        "pt-PT": "Combinar competências essenciais para agir com maior autonomia nos primeiros dias de mobilidade.",
+        "fr-FR": "Combiner les compétences essentielles pour agir avec davantage d’autonomie pendant les premiers jours de mobilité."
+      }
+    }
+  ]
+}

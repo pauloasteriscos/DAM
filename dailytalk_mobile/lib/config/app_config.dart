@@ -189,7 +189,7 @@ class AppConfig {
   /// Versão enviada no registo do dispositivo para auditoria.
   static const String appVersion = String.fromEnvironment(
     'DAILYTALK_APP_VERSION',
-    defaultValue: '1.0.8',
+    defaultValue: '1.0.9',
   );
 
   /// Chaves públicas do servidor fixadas no build de produção.

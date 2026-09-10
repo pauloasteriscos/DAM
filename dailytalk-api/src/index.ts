@@ -43,7 +43,7 @@ import {
 import {
   findOfficialAssetBlob,
   findOfficialAssetManifest,
-  listLatestOfficialAssetManifests,
+  listOfficialAssetManifests,
   officialAssetCatalogVersion,
   officialAssetEtag,
 } from "./content/official_assets";
@@ -451,7 +451,7 @@ app.get("/api/content/assets/catalog", (c) =>
   c.json({
     success: true,
     assetCatalogVersion: officialAssetCatalogVersion,
-    manifests: listLatestOfficialAssetManifests(),
+    manifests: listOfficialAssetManifests(),
   }),
 );
 

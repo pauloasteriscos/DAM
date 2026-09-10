@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
-import { rm } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
@@ -356,7 +356,7 @@ test(
       );
     });
 
-    await t.test("catálogo oficial publica metadata da versão mais recente v2", async () => {
+    await t.test("catálogo oficial publica metadata da versão mais recente v3", async () => {
       const { response, payload } = await apiRequest("/api/content/catalog");
 
       assert.equal(response.status, 200);
@@ -370,16 +370,16 @@ test(
 
       assert.ok(metadata);
       assert.equal(metadata.schemaVersion, 1);
-      assert.equal(metadata.packageVersion, 2);
+      assert.equal(metadata.packageVersion, 3);
       assert.equal(
         metadata.sha256,
-        "c9f22e0fac4585aa90bb161ac609a3055e3f2fd11d0b16c3537b4c4068d77e0c",
+        "9fc5142ad80c8e66979c8f3f5f547bb8071c4be09160b03a38cf2374eebb070b",
       );
-      assert.equal(metadata.sizeBytes, 8043);
+      assert.equal(metadata.sizeBytes, 25371);
       assert.equal(metadata.contentType, "application/json");
       assert.equal(
         metadata.downloadPath,
-        "/api/content/packages/student.fr-fr.phase1/2",
+        "/api/content/packages/student.fr-fr.phase1/3",
       );
       assert.equal(metadata.immutable, true);
       assert.equal(response.headers.get("cache-control"), "no-store");
@@ -426,7 +426,14 @@ test(
       assert.equal(bytes.byteLength, contentPackageMetadata.sizeBytes);
       assert.equal(actualSha256, contentPackageMetadata.sha256);
 
+      const canonicalBytes = await readFile(
+        path.join(ROOT, "docs", "phase2", "official_reference_journey_v3.json"),
+      );
+      assert.deepEqual(Buffer.from(bytes), canonicalBytes);
+
       const decoded = JSON.parse(new TextDecoder().decode(bytes));
+      assert.equal(decoded.activities.length, 16);
+      assert.equal(decoded.journeys[0].stages.length, 4);
       assert.equal(decoded.schemaVersion, 1);
       assert.equal(decoded.id, contentPackageMetadata.pathId);
 
@@ -456,6 +463,44 @@ test(
         createHash("sha256").update(bytes).digest("hex"),
         "6d5bee9037aecaf70773e484076ad646d6b05d7f01bf0f00b8f5a70e798de968",
       );
+    });
+
+    await t.test("versão v2 continua disponível e revisões publicadas permanecem imutáveis", async () => {
+      const [v2Response, v3Response] = await Promise.all([
+        fetch(`${API_BASE}/api/content/packages/student.fr-fr.phase1/2`, {
+          headers: { [ENV_HEADER]: "DEV" },
+        }),
+        fetch(`${API_BASE}/api/content/packages/student.fr-fr.phase1/3`, {
+          headers: { [ENV_HEADER]: "DEV" },
+        }),
+      ]);
+
+      assert.equal(v2Response.status, 200);
+      assert.equal(v3Response.status, 200);
+      assert.equal(
+        v2Response.headers.get("x-content-sha256"),
+        "c9f22e0fac4585aa90bb161ac609a3055e3f2fd11d0b16c3537b4c4068d77e0c",
+      );
+
+      const v2 = await v2Response.json();
+      const v3 = await v3Response.json();
+      const oldActivity = v2.activities.find(
+        (item) => item.id === "arrival.vocabulary-01",
+      );
+      const newActivity = v3.activities.find(
+        (item) => item.id === "arrival.vocabulary-01",
+      );
+
+      assert.ok(oldActivity);
+      assert.ok(newActivity);
+      assert.deepEqual(newActivity.revisions[0], oldActivity.revisions[0]);
+      assert.deepEqual(newActivity.revisions[1], oldActivity.revisions[1]);
+      assert.equal(newActivity.revisions.length, 3);
+      assert.equal(
+        newActivity.currentRevisionId,
+        "arrival.vocabulary-01.revision-03",
+      );
+      assert.equal(newActivity.revisions[2].revisionNumber, 3);
     });
 
     await t.test("pacote imutável suporta revalidação condicional por ETag", async () => {
@@ -491,7 +536,7 @@ test(
       assert.equal(response.headers.get("cache-control"), "no-store");
     });
 
-    await t.test("catálogo de assets publica manifesto do pacote v2", async () => {
+    await t.test("catálogo de assets publica manifesto do pacote v3", async () => {
       const { response, payload } = await apiRequest(
         "/api/content/assets/catalog",
       );
@@ -502,20 +547,31 @@ test(
       assert.ok(Array.isArray(payload.manifests));
 
       const metadata = payload.manifests.find(
-        (item) => item.pathId === "student.fr-fr.phase1",
+        (item) =>
+          item.pathId === "student.fr-fr.phase1" && item.packageVersion === 3,
+      );
+      const previousMetadata = payload.manifests.find(
+        (item) =>
+          item.pathId === "student.fr-fr.phase1" && item.packageVersion === 2,
       );
       assert.ok(metadata);
-      assert.equal(metadata.packageVersion, 2);
+      assert.ok(previousMetadata);
+      assert.equal(previousMetadata.manifestVersion, 1);
+      assert.equal(
+        previousMetadata.sha256,
+        "d9ac2ce729a71cbacab669bb971c9511e340e0f7a140299ad80d5faee540aac9",
+      );
+      assert.equal(metadata.packageVersion, 3);
       assert.equal(metadata.manifestVersion, 1);
       assert.equal(
         metadata.sha256,
-        "d9ac2ce729a71cbacab669bb971c9511e340e0f7a140299ad80d5faee540aac9",
+        "bccf2da598c07ec04ddebf66ea0dc665bc7237b5928cefa0082c888a231a7e80",
       );
-      assert.equal(metadata.sizeBytes, 1029);
+      assert.equal(metadata.sizeBytes, 3790);
       assert.equal(metadata.contentType, "application/json");
       assert.equal(
         metadata.downloadPath,
-        "/api/content/assets/manifests/student.fr-fr.phase1/2",
+        "/api/content/assets/manifests/student.fr-fr.phase1/3",
       );
       assert.equal(metadata.immutable, true);
       assert.equal(response.headers.get("cache-control"), "no-store");
@@ -545,7 +601,7 @@ test(
         assetManifestMetadata.sha256,
       );
       assert.equal(response.headers.get("x-asset-manifest-version"), "1");
-      assert.equal(response.headers.get("x-content-package-version"), "2");
+      assert.equal(response.headers.get("x-content-package-version"), "3");
 
       const bytes = new Uint8Array(await response.arrayBuffer());
       assert.equal(bytes.byteLength, assetManifestMetadata.sizeBytes);
@@ -554,14 +610,23 @@ test(
         assetManifestMetadata.sha256,
       );
 
+      const canonicalBytes = await readFile(
+        path.join(ROOT, "docs", "phase2", "official_asset_manifest_v3.json"),
+      );
+      assert.deepEqual(Buffer.from(bytes), canonicalBytes);
+
       const decoded = JSON.parse(new TextDecoder().decode(bytes));
       assert.equal(decoded.manifestVersion, 1);
       assert.equal(decoded.pathId, "student.fr-fr.phase1");
-      assert.equal(decoded.packageVersion, 2);
-      assert.equal(decoded.assets.length, 2);
+      assert.equal(decoded.packageVersion, 3);
+      assert.equal(decoded.assets.length, 8);
       assert.deepEqual(
-        decoded.assets.map((item) => item.role),
+        decoded.assets.slice(0, 2).map((item) => item.role),
         ["illustration", "pronunciation"],
+      );
+      assert.equal(
+        new Set(decoded.assets.map((item) => item.revisionId)).size,
+        6,
       );
 
       assetDescriptors = decoded.assets;
@@ -572,8 +637,28 @@ test(
       );
     });
 
+    await t.test("manifesto v2 continua disponível e imutável", async () => {
+      const response = await fetch(
+        `${API_BASE}/api/content/assets/manifests/student.fr-fr.phase1/2`,
+        { headers: { [ENV_HEADER]: "DEV" } },
+      );
+
+      assert.equal(response.status, 200);
+      assert.equal(response.headers.get("x-content-package-version"), "2");
+      assert.equal(
+        response.headers.get("x-asset-manifest-sha256"),
+        "d9ac2ce729a71cbacab669bb971c9511e340e0f7a140299ad80d5faee540aac9",
+      );
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      assert.equal(bytes.byteLength, 1029);
+      assert.equal(
+        createHash("sha256").update(bytes).digest("hex"),
+        "d9ac2ce729a71cbacab669bb971c9511e340e0f7a140299ad80d5faee540aac9",
+      );
+    });
+
     await t.test("blobs de imagem e áudio correspondem ao manifesto", async () => {
-      assert.equal(assetDescriptors.length, 2);
+      assert.equal(assetDescriptors.length, 8);
 
       for (const descriptor of assetDescriptors) {
         const response = await fetch(
@@ -615,7 +700,7 @@ test(
     await t.test("manifesto e blob suportam ETag sem reenviar bytes", async () => {
       assert.ok(assetManifestMetadata);
       assert.ok(assetManifestEtag);
-      assert.equal(assetDescriptors.length, 2);
+      assert.equal(assetDescriptors.length, 8);
 
       const manifestResponse = await fetch(
         `${API_BASE}${assetManifestMetadata.downloadPath}`,

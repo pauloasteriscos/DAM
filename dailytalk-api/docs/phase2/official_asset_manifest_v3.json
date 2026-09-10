@@ -1,0 +1,95 @@
+{
+  "manifestVersion": 1,
+  "pathId": "student.fr-fr.phase1",
+  "packageVersion": 3,
+  "assets": [
+    {
+      "assetId": "arrival.vocabulary-01.illustration-02",
+      "revisionId": "arrival.vocabulary-01.revision-03",
+      "role": "illustration",
+      "contentType": "image/png",
+      "sha256": "84ef8a15743479358e2f17fa5d7ddfac7f10e7e551aa53f08c01731a8257626a",
+      "sizeBytes": 340,
+      "downloadPath": "/api/content/assets/blobs/84ef8a15743479358e2f17fa5d7ddfac7f10e7e551aa53f08c01731a8257626a",
+      "required": true,
+      "sortOrder": 0
+    },
+    {
+      "assetId": "arrival.vocabulary-01.pronunciation-02",
+      "revisionId": "arrival.vocabulary-01.revision-03",
+      "role": "pronunciation",
+      "contentType": "audio/wav",
+      "sha256": "64a289d575381bcc248139fbd48f15549c5ebcab117238200163f0bcee45d813",
+      "sizeBytes": 5644,
+      "downloadPath": "/api/content/assets/blobs/64a289d575381bcc248139fbd48f15549c5ebcab117238200163f0bcee45d813",
+      "required": true,
+      "sortOrder": 1
+    },
+    {
+      "assetId": "arrival.vocabulary-03.illustration-01",
+      "revisionId": "arrival.vocabulary-03.revision-01",
+      "role": "illustration",
+      "contentType": "image/png",
+      "sha256": "572fb1b093c9214088f83edb705859b65c531d36e33f4d8df16596c1b614858a",
+      "sizeBytes": 179,
+      "downloadPath": "/api/content/assets/blobs/572fb1b093c9214088f83edb705859b65c531d36e33f4d8df16596c1b614858a",
+      "required": false,
+      "sortOrder": 0
+    },
+    {
+      "assetId": "arrival.vocabulary-03.pronunciation-01",
+      "revisionId": "arrival.vocabulary-03.revision-01",
+      "role": "pronunciation",
+      "contentType": "audio/wav",
+      "sha256": "9dc3f6c0a6c0b8b7ecbad30db415c10cff8e504db988145ad74afd0e927c9b4c",
+      "sizeBytes": 4044,
+      "downloadPath": "/api/content/assets/blobs/9dc3f6c0a6c0b8b7ecbad30db415c10cff8e504db988145ad74afd0e927c9b4c",
+      "required": false,
+      "sortOrder": 1
+    },
+    {
+      "assetId": "arrival.dialogue-03.illustration-01",
+      "revisionId": "arrival.dialogue-03.revision-01",
+      "role": "illustration",
+      "contentType": "image/png",
+      "sha256": "572fb1b093c9214088f83edb705859b65c531d36e33f4d8df16596c1b614858a",
+      "sizeBytes": 179,
+      "downloadPath": "/api/content/assets/blobs/572fb1b093c9214088f83edb705859b65c531d36e33f4d8df16596c1b614858a",
+      "required": false,
+      "sortOrder": 0
+    },
+    {
+      "assetId": "arrival.speech-03.pronunciation-01",
+      "revisionId": "arrival.speech-03.revision-01",
+      "role": "pronunciation",
+      "contentType": "audio/wav",
+      "sha256": "9dc3f6c0a6c0b8b7ecbad30db415c10cff8e504db988145ad74afd0e927c9b4c",
+      "sizeBytes": 4044,
+      "downloadPath": "/api/content/assets/blobs/9dc3f6c0a6c0b8b7ecbad30db415c10cff8e504db988145ad74afd0e927c9b4c",
+      "required": false,
+      "sortOrder": 0
+    },
+    {
+      "assetId": "arrival.vocabulary-04.illustration-01",
+      "revisionId": "arrival.vocabulary-04.revision-01",
+      "role": "illustration",
+      "contentType": "image/png",
+      "sha256": "572fb1b093c9214088f83edb705859b65c531d36e33f4d8df16596c1b614858a",
+      "sizeBytes": 179,
+      "downloadPath": "/api/content/assets/blobs/572fb1b093c9214088f83edb705859b65c531d36e33f4d8df16596c1b614858a",
+      "required": false,
+      "sortOrder": 0
+    },
+    {
+      "assetId": "arrival.speech-04.pronunciation-01",
+      "revisionId": "arrival.speech-04.revision-01",
+      "role": "pronunciation",
+      "contentType": "audio/wav",
+      "sha256": "9dc3f6c0a6c0b8b7ecbad30db415c10cff8e504db988145ad74afd0e927c9b4c",
+      "sizeBytes": 4044,
+      "downloadPath": "/api/content/assets/blobs/9dc3f6c0a6c0b8b7ecbad30db415c10cff8e504db988145ad74afd0e927c9b4c",
+      "required": false,
+      "sortOrder": 0
+    }
+  ]
+}
