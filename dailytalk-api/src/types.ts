@@ -146,12 +146,27 @@ export const SecureSyncEnvelopeRequest = z.object({
   envelope: z.string().min(20).max(512 * 1024),
 }).strict();
 
-export const SecureProgressItem = z.object({
+export const SecureSubmissionProgressItem = z.object({
   clientSubmissionId: z.string().trim().min(16).max(200),
   remoteActivityId: z.string().trim().min(1).max(300),
   createdAt: z.string().datetime({ offset: true }).or(z.string().datetime()),
   submission: z.record(z.string(), z.unknown()),
 }).strict();
+
+export const SecureLearningProgressCompletionItem = z.object({
+  type: z.literal("activityCompletion"),
+  clientCompletionId: z.string().trim().min(16).max(200),
+  learningPathId: z.string().trim().min(1).max(300),
+  activityId: z.string().trim().min(1).max(300),
+  revisionId: z.string().trim().min(1).max(300),
+  packageVersion: z.number().int().positive(),
+  completedAt: z.string().datetime({ offset: true }).or(z.string().datetime()),
+}).strict();
+
+export const SecureProgressItem = z.union([
+  SecureSubmissionProgressItem,
+  SecureLearningProgressCompletionItem,
+]);
 
 export const SecureProgressBatch = z.object({
   version: z.literal(1),

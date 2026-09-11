@@ -1232,6 +1232,7 @@ app.post(
       }
 
       const requestHash = await sha256Base64Url(requestPayload);
+
       const existingBatch = await c.env.DB.prepare(
         `SELECT request_hash, response_envelope, status, sequence
          FROM secure_sync_batches
@@ -1251,15 +1252,82 @@ app.post(
           existingBatch.request_hash !== requestHash ||
           existingBatch.sequence !== batch.sequence
         ) {
-          return c.json({ error: "batchId reutilizado com conteúdo diferente" }, 409);
+          return c.json(
+            { error: "batchId reutilizado com conteúdo diferente" },
+            409,
+          );
         }
 
         if (existingBatch.response_envelope) {
-          return c.json({ success: true, envelope: existingBatch.response_envelope });
+          return c.json({
+            success: true,
+            envelope: existingBatch.response_envelope,
+          });
         }
-      } else {
+      }
+
+      const completionHashes = new Map<string, string>();
+
+      for (const item of batch.items) {
+        if (!("type" in item) || item.type !== "activityCompletion") {
+          continue;
+        }
+
+        const factHash = await learningCompletionFactHash({
+          learningPathId: item.learningPathId,
+          activityId: item.activityId,
+          revisionId: item.revisionId,
+          packageVersion: item.packageVersion,
+          completedAt: item.completedAt,
+        });
+
+        const sameBatchHash =
+          completionHashes.get(item.clientCompletionId);
+
+        if (sameBatchHash && sameBatchHash !== factHash) {
+          return c.json(
+            {
+              error:
+                "clientCompletionId reutilizado com conteúdo diferente",
+            },
+            409,
+          );
+        }
+
+        completionHashes.set(
+          item.clientCompletionId,
+          factHash,
+        );
+
+        const existingCompletion = await c.env.DB.prepare(
+          `SELECT fact_hash
+           FROM learning_progress_completions
+           WHERE user_id = ? AND client_completion_id = ?
+           LIMIT 1`,
+        )
+          .bind(user.id, item.clientCompletionId)
+          .first<{ fact_hash: string }>();
+
+        if (
+          existingCompletion &&
+          existingCompletion.fact_hash !== factHash
+        ) {
+          return c.json(
+            {
+              error:
+                "clientCompletionId reutilizado com conteúdo diferente",
+            },
+            409,
+          );
+        }
+      }
+
+      if (!existingBatch) {
         if (batch.sequence <= Number(device.last_sequence ?? 0)) {
-          return c.json({ error: "Sequência de sincronização repetida" }, 409);
+          return c.json(
+            { error: "Sequência de sincronização repetida" },
+            409,
+          );
         }
 
         const inserted = await c.env.DB.prepare(
@@ -1280,85 +1348,238 @@ app.post(
           .run();
 
         if (Number(inserted.meta?.changes ?? 0) === 0) {
-          return c.json({ error: "Lote ou sequência já em processamento" }, 409);
+          return c.json(
+            { error: "Lote ou sequência já em processamento" },
+            409,
+          );
         }
       }
 
       const itemStatements: D1PreparedStatement[] = [];
-      const preparedItems: Array<{
-        localId: string;
-        serverId: string;
-        remoteActivityId: string;
-        score: number;
-        feedback: string;
-        metrics: Record<string, unknown>;
-      }> = [];
+
+      const preparedItems: Array<
+        | {
+            kind: "submission";
+            clientSubmissionId: string;
+            serverId: string;
+            remoteActivityId: string;
+            score: number;
+            feedback: string;
+            metrics: Record<string, unknown>;
+            resultIndex: number;
+          }
+        | {
+            kind: "activityCompletion";
+            clientCompletionId: string;
+            completionId: string;
+            activityId: string;
+            revisionId: string;
+            factHash: string;
+            resultIndex: number;
+          }
+      > = [];
 
       for (const item of batch.items) {
-        const evaluation = evaluateSubmission(item.submission);
-        const serverId = await deterministicSubmissionId(user.id, item.clientSubmissionId);
-        const createdAt = new Date(item.createdAt).toISOString();
+        if ("clientSubmissionId" in item) {
+          const evaluation = evaluateSubmission(item.submission);
+
+          const serverId = await deterministicSubmissionId(
+            user.id,
+            item.clientSubmissionId,
+          );
+
+          const createdAt =
+            new Date(item.createdAt).toISOString();
+
+          const resultIndex = itemStatements.length;
+
+          preparedItems.push({
+            kind: "submission",
+            clientSubmissionId: item.clientSubmissionId,
+            serverId,
+            remoteActivityId: item.remoteActivityId,
+            score: evaluation.score,
+            feedback: evaluation.feedback,
+            metrics: evaluation.metrics,
+            resultIndex,
+          });
+
+          itemStatements.push(
+            c.env.DB.prepare(
+              `INSERT OR IGNORE INTO activity_submissions (
+                 id, user_id, remote_activity_id, activity_type,
+                 native_language_code, target_language_code,
+                 answer_text, score, feedback, metrics_json,
+                 submission_json, created_at, updated_at
+               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ).bind(
+              serverId,
+              user.id,
+              item.remoteActivityId,
+              asOptionalString(item.submission.activityType),
+              asOptionalString(
+                item.submission.nativeLanguageCode,
+              ),
+              asOptionalString(
+                item.submission.targetLanguageCode,
+              ),
+              evaluation.answerText,
+              evaluation.score,
+              evaluation.feedback,
+              JSON.stringify(evaluation.metrics),
+              JSON.stringify(item.submission),
+              createdAt,
+              nowIso,
+            ),
+            c.env.DB.prepare(
+              `INSERT OR IGNORE INTO secure_submission_receipts (
+                 submission_id, user_id, device_id,
+                 client_submission_id, batch_id, created_at
+               ) VALUES (?, ?, ?, ?, ?, ?)`,
+            ).bind(
+              serverId,
+              user.id,
+              deviceId,
+              item.clientSubmissionId,
+              batch.batchId,
+              nowIso,
+            ),
+          );
+
+          continue;
+        }
+
+        const factHash =
+          completionHashes.get(item.clientCompletionId);
+
+        if (!factHash) {
+          throw new Error(
+            "learning_progress_completion_hash_missing",
+          );
+        }
+
+        const completionId =
+          await deterministicCompletionId(
+            user.id,
+            item.clientCompletionId,
+          );
+
+        const resultIndex = itemStatements.length;
 
         preparedItems.push({
-          localId: item.clientSubmissionId,
-          serverId,
-          remoteActivityId: item.remoteActivityId,
-          ...evaluation,
+          kind: "activityCompletion",
+          clientCompletionId: item.clientCompletionId,
+          completionId,
+          activityId: item.activityId,
+          revisionId: item.revisionId,
+          factHash,
+          resultIndex,
         });
+
         itemStatements.push(
           c.env.DB.prepare(
-            `INSERT OR IGNORE INTO activity_submissions (
-               id, user_id, remote_activity_id, activity_type, native_language_code,
-               target_language_code, answer_text, score, feedback, metrics_json,
-               submission_json, created_at, updated_at
-             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT OR IGNORE INTO learning_progress_completions (
+               id,
+               user_id,
+               source_device_id,
+               first_batch_id,
+               client_completion_id,
+               learning_path_id,
+               activity_id,
+               revision_id,
+               package_version,
+               completed_at,
+               fact_hash,
+               created_at
+             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           ).bind(
-            serverId,
-            user.id,
-            item.remoteActivityId,
-            asOptionalString(item.submission.activityType),
-            asOptionalString(item.submission.nativeLanguageCode),
-            asOptionalString(item.submission.targetLanguageCode),
-            evaluation.answerText,
-            evaluation.score,
-            evaluation.feedback,
-            JSON.stringify(evaluation.metrics),
-            JSON.stringify(item.submission),
-            createdAt,
-            nowIso,
-          ),
-          c.env.DB.prepare(
-            `INSERT OR IGNORE INTO secure_submission_receipts (
-               submission_id, user_id, device_id, client_submission_id, batch_id, created_at
-             ) VALUES (?, ?, ?, ?, ?, ?)`,
-          ).bind(
-            serverId,
+            completionId,
             user.id,
             deviceId,
-            item.clientSubmissionId,
             batch.batchId,
+            item.clientCompletionId,
+            item.learningPathId,
+            item.activityId,
+            item.revisionId,
+            item.packageVersion,
+            new Date(item.completedAt).toISOString(),
+            factHash,
             nowIso,
           ),
         );
       }
 
-      const itemResults = itemStatements.length > 0
-        ? await c.env.DB.batch(itemStatements)
-        : [];
-      const results = preparedItems.map((item, index) => {
-        const insertionResult = itemResults[index * 2];
-        const inserted = Number(insertionResult?.meta?.changes ?? 0) > 0;
+      const itemResults =
+        itemStatements.length > 0
+          ? await c.env.DB.batch(itemStatements)
+          : [];
 
-        return {
-          clientSubmissionId: item.localId,
-          submissionId: item.serverId,
-          status: inserted ? "accepted" : "duplicate",
-          remoteActivityId: item.remoteActivityId,
-          score: item.score,
-          feedback: item.feedback,
-          metrics: item.metrics,
-        };
-      });
+      const results: Array<Record<string, unknown>> = [];
+
+      for (const item of preparedItems) {
+        const insertionResult =
+          itemResults[item.resultIndex];
+
+        const inserted =
+          Number(insertionResult?.meta?.changes ?? 0) > 0;
+
+        if (item.kind === "submission") {
+          results.push({
+            clientSubmissionId:
+              item.clientSubmissionId,
+            submissionId: item.serverId,
+            status: inserted
+              ? "accepted"
+              : "duplicate",
+            remoteActivityId:
+              item.remoteActivityId,
+            score: item.score,
+            feedback: item.feedback,
+            metrics: item.metrics,
+          });
+
+          continue;
+        }
+
+        if (!inserted) {
+          const existingCompletion =
+            await c.env.DB.prepare(
+              `SELECT fact_hash
+               FROM learning_progress_completions
+               WHERE user_id = ?
+                 AND client_completion_id = ?
+               LIMIT 1`,
+            )
+              .bind(
+                user.id,
+                item.clientCompletionId,
+              )
+              .first<{ fact_hash: string }>();
+
+          if (
+            !existingCompletion ||
+            existingCompletion.fact_hash !==
+              item.factHash
+          ) {
+            throw new Error(
+              "learning_progress_completion_identity_conflict",
+            );
+          }
+        }
+
+        results.push({
+          type: "activityCompletion",
+          clientCompletionId:
+            item.clientCompletionId,
+          completionId: item.completionId,
+          status: inserted
+            ? "accepted"
+            : "duplicate",
+          activityId: item.activityId,
+          revisionId: item.revisionId,
+        });
+      }
+
       const responsePayload = utf8(JSON.stringify({
         version: 1,
         batchId: batch.batchId,
@@ -1406,6 +1627,21 @@ app.post(
 
       return c.json({ success: true, envelope: responseEnvelope });
     } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes(
+          "learning_progress_completion_identity_conflict",
+        )
+      ) {
+        return c.json(
+          {
+            error:
+              "clientCompletionId reutilizado com conteúdo diferente",
+          },
+          409,
+        );
+      }
+
       console.error("Falha na sincronização segura", {
         userId: user.id,
         deviceId,
@@ -2014,6 +2250,39 @@ async function deterministicSubmissionId(
 ): Promise<string> {
   return sha256Base64Url(
     utf8(`dailytalk-submission:v1:${userId}:${clientSubmissionId}`),
+  );
+}
+
+async function deterministicCompletionId(
+  userId: string,
+  clientCompletionId: string,
+): Promise<string> {
+  return sha256Base64Url(
+    utf8(
+      `dailytalk-learning-completion:v1:${userId}:${clientCompletionId}`,
+    ),
+  );
+}
+
+async function learningCompletionFactHash(input: {
+  learningPathId: string;
+  activityId: string;
+  revisionId: string;
+  packageVersion: number;
+  completedAt: string;
+}): Promise<string> {
+  const canonical = {
+    type: "activityCompletion",
+    learningPathId: input.learningPathId,
+    activityId: input.activityId,
+    revisionId: input.revisionId,
+    packageVersion: input.packageVersion,
+    completedAt:
+      new Date(input.completedAt).toISOString(),
+  };
+
+  return sha256Base64Url(
+    utf8(JSON.stringify(canonical)),
   );
 }
 

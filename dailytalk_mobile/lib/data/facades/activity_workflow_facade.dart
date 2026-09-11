@@ -8,6 +8,7 @@ import '../dao/activity_dao.dart';
 import '../dao/pedagogical_analytics_dao.dart';
 import '../dao/submission_dao.dart';
 import '../database/app_database.dart';
+import '../dao/sync_queue_dao.dart';
 import '../repositories/activity_repository.dart';
 import '../repositories/submission_repository.dart';
 
@@ -240,20 +241,39 @@ class ActivityWorkflowFacade {
   ///
   /// Usa o padrão Command para encapsular cada operação de sincronização.
   Future<SyncCommandResult> syncPendingSubmissions() async {
-    final command = SyncPendingSubmissionsCommand(
-      apiService: DailyTalkApiService(),
+    final apiService = DailyTalkApiService();
+
+    final submissionsResult = await SyncPendingSubmissionsCommand(
+      apiService: apiService,
       submissionDao: submissionDao,
+    ).execute();
+
+    final db = await AppDatabase.instance.database;
+
+    final learningResult = await SyncLearningProgressOutboxCommand(
+      apiService: apiService,
+      syncQueueDao: SyncQueueDao(db),
+    ).execute();
+
+    final syncedCount =
+        submissionsResult.syncedCount + learningResult.syncedCount;
+
+    final failedCount =
+        submissionsResult.failedCount + learningResult.failedCount;
+
+    final success = submissionsResult.success && learningResult.success;
+
+    return SyncCommandResult(
+      success: success,
+      syncedCount: syncedCount,
+      failedCount: failedCount,
+      message: success
+          ? syncedCount == 0
+                ? 'Não existe progresso pendente para sincronizar.'
+                : 'Progresso sincronizado com segurança.'
+          : 'O progresso continua guardado neste dispositivo. '
+                'A sincronização será retomada quando for possível.',
     );
-
-    final result = await command.execute();
-
-    AppEventNotifier.instance.notifySyncCompleted();
-
-    if (result.syncedCount > 0) {
-      AppEventNotifier.instance.notifyResultsChanged();
-    }
-
-    return result;
   }
 
   /// Lê a pontuação de forma segura a partir do resultado.

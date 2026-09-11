@@ -35,11 +35,11 @@ void main() {
   });
 
   group('DailyTalk SQLite — Fase 2.3 — catálogo e assets', () {
-    test('base nova v5 cria schema esperado e invariantes locais', () async {
-      final path = p.join(tempDir.path, 'fresh-v5.db');
+    test('base nova v6 cria schema esperado e invariantes locais', () async {
+      final path = p.join(tempDir.path, 'fresh-v6.db');
       final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-      expect(await db.getVersion(), 5);
+      expect(await db.getVersion(), 6);
       expect(await _foreignKeysEnabled(db), isTrue);
       expect(await _integrityCheck(db), 'ok');
 
@@ -104,19 +104,19 @@ void main() {
         whereArgs: ['database_version'],
       );
       expect(settings, hasLength(1));
-      expect(settings.single['value'], '5');
+      expect(settings.single['value'], '6');
 
       await db.close();
     });
 
     test(
-      'v1 → v5 preserva dados e acrescenta catálogo + assets + notas',
+      'v1 → v6 preserva dados e acrescenta catálogo + assets + notas',
       () async {
         final path = await _createHistoricalDatabase(tempDir, version: 1);
 
         final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-        expect(await db.getVersion(), 5);
+        expect(await db.getVersion(), 6);
         expect(await _foreignKeysEnabled(db), isTrue);
         expect(await _integrityCheck(db), 'ok');
 
@@ -143,18 +143,18 @@ void main() {
         expect(clientId, isNotEmpty);
         expect(clientId, startsWith('legacy-1-'));
 
-        await _assertDatabaseVersionSetting(db, '5');
+        await _assertDatabaseVersionSetting(db, '6');
 
         await db.close();
       },
     );
 
-    test('v2 → v5 preserva nota privada, progresso e fila pendente', () async {
+    test('v2 → v6 preserva nota privada, progresso e fila pendente', () async {
       final path = await _createHistoricalDatabase(tempDir, version: 2);
 
       final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-      expect(await db.getVersion(), 5);
+      expect(await db.getVersion(), 6);
       expect(await _integrityCheck(db), 'ok');
 
       await _assertHistoricDataPreserved(db);
@@ -191,7 +191,7 @@ void main() {
       expect(clientId, isNotNull);
       expect(clientId, isNotEmpty);
 
-      await _assertDatabaseVersionSetting(db, '5');
+      await _assertDatabaseVersionSetting(db, '6');
 
       await db.close();
     });
@@ -215,7 +215,7 @@ void main() {
 
         db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-        expect(await db.getVersion(), 5);
+        expect(await db.getVersion(), 6);
         final rows = await db.query(
           'submissions',
           columns: ['client_submission_id'],
@@ -236,12 +236,12 @@ void main() {
     );
 
     test(
-      'v3 → v5 preserva progresso e cria catálogo/assets aditivamente',
+      'v3 → v6 preserva progresso e cria catálogo/assets aditivamente',
       () async {
         final path = await _createHistoricalV3Database(tempDir);
         final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-        expect(await db.getVersion(), 5);
+        expect(await db.getVersion(), 6);
         await _assertHistoricDataPreserved(db);
 
         final submissions = await db.query(
@@ -261,14 +261,14 @@ void main() {
         expect(await _tableExists(db, 'learning_content_packages'), isTrue);
         expect(await _tableExists(db, 'learning_content_catalog'), isTrue);
         expect(await _integrityCheck(db), 'ok');
-        await _assertDatabaseVersionSetting(db, '5');
+        await _assertDatabaseVersionSetting(db, '6');
 
         await db.close();
       },
     );
 
     test(
-      'v4 → v5 preserva pacote/catálogo e acrescenta cache de assets',
+      'v4 → v6 preserva pacote/catálogo e acrescenta cache de assets',
       () async {
         final path = p.join(tempDir.path, 'historical-v4.db');
 
@@ -304,7 +304,7 @@ void main() {
 
         db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-        expect(await db.getVersion(), 5);
+        expect(await db.getVersion(), 6);
         expect(
           await _tableExists(db, 'learning_content_asset_manifests'),
           isTrue,
@@ -339,11 +339,274 @@ void main() {
         expect(catalog.single['active_package_id'], packageId);
 
         expect(await _integrityCheck(db), 'ok');
-        await _assertDatabaseVersionSetting(db, '5');
+        await _assertDatabaseVersionSetting(db, '6');
         await db.close();
       },
     );
 
+    test(
+      'Fase 3.1 — base nova v6 cria schema de progresso e aplica invariantes',
+      () async {
+        final path = p.join(tempDir.path, 'fase3-fresh-v6.db');
+        final db = await AppDatabase.instance.openDatabaseForTesting(path);
+
+        expect(await db.getVersion(), 6);
+        expect(await _foreignKeysEnabled(db), isTrue);
+
+        for (final table in <String>[
+          'learning_progress_completions',
+          'learning_competency_evidence',
+          'learning_progress_projection',
+        ]) {
+          expect(
+            await _tableExists(db, table),
+            isTrue,
+            reason: 'Tabela da Fase 3 em falta: $table',
+          );
+        }
+
+        for (final index in <String>[
+          'idx_learning_progress_completions_account_path',
+          'idx_learning_progress_completions_activity',
+          'idx_learning_competency_evidence_completion',
+          'idx_learning_competency_evidence_competency',
+          'idx_learning_progress_projection_state',
+          'idx_sync_queue_learning_completion_once',
+        ]) {
+          expect(
+            await _indexExists(db, index),
+            isTrue,
+            reason: 'Índice da Fase 3 em falta: $index',
+          );
+        }
+
+        final now = DateTime.utc(2026, 9, 10, 15).toIso8601String();
+
+        final completionId = await db.insert('learning_progress_completions', {
+          'client_completion_id': 'completion-device-a-0001',
+          'account_id': 'user-phase3',
+          'learning_path_id': 'student.fr-fr.phase1',
+          'activity_id': 'arrival.vocabulary-01',
+          'revision_id': 'arrival.vocabulary-01.rev-1',
+          'package_version': 3,
+          'completed_at': now,
+          'created_at': now,
+        });
+
+        await db.insert('learning_competency_evidence', {
+          'completion_id': completionId,
+          'competency_id': 'arrival.greeting-basics',
+          'evidence_type': 'activity_completion',
+          'created_at': now,
+        });
+
+        await db.insert('learning_progress_projection', {
+          'account_id': 'user-phase3',
+          'learning_path_id': 'student.fr-fr.phase1',
+          'path_element_id': 'arrival.vocabulary-01.element',
+          'activity_id': 'arrival.vocabulary-01',
+          'state': 'completed',
+          'reason': 'completed',
+          'recommendation_rank': null,
+          'package_version': 3,
+          'updated_at': now,
+        });
+
+        await db.insert('sync_queue', {
+          'entity_type': 'learning_progress_completion',
+          'entity_id': completionId,
+          'operation': 'ActivityCompleted',
+          'endpoint': '/api/sync/progress',
+          'method': 'POST',
+          'payload_json': '{"phase":3}',
+          'sync_status': 'pending',
+          'attempt_count': 0,
+          'last_error': null,
+          'created_at': now,
+          'updated_at': now,
+          'next_retry_at': null,
+          'processed_at': null,
+        });
+
+        // client_completion_id é uma identidade estável.
+        await expectLater(
+          db.insert('learning_progress_completions', {
+            'client_completion_id': 'completion-device-a-0001',
+            'account_id': 'user-phase3',
+            'learning_path_id': 'student.fr-fr.phase1',
+            'activity_id': 'arrival.dialogue-01',
+            'revision_id': 'arrival.dialogue-01.rev-1',
+            'package_version': 3,
+            'completed_at': now,
+            'created_at': now,
+          }),
+          throwsA(isA<DatabaseException>()),
+        );
+
+        // Evidência não pode existir sem a conclusão correspondente.
+        await expectLater(
+          db.insert('learning_competency_evidence', {
+            'completion_id': 999999,
+            'competency_id': 'competency.invalid',
+            'evidence_type': 'activity_completion',
+            'created_at': now,
+          }),
+          throwsA(isA<DatabaseException>()),
+        );
+
+        // Estado pedagógico inválido deve ser rejeitado pelo SQLite.
+        await expectLater(
+          db.insert('learning_progress_projection', {
+            'account_id': 'user-phase3',
+            'learning_path_id': 'student.fr-fr.phase1',
+            'path_element_id': 'element.invalid',
+            'activity_id': 'activity.invalid',
+            'state': 'syncing',
+            'reason': 'invalid-test',
+            'recommendation_rank': null,
+            'package_version': 3,
+            'updated_at': now,
+          }),
+          throwsA(isA<DatabaseException>()),
+        );
+
+        // A mesma conclusão não pode gerar duas operações equivalentes
+        // na outbox local.
+        await expectLater(
+          db.insert('sync_queue', {
+            'entity_type': 'learning_progress_completion',
+            'entity_id': completionId,
+            'operation': 'ActivityCompleted',
+            'endpoint': '/api/sync/progress',
+            'method': 'POST',
+            'payload_json': '{"phase":3,"retry":true}',
+            'sync_status': 'pending',
+            'attempt_count': 0,
+            'last_error': null,
+            'created_at': now,
+            'updated_at': now,
+            'next_retry_at': null,
+            'processed_at': null,
+          }),
+          throwsA(isA<DatabaseException>()),
+        );
+
+        final evidence = await db.query(
+          'learning_competency_evidence',
+          where: 'completion_id = ?',
+          whereArgs: [completionId],
+        );
+        expect(evidence, hasLength(1));
+
+        final projection = await db.query(
+          'learning_progress_projection',
+          where: 'path_element_id = ?',
+          whereArgs: ['arrival.vocabulary-01.element'],
+        );
+        expect(projection, hasLength(1));
+        expect(projection.single['state'], 'completed');
+
+        final queue = await db.query(
+          'sync_queue',
+          where: 'entity_type = ? AND entity_id = ?',
+          whereArgs: ['learning_progress_completion', completionId],
+        );
+        expect(queue, hasLength(1));
+        expect(queue.single['sync_status'], 'pending');
+
+        expect(await db.rawQuery('PRAGMA foreign_key_check'), isEmpty);
+        expect(await _integrityCheck(db), 'ok');
+
+        await db.close();
+      },
+    );
+
+    test(
+      'Fase 3.1 — v5 → v6 preserva fila e acrescenta schema de progresso',
+      () async {
+        final path = p.join(tempDir.path, 'fase3-v5-to-v6.db');
+
+        // Criar uma base atual e reduzi-la apenas ao delta conhecido da v5.
+        // Isso permite testar especificamente a migration 5 -> 6.
+        var db = await AppDatabase.instance.openDatabaseForTesting(path);
+
+        final now = DateTime.utc(2026, 9, 10, 15, 30).toIso8601String();
+
+        await db.insert('sync_queue', {
+          'id': 501,
+          'entity_type': 'submission',
+          'entity_id': 77,
+          'operation': 'create',
+          'endpoint': '/api/sync/progress',
+          'method': 'POST',
+          'payload_json': '{"preserve":"v5"}',
+          'sync_status': 'pending',
+          'attempt_count': 2,
+          'last_error': 'offline',
+          'created_at': now,
+          'updated_at': now,
+          'next_retry_at': null,
+          'processed_at': null,
+        });
+
+        await db.execute(
+          'DROP INDEX IF EXISTS idx_sync_queue_learning_completion_once',
+        );
+        await db.execute('DROP TABLE IF EXISTS learning_competency_evidence');
+        await db.execute('DROP TABLE IF EXISTS learning_progress_projection');
+        await db.execute('DROP TABLE IF EXISTS learning_progress_completions');
+
+        await db.execute('PRAGMA user_version = 5');
+
+        await db.update(
+          'app_settings',
+          {'value': '5', 'updated_at': now},
+          where: 'key = ?',
+          whereArgs: ['database_version'],
+        );
+
+        await db.close();
+
+        // Abertura pela aplicação deve executar somente o avanço necessário.
+        db = await AppDatabase.instance.openDatabaseForTesting(path);
+
+        expect(await db.getVersion(), 6);
+
+        for (final table in <String>[
+          'learning_progress_completions',
+          'learning_competency_evidence',
+          'learning_progress_projection',
+        ]) {
+          expect(await _tableExists(db, table), isTrue);
+        }
+
+        expect(
+          await _indexExists(db, 'idx_sync_queue_learning_completion_once'),
+          isTrue,
+        );
+
+        final preservedQueue = await db.query(
+          'sync_queue',
+          where: 'id = ?',
+          whereArgs: [501],
+        );
+
+        expect(preservedQueue, hasLength(1));
+        expect(preservedQueue.single['entity_type'], 'submission');
+        expect(preservedQueue.single['entity_id'], 77);
+        expect(preservedQueue.single['payload_json'], '{"preserve":"v5"}');
+        expect(preservedQueue.single['sync_status'], 'pending');
+        expect(preservedQueue.single['attempt_count'], 2);
+        expect(preservedQueue.single['last_error'], 'offline');
+
+        await _assertDatabaseVersionSetting(db, '6');
+
+        expect(await db.rawQuery('PRAGMA foreign_key_check'), isEmpty);
+        expect(await _integrityCheck(db), 'ok');
+
+        await db.close();
+      },
+    );
     test('catálogo rejeita ponteiro para pacote de outro percurso', () async {
       final path = p.join(tempDir.path, 'catalog-foreign-key.db');
       final db = await AppDatabase.instance.openDatabaseForTesting(path);

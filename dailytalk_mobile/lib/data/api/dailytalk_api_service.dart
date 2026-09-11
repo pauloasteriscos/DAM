@@ -135,6 +135,7 @@ class DailyTalkApiService {
   }
 
   /// Envia até 50 submissões num único lote assinado e cifrado.
+  /// Envia até 50 itens de progresso num único lote assinado e cifrado.
   Future<Map<String, dynamic>> secureSyncProgress(
     List<Map<String, dynamic>> items,
   ) {
@@ -142,19 +143,30 @@ class DailyTalkApiService {
       return Future.value({
         'version': 1,
         'batchId': 'mock-batch',
-        'results': items
-            .map(
-              (item) => {
-                'clientSubmissionId': item['clientSubmissionId'],
-                'submissionId': 'mock-${item['clientSubmissionId']}',
-                'status': 'accepted',
-                'remoteActivityId': item['remoteActivityId'],
-                'score': 80,
-                'feedback': 'Sincronização segura simulada.',
-                'metrics': {'evaluatedBy': 'mock-secure-sync'},
-              },
-            )
-            .toList(),
+        'results': items.map((item) {
+          if (item['type'] == 'activityCompletion') {
+            final clientId = item['clientCompletionId']?.toString() ?? '';
+
+            return <String, dynamic>{
+              'type': 'activityCompletion',
+              'clientCompletionId': clientId,
+              'completionId': 'mock-learning-$clientId',
+              'status': 'accepted',
+              'activityId': item['activityId'],
+              'revisionId': item['revisionId'],
+            };
+          }
+
+          return <String, dynamic>{
+            'clientSubmissionId': item['clientSubmissionId'],
+            'submissionId': 'mock-${item['clientSubmissionId']}',
+            'status': 'accepted',
+            'remoteActivityId': item['remoteActivityId'],
+            'score': 80,
+            'feedback': 'Sincronização segura simulada.',
+            'metrics': {'evaluatedBy': 'mock-secure-sync'},
+          };
+        }).toList(),
       });
     }
 

@@ -2,6 +2,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../config/app_config.dart';
+import 'learning_progress_schema.dart';
 
 /// Classe central de acesso à base de dados local SQLite.
 ///
@@ -17,7 +18,7 @@ class AppDatabase {
   static final AppDatabase instance = AppDatabase._privateConstructor();
 
   static String get _databaseName => AppConfig.localDatabaseName;
-  static const int _databaseVersion = 5;
+  static const int _databaseVersion = 6;
 
   static Database? _database;
 
@@ -134,6 +135,10 @@ class AppDatabase {
       _createLearningContentAssetTables(batch);
       _createLearningContentAssetIndexes(batch);
       await batch.commit(noResult: true);
+    }
+
+    if (oldVersion < 6) {
+      await LearningProgressSchema.create(db);
     }
 
     final now = DateTime.now().toIso8601String();
@@ -293,6 +298,7 @@ class AppDatabase {
 
     _createLearningContentTables(batch);
     _createLearningContentAssetTables(batch);
+    LearningProgressSchema.addToBatch(batch);
     _createLocalPrivateNotesTable(batch);
 
     batch.execute('''

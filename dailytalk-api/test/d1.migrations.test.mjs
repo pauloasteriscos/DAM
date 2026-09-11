@@ -230,6 +230,32 @@ test(
       assert.match(migration, /CREATE TABLE IF NOT EXISTS password_reset_tokens/i);
     });
 
+    await t.test("migration 0002 contem learning progress sync", async () => {
+      const migration = await readFile(
+        path.join(
+          ROOT,
+          "migrations",
+          "0002_learning_progress_sync.sql",
+        ),
+        "utf8",
+      );
+
+      assert.match(
+        migration,
+        /CREATE TABLE IF NOT EXISTS learning_progress_completions/i,
+      );
+
+      assert.match(
+        migration,
+        /fact_hash TEXT NOT NULL/i,
+      );
+
+      assert.match(
+        migration,
+        /UNIQUE\s*\(\s*user_id\s*,\s*client_completion_id\s*\)/i,
+      );
+    });
+
     await t.test("base vazia lista 0001 como pendente", async () => {
       const { stdout, stderr } = await migrationList(FRESH_DIR);
       assert.match(`${stdout}\n${stderr}`, /0001_baseline\.sql/i);
@@ -253,6 +279,7 @@ test(
         "dpop_replay",
         "secure_sync_batches",
         "secure_submission_receipts",
+        "learning_progress_completions",
         "password_reset_tokens",
         "d1_migrations",
       ]) {
@@ -267,7 +294,7 @@ test(
       );
       assert.deepEqual(
         migrationRows.map((row) => row.name),
-        ["0001_baseline.sql"],
+        ["0001_baseline.sql", "0002_learning_progress_sync.sql"],
       );
 
       await verifyIntegrity(FRESH_DIR);
@@ -281,7 +308,7 @@ test(
           "SELECT COUNT(*) AS total FROM d1_migrations;",
         ),
       );
-      assert.equal(Number(countRows[0].total), 1);
+      assert.equal(Number(countRows[0].total), 2);
       await verifyIntegrity(FRESH_DIR);
     });
 
@@ -340,7 +367,7 @@ test(
       );
       assert.deepEqual(
         migrationRows.map((row) => row.name),
-        ["0001_baseline.sql"],
+        ["0001_baseline.sql", "0002_learning_progress_sync.sql"],
       );
 
       await verifyIntegrity(ADOPT_DIR);

@@ -582,6 +582,8 @@ async function writeSecurityConfig() {
         binding: "DB",
         database_name: "dailytalk-security-test",
         database_id: "00000000-0000-0000-0000-000000000002",
+        migrations_dir: "migrations",
+        migrations_table: "d1_migrations",
       },
     ],
   };
@@ -621,16 +623,14 @@ async function startWorker() {
   await runCommand([
     "wrangler",
     "d1",
-    "execute",
+    "migrations",
+    "apply",
     "DB",
     "--config",
     CONFIG_FILE,
     "--local",
     "--persist-to",
     PERSIST_DIR,
-    "--file",
-    "schema.sql",
-    "--yes",
   ]);
 
   workerLog = "";
@@ -807,6 +807,7 @@ test(
     let firstSyncEnvelope = "";
     let firstSyncResponse = "";
     let firstSyncBatch = null;
+    let firstLearningCompletionBatch = null;
 
     await t.test("registo com dispositivo cria sessão vinculada", async () => {
       userEmail = `phase0-security-${Date.now()}@example.com`;
@@ -1256,6 +1257,274 @@ test(
 
       assert.equal(decoded.sequence, 2);
       assert.equal(decoded.results[0].status, "duplicate");
+    });
+
+    await t.test("activityCompletion usa o mesmo secure sync JWS+JWE", async () => {
+      const now = new Date();
+
+      const batch = {
+        version: 1,
+        batchId:
+          `phase3-completion-batch-${crypto.randomUUID()}`,
+        deviceId,
+        issuedAt: now.toISOString(),
+        expiresAt: new Date(
+          now.getTime() + 5 * 60 * 1000,
+        ).toISOString(),
+        sequence: 3,
+        items: [
+          {
+            type: "activityCompletion",
+            clientCompletionId:
+              `phase3-completion-${crypto.randomUUID()}`,
+            learningPathId:
+              "student.fr-fr.phase1",
+            activityId:
+              "arrival.dialogue-01",
+            revisionId:
+              "arrival.dialogue-01.r1",
+            packageVersion: 3,
+            completedAt: now.toISOString(),
+          },
+        ],
+      };
+
+      const envelope = await makeSyncEnvelope({
+        batch,
+        deviceId,
+        deviceKeys,
+      });
+
+      const { response, payload } =
+        await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope },
+        });
+
+      //@@DEBUG: Diagnóstico da resposta activityCompletion.
+      // Reativar temporariamente se o secure sync devolver HTTP != 200.
+      //
+      // if (response.status !== 200) {
+      //   console.error(
+      //     "\\n=== PHASE 3.4A DIAGNOSTIC — RESPONSE ===",
+      //   );
+      //   console.error(JSON.stringify(payload, null, 2));
+      //
+      //   console.error(
+      //     "\\n=== PHASE 3.4A DIAGNOSTIC — WORKER LOG ===",
+      //   );
+      //   console.error(workerLog);
+      //
+      //   console.error(
+      //     "=== END PHASE 3.4A DIAGNOSTIC ===\\n",
+      //   );
+      // }
+
+      assert.equal(
+        response.status,
+        200,
+        `activityCompletion devolveu HTTP ${response.status}. Payload: ${JSON.stringify(payload)}`,
+      );
+      assert.equal(payload.success, true);
+
+      const decoded = await decodeSyncResponse(
+        payload.envelope,
+        deviceId,
+        deviceKeys,
+      );
+
+      assert.equal(decoded.sequence, 3);
+      assert.equal(decoded.results.length, 1);
+
+      assert.equal(
+        decoded.results[0].type,
+        "activityCompletion",
+      );
+
+      assert.equal(
+        decoded.results[0].clientCompletionId,
+        batch.items[0].clientCompletionId,
+      );
+
+      assert.equal(
+        decoded.results[0].status,
+        "accepted",
+      );
+
+      assert.equal(
+        typeof decoded.results[0].completionId,
+        "string",
+      );
+
+      assert.equal(
+        decoded.results[0].activityId,
+        batch.items[0].activityId,
+      );
+
+      firstLearningCompletionBatch = batch;
+    });
+
+    await t.test("clientCompletionId repetido em nova sequence retorna duplicate", async () => {
+      const original =
+        firstLearningCompletionBatch;
+
+      assert.ok(
+        original,
+        "Activity completion inicial nao foi criada",
+      );
+
+      const now = new Date();
+
+      const retry = {
+        ...original,
+        batchId:
+          `phase3-completion-batch-${crypto.randomUUID()}`,
+        sequence: 4,
+        issuedAt: now.toISOString(),
+        expiresAt: new Date(
+          now.getTime() + 5 * 60 * 1000,
+        ).toISOString(),
+      };
+
+      const envelope = await makeSyncEnvelope({
+        batch: retry,
+        deviceId,
+        deviceKeys,
+      });
+
+      const { response, payload } =
+        await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope },
+        });
+
+      assert.equal(response.status, 200);
+
+      const decoded = await decodeSyncResponse(
+        payload.envelope,
+        deviceId,
+        deviceKeys,
+      );
+
+      assert.equal(decoded.sequence, 4);
+
+      assert.equal(
+        decoded.results[0].status,
+        "duplicate",
+      );
+
+      assert.equal(
+        decoded.results[0].clientCompletionId,
+        original.items[0].clientCompletionId,
+      );
+    });
+
+    await t.test("clientCompletionId com facto diferente e rejeitado", async () => {
+      const original =
+        firstLearningCompletionBatch;
+
+      assert.ok(
+        original,
+        "Activity completion inicial nao foi criada",
+      );
+
+      const now = new Date();
+
+      const conflicting = {
+        ...original,
+        batchId:
+          `phase3-completion-batch-${crypto.randomUUID()}`,
+        sequence: 5,
+        issuedAt: now.toISOString(),
+        expiresAt: new Date(
+          now.getTime() + 5 * 60 * 1000,
+        ).toISOString(),
+        items: [
+          {
+            ...original.items[0],
+            activityId: "arrival.quiz-01",
+            revisionId: "arrival.quiz-01.r1",
+          },
+        ],
+      };
+
+      const envelope = await makeSyncEnvelope({
+        batch: conflicting,
+        deviceId,
+        deviceKeys,
+      });
+
+      const { response, payload } =
+        await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope },
+        });
+
+      assert.equal(response.status, 409);
+
+      assert.match(
+        String(payload.error),
+        /clientCompletionId/i,
+      );
+    });
+
+    await t.test("activityCompletion rejeita competencyIds declaradas pelo cliente", async () => {
+      const original =
+        firstLearningCompletionBatch;
+
+      assert.ok(
+        original,
+        "Activity completion inicial nao foi criada",
+      );
+
+      const now = new Date();
+
+      const forged = {
+        ...original,
+        batchId:
+          `phase3-completion-batch-${crypto.randomUUID()}`,
+        sequence: 5,
+        issuedAt: now.toISOString(),
+        expiresAt: new Date(
+          now.getTime() + 5 * 60 * 1000,
+        ).toISOString(),
+        items: [
+          {
+            ...original.items[0],
+            clientCompletionId:
+              `phase3-forged-${crypto.randomUUID()}`,
+            competencyIds: [
+              "forged.unearned.competency",
+            ],
+          },
+        ],
+      };
+
+      const envelope = await makeSyncEnvelope({
+        batch: forged,
+        deviceId,
+        deviceKeys,
+      });
+
+      const { response } =
+        await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope },
+        });
+
+      assert.equal(response.status, 400);
     });
 
     await t.test("JWS de sync assinado por chave errada é rejeitado", async () => {
