@@ -251,21 +251,37 @@ final class LearningProgressStartupReconciliationService {
   Future<SyncCommandResult> _reconcileAccountOnce(String accountId) async {
     final context = await _loadContext();
     final db = await _loadDatabase();
+    final repository = LearningProgressRepository(db);
 
-    final result = await ReconcileLearningProgressCommand(
-      apiService: _createApiService(),
-      syncQueueDao: SyncQueueDao(db),
-      repository: LearningProgressRepository(db),
+    // O mapa pedagógico deve existir antes de qualquer tentativa de rede.
+    //
+    // Isto cobre:
+    // - conta nova sem factos;
+    // - atualização/fallback do pacote;
+    // - execução completamente offline.
+    //
+    // A operação é idempotente e não cria itens na outbox.
+    await repository.ensureProjection(
       accountId: accountId,
       learningPath: context.learningPath,
       activePackageVersion: context.packageVersion,
-    ).execute();
+    );
 
-    // Mesmo um resultado parcial pode ter aplicado factos remotos válidos
-    // antes de encontrar um item local inválido. Recarregar a UI é seguro.
-    _notifySyncCompleted();
-
-    return result;
+    try {
+      return await ReconcileLearningProgressCommand(
+        apiService: _createApiService(),
+        syncQueueDao: SyncQueueDao(db),
+        repository: repository,
+        accountId: accountId,
+        learningPath: context.learningPath,
+        activePackageVersion: context.packageVersion,
+      ).execute();
+    } finally {
+      // Mesmo que a rede falhe, a projeção local pode ter sido criada ou
+      // reparada. Se a sync avançou parcialmente, também pode ter aplicado
+      // factos remotos válidos. Em ambos os casos a UI deve reler SQLite.
+      _notifySyncCompleted();
+    }
   }
 
   @visibleForTesting

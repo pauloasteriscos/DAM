@@ -266,6 +266,7 @@ void main() {
 
       final signal = ChangeNotifier();
       var authenticated = true;
+      var notifications = 0;
 
       final service = LearningProgressStartupReconciliationService(
         sessionListenable: signal,
@@ -277,7 +278,7 @@ void main() {
         ),
         loadDatabase: () async => db!,
         createApiService: () => api,
-        notifySyncCompleted: () {},
+        notifySyncCompleted: () => notifications += 1,
       );
 
       try {
@@ -287,6 +288,41 @@ void main() {
         await service.waitForIdle();
 
         expect(api.calls, 1);
+        expect(notifications, 1);
+
+        // Network failed, but the local pedagogical projection
+        // must already exist because ensureProjection runs first.
+        final offlineProjection = await db!.query(
+          'learning_progress_projection',
+          where:
+              'account_id = ? '
+              'AND learning_path_id = ?',
+          whereArgs: <Object?>['user-retry', journey.id.value],
+        );
+
+        final expectedProjectionCount = journey.journeys
+            .expand((item) => item.stages)
+            .expand((stage) => stage.elements)
+            .length;
+
+        expect(offlineProjection, hasLength(expectedProjectionCount));
+
+        expect(
+          offlineProjection.every((row) => row['package_version'] == 3),
+          isTrue,
+        );
+
+        expect(
+          offlineProjection.any(
+            (row) =>
+                row['activity_id'] != null &&
+                row['state'] == LearningActivityState.available.name,
+          ),
+          isTrue,
+        );
+
+        // No local completion exists and no sync echo is produced.
+        expect(await db!.query('sync_queue'), isEmpty);
 
         expect(await db!.query('learning_progress_completions'), isEmpty);
 
@@ -298,6 +334,7 @@ void main() {
         await service.waitForIdle();
 
         expect(api.calls, 2);
+        expect(notifications, 2);
 
         expect(await db!.query('learning_progress_completions'), hasLength(1));
 
@@ -310,6 +347,8 @@ void main() {
         );
 
         expect(cursor.single['cursor'], 'server-after-offline');
+
+        expect(await db!.query('sync_queue'), isEmpty);
       } finally {
         authenticated = false;
         service.stop();

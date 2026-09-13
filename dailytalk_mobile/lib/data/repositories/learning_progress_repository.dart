@@ -325,6 +325,129 @@ final class LearningProgressRepository {
     );
   }
 
+  Future<bool> ensureProjection({
+    required String accountId,
+    required LearningPath learningPath,
+    required int activePackageVersion,
+    PracticePreference practicePreference = PracticePreference.balanced,
+    bool forceRebuild = false,
+  }) {
+    final normalizedAccountId = accountId.trim();
+
+    if (normalizedAccountId.isEmpty) {
+      throw ArgumentError.value(accountId, 'accountId', 'não pode estar vazio');
+    }
+
+    if (activePackageVersion <= 0) {
+      throw ArgumentError.value(
+        activePackageVersion,
+        'activePackageVersion',
+        'deve ser positivo',
+      );
+    }
+
+    return _db.transaction((txn) async {
+      final pathId = learningPath.id.value;
+      final elements = _pathElementsById(learningPath);
+
+      final elementsByValue = <String, PathElement>{
+        for (final entry in elements.entries) entry.key.value: entry.value,
+      };
+
+      final existingRows = await txn.query(
+        'learning_progress_projection',
+        columns: const <String>[
+          'path_element_id',
+          'activity_id',
+          'state',
+          'reason',
+          'recommendation_rank',
+          'package_version',
+        ],
+        where: 'account_id = ? AND learning_path_id = ?',
+        whereArgs: <Object?>[normalizedAccountId, pathId],
+      );
+
+      var projectionIsCurrent = existingRows.length == elementsByValue.length;
+
+      if (projectionIsCurrent) {
+        for (final row in existingRows) {
+          final pathElementId = row['path_element_id'];
+          final element = pathElementId is String
+              ? elementsByValue[pathElementId]
+              : null;
+
+          if (element == null ||
+              row['package_version'] != activePackageVersion ||
+              row['activity_id'] != element.activityId?.value) {
+            projectionIsCurrent = false;
+            break;
+          }
+
+          final state = row['state'];
+          final reason = row['reason'];
+          final recommendationRank = row['recommendation_rank'];
+
+          if (state is! String ||
+              !LearningActivityState.values.any(
+                (candidate) => candidate.name == state,
+              ) ||
+              reason is! String ||
+              !ProgressionReason.values.any(
+                (candidate) => candidate.name == reason,
+              ) ||
+              (recommendationRank != null && recommendationRank is! int)) {
+            projectionIsCurrent = false;
+            break;
+          }
+        }
+      }
+
+      if (!forceRebuild && projectionIsCurrent) {
+        return false;
+      }
+
+      // O progresso parcial é local ao dispositivo. Deve sobreviver tanto
+      // a atualizações/fallback do catálogo como a reconstruções forçadas.
+      final activitiesInProgress = existingRows
+          .where(
+            (row) =>
+                row['state'] == LearningActivityState.inProgress.name &&
+                row['activity_id'] is String,
+          )
+          .map((row) => row['activity_id']! as String)
+          .where((activityId) => activityId.trim().isNotEmpty)
+          .map(ActivityId.new)
+          .toSet();
+
+      final facts = await _loadFacts(
+        txn,
+        accountId: normalizedAccountId,
+        learningPathId: pathId,
+      );
+
+      final progression = _engine.evaluate(
+        ProgressionRequest(
+          learningPath: learningPath,
+          facts: facts,
+          practicePreference: practicePreference,
+          activitiesInProgress: activitiesInProgress,
+        ),
+      );
+
+      await _replaceProjection(
+        txn,
+        accountId: normalizedAccountId,
+        learningPath: learningPath,
+        packageVersion: activePackageVersion,
+        progression: progression,
+        updatedAt: DateTime.now().toUtc().toIso8601String(),
+      );
+
+      return true;
+    });
+  }
+
   /// Lê a posição confirmada do feed remoto para a conta/percurso.
   Future<String?> readSyncCursor({
     required String accountId,
