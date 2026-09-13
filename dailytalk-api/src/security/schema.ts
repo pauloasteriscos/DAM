@@ -151,5 +151,33 @@ async function createSecuritySchema(c: AppContext): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_learning_progress_completions_completed_at
       ON learning_progress_completions(user_id, completed_at)
     `),
+
+    // Fase 3.5 — ordem monotónica para pull incremental.
+    c.env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS learning_progress_sync_feed (
+        seq INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        completion_id TEXT NOT NULL UNIQUE,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (completion_id)
+          REFERENCES learning_progress_completions(id)
+          ON DELETE CASCADE
+      )
+    `),
+    c.env.DB.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_learning_progress_sync_feed_user_seq
+      ON learning_progress_sync_feed(user_id, seq)
+    `),
+    c.env.DB.prepare(`
+      INSERT OR IGNORE INTO learning_progress_sync_feed (
+        user_id,
+        completion_id,
+        created_at
+      )
+      SELECT user_id, id, created_at
+      FROM learning_progress_completions
+      ORDER BY created_at ASC, id ASC
+    `),
   ]);
 }

@@ -18,7 +18,7 @@ class AppDatabase {
   static final AppDatabase instance = AppDatabase._privateConstructor();
 
   static String get _databaseName => AppConfig.localDatabaseName;
-  static const int _databaseVersion = 6;
+  static const int _databaseVersion = 7;
 
   static Database? _database;
 
@@ -139,6 +139,10 @@ class AppDatabase {
 
     if (oldVersion < 6) {
       await LearningProgressSchema.create(db);
+    }
+
+    if (oldVersion < 7) {
+      await LearningProgressSchema.createSyncState(db);
     }
 
     final now = DateTime.now().toIso8601String();

@@ -256,6 +256,32 @@ test(
       );
     });
 
+    await t.test("migration 0003 contém feed monotónico de progresso", async () => {
+      const migration = await readFile(
+        path.join(ROOT, "migrations", "0003_learning_progress_feed.sql"),
+        "utf8",
+      );
+
+      assert.match(
+        migration,
+        /CREATE TABLE IF NOT EXISTS learning_progress_sync_feed/i,
+      );
+
+      assert.match(
+        migration,
+        /seq INTEGER PRIMARY KEY AUTOINCREMENT/i,
+      );
+
+      assert.match(
+        migration,
+        /UNIQUE/i,
+      );
+
+      assert.match(
+        migration,
+        /INSERT OR IGNORE INTO learning_progress_sync_feed/i,
+      );
+    });
     await t.test("base vazia lista 0001 como pendente", async () => {
       const { stdout, stderr } = await migrationList(FRESH_DIR);
       assert.match(`${stdout}\n${stderr}`, /0001_baseline\.sql/i);
@@ -280,6 +306,7 @@ test(
         "secure_sync_batches",
         "secure_submission_receipts",
         "learning_progress_completions",
+        "learning_progress_sync_feed",
         "password_reset_tokens",
         "d1_migrations",
       ]) {
@@ -294,7 +321,7 @@ test(
       );
       assert.deepEqual(
         migrationRows.map((row) => row.name),
-        ["0001_baseline.sql", "0002_learning_progress_sync.sql"],
+        ["0001_baseline.sql", "0002_learning_progress_sync.sql", "0003_learning_progress_feed.sql"],
       );
 
       await verifyIntegrity(FRESH_DIR);
@@ -308,7 +335,7 @@ test(
           "SELECT COUNT(*) AS total FROM d1_migrations;",
         ),
       );
-      assert.equal(Number(countRows[0].total), 2);
+      assert.equal(Number(countRows[0].total), 3);
       await verifyIntegrity(FRESH_DIR);
     });
 
@@ -367,7 +394,7 @@ test(
       );
       assert.deepEqual(
         migrationRows.map((row) => row.name),
-        ["0001_baseline.sql", "0002_learning_progress_sync.sql"],
+        ["0001_baseline.sql", "0002_learning_progress_sync.sql", "0003_learning_progress_feed.sql"],
       );
 
       await verifyIntegrity(ADOPT_DIR);

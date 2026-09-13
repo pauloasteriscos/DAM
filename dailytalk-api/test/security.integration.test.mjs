@@ -809,6 +809,11 @@ test(
     let firstSyncBatch = null;
     let firstLearningCompletionBatch = null;
 
+    // Fase 3.5A — sequência do primeiro lote válido após os
+    // testes activityCompletion da Fase 3.4.
+    let phase35Sequence = 5;
+    let phase35Cursor = null;
+
     await t.test("registo com dispositivo cria sessão vinculada", async () => {
       userEmail = `phase0-security-${Date.now()}@example.com`;
 
@@ -1527,6 +1532,531 @@ test(
       assert.equal(response.status, 400);
     });
 
+    await t.test(
+      "Fase 3.5A — lote vazio sem pull é rejeitado sem consumir sequence",
+      async () => {
+        const now = new Date();
+
+        const batch = {
+          version: 1,
+          batchId: `phase35-empty-${crypto.randomUUID()}`,
+          deviceId,
+          issuedAt: now.toISOString(),
+          expiresAt: new Date(
+            now.getTime() + 5 * 60 * 1000,
+          ).toISOString(),
+          sequence: phase35Sequence,
+          items: [],
+        };
+
+        const envelope = await makeSyncEnvelope({
+          batch,
+          deviceId,
+          deviceKeys,
+        });
+
+        const { response } = await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope },
+        });
+
+        assert.equal(response.status, 400);
+
+        // Não incrementamos phase35Sequence.
+        // O pedido inválido não pode consumir a sequence.
+      },
+    );
+
+    await t.test(
+      "Fase 3.5A — pull-only funciona com outbox vazia",
+      async () => {
+        assert.ok(
+          firstLearningCompletionBatch,
+          "Conclusão da Fase 3.4 não existe",
+        );
+
+        const now = new Date();
+
+        const batch = {
+          version: 1,
+          batchId: `phase35-pull-only-${crypto.randomUUID()}`,
+          deviceId,
+          issuedAt: now.toISOString(),
+          expiresAt: new Date(
+            now.getTime() + 5 * 60 * 1000,
+          ).toISOString(),
+          sequence: phase35Sequence,
+          items: [],
+          pull: {
+            learningProgress: {
+              limit: 50,
+            },
+          },
+        };
+
+        const envelope = await makeSyncEnvelope({
+          batch,
+          deviceId,
+          deviceKeys,
+        });
+
+        const { response, payload } = await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope },
+        });
+
+        assert.equal(response.status, 200);
+
+        const decoded = await decodeSyncResponse(
+          payload.envelope,
+          deviceId,
+          deviceKeys,
+        );
+
+        assert.equal(decoded.sequence, phase35Sequence);
+        assert.deepEqual(decoded.results, []);
+
+        const pull = decoded.pull?.learningProgress;
+
+        assert.ok(pull);
+        assert.equal(Array.isArray(pull.items), true);
+
+        const expectedClientId =
+          firstLearningCompletionBatch.items[0].clientCompletionId;
+
+        const existing = pull.items.find(
+          (item) =>
+            item.clientCompletionId === expectedClientId,
+        );
+
+        assert.ok(
+          existing,
+          "Pull não devolveu a conclusão já existente",
+        );
+
+        assert.equal(
+          existing.type,
+          "activityCompletion",
+        );
+
+        assert.equal(
+          typeof existing.completionId,
+          "string",
+        );
+
+        // O servidor transporta apenas o facto necessário.
+        assert.equal("userId" in existing, false);
+        assert.equal("accountId" in existing, false);
+        assert.equal("sourceDeviceId" in existing, false);
+        assert.equal("factHash" in existing, false);
+
+        assert.equal(pull.hasMore, false);
+        assert.equal(typeof pull.nextCursor, "string");
+
+        phase35Cursor = pull.nextCursor;
+        phase35Sequence += 1;
+      },
+    );
+
+    await t.test(
+      "Fase 3.5A — push e pull funcionam no mesmo Secure Sync",
+      async () => {
+        assert.equal(typeof phase35Cursor, "string");
+
+        const now = new Date();
+        const clientCompletionId =
+          `phase35-push-pull-${crypto.randomUUID()}`;
+
+        const batch = {
+          version: 1,
+          batchId: `phase35-push-pull-batch-${crypto.randomUUID()}`,
+          deviceId,
+          issuedAt: now.toISOString(),
+          expiresAt: new Date(
+            now.getTime() + 5 * 60 * 1000,
+          ).toISOString(),
+          sequence: phase35Sequence,
+          items: [
+            {
+              type: "activityCompletion",
+              clientCompletionId,
+              learningPathId: "student.fr-fr.phase1",
+              activityId: "arrival.quiz-01",
+              revisionId: "arrival.quiz-01.r1",
+              packageVersion: 3,
+              completedAt: now.toISOString(),
+            },
+          ],
+          pull: {
+            learningProgress: {
+              cursor: phase35Cursor,
+              limit: 50,
+            },
+          },
+        };
+
+        const envelope = await makeSyncEnvelope({
+          batch,
+          deviceId,
+          deviceKeys,
+        });
+
+        const { response, payload } = await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope },
+        });
+
+        assert.equal(response.status, 200);
+
+        const decoded = await decodeSyncResponse(
+          payload.envelope,
+          deviceId,
+          deviceKeys,
+        );
+
+        assert.equal(decoded.results.length, 1);
+        assert.equal(
+          decoded.results[0].clientCompletionId,
+          clientCompletionId,
+        );
+        assert.equal(
+          decoded.results[0].status,
+          "accepted",
+        );
+
+        const pull = decoded.pull?.learningProgress;
+
+        assert.ok(pull);
+        assert.equal(pull.items.length, 1);
+        assert.equal(
+          pull.items[0].clientCompletionId,
+          clientCompletionId,
+        );
+        assert.equal(pull.hasMore, false);
+        assert.equal(typeof pull.nextCursor, "string");
+
+        phase35Cursor = pull.nextCursor;
+        phase35Sequence += 1;
+      },
+    );
+
+    await t.test(
+      "Fase 3.5A — paginação não perde factos e mantém cursor terminal",
+      async () => {
+        assert.equal(typeof phase35Cursor, "string");
+
+        const now = new Date();
+
+        const completionA =
+          `phase35-page-a-${crypto.randomUUID()}`;
+        const completionB =
+          `phase35-page-b-${crypto.randomUUID()}`;
+
+        const pushBatch = {
+          version: 1,
+          batchId: `phase35-page-push-${crypto.randomUUID()}`,
+          deviceId,
+          issuedAt: now.toISOString(),
+          expiresAt: new Date(
+            now.getTime() + 5 * 60 * 1000,
+          ).toISOString(),
+          sequence: phase35Sequence,
+          items: [
+            {
+              type: "activityCompletion",
+              clientCompletionId: completionA,
+              learningPathId: "student.fr-fr.phase1",
+              activityId: "arrival.vocabulary-01",
+              revisionId: "arrival.vocabulary-01.r1",
+              packageVersion: 3,
+              completedAt: now.toISOString(),
+            },
+            {
+              type: "activityCompletion",
+              clientCompletionId: completionB,
+              learningPathId: "student.fr-fr.phase1",
+              activityId: "arrival.vocabulary-02",
+              revisionId: "arrival.vocabulary-02.r1",
+              packageVersion: 3,
+              completedAt: now.toISOString(),
+            },
+          ],
+          pull: {
+            learningProgress: {
+              cursor: phase35Cursor,
+              limit: 1,
+            },
+          },
+        };
+
+        const pushEnvelope = await makeSyncEnvelope({
+          batch: pushBatch,
+          deviceId,
+          deviceKeys,
+        });
+
+        const first = await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope: pushEnvelope },
+        });
+
+        assert.equal(first.response.status, 200);
+
+        const firstDecoded = await decodeSyncResponse(
+          first.payload.envelope,
+          deviceId,
+          deviceKeys,
+        );
+
+        assert.equal(firstDecoded.results.length, 2);
+
+        const page1 =
+          firstDecoded.pull?.learningProgress;
+
+        assert.ok(page1);
+        assert.equal(page1.items.length, 1);
+        assert.equal(page1.hasMore, true);
+        assert.equal(typeof page1.nextCursor, "string");
+
+        const seen = [
+          page1.items[0].clientCompletionId,
+        ];
+
+        phase35Sequence += 1;
+
+        const secondNow = new Date();
+
+        const secondBatch = {
+          version: 1,
+          batchId: `phase35-page-next-${crypto.randomUUID()}`,
+          deviceId,
+          issuedAt: secondNow.toISOString(),
+          expiresAt: new Date(
+            secondNow.getTime() + 5 * 60 * 1000,
+          ).toISOString(),
+          sequence: phase35Sequence,
+          items: [],
+          pull: {
+            learningProgress: {
+              cursor: page1.nextCursor,
+              limit: 1,
+            },
+          },
+        };
+
+        const secondEnvelope = await makeSyncEnvelope({
+          batch: secondBatch,
+          deviceId,
+          deviceKeys,
+        });
+
+        const second = await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope: secondEnvelope },
+        });
+
+        assert.equal(second.response.status, 200);
+
+        const secondDecoded = await decodeSyncResponse(
+          second.payload.envelope,
+          deviceId,
+          deviceKeys,
+        );
+
+        const page2 =
+          secondDecoded.pull?.learningProgress;
+
+        assert.ok(page2);
+        assert.equal(page2.items.length, 1);
+        assert.equal(page2.hasMore, false);
+        assert.equal(typeof page2.nextCursor, "string");
+        assert.notEqual(
+          page2.nextCursor,
+          page1.nextCursor,
+        );
+
+        seen.push(page2.items[0].clientCompletionId);
+
+        assert.deepEqual(
+          [...seen].sort(),
+          [completionA, completionB].sort(),
+        );
+
+        phase35Cursor = page2.nextCursor;
+        phase35Sequence += 1;
+
+        // Com o cursor terminal, a próxima sincronização não
+        // volta ao início e não repete todo o histórico.
+        const terminalNow = new Date();
+
+        const terminalBatch = {
+          version: 1,
+          batchId: `phase35-page-terminal-${crypto.randomUUID()}`,
+          deviceId,
+          issuedAt: terminalNow.toISOString(),
+          expiresAt: new Date(
+            terminalNow.getTime() + 5 * 60 * 1000,
+          ).toISOString(),
+          sequence: phase35Sequence,
+          items: [],
+          pull: {
+            learningProgress: {
+              cursor: phase35Cursor,
+              limit: 1,
+            },
+          },
+        };
+
+        const terminalEnvelope = await makeSyncEnvelope({
+          batch: terminalBatch,
+          deviceId,
+          deviceKeys,
+        });
+
+        const terminal = await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope: terminalEnvelope },
+        });
+
+        assert.equal(terminal.response.status, 200);
+
+        const terminalDecoded = await decodeSyncResponse(
+          terminal.payload.envelope,
+          deviceId,
+          deviceKeys,
+        );
+
+        const terminalPull =
+          terminalDecoded.pull?.learningProgress;
+
+        assert.ok(terminalPull);
+        assert.equal(terminalPull.items.length, 0);
+        assert.equal(terminalPull.hasMore, false);
+        assert.equal(
+          terminalPull.nextCursor,
+          phase35Cursor,
+        );
+
+        phase35Sequence += 1;
+      },
+    );
+
+    await t.test(
+      "Fase 3.5A — cursor inválido é rejeitado sem consumir sequence",
+      async () => {
+        assert.equal(typeof phase35Cursor, "string");
+
+        const now = new Date();
+
+        const invalidBatch = {
+          version: 1,
+          batchId: `phase35-invalid-cursor-${crypto.randomUUID()}`,
+          deviceId,
+          issuedAt: now.toISOString(),
+          expiresAt: new Date(
+            now.getTime() + 5 * 60 * 1000,
+          ).toISOString(),
+          sequence: phase35Sequence,
+          items: [],
+          pull: {
+            learningProgress: {
+              cursor: `unknown-${crypto.randomUUID()}`,
+              limit: 1,
+            },
+          },
+        };
+
+        const invalidEnvelope = await makeSyncEnvelope({
+          batch: invalidBatch,
+          deviceId,
+          deviceKeys,
+        });
+
+        const invalid = await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope: invalidEnvelope },
+        });
+
+        assert.equal(invalid.response.status, 400);
+
+        // Reutiliza exatamente a mesma sequence.
+        // Se o pedido inválido a tivesse consumido, este falharia.
+        const validNow = new Date();
+
+        const validBatch = {
+          version: 1,
+          batchId: `phase35-valid-after-invalid-${crypto.randomUUID()}`,
+          deviceId,
+          issuedAt: validNow.toISOString(),
+          expiresAt: new Date(
+            validNow.getTime() + 5 * 60 * 1000,
+          ).toISOString(),
+          sequence: phase35Sequence,
+          items: [],
+          pull: {
+            learningProgress: {
+              cursor: phase35Cursor,
+              limit: 1,
+            },
+          },
+        };
+
+        const validEnvelope = await makeSyncEnvelope({
+          batch: validBatch,
+          deviceId,
+          deviceKeys,
+        });
+
+        const valid = await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope: validEnvelope },
+        });
+
+        assert.equal(valid.response.status, 200);
+
+        const decoded = await decodeSyncResponse(
+          valid.payload.envelope,
+          deviceId,
+          deviceKeys,
+        );
+
+        assert.equal(decoded.sequence, phase35Sequence);
+        assert.equal(
+          decoded.pull.learningProgress.items.length,
+          0,
+        );
+        assert.equal(
+          decoded.pull.learningProgress.nextCursor,
+          phase35Cursor,
+        );
+
+        phase35Sequence += 1;
+      },
+    );
     await t.test("JWS de sync assinado por chave errada é rejeitado", async () => {
       const now = new Date();
       const batch = {

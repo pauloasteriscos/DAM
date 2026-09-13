@@ -59,6 +59,74 @@ final class CompleteLearningActivityResult {
   final bool alreadyCompleted;
 }
 
+/// Facto recebido do servidor através do Secure Sync.
+///
+/// O servidor nunca fornece competências nem estados pedagógicos.
+/// Esses valores continuam a ser derivados do conteúdo oficial local.
+final class RemoteLearningCompletionFact {
+  const RemoteLearningCompletionFact({
+    required this.serverCompletionId,
+    required this.clientCompletionId,
+    required this.learningPathId,
+    required this.activityId,
+    required this.revisionId,
+    required this.packageVersion,
+    required this.completedAt,
+  });
+
+  final String serverCompletionId;
+  final String clientCompletionId;
+  final String learningPathId;
+
+  final ActivityId activityId;
+  final RevisionId revisionId;
+
+  final int packageVersion;
+  final DateTime completedAt;
+}
+
+/// Página remota que será fundida atomicamente no SQLite.
+final class MergeRemoteLearningProgressWrite {
+  MergeRemoteLearningProgressWrite({
+    required this.accountId,
+    required this.learningPath,
+    required this.activePackageVersion,
+    required this.expectedCursor,
+    required this.nextCursor,
+    required Iterable<RemoteLearningCompletionFact> completions,
+    this.practicePreference = PracticePreference.balanced,
+  }) : completions = List<RemoteLearningCompletionFact>.unmodifiable(
+         completions,
+       );
+
+  final String accountId;
+  final LearningPath learningPath;
+
+  /// Versão oficial atualmente validada neste dispositivo.
+  final int activePackageVersion;
+
+  /// Cursor usado para produzir esta página.
+  final String? expectedCursor;
+
+  /// Cursor confirmado pelo servidor após esta página.
+  final String? nextCursor;
+
+  final List<RemoteLearningCompletionFact> completions;
+  final PracticePreference practicePreference;
+}
+
+final class MergeRemoteLearningProgressResult {
+  const MergeRemoteLearningProgressResult({
+    required this.insertedCount,
+    required this.duplicateCount,
+    required this.cursor,
+  });
+
+  final int insertedCount;
+  final int duplicateCount;
+  final String? cursor;
+}
+
 /// Persistência offline-first do progresso pedagógico.
 ///
 /// A conclusão é uma única transação SQLite:
@@ -257,6 +325,415 @@ final class LearningProgressRepository {
     );
   }
 
+  /// Lê a posição confirmada do feed remoto para a conta/percurso.
+  Future<String?> readSyncCursor({
+    required String accountId,
+    required String learningPathId,
+  }) async {
+    final rows = await _db.query(
+      'learning_progress_sync_state',
+      columns: const <String>['cursor'],
+      where: 'account_id = ? AND learning_path_id = ?',
+      whereArgs: <Object?>[accountId, learningPathId],
+      limit: 1,
+    );
+
+    if (rows.isEmpty) {
+      return null;
+    }
+
+    return rows.single['cursor']! as String;
+  }
+
+  /// Número global de atividades distintas concluídas pela conta.
+  ///
+  /// Esta é a base canónica de progressão para a Fase 3:
+  ///
+  /// - independe do dispositivo;
+  /// - independe do percurso;
+  /// - múltiplos factos da mesma ActivityId contam apenas uma vez.
+  ///
+  /// Uma camada de gamificação poderá futuramente atribuir pesos/XP sem
+  /// alterar esta invariável de deduplicação.
+  Future<int> readGlobalDistinctCompletedActivityCount({
+    required String accountId,
+  }) async {
+    final normalizedAccountId = accountId.trim();
+
+    if (normalizedAccountId.isEmpty) {
+      throw ArgumentError.value(accountId, 'accountId', 'não pode estar vazio');
+    }
+
+    final rows = await _db.rawQuery(
+      '''
+      SELECT COUNT(DISTINCT activity_id) AS activity_count
+      FROM learning_progress_completions
+      WHERE account_id = ?
+      ''',
+      <Object?>[normalizedAccountId],
+    );
+
+    final value = rows.single['activity_count'];
+
+    if (value == null) {
+      return 0;
+    }
+
+    if (value is num) {
+      return value.toInt();
+    }
+
+    throw StateError('COUNT(DISTINCT activity_id) devolveu tipo inesperado.');
+  }
+
+  /// Funde uma página recebida pelo Secure Sync.
+  ///
+  /// Invariantes:
+  /// - não cria outbox;
+  /// - não confia em competências vindas da rede;
+  /// - valida activity/revision contra o conteúdo oficial local;
+  /// - conclusão é monotónica;
+  /// - projeção é sempre recalculada;
+  /// - cursor só avança na mesma transação do merge.
+  Future<MergeRemoteLearningProgressResult> mergeRemoteProgress(
+    MergeRemoteLearningProgressWrite command,
+  ) {
+    return _db.transaction((txn) => _mergeRemoteProgress(txn, command));
+  }
+
+  Future<MergeRemoteLearningProgressResult> _mergeRemoteProgress(
+    Transaction txn,
+    MergeRemoteLearningProgressWrite command,
+  ) async {
+    final accountId = command.accountId.trim();
+
+    if (accountId.isEmpty) {
+      throw ArgumentError.value(
+        command.accountId,
+        'accountId',
+        'não pode estar vazio',
+      );
+    }
+
+    if (command.activePackageVersion < 1) {
+      throw ArgumentError.value(
+        command.activePackageVersion,
+        'activePackageVersion',
+        'deve ser igual ou superior a 1',
+      );
+    }
+
+    final pathId = command.learningPath.id.value;
+
+    String? normalizeCursor(String? value, String fieldName) {
+      if (value == null) {
+        return null;
+      }
+
+      final normalized = value.trim();
+
+      if (normalized.isEmpty) {
+        throw ArgumentError.value(value, fieldName, 'não pode estar vazio');
+      }
+
+      return normalized;
+    }
+
+    final expectedCursor = normalizeCursor(
+      command.expectedCursor,
+      'expectedCursor',
+    );
+
+    final nextCursor = normalizeCursor(command.nextCursor, 'nextCursor');
+
+    // --------------------------------------------------------
+    // 1. Compare-and-set do cursor
+    //
+    // Duas sincronizações concorrentes nunca podem fazer uma
+    // página antiga sobrescrever uma posição mais nova.
+    // --------------------------------------------------------
+
+    final stateRows = await txn.query(
+      'learning_progress_sync_state',
+      columns: const <String>['cursor'],
+      where: 'account_id = ? AND learning_path_id = ?',
+      whereArgs: <Object?>[accountId, pathId],
+      limit: 1,
+    );
+
+    final storedCursor = stateRows.isEmpty
+        ? null
+        : stateRows.single['cursor']! as String;
+
+    if (storedCursor != expectedCursor) {
+      throw StateError(
+        'Cursor local mudou durante a sincronização. '
+        'Esperado=${expectedCursor ?? '<início>'}, '
+        'atual=${storedCursor ?? '<início>'}.',
+      );
+    }
+
+    // Contrato da Fase 3.5A:
+    //
+    // página vazia mantém o cursor;
+    // página não vazia devolve como cursor o completionId do último facto.
+    if (command.completions.isEmpty) {
+      if (nextCursor != expectedCursor) {
+        throw StateError(
+          'Página vazia não pode alterar o cursor de progresso.',
+        );
+      }
+    } else {
+      final lastServerCompletionId = command.completions.last.serverCompletionId
+          .trim();
+
+      if (lastServerCompletionId.isEmpty) {
+        throw const FormatException('serverCompletionId remoto vazio.');
+      }
+
+      if (nextCursor != lastServerCompletionId) {
+        throw StateError(
+          'nextCursor não corresponde ao último facto da página.',
+        );
+      }
+    }
+
+    final createdAt = DateTime.now().toUtc().toIso8601String();
+
+    var insertedCount = 0;
+    var duplicateCount = 0;
+
+    // --------------------------------------------------------
+    // 2. União monotónica das conclusões
+    // --------------------------------------------------------
+
+    for (final fact in command.completions) {
+      final serverCompletionId = fact.serverCompletionId.trim();
+      final clientCompletionId = fact.clientCompletionId.trim();
+
+      if (serverCompletionId.isEmpty) {
+        throw const FormatException('serverCompletionId remoto vazio.');
+      }
+
+      if (clientCompletionId.isEmpty) {
+        throw const FormatException('clientCompletionId remoto vazio.');
+      }
+
+      if (fact.learningPathId != pathId) {
+        throw StateError(
+          'Facto remoto pertence a outro percurso: '
+          '${fact.learningPathId}.',
+        );
+      }
+
+      if (fact.packageVersion < 1) {
+        throw StateError(
+          'packageVersion remoto inválido: ${fact.packageVersion}.',
+        );
+      }
+
+      // Se outro dispositivo já está numa versão oficial mais nova,
+      // este dispositivo deve primeiro atualizar o conteúdo e só depois
+      // aceitar o facto. O cursor NÃO avançará porque toda a transação
+      // será revertida.
+      if (fact.packageVersion > command.activePackageVersion) {
+        throw StateError(
+          'Conteúdo local desatualizado. '
+          'Facto remoto usa packageVersion=${fact.packageVersion}, '
+          'local=${command.activePackageVersion}.',
+        );
+      }
+
+      final activity = _resolveActivityInPath(
+        command.learningPath,
+        fact.activityId,
+      );
+
+      final revision = _resolveRevision(activity, fact.revisionId);
+
+      final existing = await txn.query(
+        'learning_progress_completions',
+        where: 'client_completion_id = ?',
+        whereArgs: <Object?>[clientCompletionId],
+        limit: 1,
+      );
+
+      if (existing.isNotEmpty) {
+        _assertSameRemoteCompletion(
+          existing.single,
+          accountId: accountId,
+          fact: fact,
+        );
+
+        duplicateCount += 1;
+        continue;
+      }
+
+      final completionId = await txn
+          .insert('learning_progress_completions', <String, Object?>{
+            'client_completion_id': clientCompletionId,
+            'account_id': accountId,
+            'learning_path_id': pathId,
+            'activity_id': fact.activityId.value,
+            'revision_id': fact.revisionId.value,
+            'package_version': fact.packageVersion,
+            'completed_at': fact.completedAt.toUtc().toIso8601String(),
+            'created_at': createdAt,
+          });
+
+      // Competências vêm SEMPRE da ActivityRevision oficial local.
+      final competencies = revision.competencies.toList()
+        ..sort((a, b) => a.value.compareTo(b.value));
+
+      for (final competencyId in competencies) {
+        await txn.insert('learning_competency_evidence', <String, Object?>{
+          'completion_id': completionId,
+          'competency_id': competencyId.value,
+          'evidence_type': 'activity_completion',
+          'created_at': createdAt,
+        });
+      }
+
+      insertedCount += 1;
+    }
+
+    // --------------------------------------------------------
+    // 3. Preservar inProgress deste dispositivo
+    //
+    // O estado parcial continua local ao dispositivo. Uma sincronização
+    // remota não pode apagá-lo ao reconstruir a projeção.
+    // --------------------------------------------------------
+
+    final inProgressRows = await txn.query(
+      'learning_progress_projection',
+      columns: const <String>['activity_id'],
+      where:
+          'account_id = ? AND learning_path_id = ? '
+          'AND state = ? AND activity_id IS NOT NULL',
+      whereArgs: <Object?>[
+        accountId,
+        pathId,
+        LearningActivityState.inProgress.name,
+      ],
+    );
+
+    final activitiesInProgress = inProgressRows
+        .map((row) => row['activity_id'])
+        .whereType<String>()
+        .map(ActivityId.new)
+        .toSet();
+
+    // --------------------------------------------------------
+    // 4. Reconstruir factos globais e recalcular o motor
+    // --------------------------------------------------------
+
+    final facts = await _loadFacts(
+      txn,
+      accountId: accountId,
+      learningPathId: pathId,
+    );
+
+    final progression = _engine.evaluate(
+      ProgressionRequest(
+        learningPath: command.learningPath,
+        facts: facts,
+        practicePreference: command.practicePreference,
+        activitiesInProgress: activitiesInProgress,
+      ),
+    );
+
+    await _replaceProjection(
+      txn,
+      accountId: accountId,
+      learningPath: command.learningPath,
+      packageVersion: command.activePackageVersion,
+      progression: progression,
+      updatedAt: createdAt,
+    );
+
+    // --------------------------------------------------------
+    // 5. Cursor confirmado na MESMA transação
+    // --------------------------------------------------------
+
+    if (nextCursor != null) {
+      await txn.insert('learning_progress_sync_state', <String, Object?>{
+        'account_id': accountId,
+        'learning_path_id': pathId,
+        'cursor': nextCursor,
+        'updated_at': createdAt,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+
+    return MergeRemoteLearningProgressResult(
+      insertedCount: insertedCount,
+      duplicateCount: duplicateCount,
+      cursor: nextCursor,
+    );
+  }
+
+  Future<void> _replaceProjection(
+    Transaction txn, {
+    required String accountId,
+    required LearningPath learningPath,
+    required int packageVersion,
+    required ProgressionResult progression,
+    required String updatedAt,
+  }) async {
+    final pathId = learningPath.id.value;
+
+    await txn.delete(
+      'learning_progress_projection',
+      where: 'account_id = ? AND learning_path_id = ?',
+      whereArgs: <Object?>[accountId, pathId],
+    );
+
+    final elements = _pathElementsById(learningPath);
+    final recommendationRanks = <PathElementId, int>{};
+
+    for (var index = 0; index < progression.recommendations.length; index++) {
+      recommendationRanks[progression.recommendations[index]] = index;
+    }
+
+    for (final entry in progression.decisions.entries) {
+      final element = elements[entry.key];
+
+      if (element == null) {
+        throw StateError(
+          'ProgressionEngine devolveu PathElementId desconhecido: '
+          '${entry.key.value}',
+        );
+      }
+
+      await txn.insert('learning_progress_projection', <String, Object?>{
+        'account_id': accountId,
+        'learning_path_id': pathId,
+        'path_element_id': entry.key.value,
+        'activity_id': element.activityId?.value,
+        'state': entry.value.state.name,
+        'reason': entry.value.reason.name,
+        'recommendation_rank': recommendationRanks[entry.key],
+        'package_version': packageVersion,
+        'updated_at': updatedAt,
+      });
+    }
+  }
+
+  Activity _resolveActivityInPath(
+    LearningPath learningPath,
+    ActivityId activityId,
+  ) {
+    for (final activity in learningPath.activities) {
+      if (activity.id == activityId) {
+        return activity;
+      }
+    }
+
+    throw StateError(
+      'ActivityId ${activityId.value} não pertence ao percurso '
+      '${learningPath.id.value}.',
+    );
+  }
+
   Activity _resolveActivity(CompleteLearningActivityWrite command) {
     for (final activity in command.learningPath.activities) {
       if (activity.id == command.activityId) {
@@ -295,6 +772,11 @@ final class LearningProgressRepository {
       whereArgs: <Object?>[accountId, learningPathId],
     );
 
+    // As conclusões permanecem específicas do percurso avaliado.
+    //
+    // As competências, porém, pertencem à conta: se foram adquiridas
+    // validamente noutro percurso ou dispositivo, podem satisfazer um
+    // pré-requisito baseado na mesma CompetencyId.
     final competencyRows = await txn.rawQuery(
       '''
       SELECT DISTINCT e.competency_id
@@ -302,10 +784,9 @@ final class LearningProgressRepository {
       INNER JOIN learning_progress_completions c
         ON c.id = e.completion_id
       WHERE c.account_id = ?
-        AND c.learning_path_id = ?
         AND e.evidence_type = 'activity_completion'
       ''',
-      <Object?>[accountId, learningPathId],
+      <Object?>[accountId],
     );
 
     return ProgressionFacts(
@@ -330,6 +811,39 @@ final class LearningProgressRepository {
     }
 
     return result;
+  }
+
+  void _assertSameRemoteCompletion(
+    Map<String, Object?> row, {
+    required String accountId,
+    required RemoteLearningCompletionFact fact,
+  }) {
+    final storedCompletedAt = DateTime.tryParse(
+      row['completed_at']?.toString() ?? '',
+    );
+
+    // O backend normaliza timestamps para milissegundos através de
+    // Date.toISOString(). A comparação temporal usa por isso a mesma
+    // resolução e não a representação textual.
+    final sameCompletedAt =
+        storedCompletedAt != null &&
+        storedCompletedAt.toUtc().millisecondsSinceEpoch ==
+            fact.completedAt.toUtc().millisecondsSinceEpoch;
+
+    final matches =
+        row['account_id'] == accountId &&
+        row['learning_path_id'] == fact.learningPathId &&
+        row['activity_id'] == fact.activityId.value &&
+        row['revision_id'] == fact.revisionId.value &&
+        row['package_version'] == fact.packageVersion &&
+        sameCompletedAt;
+
+    if (!matches) {
+      throw StateError(
+        'clientCompletionId remoto já existe com outro facto: '
+        '${fact.clientCompletionId}',
+      );
+    }
   }
 
   void _assertSameCompletion(

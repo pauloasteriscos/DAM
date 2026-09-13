@@ -7,6 +7,16 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// A rede não participa da transação local de conclusão.
 abstract final class LearningProgressSchema {
+  static const String _syncStateTableStatement = '''
+    CREATE TABLE IF NOT EXISTS learning_progress_sync_state (
+      account_id TEXT NOT NULL,
+      learning_path_id TEXT NOT NULL,
+      cursor TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      PRIMARY KEY (account_id, learning_path_id)
+    )
+    ''';
+
   static const List<String> _tableStatements = <String>[
     '''
     CREATE TABLE IF NOT EXISTS learning_progress_completions (
@@ -49,6 +59,7 @@ abstract final class LearningProgressSchema {
       PRIMARY KEY (account_id, learning_path_id, path_element_id)
     )
     ''',
+    _syncStateTableStatement,
   ];
 
   static const List<String> _indexStatements = <String>[
@@ -115,5 +126,13 @@ abstract final class LearningProgressSchema {
     for (final statement in _indexStatements) {
       await db.execute(statement);
     }
+  }
+
+  /// Migration aditiva da Fase 3.5.
+  ///
+  /// O cursor nunca representa progresso pedagógico. É apenas a posição
+  /// confirmada no feed remoto para uma conta/percurso.
+  static Future<void> createSyncState(DatabaseExecutor db) {
+    return db.execute(_syncStateTableStatement);
   }
 }

@@ -7,6 +7,7 @@ import 'config/feature_flags.dart';
 import 'data/content/learning_content_assets.dart';
 import 'data/content/learning_content_bootstrap.dart';
 import 'data/database/database_factory_config.dart';
+import 'data/services/learning_progress_startup_reconciliation_service.dart';
 import 'screens/auth_gate.dart';
 import 'state/app_locale_controller.dart';
 import 'state/app_session_controller.dart';
@@ -32,6 +33,13 @@ Future<void> main() async {
   await AppLocaleController.instance.initialize();
 
   runApp(const DailyTalkApp());
+
+  // Fase 3.5C:
+  //
+  // começa a observar a sessão SEM bloquear o primeiro frame.
+  // Quando a sessão ficar autenticada, o mesmo Secure Sync usado pela
+  // outbox executará push + pull. Outbox vazia continua a gerar pull.
+  LearningProgressStartupReconciliationService.instance.start();
 
   // A atualização remota é deliberadamente posterior ao primeiro frame e
   // controlada por feature flag. A aprendizagem continua sobre SQLite.

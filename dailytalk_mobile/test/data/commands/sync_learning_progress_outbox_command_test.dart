@@ -21,8 +21,11 @@ final class _FakeApiService extends DailyTalkApiService {
 
   @override
   Future<Map<String, dynamic>> secureSyncProgress(
-    List<Map<String, dynamic>> items,
-  ) {
+    List<Map<String, dynamic>> items, {
+    bool pullLearningProgress = false,
+    String? learningProgressCursor,
+    int learningProgressLimit = 50,
+  }) {
     calls += 1;
     return handler(items);
   }

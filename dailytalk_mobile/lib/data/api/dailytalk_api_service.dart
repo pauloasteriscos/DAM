@@ -135,42 +135,67 @@ class DailyTalkApiService {
   }
 
   /// Envia até 50 submissões num único lote assinado e cifrado.
-  /// Envia até 50 itens de progresso num único lote assinado e cifrado.
+  /// Reconcilia progresso através do Secure Sync existente.
+  ///
+  /// Pode transportar push, pull ou ambos no mesmo lote DPoP/JWS/JWE.
+  /// Um pull-only é válido mesmo quando [items] está vazio.
   Future<Map<String, dynamic>> secureSyncProgress(
-    List<Map<String, dynamic>> items,
-  ) {
+    List<Map<String, dynamic>> items, {
+    bool pullLearningProgress = false,
+    String? learningProgressCursor,
+    int learningProgressLimit = 50,
+  }) {
     if (AppConfig.useMockApi) {
-      return Future.value({
+      final response = <String, dynamic>{
         'version': 1,
         'batchId': 'mock-batch',
-        'results': items.map((item) {
-          if (item['type'] == 'activityCompletion') {
-            final clientId = item['clientCompletionId']?.toString() ?? '';
+        'results': items
+            .map((item) {
+              if (item['type'] == 'activityCompletion') {
+                final clientId = item['clientCompletionId']?.toString() ?? '';
 
-            return <String, dynamic>{
-              'type': 'activityCompletion',
-              'clientCompletionId': clientId,
-              'completionId': 'mock-learning-$clientId',
-              'status': 'accepted',
-              'activityId': item['activityId'],
-              'revisionId': item['revisionId'],
-            };
-          }
+                return <String, dynamic>{
+                  'type': 'activityCompletion',
+                  'clientCompletionId': clientId,
+                  'completionId': 'mock-learning-$clientId',
+                  'status': 'accepted',
+                  'activityId': item['activityId'],
+                  'revisionId': item['revisionId'],
+                };
+              }
 
-          return <String, dynamic>{
-            'clientSubmissionId': item['clientSubmissionId'],
-            'submissionId': 'mock-${item['clientSubmissionId']}',
-            'status': 'accepted',
-            'remoteActivityId': item['remoteActivityId'],
-            'score': 80,
-            'feedback': 'Sincronização segura simulada.',
-            'metrics': {'evaluatedBy': 'mock-secure-sync'},
-          };
-        }).toList(),
-      });
+              return <String, dynamic>{
+                'clientSubmissionId': item['clientSubmissionId'],
+                'submissionId': 'mock-${item['clientSubmissionId']}',
+                'status': 'accepted',
+                'remoteActivityId': item['remoteActivityId'],
+                'score': 80,
+                'feedback': 'Sincronização segura simulada.',
+                'metrics': <String, dynamic>{'evaluatedBy': 'mock-secure-sync'},
+              };
+            })
+            .toList(growable: false),
+      };
+
+      if (pullLearningProgress) {
+        response['pull'] = <String, dynamic>{
+          'learningProgress': <String, dynamic>{
+            'items': <Map<String, dynamic>>[],
+            'nextCursor': learningProgressCursor,
+            'hasMore': false,
+          },
+        };
+      }
+
+      return Future.value(response);
     }
 
-    return _secureSyncService.synchronizeProgress(items);
+    return _secureSyncService.synchronizeProgress(
+      items,
+      pullLearningProgress: pullLearningProgress,
+      learningProgressCursor: learningProgressCursor,
+      learningProgressLimit: learningProgressLimit,
+    );
   }
 
   Future<List<Map<String, dynamic>>> getMySubmissions() async {

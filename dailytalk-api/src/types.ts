@@ -168,6 +168,15 @@ export const SecureProgressItem = z.union([
   SecureLearningProgressCompletionItem,
 ]);
 
+export const SecureLearningProgressPull = z.object({
+  cursor: z.string().trim().min(1).max(1024).optional(),
+  limit: z.number().int().min(1).max(100).default(50),
+}).strict();
+
+export const SecureProgressPull = z.object({
+  learningProgress: SecureLearningProgressPull.optional(),
+}).strict();
+
 export const SecureProgressBatch = z.object({
   version: z.literal(1),
   batchId: z.string().trim().min(16).max(200),
@@ -175,5 +184,17 @@ export const SecureProgressBatch = z.object({
   issuedAt: z.string().datetime({ offset: true }).or(z.string().datetime()),
   expiresAt: z.string().datetime({ offset: true }).or(z.string().datetime()),
   sequence: z.number().int().positive(),
-  items: z.array(SecureProgressItem).min(1).max(100),
-}).strict();
+  items: z.array(SecureProgressItem).max(100),
+  pull: SecureProgressPull.optional(),
+}).strict().superRefine((batch, ctx) => {
+  if (
+    batch.items.length === 0 &&
+    batch.pull?.learningProgress === undefined
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["items"],
+      message: "O lote deve conter items ou solicitar pull de progresso.",
+    });
+  }
+});

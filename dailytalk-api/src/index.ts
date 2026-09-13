@@ -1231,6 +1231,40 @@ app.post(
         return c.json({ error: "Contexto ou validade do lote inválidos" }, 400);
       }
 
+      // Fase 3.5 — o cursor externo é um completionId opaco.
+      //
+      // O seq monotónico permanece exclusivamente no servidor.
+      // O cursor é ainda validado antes de reservar sequence/batch,
+      // portanto um cursor inválido não consome a sequência segura.
+      let learningProgressCursor = 0;
+
+      const requestedLearningProgressCursor =
+        batch.pull?.learningProgress?.cursor;
+
+      if (requestedLearningProgressCursor !== undefined) {
+        const cursorRow = await c.env.DB.prepare(
+          `SELECT seq
+           FROM learning_progress_sync_feed
+           WHERE user_id = ?
+             AND completion_id = ?
+           LIMIT 1`,
+        )
+          .bind(
+            user.id,
+            requestedLearningProgressCursor,
+          )
+          .first<{ seq: number }>();
+
+        if (!cursorRow) {
+          return c.json(
+            { error: "Cursor de progresso inválido" },
+            400,
+          );
+        }
+
+        learningProgressCursor = Number(cursorRow.seq);
+      }
+
       const requestHash = await sha256Base64Url(requestPayload);
 
       const existingBatch = await c.env.DB.prepare(
@@ -1506,6 +1540,17 @@ app.post(
             factHash,
             nowIso,
           ),
+          c.env.DB.prepare(
+            `INSERT OR IGNORE INTO learning_progress_sync_feed (
+               user_id,
+               completion_id,
+               created_at
+             ) VALUES (?, ?, ?)`,
+          ).bind(
+            user.id,
+            completionId,
+            nowIso,
+          ),
         );
       }
 
@@ -1580,14 +1625,99 @@ app.post(
         });
       }
 
-      const responsePayload = utf8(JSON.stringify({
+      let learningProgressPull:
+        | {
+            items: Array<Record<string, unknown>>;
+            nextCursor: string | null;
+            hasMore: boolean;
+          }
+        | undefined;
+
+      if (batch.pull?.learningProgress !== undefined) {
+        const limit = batch.pull.learningProgress.limit;
+
+        const feedRows = await c.env.DB.prepare(
+          `SELECT
+             f.seq,
+             c.id,
+             c.client_completion_id,
+             c.learning_path_id,
+             c.activity_id,
+             c.revision_id,
+             c.package_version,
+             c.completed_at
+           FROM learning_progress_sync_feed f
+           INNER JOIN learning_progress_completions c
+             ON c.id = f.completion_id
+           WHERE f.user_id = ?
+             AND f.seq > ?
+           ORDER BY f.seq ASC
+           LIMIT ?`,
+        )
+          .bind(
+            user.id,
+            learningProgressCursor,
+            limit + 1,
+          )
+          .all<{
+            seq: number;
+            id: string;
+            client_completion_id: string;
+            learning_path_id: string;
+            activity_id: string;
+            revision_id: string;
+            package_version: number;
+            completed_at: string;
+          }>();
+
+        const allRows = feedRows.results ?? [];
+        const hasMore = allRows.length > limit;
+        const pageRows = hasMore
+          ? allRows.slice(0, limit)
+          : allRows;
+
+        const lastRow =
+          pageRows.length > 0
+            ? pageRows[pageRows.length - 1]
+            : undefined;
+
+        learningProgressPull = {
+          items: pageRows.map((row) => ({
+            type: "activityCompletion",
+            completionId: row.id,
+            clientCompletionId: row.client_completion_id,
+            learningPathId: row.learning_path_id,
+            activityId: row.activity_id,
+            revisionId: row.revision_id,
+            packageVersion: Number(row.package_version),
+            completedAt: row.completed_at,
+          })),
+          hasMore,
+          nextCursor:
+            lastRow
+              ? lastRow.id
+              : (batch.pull.learningProgress.cursor ?? null),
+        };
+      }
+
+      const responseBody: Record<string, unknown> = {
         version: 1,
         batchId: batch.batchId,
         deviceId,
         sequence: batch.sequence,
         processedAt: new Date().toISOString(),
         results,
-      }));
+      };
+
+      if (learningProgressPull !== undefined) {
+        responseBody.pull = {
+          learningProgress: learningProgressPull,
+        };
+      }
+
+      const responsePayload = utf8(
+        JSON.stringify(responseBody),
+      );
       const signedResponse = await signCompactJws({
         payload: responsePayload,
         privateJwk: serverSigningPrivate,
@@ -2285,6 +2415,7 @@ async function learningCompletionFactHash(input: {
     utf8(JSON.stringify(canonical)),
   );
 }
+
 
 function errorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error && error.message.trim()) {

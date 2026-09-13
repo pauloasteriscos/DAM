@@ -36,9 +36,16 @@ class SecureSyncService {
   late final DeviceKeyService _deviceKeyService;
 
   Future<Map<String, dynamic>> synchronizeProgress(
-    List<Map<String, dynamic>> items,
-  ) async {
-    if (items.isEmpty) {
+    List<Map<String, dynamic>> items, {
+    bool pullLearningProgress = false,
+    String? learningProgressCursor,
+    int learningProgressLimit = 50,
+  }) async {
+    // Uma chamada sem push e sem pull continua a ser um no-op local.
+    //
+    // Fase 3.5: items=[] COM pullLearningProgress=true deve chegar
+    // obrigatoriamente ao servidor.
+    if (items.isEmpty && !pullLearningProgress) {
       return const {'results': <Map<String, dynamic>>[]};
     }
     if (items.length > 50) {
@@ -46,6 +53,36 @@ class SecureSyncService {
         items.length,
         'items',
         'Máximo de 50 itens por lote.',
+      );
+    }
+
+    if (learningProgressLimit < 1 || learningProgressLimit > 100) {
+      throw ArgumentError.value(
+        learningProgressLimit,
+        'learningProgressLimit',
+        'Deve estar entre 1 e 100.',
+      );
+    }
+
+    String? normalizedLearningProgressCursor;
+
+    if (learningProgressCursor != null) {
+      final value = learningProgressCursor.trim();
+
+      if (value.isEmpty) {
+        throw ArgumentError.value(
+          learningProgressCursor,
+          'learningProgressCursor',
+          'Não pode estar vazio.',
+        );
+      }
+
+      normalizedLearningProgressCursor = value;
+    }
+
+    if (!pullLearningProgress && normalizedLearningProgressCursor != null) {
+      throw ArgumentError(
+        'learningProgressCursor exige pullLearningProgress=true.',
       );
     }
 
@@ -70,6 +107,13 @@ class SecureSyncService {
       'expiresAt': issuedAt.add(const Duration(minutes: 2)).toIso8601String(),
       'sequence': await _deviceKeyService.nextSyncSequence(),
       'items': items,
+      if (pullLearningProgress)
+        'pull': <String, dynamic>{
+          'learningProgress': <String, dynamic>{
+            'cursor': ?normalizedLearningProgressCursor,
+            'limit': learningProgressLimit,
+          },
+        },
     };
     final batchPayload = utf8Bytes(jsonEncode(batch));
     if (batchPayload.length > 256 * 1024) {
