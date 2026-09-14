@@ -42,12 +42,10 @@ final class LearningMapView extends StatelessWidget {
             journeyIndex < model.journeys.length;
             journeyIndex++
           )
-            SliverToBoxAdapter(
-              child: _JourneySection(
-                journey: model.journeys[journeyIndex],
-                journeyIndex: journeyIndex,
-                onActivityTap: onActivityTap,
-              ),
+            _JourneySliver(
+              journey: model.journeys[journeyIndex],
+              journeyIndex: journeyIndex,
+              onActivityTap: onActivityTap,
             ),
           const SliverToBoxAdapter(child: SizedBox(height: 28)),
         ],
@@ -56,8 +54,8 @@ final class LearningMapView extends StatelessWidget {
   }
 }
 
-final class _JourneySection extends StatelessWidget {
-  const _JourneySection({
+final class _JourneySliver extends StatelessWidget {
+  const _JourneySliver({
     required this.journey,
     required this.journeyIndex,
     required this.onActivityTap,
@@ -69,28 +67,30 @@ final class _JourneySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SliverPadding(
       key: Key('learning-map-journey-${journey.id}'),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _JourneyHeader(index: journeyIndex, title: journey.title),
-          const SizedBox(height: 12),
-          for (
-            var stageIndex = 0;
-            stageIndex < journey.stages.length;
-            stageIndex++
-          ) ...<Widget>[
-            _StageSection(
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate((context, itemIndex) {
+          if (itemIndex == 0) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _JourneyHeader(index: journeyIndex, title: journey.title),
+            );
+          }
+
+          final stageIndex = itemIndex - 1;
+          final isLastStage = stageIndex == journey.stages.length - 1;
+
+          return Padding(
+            padding: EdgeInsets.only(bottom: isLastStage ? 0 : 18),
+            child: _StageSection(
               stage: journey.stages[stageIndex],
               stageIndex: stageIndex,
               onActivityTap: onActivityTap,
             ),
-            if (stageIndex != journey.stages.length - 1)
-              const SizedBox(height: 18),
-          ],
-        ],
+          );
+        }, childCount: journey.stages.length + 1),
       ),
     );
   }
