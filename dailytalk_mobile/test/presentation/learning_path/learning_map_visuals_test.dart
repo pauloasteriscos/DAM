@@ -56,6 +56,7 @@ void main() {
     expect(find.text('Jornada de Acolhimento \u2022 Chegada'), findsOneWidget);
     expect(find.text('1 de 4 miss\u00f5es conclu\u00eddas'), findsOneWidget);
     expect(find.text('Pr\u00f3xima miss\u00e3o'), findsOneWidget);
+    expect(find.text('Tudo guardado'), findsOneWidget);
     expect(
       find.text('Cumprimentar a fam\u00edlia anfitri\u00e3'),
       findsOneWidget,
@@ -84,7 +85,7 @@ void main() {
   }
 
   testWidgets(
-    'pedagogical completion and pending sync remain visually independent',
+    'pedagogical state remains on the mission while sync stays global',
     (tester) async {
       final element = _activity(
         id: 'completed-pending',
@@ -95,15 +96,15 @@ void main() {
       await _pumpNode(tester, element);
 
       expect(find.text('Conclu\u00edda'), findsOneWidget);
-      expect(find.text('Por sincronizar'), findsOneWidget);
       expect(
         find.byKey(const Key('learning-map-state-completed-pending')),
         findsOneWidget,
       );
       expect(
         find.byKey(const Key('learning-map-sync-completed-pending')),
-        findsOneWidget,
+        findsNothing,
       );
+      expect(find.text('Por sincronizar'), findsNothing);
     },
   );
 

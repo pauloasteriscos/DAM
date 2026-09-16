@@ -387,6 +387,7 @@ final class LearningMapWindowViewport extends StatefulWidget {
     this.onActivityTap,
     this.activityOpenAction,
     this.scrollController,
+    this.footer,
     this.autoLoad = true,
     this.showSegmentControls = true,
     super.key,
@@ -403,6 +404,10 @@ final class LearningMapWindowViewport extends StatefulWidget {
   ///
   /// Quando nulo, o viewport cria e gere o seu próprio controller de scroll.
   final ScrollController? scrollController;
+
+  /// Conteúdo opcional anexado depois do mapa e da navegação de segmentos,
+  /// dentro da mesma superfície de scroll.
+  final Widget? footer;
 
   final bool autoLoad;
   final bool showSegmentControls;
@@ -626,6 +631,41 @@ final class _LearningMapWindowViewportState
           );
         }
 
+        final showSegmentControls =
+            widget.showSegmentControls &&
+            (composition.window.hasPrevious || composition.window.hasNext);
+
+        final Widget? scrollFooter =
+            showSegmentControls || widget.footer != null
+            ? Column(
+                key: const Key('learning-map-window-scroll-footer'),
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  if (showSegmentControls)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
+                      child: LearningMapWindowSegmentControls(
+                        startStageIndex: composition.window.startStageIndex,
+                        loadedStageCount: composition.window.loadedStageCount,
+                        totalStageCount: composition.window.totalStageCount,
+                        canPrevious: widget.controller.canLoadPrevious,
+                        canNext: widget.controller.canLoadNext,
+                        isBusy:
+                            widget.controller.isLoading ||
+                            widget.controller.isActivityFlowRunning,
+                        hasError: widget.controller.hasError,
+                        onPrevious: _handlePreviousSegment,
+                        onNext: _handleNextSegment,
+                        onRetry: _retryWindowAction == null
+                            ? null
+                            : _handleRetrySegment,
+                      ),
+                    ),
+                  if (widget.footer != null) widget.footer!,
+                ],
+              )
+            : null;
+
         return Stack(
           fit: StackFit.expand,
           children: <Widget>[
@@ -634,27 +674,8 @@ final class _LearningMapWindowViewportState
               model: composition.model,
               onActivityTap: _handleActivityTap,
               scrollController: _scrollController,
+              footer: scrollFooter,
             ),
-            if (widget.showSegmentControls)
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: LearningMapWindowSegmentControls(
-                  startStageIndex: composition.window.startStageIndex,
-                  loadedStageCount: composition.window.loadedStageCount,
-                  totalStageCount: composition.window.totalStageCount,
-                  canPrevious: widget.controller.canLoadPrevious,
-                  canNext: widget.controller.canLoadNext,
-                  isBusy:
-                      widget.controller.isLoading ||
-                      widget.controller.isActivityFlowRunning,
-                  hasError: widget.controller.hasError,
-                  onPrevious: _handlePreviousSegment,
-                  onNext: _handleNextSegment,
-                  onRetry: _retryWindowAction == null
-                      ? null
-                      : _handleRetrySegment,
-                ),
-              ),
             if (widget.controller.isLoading)
               const Align(
                 alignment: Alignment.topCenter,

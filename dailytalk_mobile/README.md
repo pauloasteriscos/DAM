@@ -1115,9 +1115,27 @@ Entregas contempladas:
 
 ---
 
+## Atualização pós-Sprint 4 — Fase 4.6: Learning Path
+
+A Fase 4.6 marcou a evolução do Learning Path de uma representação funcional da progressão para uma parte central da experiência de aprendizagem do DailyTalk.pt.
+
+> **O percurso deve dar a sensação de avançar numa aventura, não de navegar num fluxograma.**
+
+A interface passou a esconder do aluno a complexidade técnica existente por baixo — dependências, regras de progressão, persistência e sincronização — apresentando de forma clara objetivos, progresso, escolhas, bloqueios compreensíveis e a próxima ação.
+
+A evolução foi orientada por princípios de design de interação centrado no utilizador discutidos por Sharp, Preece e Rogers. Para além da eficácia, eficiência e facilidade de aprendizagem, procurou-se construir uma experiência envolvente, motivadora, agradável e recompensadora, adequada a utilizadores dos 11 aos 15 anos e sem recorrer a uma linguagem excessivamente técnica ou infantilizada.
+
+Na implementação, estes princípios traduziram-se num Learning Path responsivo e orientado por dados, com hierarquia visual mais clara, ação principal evidente, estados pedagógicos legíveis, pré-requisitos apresentados em linguagem simples, identidade visual por tipo de atividade e maior destaque para checkpoints e desafios.
+
+O processo foi iterativo: as decisões visuais foram implementadas, testadas, avaliadas em diferentes dimensões de ecrã e refinadas sem alterar as regras pedagógicas, o funcionamento offline-first, a sincronização, o windowing ou os requisitos de desempenho.
+
+Referência de design de interação: Helen Sharp, Jennifer Preece e Yvonne Rogers, *Interaction Design: Beyond Human-Computer Interaction*, 5.ª edição.
+
+* * *
+
 ## Observações
 
-Esta versão continua a ser um protótipo funcional, mas já ultrapassa o fluxo local/mockado da Sprint 2.
+Esta versão nasceu como protótipo funcional, mas a evolução pós-Sprint 4 passou a ser orientada para uma base de produção, mantendo a implementação incremental e os gates de qualidade.
 
 A aplicação passou a ter backend real, autenticação, persistência remota e sincronização entre plataformas. Ainda assim, algumas funcionalidades continuam em modo de protótipo, principalmente a recuperação de palavra-passe, que nesta fase utiliza código devolvido pela app em modo debug por limitação do plano de envio de email transacional.
 

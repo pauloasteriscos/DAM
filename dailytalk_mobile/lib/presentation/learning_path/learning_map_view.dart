@@ -7,6 +7,8 @@ import 'learning_map_visuals.dart';
 typedef LearningMapActivityTap =
     void Function(LearningMapElementViewModel element);
 
+const double _learningMapContentMaxWidth = 920;
+
 /// Scrollable composition of the DailyTalk Learning Path.
 ///
 /// This widget consumes only [LearningMapViewModel]. It does not read
@@ -16,6 +18,7 @@ final class LearningMapView extends StatelessWidget {
     required this.model,
     this.onActivityTap,
     this.scrollController,
+    this.footer,
     super.key,
   });
 
@@ -23,8 +26,14 @@ final class LearningMapView extends StatelessWidget {
   final LearningMapActivityTap? onActivityTap;
   final ScrollController? scrollController;
 
+  /// Conteúdo opcional renderizado depois da última jornada, dentro deste
+  /// mesmo [CustomScrollView].
+  final Widget? footer;
+
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 390;
+
     return ColoredBox(
       color: LearningMapVisualTokens.background,
       child: CustomScrollView(
@@ -32,9 +41,22 @@ final class LearningMapView extends StatelessWidget {
         controller: scrollController,
         slivers: <Widget>[
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+            padding: EdgeInsets.fromLTRB(
+              compact ? 10 : 14,
+              compact ? 10 : 14,
+              compact ? 10 : 14,
+              8,
+            ),
             sliver: SliverToBoxAdapter(
-              child: LearningMapContextHeader(model: model),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: _learningMapContentMaxWidth,
+                  ),
+                  child: LearningMapContextHeader(model: model),
+                ),
+              ),
             ),
           ),
           for (
@@ -46,6 +68,18 @@ final class LearningMapView extends StatelessWidget {
               journey: model.journeys[journeyIndex],
               journeyIndex: journeyIndex,
               onActivityTap: onActivityTap,
+            ),
+          if (footer != null)
+            SliverToBoxAdapter(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: _learningMapContentMaxWidth,
+                  ),
+                  child: footer!,
+                ),
+              ),
             ),
           const SliverToBoxAdapter(child: SizedBox(height: 28)),
         ],
@@ -67,27 +101,48 @@ final class _JourneySliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 390;
+
     return SliverPadding(
       key: Key('learning-map-journey-${journey.id}'),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 10 : 14,
+        compact ? 10 : 12,
+        compact ? 10 : 14,
+        4,
+      ),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate((context, itemIndex) {
+          Widget child;
+
           if (itemIndex == 0) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+            child = Padding(
+              padding: EdgeInsets.only(bottom: compact ? 8 : 10),
               child: _JourneyHeader(index: journeyIndex, title: journey.title),
+            );
+          } else {
+            final stageIndex = itemIndex - 1;
+            final isLastStage = stageIndex == journey.stages.length - 1;
+
+            child = Padding(
+              padding: EdgeInsets.only(
+                bottom: isLastStage ? 0 : (compact ? 12 : 14),
+              ),
+              child: _StageSection(
+                stage: journey.stages[stageIndex],
+                stageIndex: stageIndex,
+                onActivityTap: onActivityTap,
+              ),
             );
           }
 
-          final stageIndex = itemIndex - 1;
-          final isLastStage = stageIndex == journey.stages.length - 1;
-
-          return Padding(
-            padding: EdgeInsets.only(bottom: isLastStage ? 0 : 18),
-            child: _StageSection(
-              stage: journey.stages[stageIndex],
-              stageIndex: stageIndex,
-              onActivityTap: onActivityTap,
+          return Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: _learningMapContentMaxWidth,
+              ),
+              child: child,
             ),
           );
         }, childCount: journey.stages.length + 1),
@@ -104,54 +159,84 @@ final class _JourneyHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: LearningMapVisualTokens.cyan.withValues(alpha: 0.12),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: LearningMapVisualTokens.cyan.withValues(alpha: 0.3),
+    final compact = MediaQuery.sizeOf(context).width < 390;
+
+    return Container(
+      key: Key('learning-map-journey-header-$index'),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 10 : 12,
+        vertical: compact ? 8 : 10,
+      ),
+      decoration: BoxDecoration(
+        color: LearningMapVisualTokens.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: LearningMapVisualTokens.outline),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: LearningMapVisualTokens.shadow,
+            blurRadius: 14,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: compact ? 36 : 40,
+            height: compact ? 36 : 40,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  LearningMapVisualTokens.cyan,
+                  LearningMapVisualTokens.blue,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(compact ? 12 : 13),
+            ),
+            child: Icon(
+              Icons.home_rounded,
+              color: Colors.white,
+              size: compact ? 20 : 22,
             ),
           ),
-          child: const Icon(
-            Icons.flight_takeoff_rounded,
-            color: LearningMapVisualTokens.cyan,
+          SizedBox(width: compact ? 10 : 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'JORNADA ${index + 1}',
+                  style: const TextStyle(
+                    color: LearningMapVisualTokens.blue,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: LearningMapVisualTokens.textPrimary,
+                    fontSize: 16,
+                    height: 1.15,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.route_rounded,
+            color: LearningMapVisualTokens.blue,
             size: 22,
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'JORNADA ${index + 1}',
-                style: const TextStyle(
-                  color: LearningMapVisualTokens.cyan,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.1,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: LearningMapVisualTokens.textPrimary,
-                  fontSize: 20,
-                  height: 1.15,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -169,31 +254,46 @@ final class _StageSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 390;
+
     return Container(
       key: Key('learning-map-stage-${stage.id}'),
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 18),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 10 : 12,
+        compact ? 10 : 12,
+        compact ? 10 : 12,
+        compact ? 12 : 14,
+      ),
       decoration: BoxDecoration(
-        color: LearningMapVisualTokens.surface.withValues(alpha: 0.62),
+        color: LearningMapVisualTokens.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: LearningMapVisualTokens.cyan.withValues(alpha: 0.12),
-        ),
+        border: Border.all(color: LearningMapVisualTokens.outline),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: LearningMapVisualTokens.shadow,
+            blurRadius: 18,
+            offset: Offset(0, 7),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           _StageHeader(stage: stage, stageIndex: stageIndex),
-          const SizedBox(height: 16),
+          SizedBox(height: compact ? 10 : 12),
           Stack(
             children: <Widget>[
               if (stage.elements.length > 1)
                 Positioned(
-                  left: 16,
+                  left: compact ? 14 : 16,
                   top: 18,
                   bottom: 18,
                   child: Container(
                     width: 2,
-                    color: LearningMapVisualTokens.cyan.withValues(alpha: 0.16),
+                    decoration: BoxDecoration(
+                      color: LearningMapVisualTokens.outline,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                   ),
                 ),
               Column(
@@ -209,14 +309,14 @@ final class _StageSection extends StatelessWidget {
                       _LearningMapPrerequisiteConnector(
                         target: stage.elements[elementIndex],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                     ],
                     _RouteElement(
                       element: stage.elements[elementIndex],
                       onActivityTap: onActivityTap,
                     ),
                     if (elementIndex != stage.elements.length - 1)
-                      const SizedBox(height: 12),
+                      SizedBox(height: compact ? 8 : 9),
                   ],
                 ],
               ),
@@ -236,11 +336,32 @@ final class _StageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 390;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Row(
           children: <Widget>[
+            Container(
+              width: compact ? 32 : 34,
+              height: compact ? 32 : 34,
+              decoration: BoxDecoration(
+                color: LearningMapVisualTokens.surfaceElevated,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Center(
+                child: Text(
+                  '${stageIndex + 1}',
+                  style: const TextStyle(
+                    color: LearningMapVisualTokens.blue,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: compact ? 8 : 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,10 +372,10 @@ final class _StageHeader extends StatelessWidget {
                       color: LearningMapVisualTokens.textSecondary,
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: 1,
+                      letterSpacing: 0.8,
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 2),
                   Text(
                     stage.title,
                     maxLines: 2,
@@ -263,44 +384,43 @@ final class _StageHeader extends StatelessWidget {
                       color: LearningMapVisualTokens.textPrimary,
                       fontSize: 17,
                       height: 1.15,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: compact ? 8 : 10),
             Container(
               key: Key('learning-map-stage-count-${stage.id}'),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 8 : 10,
+                vertical: compact ? 5 : 6,
+              ),
               decoration: BoxDecoration(
-                color: LearningMapVisualTokens.background.withValues(
-                  alpha: 0.58,
-                ),
+                color: LearningMapVisualTokens.surfaceElevated,
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
                 '${stage.completedActivityCount} / ${stage.activityCount}',
                 style: const TextStyle(
-                  color: LearningMapVisualTokens.textPrimary,
+                  color: LearningMapVisualTokens.blue,
                   fontSize: 11,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ),
           ],
         ),
         if (stage.activityCount > 0) ...<Widget>[
-          const SizedBox(height: 10),
+          SizedBox(height: compact ? 9 : 11),
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
             child: LinearProgressIndicator(
               key: Key('learning-map-stage-progress-${stage.id}'),
               value: stage.completionRatio,
               minHeight: 5,
-              backgroundColor: LearningMapVisualTokens.background.withValues(
-                alpha: 0.7,
-              ),
+              backgroundColor: LearningMapVisualTokens.surfaceElevated,
               valueColor: const AlwaysStoppedAnimation<Color>(
                 LearningMapVisualTokens.green,
               ),
@@ -319,374 +439,162 @@ final class _LearningMapPrerequisiteConnector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 390;
     final rule = target.prerequisites;
 
     if (rule == null) {
       return const SizedBox.shrink();
     }
 
+    final summary = _summarizePrerequisite(rule);
+
     return Padding(
       key: Key('learning-map-topology-${target.pathElementId}'),
-      padding: const EdgeInsets.only(left: 40, right: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _PrerequisiteRuleConnector(
-            rule: rule,
-            targetPathElementId: target.pathElementId,
-            branchPath: 'root',
-          ),
-          const SizedBox(height: 3),
-          Padding(
-            padding: const EdgeInsets.only(left: 14),
-            child: Column(
-              children: <Widget>[
-                Container(
-                  width: 2,
-                  height: 8,
-                  color: LearningMapVisualTokens.cyan.withValues(alpha: 0.26),
-                ),
-                const Icon(
-                  Icons.arrow_drop_down_rounded,
-                  color: LearningMapVisualTokens.cyan,
-                  size: 18,
-                ),
-              ],
+      padding: EdgeInsets.only(left: compact ? 34 : 40, right: 4),
+      child: Container(
+        key: Key('learning-map-prerequisite-summary-${target.pathElementId}'),
+        constraints: const BoxConstraints(minHeight: 36),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+        decoration: BoxDecoration(
+          color: summary.accent.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(color: summary.accent.withValues(alpha: 0.22)),
+        ),
+        child: Row(
+          children: <Widget>[
+            Container(
+              width: 26,
+              height: 26,
+              decoration: BoxDecoration(
+                color: summary.accent.withValues(alpha: 0.11),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(summary.icon, size: 15, color: summary.accent),
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                summary.label,
+                key: Key(
+                  'learning-map-prerequisite-label-${target.pathElementId}',
+                ),
+                style: const TextStyle(
+                  color: LearningMapVisualTokens.textSecondary,
+                  fontSize: 11,
+                  height: 1.25,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-final class _PrerequisiteRuleConnector extends StatelessWidget {
-  const _PrerequisiteRuleConnector({
-    required this.rule,
-    required this.targetPathElementId,
-    required this.branchPath,
+final class _PrerequisiteSummarySpec {
+  const _PrerequisiteSummarySpec({
+    required this.label,
+    required this.icon,
+    required this.accent,
   });
 
-  final LearningMapPrerequisiteViewModel rule;
-  final String targetPathElementId;
-  final String branchPath;
-
-  @override
-  Widget build(BuildContext context) {
-    return switch (rule.type) {
-      LearningMapPrerequisiteType.activityCompleted =>
-        _ActivityDependencyConnector(
-          rule: rule,
-          targetPathElementId: targetPathElementId,
-          branchPath: branchPath,
-        ),
-      LearningMapPrerequisiteType.competencyAchieved =>
-        _CompetencyRequirementConnector(
-          targetPathElementId: targetPathElementId,
-          branchPath: branchPath,
-        ),
-      LearningMapPrerequisiteType.group => _PrerequisiteGroupConnector(
-        rule: rule,
-        targetPathElementId: targetPathElementId,
-        branchPath: branchPath,
-      ),
-    };
-  }
+  final String label;
+  final IconData icon;
+  final Color accent;
 }
 
-final class _ActivityDependencyConnector extends StatelessWidget {
-  const _ActivityDependencyConnector({
-    required this.rule,
-    required this.targetPathElementId,
-    required this.branchPath,
-  });
+_PrerequisiteSummarySpec _summarizePrerequisite(
+  LearningMapPrerequisiteViewModel rule,
+) {
+  return switch (rule.type) {
+    LearningMapPrerequisiteType.activityCompleted => _PrerequisiteSummarySpec(
+      label: rule.sourcePathElementId == null
+          ? 'Completa uma miss\u00e3o para desbloquear'
+          : 'Completa a miss\u00e3o anterior para desbloquear',
+      icon: Icons.lock_open_rounded,
+      accent: LearningMapVisualTokens.cyan,
+    ),
+    LearningMapPrerequisiteType.competencyAchieved =>
+      const _PrerequisiteSummarySpec(
+        label: 'Ganha a compet\u00eancia necess\u00e1ria para desbloquear',
+        icon: Icons.workspace_premium_rounded,
+        accent: LearningMapVisualTokens.gold,
+      ),
+    LearningMapPrerequisiteType.group => _summarizePrerequisiteGroup(rule),
+  };
+}
 
-  final LearningMapPrerequisiteViewModel rule;
-  final String targetPathElementId;
-  final String branchPath;
+_PrerequisiteSummarySpec _summarizePrerequisiteGroup(
+  LearningMapPrerequisiteViewModel rule,
+) {
+  final operator = rule.operator;
 
-  @override
-  Widget build(BuildContext context) {
-    final sourcePathElementId = rule.sourcePathElementId;
+  if (operator == null) {
+    throw StateError('A prerequisite group requires an operator.');
+  }
 
-    if (sourcePathElementId == null) {
-      return _UnresolvedActivityRequirement(
-        targetPathElementId: targetPathElementId,
-        branchPath: branchPath,
+  final flatActivityGroup = rule.rules.every(
+    (child) => child.type == LearningMapPrerequisiteType.activityCompleted,
+  );
+
+  final flatCompetencyGroup = rule.rules.every(
+    (child) => child.type == LearningMapPrerequisiteType.competencyAchieved,
+  );
+
+  if (operator == PrerequisiteOperator.any) {
+    if (flatActivityGroup) {
+      return _PrerequisiteSummarySpec(
+        label:
+            'Completa 1 de ${rule.rules.length} miss\u00f5es para desbloquear',
+        icon: Icons.alt_route_rounded,
+        accent: LearningMapVisualTokens.cyan,
       );
     }
 
-    return Container(
-      key: Key(
-        'learning-map-edge-$sourcePathElementId-'
-        '$targetPathElementId-$branchPath',
-      ),
-      constraints: const BoxConstraints(minHeight: 34),
-      child: Row(
-        children: <Widget>[
-          SizedBox(
-            width: 30,
-            height: 30,
-            child: Stack(
-              children: <Widget>[
-                Positioned(
-                  left: 7,
-                  top: 0,
-                  bottom: 14,
-                  child: Container(
-                    width: 2,
-                    color: LearningMapVisualTokens.cyan.withValues(alpha: 0.42),
-                  ),
-                ),
-                Positioned(
-                  left: 7,
-                  right: 7,
-                  top: 14,
-                  child: Container(
-                    height: 2,
-                    color: LearningMapVisualTokens.cyan.withValues(alpha: 0.42),
-                  ),
-                ),
-                const Positioned(
-                  right: 0,
-                  top: 7,
-                  child: Icon(
-                    Icons.chevron_right_rounded,
-                    size: 16,
-                    color: LearningMapVisualTokens.cyan,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-              decoration: BoxDecoration(
-                color: LearningMapVisualTokens.cyan.withValues(alpha: 0.07),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: LearningMapVisualTokens.cyan.withValues(alpha: 0.2),
-                ),
-              ),
-              child: const Row(
-                children: <Widget>[
-                  Icon(
-                    Icons.route_outlined,
-                    size: 15,
-                    color: LearningMapVisualTokens.cyan,
-                  ),
-                  SizedBox(width: 7),
-                  Expanded(
-                    child: Text(
-                      'Miss\u00e3o necess\u00e1ria',
-                      style: TextStyle(
-                        color: LearningMapVisualTokens.textSecondary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-final class _UnresolvedActivityRequirement extends StatelessWidget {
-  const _UnresolvedActivityRequirement({
-    required this.targetPathElementId,
-    required this.branchPath,
-  });
-
-  final String targetPathElementId;
-  final String branchPath;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      key: Key(
-        'learning-map-unresolved-activity-'
-        '$targetPathElementId-$branchPath',
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        color: LearningMapVisualTokens.muted.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: LearningMapVisualTokens.muted.withValues(alpha: 0.2),
-        ),
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(
-            Icons.link_off_rounded,
-            size: 15,
-            color: LearningMapVisualTokens.muted,
-          ),
-          SizedBox(width: 7),
-          Flexible(
-            child: Text(
-              'Atividade necess\u00e1ria',
-              style: TextStyle(
-                color: LearningMapVisualTokens.textSecondary,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-final class _CompetencyRequirementConnector extends StatelessWidget {
-  const _CompetencyRequirementConnector({
-    required this.targetPathElementId,
-    required this.branchPath,
-  });
-
-  final String targetPathElementId;
-  final String branchPath;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      key: Key(
-        'learning-map-competency-'
-        '$targetPathElementId-$branchPath',
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        color: LearningMapVisualTokens.gold.withValues(alpha: 0.07),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: LearningMapVisualTokens.gold.withValues(alpha: 0.22),
-        ),
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(
-            Icons.workspace_premium_outlined,
-            size: 15,
-            color: LearningMapVisualTokens.gold,
-          ),
-          SizedBox(width: 7),
-          Flexible(
-            child: Text(
-              'Compet\u00eancia necess\u00e1ria',
-              style: TextStyle(
-                color: LearningMapVisualTokens.textSecondary,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-final class _PrerequisiteGroupConnector extends StatelessWidget {
-  const _PrerequisiteGroupConnector({
-    required this.rule,
-    required this.targetPathElementId,
-    required this.branchPath,
-  });
-
-  final LearningMapPrerequisiteViewModel rule;
-  final String targetPathElementId;
-  final String branchPath;
-
-  @override
-  Widget build(BuildContext context) {
-    final operator = rule.operator;
-
-    if (operator == null) {
-      throw StateError('A prerequisite group requires an operator.');
+    if (flatCompetencyGroup) {
+      return _PrerequisiteSummarySpec(
+        label:
+            'Ganha 1 de ${rule.rules.length} compet\u00eancias para desbloquear',
+        icon: Icons.workspace_premium_rounded,
+        accent: LearningMapVisualTokens.gold,
+      );
     }
 
-    final isAny = operator == PrerequisiteOperator.any;
-
-    final accent = isAny
-        ? LearningMapVisualTokens.cyan
-        : LearningMapVisualTokens.gold;
-
-    final label = isAny ? 'QUALQUER UMA' : 'TODAS';
-
-    final icon = isAny ? Icons.call_split_rounded : Icons.call_merge_rounded;
-
-    return Container(
-      key: Key(
-        'learning-map-group-${operator.name}-'
-        '$targetPathElementId-$branchPath',
-      ),
-      padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: accent.withValues(alpha: 0.22)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Icon(icon, size: 16, color: accent),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  color: accent,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.7,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.only(left: 9),
-            decoration: BoxDecoration(
-              border: Border(
-                left: BorderSide(
-                  color: accent.withValues(alpha: 0.25),
-                  width: 2,
-                ),
-              ),
-            ),
-            child: Column(
-              children: <Widget>[
-                for (
-                  var index = 0;
-                  index < rule.rules.length;
-                  index++
-                ) ...<Widget>[
-                  _PrerequisiteRuleConnector(
-                    rule: rule.rules[index],
-                    targetPathElementId: targetPathElementId,
-                    branchPath: '$branchPath-$index',
-                  ),
-                  if (index != rule.rules.length - 1) const SizedBox(height: 7),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
+    return _PrerequisiteSummarySpec(
+      label:
+          'Cumpre 1 de ${rule.rules.length} condi\u00e7\u00f5es para desbloquear',
+      icon: Icons.alt_route_rounded,
+      accent: LearningMapVisualTokens.cyan,
     );
   }
+
+  if (flatActivityGroup) {
+    return _PrerequisiteSummarySpec(
+      label: rule.rules.length == 1
+          ? 'Completa a miss\u00e3o anterior para desbloquear'
+          : 'Completa as ${rule.rules.length} miss\u00f5es para desbloquear',
+      icon: Icons.lock_open_rounded,
+      accent: LearningMapVisualTokens.gold,
+    );
+  }
+
+  if (flatCompetencyGroup) {
+    return _PrerequisiteSummarySpec(
+      label: rule.rules.length == 1
+          ? 'Ganha a compet\u00eancia necess\u00e1ria para desbloquear'
+          : 'Ganha as ${rule.rules.length} compet\u00eancias para desbloquear',
+      icon: Icons.workspace_premium_rounded,
+      accent: LearningMapVisualTokens.gold,
+    );
+  }
+
+  return const _PrerequisiteSummarySpec(
+    label: 'Completa todas as condi\u00e7\u00f5es para desbloquear',
+    icon: Icons.lock_open_rounded,
+    accent: LearningMapVisualTokens.gold,
+  );
 }
 
 final class _RouteElement extends StatelessWidget {
@@ -697,6 +605,7 @@ final class _RouteElement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 390;
     final child = element.isActivity
         ? LearningMapActivityNode(
             element: element,
@@ -709,30 +618,104 @@ final class _RouteElement extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.only(top: 13),
-          child: Container(
-            width: 34,
-            alignment: Alignment.topCenter,
-            child: Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                color: element.isPrimaryRecommendation
-                    ? LearningMapVisualTokens.cyan
-                    : LearningMapVisualTokens.surfaceElevated,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: LearningMapVisualTokens.cyan.withValues(alpha: 0.45),
-                ),
-              ),
+          padding: const EdgeInsets.only(top: 10),
+          child: SizedBox(
+            width: compact ? 30 : 34,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: _RouteMarker(element: element),
             ),
           ),
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: compact ? 3 : 4),
         Expanded(child: child),
       ],
     );
   }
+}
+
+final class _RouteMarker extends StatelessWidget {
+  const _RouteMarker({required this.element});
+
+  final LearningMapElementViewModel element;
+
+  @override
+  Widget build(BuildContext context) {
+    final marker = _routeMarkerSpec(element);
+
+    return AnimatedContainer(
+      key: Key('learning-map-route-marker-${element.pathElementId}'),
+      duration: const Duration(milliseconds: 180),
+      width: element.isPrimaryRecommendation ? 25 : 21,
+      height: element.isPrimaryRecommendation ? 25 : 21,
+      decoration: BoxDecoration(
+        color: marker.fill,
+        shape: BoxShape.circle,
+        border: Border.all(color: marker.accent, width: 2),
+        boxShadow: element.isPrimaryRecommendation
+            ? <BoxShadow>[
+                BoxShadow(
+                  color: LearningMapVisualTokens.blue.withValues(alpha: 0.22),
+                  blurRadius: 10,
+                ),
+              ]
+            : const <BoxShadow>[],
+      ),
+      child: Icon(marker.icon, size: 13, color: marker.iconColor),
+    );
+  }
+}
+
+final class _RouteMarkerSpec {
+  const _RouteMarkerSpec({
+    required this.icon,
+    required this.accent,
+    required this.fill,
+    required this.iconColor,
+  });
+
+  final IconData icon;
+  final Color accent;
+  final Color fill;
+  final Color iconColor;
+}
+
+_RouteMarkerSpec _routeMarkerSpec(LearningMapElementViewModel element) {
+  if (element.isPrimaryRecommendation) {
+    return const _RouteMarkerSpec(
+      icon: Icons.play_arrow_rounded,
+      accent: LearningMapVisualTokens.blue,
+      fill: LearningMapVisualTokens.blue,
+      iconColor: Colors.white,
+    );
+  }
+
+  return switch (element.state) {
+    LearningActivityState.completed => const _RouteMarkerSpec(
+      icon: Icons.check_rounded,
+      accent: LearningMapVisualTokens.green,
+      fill: LearningMapVisualTokens.green,
+      iconColor: Colors.white,
+    ),
+    LearningActivityState.inProgress => const _RouteMarkerSpec(
+      icon: Icons.directions_walk_rounded,
+      accent: LearningMapVisualTokens.gold,
+      fill: Color(0xFFFFF5D9),
+      iconColor: LearningMapVisualTokens.gold,
+    ),
+    LearningActivityState.available => const _RouteMarkerSpec(
+      icon: Icons.circle_rounded,
+      accent: LearningMapVisualTokens.blue,
+      fill: Colors.white,
+      iconColor: LearningMapVisualTokens.blue,
+    ),
+    LearningActivityState.locked => const _RouteMarkerSpec(
+      icon: Icons.lock_rounded,
+      accent: LearningMapVisualTokens.muted,
+      fill: Colors.white,
+      iconColor: LearningMapVisualTokens.muted,
+    ),
+  };
 }
 
 /// Final visual grammar for non-activity path elements.
@@ -746,17 +729,31 @@ final class _SpecialPathElement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 390;
     final visual = _specialVisual(element.elementType);
     final state = _structuralStateVisual(element.state);
 
     return Container(
       key: Key('learning-map-structural-${element.pathElementId}'),
-      constraints: const BoxConstraints(minHeight: 70),
-      padding: const EdgeInsets.all(12),
+      constraints: BoxConstraints(minHeight: compact ? 60 : 64),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 10 : 12,
+        vertical: compact ? 9 : 10,
+      ),
       decoration: BoxDecoration(
-        color: visual.accent.withValues(alpha: 0.08),
+        color: Color.alphaBlend(
+          visual.accent.withValues(alpha: 0.055),
+          LearningMapVisualTokens.surface,
+        ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: visual.accent.withValues(alpha: 0.32)),
+        border: Border.all(color: visual.accent.withValues(alpha: 0.26)),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: LearningMapVisualTokens.shadow,
+            blurRadius: 12,
+            offset: Offset(0, 5),
+          ),
+        ],
       ),
       child: Row(
         children: <Widget>[
@@ -764,13 +761,13 @@ final class _SpecialPathElement extends StatelessWidget {
             key: Key(
               'learning-map-special-${element.elementType.name}-${element.pathElementId}',
             ),
-            width: 44,
-            height: 44,
+            width: compact ? 38 : 40,
+            height: compact ? 38 : 40,
             decoration: BoxDecoration(
-              color: visual.accent.withValues(alpha: 0.14),
-              shape: BoxShape.circle,
+              color: visual.accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(visual.icon, color: visual.accent, size: 24),
+            child: Icon(visual.icon, color: visual.accent, size: 22),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -779,16 +776,16 @@ final class _SpecialPathElement extends StatelessWidget {
               children: <Widget>[
                 Text(
                   visual.label,
-                  style: TextStyle(
-                    color: visual.accent,
+                  style: const TextStyle(
+                    color: LearningMapVisualTokens.textPrimary,
                     fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(height: 3),
-                const Text(
-                  'Elemento da jornada',
-                  style: TextStyle(
+                Text(
+                  _structuralSubtitle(element.elementType),
+                  style: const TextStyle(
                     color: LearningMapVisualTokens.textSecondary,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -815,7 +812,7 @@ final class _SpecialPathElement extends StatelessWidget {
                   style: TextStyle(
                     color: state.color,
                     fontSize: 10,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ],
@@ -825,6 +822,17 @@ final class _SpecialPathElement extends StatelessWidget {
       ),
     );
   }
+}
+
+String _structuralSubtitle(PathElementType type) {
+  return switch (type) {
+    PathElementType.checkpoint => 'Rev\u00ea e consolida o que aprendeste',
+    PathElementType.scene => 'Pratica num contexto da jornada',
+    PathElementType.reward => 'Celebra o progresso alcan\u00e7ado',
+    PathElementType.activity => throw StateError(
+      'Activities must use LearningMapActivityNode.',
+    ),
+  };
 }
 
 final class _SpecialVisualSpec {
@@ -856,7 +864,7 @@ _SpecialVisualSpec _specialVisual(PathElementType type) {
     PathElementType.checkpoint => const _SpecialVisualSpec(
       label: 'Checkpoint',
       icon: Icons.flag_outlined,
-      accent: LearningMapVisualTokens.gold,
+      accent: LearningMapVisualTokens.blue,
     ),
     PathElementType.scene => const _SpecialVisualSpec(
       label: 'Cena',
@@ -866,7 +874,7 @@ _SpecialVisualSpec _specialVisual(PathElementType type) {
     PathElementType.reward => const _SpecialVisualSpec(
       label: 'Recompensa',
       icon: Icons.emoji_events_outlined,
-      accent: LearningMapVisualTokens.green,
+      accent: LearningMapVisualTokens.gold,
     ),
     PathElementType.activity => throw StateError(
       'Activities must use LearningMapActivityNode.',

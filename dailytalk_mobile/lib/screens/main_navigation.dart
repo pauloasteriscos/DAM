@@ -2,13 +2,17 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../config/feature_flags.dart';
+
 import '../l10n/app_localizations.dart';
 
+import '../state/app_locale_controller.dart';
 import '../state/app_session_controller.dart';
 import 'analytics_content.dart';
 import 'vocabulary_pairs_page.dart';
 import 'quiz_page.dart';
 import 'dialogue_page.dart';
+import '../presentation/learning_path/learning_map_home_host.dart';
 import 'home_gamificada.dart';
 import 'placeholder_page.dart';
 import 'practice_content.dart';
@@ -55,11 +59,40 @@ class _MainNavigationState extends State<MainNavigation> {
       AppSessionScope.read(context).markAuthenticated();
     }
 
+    final accountId = session.currentUser?.id.trim();
+
+    final useDynamicLearningMap = shouldUseLearningMapHome(
+      featureEnabled: FeatureFlags.isEnabled(FeatureFlag.dynamicLearningMap),
+      isAuthenticated: session.isAuthenticated,
+      accountId: accountId,
+    );
+
+    final Widget Function(Widget footer)? dynamicMapBuilder =
+        useDynamicLearningMap
+        ? (footer) => LearningMapHomeHost(
+            accountId: accountId!,
+            locale: AppLocaleController.instance.languageCode,
+            footer: footer,
+            fallback: const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'Nao foi possivel carregar o percurso.',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          )
+        : null;
+
+    final Widget home = HomeGamificada(
+      isTestMode: session.isTestMode,
+      onAuthenticated: handleAuthenticated,
+      mapContentBuilder: dynamicMapBuilder,
+    );
+
     return [
-      HomeGamificada(
-        isTestMode: session.isTestMode,
-        onAuthenticated: handleAuthenticated,
-      ),
+      home,
       const PlaceholderPage(
         title: 'Praticar',
         message:

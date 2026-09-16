@@ -21,7 +21,9 @@ class HomeGamificada extends StatelessWidget {
     super.key,
     this.isTestMode = false,
     this.onAuthenticated,
-  });
+    this.mapContent,
+    this.mapContentBuilder,
+  }) : assert(mapContent == null || mapContentBuilder == null);
 
   /// Indica se a Home foi aberta a partir do botão "Testar agora".
   ///
@@ -31,6 +33,20 @@ class HomeGamificada extends StatelessWidget {
 
   /// Callback usado quando o utilizador decide entrar a partir do modo teste.
   final VoidCallback? onAuthenticated;
+
+  /// Conteudo visual que substitui apenas o mapa legado.
+  ///
+  /// Quando nulo, a Home continua exatamente no comportamento anterior.
+  /// Quando preenchido, header, modo teste e atalhos continuam pertencendo
+  /// a Home, enquanto apenas a area central e entregue ao novo Learning Map.
+  final Widget? mapContent;
+
+  /// Builder usado pela Home real para inserir conteúdo que deve pertencer
+  /// ao mesmo scroll do Learning Map, como Atalhos / Feedback.
+  ///
+  /// [mapContent] é mantido por compatibilidade com o comportamento anterior.
+  /// Apenas um dos dois deve ser informado.
+  final Widget Function(Widget footer)? mapContentBuilder;
 
   /// Lista temporária de atividades.
   ///
@@ -73,6 +89,35 @@ class HomeGamificada extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lessons = _buildLessons();
+
+    final dynamicContentBuilder = mapContentBuilder;
+    final dynamicContent = dynamicContentBuilder == null
+        ? mapContent
+        : dynamicContentBuilder(_buildLearningMapShortcutsPanel(context));
+
+    if (dynamicContent != null) {
+      return SafeArea(
+        child: Container(
+          color: const Color(0xFF0D1B22),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compactShell = constraints.maxHeight < 700;
+
+              return Column(
+                children: [
+                  _buildHeader(compact: compactShell),
+                  if (isTestMode)
+                    _buildTestModeBanner(context, compact: compactShell),
+                  Expanded(child: dynamicContent),
+                  if (!compactShell && dynamicContentBuilder == null)
+                    _buildShortcutsPanel(context),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    }
 
     return SafeArea(
       child: Container(
@@ -589,6 +634,101 @@ class HomeGamificada extends StatelessWidget {
     );
   }
 
+  Widget _buildLearningMapShortcutsPanel(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: const Color(0xFFD7E5F0)),
+          boxShadow: const <BoxShadow>[
+            BoxShadow(
+              color: Color(0x14123A5A),
+              blurRadius: 18,
+              offset: Offset(0, 7),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            const AppText(
+              'ATALHOS / FEEDBACK',
+              style: TextStyle(
+                color: Color(0xFF147CF3),
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.7,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _ShortcutButton(
+                    icon: Icons.emoji_events,
+                    title: 'Conquistas',
+                    subtitle: 'Badges e pontos',
+                    light: true,
+                    onTap: () => _showShortcutMessage(
+                      context,
+                      'Conquistas ser\u00e3o detalhadas na \u00e1rea de Resultados.',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _ShortcutButton(
+                    icon: Icons.bar_chart,
+                    title: 'Progresso',
+                    subtitle: 'Evolu\u00e7\u00e3o',
+                    light: true,
+                    onTap: () => _showShortcutMessage(
+                      context,
+                      'O progresso ser\u00e1 apresentado com m\u00e9tricas de aprendizagem.',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _ShortcutButton(
+                    icon: Icons.feedback_outlined,
+                    title: 'Feedback',
+                    subtitle: 'Opini\u00e3o',
+                    light: true,
+                    onTap: () => _showShortcutMessage(
+                      context,
+                      'O feedback ajudar\u00e1 a melhorar as atividades.',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _ShortcutButton(
+                    icon: Icons.help_outline,
+                    title: 'Ajuda r\u00e1pida',
+                    subtitle: 'Dicas',
+                    light: true,
+                    onTap: () => _showShortcutMessage(
+                      context,
+                      'A ajuda r\u00e1pida explicar\u00e1 como usar a aplica\u00e7\u00e3o.',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showShortcutMessage(BuildContext context, String message) {
     ScaffoldMessenger.of(
       context,
@@ -603,17 +743,29 @@ class _ShortcutButton extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.light = false,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final bool light;
 
   @override
   Widget build(BuildContext context) {
+    final background = light
+        ? const Color(0xFFF8FBFE)
+        : const Color(0xFF0D1B22);
+    final border = light
+        ? const Color(0xFFD7E5F0)
+        : Colors.lightBlue.withValues(alpha: 0.35);
+    final iconColor = light ? const Color(0xFF147CF3) : Colors.lightBlueAccent;
+    final titleColor = light ? const Color(0xFF102D50) : Colors.white;
+    final subtitleColor = light ? const Color(0xFF627992) : Colors.white60;
+
     return Material(
-      color: const Color(0xFF0D1B22),
+      color: background,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -624,13 +776,11 @@ class _ShortcutButton extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: Colors.lightBlue.withValues(alpha: 0.35),
-              ),
+              border: Border.all(color: border),
             ),
             child: Row(
               children: [
-                Icon(icon, color: Colors.lightBlueAccent, size: 28),
+                Icon(icon, color: iconColor, size: 28),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -641,8 +791,8 @@ class _ShortcutButton extends StatelessWidget {
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: titleColor,
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                         ),
@@ -652,8 +802,8 @@ class _ShortcutButton extends StatelessWidget {
                         subtitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white60,
+                        style: TextStyle(
+                          color: subtitleColor,
                           fontSize: 11,
                           height: 1.2,
                         ),

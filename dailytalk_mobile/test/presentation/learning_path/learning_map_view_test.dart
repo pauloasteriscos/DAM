@@ -93,7 +93,13 @@ void main() {
       onActivityTap: (element) => tapped = element,
     );
 
-    await tester.tap(find.byKey(const Key('learning-map-node-open-mission')));
+    final missionFinder = find.byKey(
+      const Key('learning-map-node-open-mission'),
+    );
+
+    await tester.ensureVisible(missionFinder);
+    await tester.pump();
+    await tester.tap(missionFinder);
     await tester.pump();
 
     expect(tapped, same(mission));
@@ -115,7 +121,13 @@ void main() {
       onActivityTap: (_) => taps += 1,
     );
 
-    await tester.tap(find.byKey(const Key('learning-map-node-locked-mission')));
+    final missionFinder = find.byKey(
+      const Key('learning-map-node-locked-mission'),
+    );
+
+    await tester.ensureVisible(missionFinder);
+    await tester.pump();
+    await tester.tap(missionFinder);
     await tester.pump();
 
     expect(taps, 0);

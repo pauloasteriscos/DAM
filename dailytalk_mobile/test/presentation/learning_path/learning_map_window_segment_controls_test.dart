@@ -128,6 +128,8 @@ void main() {
 
     await tester.pumpAndSettle();
 
+    await _scrollToWindowControls(tester);
+
     expect(find.text('1\u20132 / 6'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('learning-map-window-next-segment')));
@@ -135,6 +137,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.composition!.window.startStageIndex, 2);
+
+    await _scrollToWindowControls(tester);
 
     expect(find.text('3\u20134 / 6'), findsOneWidget);
 
@@ -186,6 +190,8 @@ void main() {
       );
 
       await tester.pumpAndSettle();
+
+      await _scrollToWindowControls(tester);
 
       failNext = true;
 
@@ -267,6 +273,8 @@ void main() {
 
     expect(controller.isActivityFlowRunning, isTrue);
 
+    await _scrollToWindowControls(tester);
+
     final previous = tester.widget<IconButton>(
       find.byKey(const Key('learning-map-window-previous-segment')),
     );
@@ -290,6 +298,92 @@ void main() {
 
     expect(controller.isActivityFlowRunning, isFalse);
   });
+
+  testWidgets('viewport hides controls when the whole path fits one window', (
+    tester,
+  ) async {
+    final fixture = await _fixture(stageCount: 2);
+
+    final controller = fixture.controller;
+
+    addTearDown(controller.dispose);
+
+    await controller.loadInitial();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            height: 700,
+            child: LearningMapWindowViewport(
+              controller: controller,
+              autoLoad: false,
+              footer: const SizedBox(
+                key: Key('learning-map-test-footer'),
+                height: 120,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('learning-map-window-previous-segment')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('learning-map-window-next-segment')),
+      findsNothing,
+    );
+
+    await _scrollToMapBottom(tester);
+
+    expect(find.byKey(const Key('learning-map-test-footer')), findsOneWidget);
+  });
+}
+
+Future<void> _scrollToWindowControls(WidgetTester tester) async {
+  for (var attempt = 0; attempt < 12; attempt++) {
+    if (find
+        .byKey(const Key('learning-map-window-next-segment'))
+        .evaluate()
+        .isNotEmpty) {
+      return;
+    }
+
+    await tester.drag(
+      find.byKey(const Key('learning-map-scroll-view')),
+      const Offset(0, -500),
+    );
+
+    // The busy-state regression intentionally keeps an indeterminate progress
+    // animation alive. pumpAndSettle() can therefore never settle here.
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+
+  fail('Segment controls did not become visible at the end of the map scroll.');
+}
+
+Future<void> _scrollToMapBottom(WidgetTester tester) async {
+  for (var attempt = 0; attempt < 12; attempt++) {
+    if (find
+        .byKey(const Key('learning-map-test-footer'))
+        .evaluate()
+        .isNotEmpty) {
+      return;
+    }
+
+    await tester.drag(
+      find.byKey(const Key('learning-map-scroll-view')),
+      const Offset(0, -500),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  fail('Footer did not become visible at the end of the map scroll.');
 }
 
 Future<_Fixture> _fixture({

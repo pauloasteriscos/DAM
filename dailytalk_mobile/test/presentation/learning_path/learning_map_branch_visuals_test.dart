@@ -6,51 +6,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('dependencia direta preserva regra e mostra resumo compacto', (
-    tester,
-  ) async {
-    final source = _activity(
-      id: 'source',
-      state: LearningActivityState.completed,
-    );
+  testWidgets(
+    'dependencia direta vira uma instrucao simples para desbloquear',
+    (tester) async {
+      final source = _activity(
+        id: 'source',
+        state: LearningActivityState.completed,
+      );
 
-    final target = _activity(
-      id: 'target',
-      state: LearningActivityState.locked,
-      prerequisites: LearningMapPrerequisiteViewModel.activityCompleted(
-        activityId: 'activity-source',
-        sourcePathElementId: 'source',
-      ),
-    );
+      final target = _activity(
+        id: 'target',
+        state: LearningActivityState.locked,
+        prerequisites: LearningMapPrerequisiteViewModel.activityCompleted(
+          activityId: 'activity-source',
+          sourcePathElementId: 'source',
+        ),
+      );
 
-    await _pumpMap(
-      tester,
-      _singleStageModel(<LearningMapElementViewModel>[source, target]),
-    );
+      await _pumpMap(
+        tester,
+        _singleStageModel(<LearningMapElementViewModel>[source, target]),
+      );
 
-    expect(
-      find.byKey(const Key('learning-map-topology-target')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('learning-map-prerequisite-summary-target')),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Completa a miss\u00e3o anterior para desbloquear'),
-      findsOneWidget,
-    );
+      expect(
+        find.byKey(const Key('learning-map-topology-target')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('learning-map-prerequisite-summary-target')),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Completa a miss\u00e3o anterior para desbloquear'),
+        findsOneWidget,
+      );
+      expect(find.text('Miss\u00e3o necess\u00e1ria'), findsNothing);
+    },
+  );
 
-    // 4.6B.1B keeps authored topology in the ViewModel, but no longer
-    // exposes the technical edge/tree representation to the child.
-    expect(
-      find.byKey(const Key('learning-map-edge-source-target-root')),
-      findsNothing,
-    );
-    expect(find.text('Miss\u00e3o necess\u00e1ria'), findsNothing);
-  });
-
-  testWidgets('ANY e ALL permanecem no modelo sem expor a arvore tecnica', (
+  testWidgets('ANY de duas missoes vira escolha simples 1 de 2', (
     tester,
   ) async {
     final sourceA = _activity(
@@ -65,23 +59,15 @@ void main() {
       id: 'target',
       state: LearningActivityState.locked,
       prerequisites: LearningMapPrerequisiteViewModel.group(
-        operator: PrerequisiteOperator.all,
+        operator: PrerequisiteOperator.any,
         rules: <LearningMapPrerequisiteViewModel>[
-          LearningMapPrerequisiteViewModel.group(
-            operator: PrerequisiteOperator.any,
-            rules: <LearningMapPrerequisiteViewModel>[
-              LearningMapPrerequisiteViewModel.activityCompleted(
-                activityId: 'activity-source-a',
-                sourcePathElementId: 'source-a',
-              ),
-              LearningMapPrerequisiteViewModel.activityCompleted(
-                activityId: 'activity-source-b',
-                sourcePathElementId: 'source-b',
-              ),
-            ],
+          LearningMapPrerequisiteViewModel.activityCompleted(
+            activityId: 'activity-source-a',
+            sourcePathElementId: 'source-a',
           ),
-          LearningMapPrerequisiteViewModel.competencyAchieved(
-            competencyId: 'competency-pronunciation',
+          LearningMapPrerequisiteViewModel.activityCompleted(
+            activityId: 'activity-source-b',
+            sourcePathElementId: 'source-b',
           ),
         ],
       ),
@@ -97,72 +83,69 @@ void main() {
     );
 
     expect(
-      find.text('Completa todas as condi\u00e7\u00f5es para desbloquear'),
+      find.text('Completa 1 de 2 miss\u00f5es para desbloquear'),
       findsOneWidget,
     );
-    expect(find.text('TODAS'), findsNothing);
     expect(find.text('QUALQUER UMA'), findsNothing);
-    expect(find.text('Compet\u00eancia necess\u00e1ria'), findsNothing);
-
-    expect(
-      find.byKey(const Key('learning-map-group-all-target-root')),
-      findsNothing,
-    );
-    expect(
-      find.byKey(const Key('learning-map-group-any-target-root-0')),
-      findsNothing,
-    );
-    expect(
-      find.byKey(const Key('learning-map-edge-source-a-target-root-0-0')),
-      findsNothing,
-    );
-    expect(
-      find.byKey(const Key('learning-map-edge-source-b-target-root-0-1')),
-      findsNothing,
-    );
-    expect(
-      find.byKey(const Key('learning-map-competency-target-root-1')),
-      findsNothing,
-    );
   });
 
-  testWidgets('atividade sem sourcePathElementId nao inventa aresta', (
-    tester,
-  ) async {
-    final target = _activity(
-      id: 'target',
-      state: LearningActivityState.locked,
-      prerequisites: LearningMapPrerequisiteViewModel.activityCompleted(
-        activityId: 'activity-ambiguous',
-      ),
-    );
+  testWidgets(
+    'ALL aninhado vira uma mensagem unica sem expor a arvore tecnica',
+    (tester) async {
+      final sourceA = _activity(
+        id: 'source-a',
+        state: LearningActivityState.completed,
+      );
+      final sourceB = _activity(
+        id: 'source-b',
+        state: LearningActivityState.available,
+      );
+      final target = _activity(
+        id: 'target',
+        state: LearningActivityState.locked,
+        prerequisites: LearningMapPrerequisiteViewModel.group(
+          operator: PrerequisiteOperator.all,
+          rules: <LearningMapPrerequisiteViewModel>[
+            LearningMapPrerequisiteViewModel.group(
+              operator: PrerequisiteOperator.any,
+              rules: <LearningMapPrerequisiteViewModel>[
+                LearningMapPrerequisiteViewModel.activityCompleted(
+                  activityId: 'activity-source-a',
+                  sourcePathElementId: 'source-a',
+                ),
+                LearningMapPrerequisiteViewModel.activityCompleted(
+                  activityId: 'activity-source-b',
+                  sourcePathElementId: 'source-b',
+                ),
+              ],
+            ),
+            LearningMapPrerequisiteViewModel.competencyAchieved(
+              competencyId: 'competency-pronunciation',
+            ),
+          ],
+        ),
+      );
 
-    await _pumpMap(
-      tester,
-      _singleStageModel(<LearningMapElementViewModel>[target]),
-    );
+      await _pumpMap(
+        tester,
+        _singleStageModel(<LearningMapElementViewModel>[
+          sourceA,
+          sourceB,
+          target,
+        ]),
+      );
 
-    expect(
-      find.byKey(const Key('learning-map-prerequisite-summary-target')),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Completa uma miss\u00e3o para desbloquear'),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('learning-map-unresolved-activity-target-root')),
-      findsNothing,
-    );
-    expect(
-      find.byKey(const Key('learning-map-edge-activity-ambiguous-target-root')),
-      findsNothing,
-    );
-  });
+      expect(
+        find.text('Completa todas as condi\u00e7\u00f5es para desbloquear'),
+        findsOneWidget,
+      );
+      expect(find.text('TODAS'), findsNothing);
+      expect(find.text('QUALQUER UMA'), findsNothing);
+      expect(find.text('Compet\u00eancia necess\u00e1ria'), findsNothing);
+    },
+  );
 
-  testWidgets('competencia isolada permanece requisito sem aresta', (
-    tester,
-  ) async {
+  testWidgets('competencia isolada usa linguagem de objetivo', (tester) async {
     final target = _activity(
       id: 'target',
       state: LearningActivityState.locked,
@@ -180,19 +163,9 @@ void main() {
       find.text('Ganha a compet\u00eancia necess\u00e1ria para desbloquear'),
       findsOneWidget,
     );
-    expect(
-      find.byKey(const Key('learning-map-competency-target-root')),
-      findsNothing,
-    );
-    expect(
-      find.byKey(
-        const Key('learning-map-edge-competency-cultural-target-root'),
-      ),
-      findsNothing,
-    );
   });
 
-  testWidgets('elemento estrutural preserva requisito com resumo amigavel', (
+  testWidgets('elemento estrutural tambem recebe resumo amigavel', (
     tester,
   ) async {
     final source = _activity(
@@ -223,10 +196,6 @@ void main() {
     expect(
       find.text('Completa a miss\u00e3o anterior para desbloquear'),
       findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('learning-map-edge-source-checkpoint-target-root')),
-      findsNothing,
     );
   });
 }
