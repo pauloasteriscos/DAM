@@ -1,47 +1,38 @@
 name: dailytalk_mobile
-description: "A new Flutter project."
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+description: "Aplicação móvel e Web do DailyTalk.pt para aprendizagem gamificada de idiomas em contexto de mobilidade escolar."
+# Impede a publicação acidental deste projeto no pub.dev.
+# O DailyTalk.pt é uma aplicação e não um pacote destinado a publicação no pub.dev.
+publish_to: 'none'
 
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-# In Windows, build-name is used as the major, minor, and patch parts
-# of the product and file versions while build-number is used as the build suffix.
-version: 1.0.12+12
+# Versão da aplicação no formato MAJOR.MINOR.PATCH+BUILD.
+# MAJOR representa alterações incompatíveis ou mudanças estruturais relevantes.
+# MINOR representa evolução funcional compatível.
+# PATCH representa correções e melhorias compatíveis.
+# O número após "+" identifica o build e deve aumentar a cada nova release.
+# No Android, a versão é usada como versionName e o build como versionCode.
+# No iOS, correspondem a CFBundleShortVersionString e CFBundleVersion.
+# No Windows, a versão identifica major, minor e patch, e o build funciona como sufixo.
+version: 1.0.13+13
 
 environment:
   sdk: ^3.11.5
 
-# Dependencies specify other packages that your package needs in order to work.
-# To automatically upgrade your package dependencies to the latest versions
-# consider running `flutter pub upgrade --major-versions`. Alternatively,
-# dependencies can be manually updated by changing the version numbers below to
-# the latest version available on pub.dev. To see which dependencies have newer
-# versions available, run `flutter pub outdated`.
+# Dependências utilizadas em tempo de execução.
+# As atualizações são realizadas de forma deliberada e validadas antes da incorporação.
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  # Ícones de estilo Cupertino utilizados quando necessário na interface.
   cupertino_icons: ^1.0.8
 
   sqflite: ^2.4.2
   sqflite_common_ffi_web: ^1.1.1
   path: ^1.8.0
-  http: ^1.0.0
-  flutter_secure_storage: ^9.2.4
+  http: 1.6.0
+  flutter_secure_storage: 11.2.0
   cryptography: ^2.9.0
   cryptography_flutter: ^2.3.4
 
@@ -50,15 +41,11 @@ dev_dependencies:
 
   flutter_test:
     sdk: flutter
-  # SQLite nativo usado apenas na bateria de migração da Fase 0.
-  # 2.4.0+3 suporta Dart >=3.10; o projeto usa Dart 3.11.x.
-  sqflite_common_ffi: 2.4.0+3
+  # SQLite nativo utilizado nos testes e validações de migração.
+  sqflite_common_ffi: 2.4.3
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
+  # Regras de análise estática utilizadas pelo projeto.
+  # A configuração complementar encontra-se em analysis_options.yaml.
   flutter_lints: ^6.0.0
 
 flutter_launcher_icons:
@@ -86,47 +73,11 @@ flutter_launcher_icons:
     image_path: "assets/icon/app_icon.png"
 
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
-
-# The following section is specific to Flutter packages.
+# Configuração específica da aplicação Flutter.
 flutter:
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
+  # Inclui a fonte Material Icons utilizada pela interface.
   uses-material-design: true
   assets:
     - assets/branding/
     - assets/content/
-
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
-
-  # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/to/resolution-aware-images
-
-  # For details regarding adding assets from package dependencies, see
-  # https://flutter.dev/to/asset-from-package
-
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/to/font-from-package

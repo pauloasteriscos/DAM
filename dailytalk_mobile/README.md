@@ -1,13 +1,11 @@
 # DailyTalk.pt Mobile
 
-**Versão:** 1.0.0 — Sprint 4 Final  
-**Estado:** versão candidata à entrega final, em validação após a localização global
-
-Aplicação móvel desenvolvida em Flutter para o projeto **Erasmus DailyTalk.pt**, no âmbito da unidade curricular **DAM - Desenvolvimento de Aplicações Móveis**.
+**Versão atual:** 1.0.13+13
+**Estado:** desenvolvimento ativo, com arquitetura offline-first, sincronização segura, Learning Path orientado por dados e Quality Gate automatizado
 
 O objetivo da aplicação é apoiar crianças e jovens em mobilidade escolar, normalmente entre os 11 e os 15 anos, na prática de comunicação em situações reais do quotidiano escolar, através de atividades gamificadas como vocabulário, áudio, diálogos, quizzes e desafios.
 
-Esta versão contempla a evolução até à **Sprint 4**, incluindo a estrutura inicial da aplicação, navegação, Home gamificada, base de dados local SQLite, configuração de atividades, submissão de respostas, apresentação de resultados, integração com backend real, autenticação de utilizadores, sincronização entre mobile e Web, publicação em Cloudflare, aplicação progressiva de padrões de software, refinamento visual/UX dos principais fluxos, implementação de atividades gamificadas para vocabulário, quiz, diálogo e revisão, introdução do **modo teste sem conta**, reorganização do fluxo de início de sessão, localização global da interface, adaptação a orientação horizontal e aplicação de controladores globais baseados no padrão **Observer** para sessão e idioma.
+Este README preserva a evolução académica até à **Sprint 4** e documenta também a evolução posterior do DailyTalk.pt. Após essa etapa, iniciou-se uma fase de consolidação técnica destinada a transformar a base académica numa fundação adequada à evolução do produto. Esse trabalho incluiu o reforço da arquitetura offline-first, do Learning Path orientado por dados, da sincronização segura, da persistência local e remota, dos gates de qualidade e da política de atualização controlada das dependências.
 
 ---
 
@@ -65,8 +63,8 @@ A aplicação já possui:
 - manutenção deliberada da designação **Language** em inglês, independentemente do idioma selecionado;
 - controlador global de idioma baseado em Observer;
 - correção do layout da Home gamificada em orientação horizontal;
-- bateria automatizada de testes da Sprint 4, com **13 testes automatizados disponíveis**;
-- análise estática concluída sem problemas através de `flutter analyze`.
+- bateria automatizada de testes em expansão, integrada nos gates de qualidade do projeto;
+- análise estática e builds multiplataforma usados como critérios de validação antes da promoção de alterações.
 
 ---
 
@@ -173,7 +171,7 @@ A aplicação passou a incluir ecrãs próprios para algumas atividades centrais
 
 O separador **Praticar** foi ajustado para abrir aleatoriamente uma das atividades principais já implementadas: Vocabulário, Diálogo ou Quiz. Esta decisão reforça a ideia de prática rápida e variada, evitando que o botão leve sempre ao mesmo tipo de exercício.
 
-### Vocabulário — Combina pares
+### Vocabulário: Combina pares
 
 A atividade de vocabulário apresenta um exercício de associação de pares. O objetivo é ligar palavras ou expressões do DailyTalk.pt no idioma habitual do aluno às respetivas equivalências no idioma que está a aprender.
 
@@ -804,64 +802,41 @@ POST /api/activities/submissions
 GET  /api/activities/submissions/mine
 ```
 
-A app pode ser executada em modo mock ou modo real.
+A seleção de ambiente é automática e segue uma política fail-closed, sem fallback silencioso entre desenvolvimento e produção:
 
-### Modo real
+- Web em `dailytalk.pt` ou `www.dailytalk.pt`: produção, usando `https://dailytalk.pt/api`;
+- Web em `localhost` ou `127.0.0.1`: desenvolvimento, usando a API local na porta `8787`;
+- aplicações nativas em `release`: produção;
+- aplicações nativas em `debug` ou `profile`: desenvolvimento;
+- Android em desenvolvimento: `10.0.2.2:8787`, destinado ao emulador Android;
+- restantes plataformas nativas em desenvolvimento: `127.0.0.1:8787`.
 
-```bash
-flutter run -d chrome \
-  --web-port 5173 \
-  --dart-define=DAILYTALK_USE_MOCK_API=false \
-  --dart-define=DAILYTALK_API_BASE_URL=https://dailytalk.pt/api
-```
-
-### Modo mock
+O modo mock continua disponível para testes isolados através de `DAILYTALK_USE_MOCK_API=true`:
 
 ```bash
-flutter run -d chrome \
-  --dart-define=DAILYTALK_USE_MOCK_API=true
+flutter run -d chrome --web-port 5555 --dart-define=DAILYTALK_USE_MOCK_API=true
 ```
 
 ---
 
 ## Validação e testes automatizados
 
-A versão final da Sprint 4 foi validada com:
+A validação atual deixou de estar limitada aos testes da entrega académica e passou a funcionar como um gate técnico antes da promoção de alterações. O objetivo é garantir que uma mudança de dependências, persistência, segurança ou interface não é incorporada apenas porque compila num único ambiente.
+
+O gate local inclui:
 
 ```powershell
 flutter analyze
-flutter test --reporter expanded
+flutter test
+flutter build web --profile
+flutter build apk --debug
+flutter build apk --release
+flutter build windows --debug
 ```
 
-Resultado esperado antes da publicação final:
+A suite automatizada cobre progressivamente domínio, persistência SQLite, sincronização, conteúdo, Learning Path, navegação, estados de interface e cenários de convergência. As validações de dependências incluem ainda a resolução do grafo através de `flutter pub outdated` e, quando aplicável, testes de migração em dispositivo real.
 
-```text
-No issues found!
-All tests passed!
-```
-
-A bateria de testes inclui, entre outros:
-
-- apresentação do ecrã inicial com **Testar agora**, **Entrar** e **Criar conta**;
-- abertura do ecrã de autenticação;
-- feedback da Conta Google como funcionalidade futura;
-- transições do controlador de sessão entre modo teste e sessão autenticada;
-- presença e ausência do aviso de modo teste;
-- comportamento da Home gamificada em orientação horizontal;
-- mensagens e recuperação em funcionalidades que exigem conta;
-- alteração global do idioma e manutenção da designação **Language**.
-
-Para visualizar individualmente os testes executados:
-
-```powershell
-flutter test --reporter expanded
-```
-
-Para guardar a evidência num ficheiro:
-
-```powershell
-flutter test --reporter expanded | Tee-Object -FilePath testes_sprint4_resultado.txt
-```
+Na modernização da base tecnológica, a evolução do armazenamento seguro foi validada num dispositivo Android real, instalando sucessivamente novas versões da aplicação sem limpar os dados e confirmando a preservação da sessão autenticada e das preferências. A versão Web passou também a satisfazer a verificação WebAssembly do Flutter.
 
 ## Build e execução
 
@@ -913,56 +888,39 @@ Resultado esperado:
 http://localhost:5555
 ```
 
-### Executar em Chrome com API real publicada
+### Ambiente Web
+
+Em execução local (`localhost` ou `127.0.0.1`), a aplicação Web utiliza DEV. Quando publicada em `dailytalk.pt` ou `www.dailytalk.pt`, utiliza PRD automaticamente. Não existe fallback silencioso entre ambientes.
+
+### Gerar APK Android de produção
 
 ```bash
-flutter run -d chrome \
-  --web-port 5173 \
-  --dart-define=DAILYTALK_USE_MOCK_API=false \
-  --dart-define=DAILYTALK_API_BASE_URL=https://dailytalk.pt/api
+flutter build apk --release
 ```
 
-### Gerar APK Android com API real
-
-```bash
-flutter build apk --release \
-  --dart-define=DAILYTALK_USE_MOCK_API=false \
-  --dart-define=DAILYTALK_API_BASE_URL=https://dailytalk.pt/api
-```
+No Android, builds `release` utilizam PRD. Builds `debug` e `profile` utilizam DEV e, no emulador, acedem ao host através de `10.0.2.2:8787`.
 
 ### Gerar Web release
 
 ```bash
-flutter build web --release \
-  --base-href /web/ \
-  --dart-define=DAILYTALK_USE_MOCK_API=false \
-  --dart-define=DAILYTALK_API_BASE_URL=https://dailytalk.pt/api
+flutter build web --release --base-href /web/
 ```
+
+Quando o build Web é servido em `dailytalk.pt/web`, a aplicação seleciona automaticamente a API de produção.
 
 ---
 
 ## Versão e release
 
-A versão final desta entrega é identificada no `pubspec.yaml` como:
+A entrega académica da Sprint 4 foi identificada como `1.0.0+1` e preservada através da respetiva tag. A evolução posterior passou a seguir o mesmo esquema de versionamento do Flutter, separando a versão funcional do número de build.
+
+A versão atual desta linha de desenvolvimento é:
 
 ```yaml
-version: 1.0.0+1
+version: 1.0.13+13
 ```
 
-Designação da entrega:
-
-```text
-DailyTalk.pt Mobile v1.0.0+1 — Sprint 4 Final
-```
-
-Após validação, recomenda-se marcar o commit correspondente no GitHub:
-
-```powershell
-git tag -a v1.0.0 -m "Versão final do projeto DAM"
-git push origin v1.0.0
-```
-
-A tag permite reproduzir exatamente o código correspondente à entrega, independentemente de alterações futuras na branch principal.
+As tags continuam a ser utilizadas para preservar pontos estáveis e reproduzíveis da evolução do projeto. Uma nova tag só deve ser criada depois de concluídos os gates de qualidade e da promoção deliberada das alterações para o repositório.
 
 ## Tecnologias utilizadas
 
@@ -1115,13 +1073,13 @@ Entregas contempladas:
 
 ---
 
-## Atualização pós-Sprint 4 — Fase 4.6: Learning Path
+## Atualização pós-Sprint 4 (Fase 4.6): Learning Path
 
 A Fase 4.6 marcou a evolução do Learning Path de uma representação funcional da progressão para uma parte central da experiência de aprendizagem do DailyTalk.pt.
 
 > **O percurso deve dar a sensação de avançar numa aventura, não de navegar num fluxograma.**
 
-A interface passou a esconder do aluno a complexidade técnica existente por baixo — dependências, regras de progressão, persistência e sincronização — apresentando de forma clara objetivos, progresso, escolhas, bloqueios compreensíveis e a próxima ação.
+A interface passou a esconder do aluno a complexidade técnica existente por baixo (dependências, regras de progressão, persistência e sincronização), apresentando de forma clara objetivos, progresso, escolhas, bloqueios compreensíveis e a próxima ação.
 
 A evolução foi orientada por princípios de design de interação centrado no utilizador discutidos por Sharp, Preece e Rogers. Para além da eficácia, eficiência e facilidade de aprendizagem, procurou-se construir uma experiência envolvente, motivadora, agradável e recompensadora, adequada a utilizadores dos 11 aos 15 anos e sem recorrer a uma linguagem excessivamente técnica ou infantilizada.
 
@@ -1133,15 +1091,33 @@ Referência de design de interação: Helen Sharp, Jennifer Preece e Yvonne Roge
 
 * * *
 
+## Da entrega académica à preparação para produção
+
+O DailyTalk.pt nasceu inicialmente como um projeto académico, desenvolvido de forma incremental para responder aos objetivos e às entregas das diferentes unidades curriculares do mestrado. As primeiras fases tiveram, por isso, um âmbito condicionado pelos requisitos das disciplinas, pelos respetivos calendários e pela necessidade de demonstrar progressivamente conceitos de desenvolvimento móvel, interação pessoa-computador, arquitetura de software, persistência, segurança e integração com serviços Web.
+
+Com a conclusão dessas entregas e durante o período de preparação do projeto final, o objetivo mudou. O DailyTalk.pt deixou de ser tratado apenas como um protótipo académico e passou a ser preparado como um sistema orientado a produção. Antes de continuar a acrescentar funcionalidades, tornou-se necessário consolidar a base existente e reduzir dívida técnica acumulada durante as sucessivas fases de desenvolvimento. Em termos práticos, foi necessário "arrumar a casa".
+
+Uma das áreas abrangidas por essa consolidação foi a gestão das dependências da aplicação. Foi realizada uma modernização geral e controlada do ecossistema Flutter/Dart, incluindo componentes associados à persistência SQLite, integração nativa, armazenamento seguro e suporte multiplataforma. As atualizações não foram aplicadas de forma indiscriminada. Cada alteração, ou conjunto tecnicamente indivisível de alterações, foi analisado, atualizado e validado antes de ser aceite.
+
+Ao mesmo tempo, foi reforçada uma política de resolução previsível e reproduzível das dependências. As versões diretamente controladas pelo projeto são definidas deliberadamente e o ficheiro `pubspec.lock` preserva a resolução efetivamente validada. Desta forma, uma instalação futura não deve introduzir silenciosamente uma versão diferente de uma dependência apenas porque foi publicada uma atualização externa. A evolução das dependências passa a ser uma decisão consciente de engenharia, seguida de validação antes da sua incorporação.
+
+Esta modernização permitiu iniciar a fase orientada a produção sobre uma base tecnológica mais atual e coerente. A validação incluiu análise estática, testes automatizados e builds para Web, Android e Windows. A evolução do armazenamento seguro foi ainda testada num dispositivo Android real, instalando sucessivamente novas versões sobre uma sessão existente e confirmando a preservação da autenticação e das preferências do utilizador.
+
+A atualização eliminou também incompatibilidades anteriormente identificadas na verificação WebAssembly do Flutter, reforçando a preparação da aplicação para evolução futura nas diferentes plataformas suportadas.
+
+O objetivo desta política não é atualizar automaticamente todas as dependências sempre que surge uma nova versão. O objetivo é manter uma **doutrina de atualização controlada**, baseada em versões conhecidas, builds reproduzíveis, alterações intencionais, testes antes da promoção e capacidade de evolução sem comprometer a estabilidade do sistema.
+
+Para um produto ainda no início do seu ciclo de vida, esta abordagem permite continuar o desenvolvimento sobre uma base atualizada e controlada, evitando transportar desnecessariamente dívida técnica para as fases seguintes.
+
+* * *
+
 ## Observações
 
-Esta versão nasceu como protótipo funcional, mas a evolução pós-Sprint 4 passou a ser orientada para uma base de produção, mantendo a implementação incremental e os gates de qualidade.
+As secções dedicadas às Sprints 1 a 4 preservam o contexto da entrega académica e, por isso, utilizam em vários pontos a designação de protótipo. Essa designação descreve o estado dessas entregas e não o objetivo atual do DailyTalk.pt.
 
-A aplicação passou a ter backend real, autenticação, persistência remota e sincronização entre plataformas. Ainda assim, algumas funcionalidades continuam em modo de protótipo, principalmente a recuperação de palavra-passe, que nesta fase utiliza código devolvido pela app em modo debug por limitação do plano de envio de email transacional.
+A evolução pós-Sprint 4 passou a privilegiar uma base orientada a produção, mantendo implementação incremental, validação técnica, funcionamento offline-first, sincronização segura e promoção controlada de alterações.
 
-A organização em quatro sprints permitiu testar progressivamente as funcionalidades principais. A Sprint 3 foi usada para consolidar autenticação, backend, segurança, testes e infraestrutura. A Sprint 4 foi usada para melhorar a comunicação visual, reforçar a identidade do DailyTalk.pt, tornar os fluxos principais mais consistentes do ponto de vista de usabilidade, transformar parte do mapa gamificado em atividades jogáveis e introduzir um modo teste que permite experimentar a aplicação antes do registo.
-
-A próxima etapa deverá concentrar-se na validação final em Android e Web, reforço dos testes unitários, persistência mais completa do progresso das novas atividades, validação do comportamento do modo teste em todos os ecrãs, substituição de mecanismos temporários por serviços definitivos quando a infraestrutura permitir e preparação da entrega final.
+Algumas funcionalidades permanecem deliberadamente em modo provisório enquanto a infraestrutura definitiva não é adotada. O exemplo mais evidente continua a ser a recuperação de palavra-passe em debug, dependente da estratégia de envio de email transacional. Estas limitações são tratadas como trabalho explícito e não como comportamento de produção concluído.
 
 ---
 
