@@ -331,9 +331,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
   /// Ao regressar, recarrega os idiomas guardados no perfil/cache local e
   /// reinicia a ronda com o novo par linguístico.
   Future<void> _openLanguageSelection() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const LanguageSelectionPage()),
-    );
+    await openLanguageSelectionFlow(context);
 
     if (!mounted) {
       return;

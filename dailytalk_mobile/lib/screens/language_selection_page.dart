@@ -2,12 +2,80 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 
-import '../data/dao/app_settings_dao.dart';
-import '../data/database/app_database.dart';
-import '../data/repositories/auth_repository.dart';
 import '../state/app_learning_language_controller.dart';
 import '../state/app_locale_controller.dart';
 import '../state/app_session_controller.dart';
+import '../state/language_preferences_coordinator.dart';
+
+/// Abre o editor de idiomas e aplica a escolha somente depois de a rota
+/// Language ter sido fechada.
+///
+/// Esta ordem é intencional: a alteração do idioma de prática reconstrói o
+/// Learning Map e pode limpar a pilha interna da Home. Aplicar a preferência
+/// enquanto o próprio ecrã Language ainda está nessa pilha criava uma corrida
+/// de navegação.
+Future<LanguagePreferenceApplyResult?> openLanguageSelectionFlow(
+  BuildContext context,
+) async {
+  // Language é uma preferência global da aplicação, não uma rota da aba
+  // Home. Abrir no Navigator raiz evita competir com o Navigator interno da
+  // Home, que é reiniciado quando learningLanguageCode muda.
+  final selection = await Navigator.of(context, rootNavigator: true)
+      .push<LanguagePreferenceSelection>(
+        MaterialPageRoute<LanguagePreferenceSelection>(
+          builder: (_) => const LanguageSelectionPage(),
+        ),
+      );
+
+  if (selection == null || !context.mounted) {
+    return null;
+  }
+
+  final appName = _languageOptionName(selection.appLanguageCode);
+  final learningName = _languageOptionName(selection.learningLanguageCode);
+  final savedMessage = AppTranslations.translate(
+    'Guardado: {source} → {target}',
+    AppLocaleController.instance.languageCode,
+    parameters: <String, Object?>{'source': appName, 'target': learningName},
+  );
+  final localMessage = AppTranslations.translate(
+    'Idioma guardado neste dispositivo. A sincronização será tentada mais tarde.',
+    AppLocaleController.instance.languageCode,
+  );
+
+  final result = await LanguagePreferencesCoordinator.instance.apply(
+    appLanguageCode: selection.appLanguageCode,
+    learningLanguageCode: selection.learningLanguageCode,
+  );
+
+  if (!context.mounted) {
+    return result;
+  }
+
+  ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+    SnackBar(
+      content: AppText(
+        result.remoteSyncAttempted && !result.remoteSynced
+            ? localMessage
+            : savedMessage,
+      ),
+    ),
+  );
+
+  return result;
+}
+
+String _languageOptionName(String code) {
+  return switch (code) {
+    'pt-PT' => 'Português',
+    'en-US' => 'English',
+    'es-ES' => 'Español',
+    'fr-FR' => 'Français',
+    'it-IT' => 'Italiano',
+    'de-DE' => 'Deutsch',
+    _ => code,
+  };
+}
 
 /// Página de configuração dos idiomas do DailyTalk.pt.
 ///
@@ -29,7 +97,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
   String _nativeLanguageCode = 'pt-PT';
   String _targetLanguageCode = 'it-IT';
   bool _isLoading = true;
-  bool _isSaving = false;
 
   static const Color _backgroundColor = Color(0xFF061823);
   static const Color _cardColor = Color(0xFF071D2A);
@@ -77,65 +144,13 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
   @override
   void initState() {
     super.initState();
-    _loadSavedLanguages();
-  }
 
-  Future<void> _loadSavedLanguages() async {
-    final db = await AppDatabase.instance.database;
-    final settingsDao = AppSettingsDao(db);
-
-    // Primeiro lê a cache local para manter a aplicação funcional mesmo sem rede.
-    var nativeLanguageCode = await settingsDao.getNativeLanguageCode();
-    var targetLanguageCode = await settingsDao.getTargetLanguageCode();
-
-    try {
-      // Depois tenta obter o perfil remoto. Isto resolve o caso em que os
-      // idiomas foram alterados noutro dispositivo, por exemplo no Android,
-      // e a versão Web ainda tem uma cache local antiga.
-      final currentUser = AppSessionController.instance.isAuthenticated
-          ? await AuthRepository().getCurrentUser()
-          : null;
-
-      if (currentUser != null) {
-        nativeLanguageCode = _normalizeLanguageCode(
-          currentUser.preferences.appLanguageCode,
-          fallbackCode: nativeLanguageCode,
-        );
-        targetLanguageCode = _normalizeLanguageCode(
-          currentUser.preferences.learningLanguageCode,
-          fallbackCode: targetLanguageCode,
-        );
-
-        // Atualiza a cache local para que as próximas aberturas da página
-        // apresentem os mesmos idiomas que aparecem em Conta.
-        await settingsDao.setLanguagePair(
-          nativeLanguageCode: nativeLanguageCode,
-          targetLanguageCode: targetLanguageCode,
-        );
-      }
-    } catch (_) {
-      // Se a sessão ou a API não estiverem disponíveis, mantém a cache local.
-      // Isto evita bloquear o ecrã Language em modo offline ou durante testes.
-    }
-
-    if (!mounted) {
-      return;
-    }
-
-    await AppLearningLanguageController.instance.setLanguageCode(
-      targetLanguageCode,
-      persist: false,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _nativeLanguageCode = nativeLanguageCode;
-      _targetLanguageCode = targetLanguageCode;
-      _isLoading = false;
-    });
+    // O ecrã Language é apenas um editor. As preferências ativas já foram
+    // inicializadas pelos controllers no arranque/login e não devem ser
+    // reescritas enquanto esta rota está aberta.
+    _nativeLanguageCode = AppLocaleController.instance.languageCode;
+    _targetLanguageCode = AppLearningLanguageController.instance.languageCode;
+    _isLoading = false;
   }
 
   Future<void> _saveLanguages() async {
@@ -146,141 +161,15 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       return;
     }
 
-    setState(() {
-      _isSaving = true;
-    });
-
-    final session = AppSessionScope.read(context);
-    final localeController = AppLocaleScope.read(context);
-
-    try {
-      final db = await AppDatabase.instance.database;
-      final settingsDao = AppSettingsDao(db);
-
-      await settingsDao.setLanguagePair(
-        nativeLanguageCode: _nativeLanguageCode,
-        targetLanguageCode: _targetLanguageCode,
-      );
-
-      // Atualiza imediatamente toda a interface. O título "Language" é a
-      // única exceção e permanece em inglês para facilitar a recuperação.
-      await localeController.setLanguageCode(_nativeLanguageCode);
-      await AppLearningLanguageController.instance.setLanguageCode(
-        _targetLanguageCode,
-        persist: false,
-      );
-
-      if (!mounted) {
-        return;
-      }
-
-      if (!session.isAuthenticated) {
-        if (!mounted) {
-          return;
-        }
-
-        final nativeLanguage = _languageByCode(_nativeLanguageCode);
-        final targetLanguage = _languageByCode(_targetLanguageCode);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: AppText(
-              context.tr(
-                'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.',
-                parameters: <String, Object?>{
-                  'source': nativeLanguage.name,
-                  'target': targetLanguage.name,
-                },
-              ),
-            ),
-          ),
-        );
-
-        Navigator.pop(context);
-        return;
-      }
-
-      /// Tenta sincronizar as preferências com o perfil remoto apenas quando
-      /// existe sessão autenticada. Em modo teste, a preferência fica local.
-      final updatedUser = await AuthRepository().updatePreferences(
+    // Fecha primeiro a rota Language. Quem a abriu recebe a seleção e só
+    // depois chama o coordenador único. Assim a mudança de idioma nunca tenta
+    // limpar a mesma pilha de Navigator enquanto esta rota ainda está ativa.
+    Navigator.of(context).pop(
+      LanguagePreferenceSelection(
         appLanguageCode: _nativeLanguageCode,
         learningLanguageCode: _targetLanguageCode,
-      );
-
-      final savedNativeLanguageCode = _normalizeLanguageCode(
-        updatedUser.preferences.appLanguageCode,
-        fallbackCode: _nativeLanguageCode,
-      );
-      final savedTargetLanguageCode = _normalizeLanguageCode(
-        updatedUser.preferences.learningLanguageCode,
-        fallbackCode: _targetLanguageCode,
-      );
-
-      // Garante que a cache local fica igual ao valor efetivamente devolvido
-      // pela API, evitando divergência entre Conta e Language.
-      await settingsDao.setLanguagePair(
-        nativeLanguageCode: savedNativeLanguageCode,
-        targetLanguageCode: savedTargetLanguageCode,
-      );
-
-      await localeController.setLanguageCode(savedNativeLanguageCode);
-      await AppLearningLanguageController.instance.setLanguageCode(
-        savedTargetLanguageCode,
-        persist: false,
-      );
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _nativeLanguageCode = savedNativeLanguageCode;
-        _targetLanguageCode = savedTargetLanguageCode;
-      });
-
-      final nativeLanguage = _languageByCode(savedNativeLanguageCode);
-      final targetLanguage = _languageByCode(savedTargetLanguageCode);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: AppText(
-            context.tr(
-              'Guardado: {source} → {target}',
-              parameters: <String, Object?>{
-                'source': nativeLanguage.name,
-                'target': targetLanguage.name,
-              },
-            ),
-          ),
-        ),
-      );
-
-      Navigator.pop(context);
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: AppText('Erro ao guardar idiomas: $error')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
-    }
-  }
-
-  String _normalizeLanguageCode(String? code, {required String fallbackCode}) {
-    final hasLanguage = _languages.any((language) => language.code == code);
-
-    if (hasLanguage) {
-      return code!;
-    }
-
-    return fallbackCode;
+      ),
+    );
   }
 
   LanguageOption _languageByCode(String code) {
@@ -610,6 +499,11 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
           const SizedBox(height: 14),
 
           DropdownButtonFormField<String>(
+            key: ValueKey<String>(
+              title == 'Idioma da aplicação'
+                  ? 'language-app-dropdown'
+                  : 'language-learning-dropdown',
+            ),
             initialValue: selectedCode,
             dropdownColor: const Color(0xFF102A38),
             iconEnabledColor: Colors.white.withValues(alpha: 0.74),
@@ -700,43 +594,26 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
-          gradient: _isSaving
-              ? LinearGradient(
-                  colors: [
-                    Colors.white.withValues(alpha: 0.22),
-                    Colors.white.withValues(alpha: 0.14),
-                  ],
-                )
-              : const LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
-                ),
-          boxShadow: _isSaving
-              ? []
-              : [
-                  BoxShadow(
-                    color: const Color(0xFF168CFF).withValues(alpha: 0.34),
-                    blurRadius: 22,
-                    offset: const Offset(0, 9),
-                  ),
-                ],
+          gradient: const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [Color(0xFF49D7FF), Color(0xFF168CFF)],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF168CFF).withValues(alpha: 0.34),
+              blurRadius: 22,
+              offset: const Offset(0, 9),
+            ),
+          ],
         ),
         child: ElevatedButton.icon(
-          onPressed: _isSaving ? null : _saveLanguages,
-          icon: _isSaving
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.4,
-                    color: Colors.white,
-                  ),
-                )
-              : const Icon(Icons.check, size: 25),
-          label: AppText(
-            _isSaving ? 'A guardar...' : 'Guardar idiomas',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+          key: const ValueKey<String>('language-save'),
+          onPressed: _saveLanguages,
+          icon: const Icon(Icons.check, size: 25),
+          label: const AppText(
+            'Guardar idiomas',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
           ),
           style: ElevatedButton.styleFrom(
             elevation: 0,

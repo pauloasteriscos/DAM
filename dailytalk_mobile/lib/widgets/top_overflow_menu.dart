@@ -31,19 +31,12 @@ class TopOverflowMenu extends StatelessWidget {
           case _TopMenuAction.account:
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const AccountPage(),
-              ),
+              MaterialPageRoute(builder: (context) => const AccountPage()),
             );
             break;
 
           case _TopMenuAction.language:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const LanguageSelectionPage(),
-              ),
-            );
+            await openLanguageSelectionFlow(context);
             break;
 
           case _TopMenuAction.createActivity:
@@ -162,10 +155,7 @@ class TopOverflowMenu extends StatelessWidget {
           ),
           title: const AppText(
             'Conta necessária',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
           ),
           content: AppText(
             'Esta funcionalidade precisa de conta para guardar e sincronizar os teus dados.',
@@ -226,9 +216,7 @@ class TopOverflowMenu extends StatelessWidget {
       if (!context.mounted) return;
 
       messenger.showSnackBar(
-        SnackBar(
-          content: AppText('Erro ao terminar a sessão: $error'),
-        ),
+        SnackBar(content: AppText('Erro ao terminar a sessão: $error')),
       );
     }
   }
@@ -257,9 +245,7 @@ class TopOverflowMenu extends StatelessWidget {
       if (!context.mounted) return;
 
       messenger.showSnackBar(
-        SnackBar(
-          content: AppText('Erro ao sincronizar: $error'),
-        ),
+        SnackBar(content: AppText('Erro ao sincronizar: $error')),
       );
     }
   }
@@ -279,11 +265,7 @@ enum _TopMenuAction {
 
 /// Conteúdo visual de cada item do menu.
 class _MenuItemContent extends StatelessWidget {
-  const _MenuItemContent({
-    required this.icon,
-    required this.text,
-    this.color,
-  });
+  const _MenuItemContent({required this.icon, required this.text, this.color});
 
   final IconData icon;
   final String text;

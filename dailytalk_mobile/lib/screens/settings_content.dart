@@ -76,13 +76,8 @@ class SettingsContent extends StatelessWidget {
           description: session.isAuthenticated
               ? 'Choose your language and the language you want to learn.'
               : 'Alterar idiomas localmente durante o modo teste.',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const LanguageSelectionPage(),
-              ),
-            );
+          onTap: () async {
+            await openLanguageSelectionFlow(context);
           },
         ),
 

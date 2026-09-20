@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../data/repositories/auth_repository.dart';
 import '../l10n/app_localizations.dart';
 import '../state/app_learning_language_controller.dart';
 import '../state/app_locale_controller.dart';
-import '../state/app_session_controller.dart';
+import '../state/language_preferences_coordinator.dart';
 
 /// Bandeira persistente do idioma a praticar.
 ///
@@ -100,6 +99,7 @@ class LearningLanguageQuickSwitcher extends StatelessWidget {
     final appLanguageCode = AppLocaleController.instance.languageCode;
     final selectedCode = await showModalBottomSheet<String>(
       context: context,
+      useRootNavigator: true,
       useSafeArea: true,
       isScrollControlled: true,
       showDragHandle: true,
@@ -130,52 +130,59 @@ class LearningLanguageQuickSwitcher extends StatelessWidget {
                     Expanded(
                       child: ListView(
                         padding: EdgeInsets.zero,
-                        children: _languages.map((language) {
-                    final selected =
-                        language.code == controller.languageCode;
-                    final sameAsApp = language.code == appLanguageCode;
+                        children: _languages
+                            .map((language) {
+                              final selected =
+                                  language.code == controller.languageCode;
+                              final sameAsApp =
+                                  language.code == appLanguageCode;
 
-                    return ListTile(
-                      key: ValueKey<String>(
-                        'learning-language-option-${language.code}',
-                      ),
-                      enabled: !sameAsApp,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      leading: _FlagImage(
-                        language: language,
-                        width: 34,
-                        height: 23,
-                      ),
-                      title: Text(
-                        language.name,
-                        style: TextStyle(
-                          color: sameAsApp ? Colors.white38 : Colors.white,
-                          fontWeight: selected
-                              ? FontWeight.w800
-                              : FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: sameAsApp
-                          ? Text(
-                              _tr('Idioma da aplicação'),
-                              style: const TextStyle(color: Colors.white38),
-                            )
-                          : null,
-                      trailing: selected
-                          ? const Icon(
-                              Icons.check_circle,
-                              color: Color(0xFF35C8FF),
-                            )
-                          : null,
-                      onTap: sameAsApp
-                          ? null
-                          : () => Navigator.of(
-                              sheetContext,
-                            ).pop(language.code),
-                    );
-                        }).toList(growable: false),
+                              return ListTile(
+                                key: ValueKey<String>(
+                                  'learning-language-option-${language.code}',
+                                ),
+                                enabled: !sameAsApp,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                leading: _FlagImage(
+                                  language: language,
+                                  width: 34,
+                                  height: 23,
+                                ),
+                                title: Text(
+                                  language.name,
+                                  style: TextStyle(
+                                    color: sameAsApp
+                                        ? Colors.white38
+                                        : Colors.white,
+                                    fontWeight: selected
+                                        ? FontWeight.w800
+                                        : FontWeight.w600,
+                                  ),
+                                ),
+                                subtitle: sameAsApp
+                                    ? Text(
+                                        _tr('Idioma da aplicação'),
+                                        style: const TextStyle(
+                                          color: Colors.white38,
+                                        ),
+                                      )
+                                    : null,
+                                trailing: selected
+                                    ? const Icon(
+                                        Icons.check_circle,
+                                        color: Color(0xFF35C8FF),
+                                      )
+                                    : null,
+                                onTap: sameAsApp
+                                    ? null
+                                    : () => Navigator.of(
+                                        sheetContext,
+                                      ).pop(language.code),
+                              );
+                            })
+                            .toList(growable: false),
                       ),
                     ),
                   ],
@@ -200,46 +207,25 @@ class LearningLanguageQuickSwitcher extends StatelessWidget {
     BuildContext context,
     String languageCode,
   ) async {
-    final controller = AppLearningLanguageController.instance;
-    final session = AppSessionController.instance;
-    final messenger = ScaffoldMessenger.of(context);
     final normalized = normalizeLearningLanguageCode(languageCode);
+    final appLanguageCode = AppLocaleController.instance.languageCode;
 
-    // Mantém a mesma regra já aplicada pelo ecrã Language.
-    if (normalized == AppLocaleController.instance.languageCode) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(_tr('Escolhe dois idiomas diferentes.'))),
-      );
-      return;
-    }
-
-    final shouldSyncRemotely = session.isAuthenticated;
-
-    // A notificação pode fazer o shell regressar imediatamente ao mapa e
-    // desmontar o runtime onde o seletor foi aberto. A sincronização remota
-    // não pode depender de esse BuildContext continuar montado.
-    await controller.setLanguageCode(normalized);
-
-    if (!shouldSyncRemotely) {
-      return;
-    }
-
-    try {
-      final updatedUser = await AuthRepository().updatePreferences(
-        learningLanguageCode: normalized,
-      );
-      final savedCode = normalizeLearningLanguageCode(
-        updatedUser.preferences.learningLanguageCode,
-      );
-
-      await controller.setLanguageCode(savedCode);
-      session.markAuthenticated(updatedUser);
-    } catch (_) {
-      if (!context.mounted) {
-        return;
+    if (normalized == appLanguageCode) {
+      if (context.mounted) {
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          SnackBar(content: Text(_tr('Escolhe dois idiomas diferentes.'))),
+        );
       }
+      return;
+    }
 
-      messenger.showSnackBar(
+    final result = await LanguagePreferencesCoordinator.instance.apply(
+      appLanguageCode: appLanguageCode,
+      learningLanguageCode: normalized,
+    );
+
+    if (result.remoteSyncAttempted && !result.remoteSynced && context.mounted) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
         SnackBar(
           content: Text(
             _tr(
@@ -262,9 +248,8 @@ class LearningLanguageQuickSwitcher extends StatelessWidget {
     final normalized = normalizeLearningLanguageCode(code);
     return _languages.firstWhere(
       (language) => language.code == normalized,
-      orElse: () => _languages.firstWhere(
-        (language) => language.code == 'it-IT',
-      ),
+      orElse: () =>
+          _languages.firstWhere((language) => language.code == 'it-IT'),
     );
   }
 }
