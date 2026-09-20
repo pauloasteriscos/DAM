@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
 import '../data/repositories/auth_repository.dart';
+import '../state/app_learning_language_controller.dart';
 import '../state/app_locale_controller.dart';
 import '../state/app_session_controller.dart';
 
@@ -121,6 +122,15 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       return;
     }
 
+    await AppLearningLanguageController.instance.setLanguageCode(
+      targetLanguageCode,
+      persist: false,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
     setState(() {
       _nativeLanguageCode = nativeLanguageCode;
       _targetLanguageCode = targetLanguageCode;
@@ -155,6 +165,10 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       // Atualiza imediatamente toda a interface. O título "Language" é a
       // única exceção e permanece em inglês para facilitar a recuperação.
       await localeController.setLanguageCode(_nativeLanguageCode);
+      await AppLearningLanguageController.instance.setLanguageCode(
+        _targetLanguageCode,
+        persist: false,
+      );
 
       if (!mounted) {
         return;
@@ -210,6 +224,10 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
       );
 
       await localeController.setLanguageCode(savedNativeLanguageCode);
+      await AppLearningLanguageController.instance.setLanguageCode(
+        savedTargetLanguageCode,
+        persist: false,
+      );
 
       if (!mounted) {
         return;

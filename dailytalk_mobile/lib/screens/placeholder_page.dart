@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 
+import '../widgets/learning_language_quick_switcher.dart';
 import '../widgets/top_overflow_menu.dart';
 
 /// Página-base usada por áreas que partilham a mesma estrutura visual.
@@ -139,6 +140,8 @@ class PlaceholderPage extends StatelessWidget {
             ),
           ),
 
+          const LearningLanguageQuickSwitcher(),
+          const SizedBox(width: 4),
           const TopOverflowMenu(),
         ],
       ),

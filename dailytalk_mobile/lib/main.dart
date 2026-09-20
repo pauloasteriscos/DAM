@@ -9,6 +9,7 @@ import 'data/content/learning_content_bootstrap.dart';
 import 'data/database/database_factory_config.dart';
 import 'data/services/learning_progress_startup_reconciliation_service.dart';
 import 'screens/auth_gate.dart';
+import 'state/app_learning_language_controller.dart';
 import 'state/app_locale_controller.dart';
 import 'state/app_session_controller.dart';
 
@@ -31,6 +32,10 @@ Future<void> main() async {
   // Lê o idioma guardado antes de construir o primeiro ecrã. Desta forma, a
   // aplicação não apresenta primeiro português e só depois muda de idioma.
   await AppLocaleController.instance.initialize();
+
+  // Carrega também o idioma de aprendizagem antes do primeiro frame para que
+  // a bandeira fixa represente imediatamente a preferência persistida.
+  await AppLearningLanguageController.instance.initialize();
 
   runApp(const DailyTalkApp());
 

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../widgets/learning_language_quick_switcher.dart';
 import '../domain/learning/learning_models.dart';
 
 import '../data/dao/app_settings_dao.dart';
@@ -467,6 +468,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
         elevation: 0,
         centerTitle: true,
         title: _buildAppBarBrand(),
+        actions: const <Widget>[LearningLanguageQuickSwitcher()],
       ),
       bottomNavigationBar: _buildFooter(),
       body: SafeArea(

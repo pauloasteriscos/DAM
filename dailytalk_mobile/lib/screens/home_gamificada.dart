@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 
 import '../models/lesson_item.dart';
 import '../widgets/lesson_node.dart';
+import '../widgets/learning_language_quick_switcher.dart';
 import '../widgets/top_overflow_menu.dart';
 
 import 'vocabulary_pairs_page.dart';
@@ -213,6 +214,8 @@ class HomeGamificada extends StatelessWidget {
             ),
           ),
 
+          LearningLanguageQuickSwitcher(compact: compact),
+          SizedBox(width: compact ? 2 : 4),
           const TopOverflowMenu(),
         ],
       ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/learning_language_quick_switcher.dart';
+
 import '../../domain/learning/learning_enums.dart';
 import 'learning_map_view_model.dart';
 
@@ -39,6 +41,7 @@ final class LearningMissionDetailPage extends StatelessWidget {
           'DailyTalk.pt',
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
+        actions: const <Widget>[LearningLanguageQuickSwitcher()],
       ),
       body: SafeArea(
         child: Center(

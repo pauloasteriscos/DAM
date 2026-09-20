@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../widgets/learning_language_quick_switcher.dart';
 import '../domain/learning/learning_models.dart';
 
 import '../data/dao/app_settings_dao.dart';
@@ -418,6 +419,7 @@ class _QuizPageState extends State<QuizPage> {
             ),
           ),
         ),
+        const LearningLanguageQuickSwitcher(),
       ],
     );
   }
