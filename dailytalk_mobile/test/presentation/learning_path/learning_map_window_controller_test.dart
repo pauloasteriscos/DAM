@@ -174,6 +174,76 @@ void main() {
     expect(_elementIds(controller), <String>['element-0', 'element-1']);
   });
 
+  test(
+    'dispose durante leitura assíncrona não notifica controller destruído',
+    () async {
+      final path = _buildPath(4);
+      final gate = Completer<void>();
+
+      final coordinator = LearningMapWindowCoordinator(
+        loadActiveContent: (_) async => LearningMapActiveContentSnapshot(
+          path: path,
+          packageVersion: 9,
+          recoveredFromFallback: false,
+        ),
+        loadWindowProjection:
+            ({
+              required String accountId,
+              required String learningPathId,
+              required Iterable<String> pathElementIds,
+            }) async {
+              await gate.future;
+              return pathElementIds
+                  .map((id) => _projection(id, stageCount: 4))
+                  .toList(growable: false);
+            },
+        loadWindowSync:
+            ({
+              required String accountId,
+              required String learningPathId,
+              required Iterable<String> activityIds,
+            }) async {
+              return const <String, ProgressSyncState>{};
+            },
+        loadGlobalRecommendations:
+            ({
+              required String accountId,
+              required String learningPathId,
+            }) async {
+              return <LearningProgressProjectionEntry>[
+                _projection('element-3', stageCount: 4, recommendationRank: 0),
+              ];
+            },
+        loadGlobalCounts:
+            ({
+              required String accountId,
+              required String learningPathId,
+            }) async {
+              return _counts(4);
+            },
+        policy: const LearningMapStageWindowPolicy(
+          initialStageCount: 2,
+          segmentStageCount: 2,
+        ),
+      );
+
+      final session = await coordinator.open(
+        accountId: 'account-1',
+        learningPathId: 'path-1',
+        locale: 'pt-PT',
+      );
+      final controller = LearningMapWindowController(session: session);
+
+      final pendingLoad = controller.loadInitial();
+      await Future<void>.delayed(Duration.zero);
+
+      controller.dispose();
+      gate.complete();
+
+      expect(await pendingLoad, isTrue);
+    },
+  );
+
   testWidgets(
     'viewport apresenta apenas o segmento corrente no LearningMapView lazy',
     (tester) async {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../widgets/learning_language_quick_switcher.dart';
 
 import '../domain/learning/learning_models.dart';
+import '../state/app_learning_language_controller.dart';
 
 /// Runtime leve para missões de fala do Learning Path.
 ///
@@ -40,7 +41,7 @@ final class _SpeechPracticePageState extends State<SpeechPracticePage> {
       ];
     }
 
-    final locale = Localizations.localeOf(context).toLanguageTag();
+    final locale = AppLearningLanguageController.instance.languageCode;
     return <String>[
       for (final prompt in execution.prompts)
         prompt.text.resolve(

@@ -356,7 +356,7 @@ test(
       );
     });
 
-    await t.test("catálogo oficial publica metadata da versão mais recente v3", async () => {
+    await t.test("catálogo oficial publica os seis percursos com experiência síncrona", async () => {
       const { response, payload } = await apiRequest("/api/content/catalog");
 
       assert.equal(response.status, 200);
@@ -364,84 +364,160 @@ test(
       assert.equal(payload.catalogVersion, 1);
       assert.ok(Array.isArray(payload.packages));
 
-      const metadata = payload.packages.find(
-        (item) => item.pathId === "student.fr-fr.phase1",
+      const expectedPackages = {
+        "student.de-de.phase1": {
+          schemaVersion: 2,
+          packageVersion: 1,
+          sha256:
+            "36b8918f56626f9fa537a0a2a74d4314b2bc806bb899ba352ab07a87de0ac30b",
+          sizeBytes: 28700,
+          downloadPath: "/api/content/packages/student.de-de.phase1/1",
+        },
+        "student.en-us.phase1": {
+          schemaVersion: 2,
+          packageVersion: 1,
+          sha256:
+            "f8951f542e81f07221d46f2721b949cb30d67e8a97f62a770e95dbbb71871196",
+          sizeBytes: 28728,
+          downloadPath: "/api/content/packages/student.en-us.phase1/1",
+        },
+        "student.es-es.phase1": {
+          schemaVersion: 2,
+          packageVersion: 1,
+          sha256:
+            "571c79de28444cc3421cad66123ca6c5c9ab24df99b941f17abc06f2c1d86e08",
+          sizeBytes: 28688,
+          downloadPath: "/api/content/packages/student.es-es.phase1/1",
+        },
+        "student.fr-fr.phase1": {
+          schemaVersion: 2,
+          packageVersion: 5,
+          sha256:
+            "114d338f667364067a4c451b0a32039ee7384ef0dbcf65b57dbdd43def53404c",
+          sizeBytes: 28692,
+          downloadPath: "/api/content/packages/student.fr-fr.phase1/5",
+        },
+        "student.it-it.phase1": {
+          schemaVersion: 2,
+          packageVersion: 1,
+          sha256:
+            "cd90b7829d6668769af10d80f16b9ece5d9ad45f74dde822556bb35797ff1a9e",
+          sizeBytes: 28686,
+          downloadPath: "/api/content/packages/student.it-it.phase1/1",
+        },
+        "student.pt-pt.phase1": {
+          schemaVersion: 2,
+          packageVersion: 1,
+          sha256:
+            "7c02afa87233cad2a175e7ba10c8d07e0340096a867b619b54d7359643e257e2",
+          sizeBytes: 28699,
+          downloadPath: "/api/content/packages/student.pt-pt.phase1/1",
+        },
+      };
+
+      assert.equal(
+        payload.packages.length,
+        Object.keys(expectedPackages).length,
       );
 
-      assert.ok(metadata);
-      assert.equal(metadata.schemaVersion, 1);
-      assert.equal(metadata.packageVersion, 3);
-      assert.equal(
-        metadata.sha256,
-        "9fc5142ad80c8e66979c8f3f5f547bb8071c4be09160b03a38cf2374eebb070b",
-      );
-      assert.equal(metadata.sizeBytes, 25371);
-      assert.equal(metadata.contentType, "application/json");
-      assert.equal(
-        metadata.downloadPath,
-        "/api/content/packages/student.fr-fr.phase1/3",
-      );
-      assert.equal(metadata.immutable, true);
+      for (const [pathId, expected] of Object.entries(expectedPackages)) {
+        const metadata = payload.packages.find(
+          (item) => item.pathId === pathId,
+        );
+
+        assert.ok(metadata, `metadata ausente para ${pathId}`);
+        assert.equal(metadata.schemaVersion, expected.schemaVersion);
+        assert.equal(metadata.packageVersion, expected.packageVersion);
+        assert.equal(metadata.sha256, expected.sha256);
+        assert.equal(metadata.sizeBytes, expected.sizeBytes);
+        assert.equal(metadata.contentType, "application/json");
+        assert.equal(metadata.downloadPath, expected.downloadPath);
+        assert.equal(metadata.immutable, true);
+      }
+
       assert.equal(response.headers.get("cache-control"), "no-store");
 
-      contentPackageMetadata = metadata;
+      contentPackageMetadata = payload.packages.find(
+        (item) => item.pathId === "student.fr-fr.phase1",
+      );
+      assert.ok(contentPackageMetadata);
     });
 
-    await t.test("pacote oficial devolve bytes exatos e headers de integridade", async () => {
-      assert.ok(contentPackageMetadata);
+    await t.test("pacotes oficiais mais recentes devolvem os bytes canónicos exatos", async () => {
+      const { response: catalogResponse, payload: catalog } =
+        await apiRequest("/api/content/catalog");
+      assert.equal(catalogResponse.status, 200);
 
-      const response = await fetch(
-        `${API_BASE}${contentPackageMetadata.downloadPath}`,
-        { headers: { [ENV_HEADER]: "DEV" } },
-      );
+      const canonicalByPath = {
+        "student.de-de.phase1": "official_de_de_phase1_v1.json",
+        "student.en-us.phase1": "official_en_us_phase1_v1.json",
+        "student.es-es.phase1": "official_es_es_phase1_v1.json",
+        "student.fr-fr.phase1": "official_fr_fr_phase1_v5.json",
+        "student.it-it.phase1": "official_it_it_phase1_v1.json",
+        "student.pt-pt.phase1": "official_pt_pt_phase1_v1.json",
+      };
 
-      assert.equal(response.status, 200);
-      assert.equal(
-        response.headers.get("content-type"),
-        "application/json; charset=utf-8",
-      );
-      assert.equal(
-        response.headers.get("cache-control"),
-        "public, max-age=31536000, immutable",
-      );
-      assert.equal(response.headers.get("pragma"), null);
-      assert.equal(
-        response.headers.get("x-content-sha256"),
-        contentPackageMetadata.sha256,
-      );
-      assert.equal(
-        response.headers.get("x-content-package-version"),
-        String(contentPackageMetadata.packageVersion),
-      );
-      assert.equal(
-        response.headers.get("x-content-schema-version"),
-        String(contentPackageMetadata.schemaVersion),
-      );
+      for (const [pathId, canonicalFile] of Object.entries(canonicalByPath)) {
+        const metadata = catalog.packages.find(
+          (item) => item.pathId === pathId,
+        );
+        assert.ok(metadata, `metadata ausente para ${pathId}`);
 
-      const bytes = new Uint8Array(await response.arrayBuffer());
-      const actualSha256 = createHash("sha256")
-        .update(bytes)
-        .digest("hex");
+        const response = await fetch(
+          `${API_BASE}${metadata.downloadPath}`,
+          { headers: { [ENV_HEADER]: "DEV" } },
+        );
 
-      assert.equal(bytes.byteLength, contentPackageMetadata.sizeBytes);
-      assert.equal(actualSha256, contentPackageMetadata.sha256);
+        assert.equal(response.status, 200);
+        assert.equal(
+          response.headers.get("content-type"),
+          "application/json; charset=utf-8",
+        );
+        assert.equal(
+          response.headers.get("cache-control"),
+          "public, max-age=31536000, immutable",
+        );
+        assert.equal(response.headers.get("pragma"), null);
+        assert.equal(
+          response.headers.get("x-content-sha256"),
+          metadata.sha256,
+        );
+        assert.equal(
+          response.headers.get("x-content-package-version"),
+          String(metadata.packageVersion),
+        );
+        assert.equal(
+          response.headers.get("x-content-schema-version"),
+          String(metadata.schemaVersion),
+        );
 
-      const canonicalBytes = await readFile(
-        path.join(ROOT, "docs", "phase2", "official_reference_journey_v3.json"),
-      );
-      assert.deepEqual(Buffer.from(bytes), canonicalBytes);
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        const actualSha256 = createHash("sha256")
+          .update(bytes)
+          .digest("hex");
 
-      const decoded = JSON.parse(new TextDecoder().decode(bytes));
-      assert.equal(decoded.activities.length, 16);
-      assert.equal(decoded.journeys[0].stages.length, 4);
-      assert.equal(decoded.schemaVersion, 1);
-      assert.equal(decoded.id, contentPackageMetadata.pathId);
+        assert.equal(bytes.byteLength, metadata.sizeBytes);
+        assert.equal(actualSha256, metadata.sha256);
 
-      contentPackageEtag = response.headers.get("etag") ?? "";
-      assert.equal(
-        contentPackageEtag,
-        `"sha256-${contentPackageMetadata.sha256}"`,
-      );
+        const canonicalBytes = await readFile(
+          path.join(ROOT, "docs", "phase2", canonicalFile),
+        );
+        assert.deepEqual(Buffer.from(bytes), canonicalBytes);
+
+        const decoded = JSON.parse(new TextDecoder().decode(bytes));
+        assert.equal(decoded.activities.length, 6);
+        assert.equal(decoded.journeys[0].stages.length, 2);
+        assert.equal(decoded.schemaVersion, 2);
+        assert.equal(decoded.id, pathId);
+
+        if (pathId === "student.fr-fr.phase1") {
+          contentPackageEtag = response.headers.get("etag") ?? "";
+          assert.equal(
+            contentPackageEtag,
+            `"sha256-${metadata.sha256}"`,
+          );
+        }
+      }
     });
 
     await t.test("versão anterior v1 continua disponível e imutável", async () => {
@@ -501,6 +577,87 @@ test(
         "arrival.vocabulary-01.revision-03",
       );
       assert.equal(newActivity.revisions[2].revisionNumber, 3);
+    });
+
+    await t.test("francês v4 publica apenas novas revision-04 sem alterar v1-v3", async () => {
+      const [v3Response, v4Response] = await Promise.all([
+        fetch(`${API_BASE}/api/content/packages/student.fr-fr.phase1/3`, {
+          headers: { [ENV_HEADER]: "DEV" },
+        }),
+        fetch(`${API_BASE}/api/content/packages/student.fr-fr.phase1/4`, {
+          headers: { [ENV_HEADER]: "DEV" },
+        }),
+      ]);
+
+      assert.equal(v3Response.status, 200);
+      assert.equal(v4Response.status, 200);
+
+      const v3 = await v3Response.json();
+      const v4 = await v4Response.json();
+
+      const v3Activity = v3.activities.find(
+        (item) => item.id === "arrival.vocabulary-01",
+      );
+      const v4Activity = v4.activities.find(
+        (item) => item.id === "arrival.vocabulary-01",
+      );
+
+      assert.ok(v3Activity);
+      assert.ok(v4Activity);
+      assert.equal(
+        v3Activity.currentRevisionId,
+        "arrival.vocabulary-01.revision-03",
+      );
+      assert.equal(
+        v4Activity.currentRevisionId,
+        "arrival.vocabulary-01.revision-04",
+      );
+      assert.equal(v4Activity.revisions.length, 1);
+      assert.equal(
+        v4Activity.revisions[0].id,
+        "arrival.vocabulary-01.revision-04",
+      );
+      assert.equal(v4Activity.revisions[0].revisionNumber, 4);
+    });
+
+    await t.test("francês v5 normaliza competências sem alterar v4", async () => {
+      const [v4Response, v5Response] = await Promise.all([
+        fetch(`${API_BASE}/api/content/packages/student.fr-fr.phase1/4`, {
+          headers: { [ENV_HEADER]: "DEV" },
+        }),
+        fetch(`${API_BASE}/api/content/packages/student.fr-fr.phase1/5`, {
+          headers: { [ENV_HEADER]: "DEV" },
+        }),
+      ]);
+
+      assert.equal(v4Response.status, 200);
+      assert.equal(v5Response.status, 200);
+
+      const v4 = await v4Response.json();
+      const v5 = await v5Response.json();
+
+      const v4Activity = v4.activities.find(
+        (item) => item.id === "arrival.vocabulary-01",
+      );
+      const v5Activity = v5.activities.find(
+        (item) => item.id === "arrival.vocabulary-01",
+      );
+
+      assert.ok(v4Activity);
+      assert.ok(v5Activity);
+      assert.equal(
+        v4Activity.currentRevisionId,
+        "arrival.vocabulary-01.revision-04",
+      );
+      assert.equal(
+        v5Activity.currentRevisionId,
+        "arrival.vocabulary-01.revision-05",
+      );
+      assert.equal(v5Activity.revisions.length, 1);
+      assert.equal(v5Activity.revisions[0].revisionNumber, 5);
+      assert.ok(
+        v5.competencies.every((item) => item.id.startsWith("arrival.fr-fr.")),
+      );
     });
 
     await t.test("pacote imutável suporta revalidação condicional por ETag", async () => {

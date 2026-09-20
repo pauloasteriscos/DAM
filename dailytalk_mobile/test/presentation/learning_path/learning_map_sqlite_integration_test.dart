@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-const _assetPath = 'assets/content/phase1_example_path.v1.json';
+const _learningLanguageCode = 'it-IT';
 const _accountId = 'phase41e3-offline-account';
 
 void main() {
@@ -58,9 +58,9 @@ void main() {
     assetReads = 0;
 
     bootstrap = LearningContentBootstrapService(
-      bundledSourceLoader: () async {
+      bundledSourceLoader: (assetPath) async {
         assetReads += 1;
-        return File(_assetPath).readAsStringSync();
+        return File(assetPath).readAsStringSync();
       },
       importService: importService,
       catalogService: catalogService,
@@ -84,16 +84,18 @@ void main() {
       expect(await db.query('learning_content_catalog'), isEmpty);
       expect(await db.query('learning_progress_projection'), isEmpty);
 
-      final active = await bootstrap.ensureLocalBaseline();
-
-      expect(
-        active.path.id.value,
-        LearningContentBootstrapService.officialLearningPathId,
+      final descriptor = OfficialLearningPathResolver.resolve(
+        _learningLanguageCode,
       );
+      final active = await bootstrap.ensureLocalBaseline(
+        learningLanguageCode: _learningLanguageCode,
+      );
+
+      expect(active.path.id.value, descriptor.learningPathId);
 
       expect(
         active.package.packageVersion,
-        LearningContentBootstrapService.officialBaselinePackageVersion,
+        descriptor.baselinePackageVersion,
       );
 
       expect(active.recoveredFromFallback, isFalse);

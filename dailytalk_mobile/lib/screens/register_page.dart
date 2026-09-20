@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 
 import '../data/repositories/auth_repository.dart';
+import '../state/app_learning_language_controller.dart';
 import '../state/app_locale_controller.dart';
 import '../state/app_session_controller.dart';
 
@@ -72,6 +73,10 @@ class _RegisterPageState extends State<RegisterPage> {
       await AppLocaleScope.read(
         context,
       ).setLanguageCode(user.preferences.appLanguageCode, persist: true);
+      await AppLearningLanguageController.instance.setLanguageCode(
+        user.preferences.learningLanguageCode,
+        persist: true,
+      );
 
       if (!mounted) {
         return;

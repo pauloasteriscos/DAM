@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/content/learning_content_bootstrap.dart';
 import '../../data/content/learning_content_catalog.dart';
+import '../../data/content/official_learning_path_resolver.dart';
 import '../../data/database/app_database.dart';
 import '../../data/repositories/learning_progress_read_repository.dart';
 import '../../data/repositories/learning_progress_repository.dart';
@@ -44,6 +45,7 @@ final class LearningMapHomeHost extends StatefulWidget {
   const LearningMapHomeHost({
     required this.accountId,
     required this.locale,
+    required this.learningLanguageCode,
     required this.fallback,
     this.footer,
     super.key,
@@ -51,6 +53,7 @@ final class LearningMapHomeHost extends StatefulWidget {
 
   final String accountId;
   final String locale;
+  final String learningLanguageCode;
   final Widget fallback;
 
   /// Conteúdo pertencente à Home que deve surgir depois do percurso,
@@ -80,7 +83,8 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.accountId != widget.accountId ||
-        oldWidget.locale != widget.locale) {
+        oldWidget.locale != widget.locale ||
+        oldWidget.learningLanguageCode != widget.learningLanguageCode) {
       _controller?.dispose();
       _controller = null;
 
@@ -104,6 +108,7 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
     try {
       final accountId = widget.accountId.trim();
       final locale = widget.locale.trim();
+      final learningLanguageCode = widget.learningLanguageCode.trim();
 
       if (accountId.isEmpty) {
         throw StateError('Learning Map requires a non-empty account id.');
@@ -113,12 +118,27 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
         throw StateError('Learning Map requires a non-empty locale.');
       }
 
+      if (learningLanguageCode.isEmpty) {
+        throw StateError(
+          'Learning Map requires a non-empty learning language code.',
+        );
+      }
+
+      final descriptor = OfficialLearningPathResolver.resolve(
+        learningLanguageCode,
+      );
       final database = await AppDatabase.instance.database;
       final catalogService = LearningContentCatalogService();
 
-      final active = await catalogService.loadActive(
-        LearningContentBootstrapService.officialLearningPathId,
-      );
+      final active = await LearningContentBootstrapService.instance
+          .ensureLocalBaseline(learningLanguageCode: learningLanguageCode);
+
+      if (active.path.id.value != descriptor.learningPathId) {
+        throw StateError(
+          'Active Learning Path ${active.path.id.value} does not match '
+          '${descriptor.learningPathId}.',
+        );
+      }
 
       // Preparation/repair belongs before presentation.
       // It is idempotent and does not create outbox work by itself.
@@ -137,7 +157,7 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
 
       final windowSession = await coordinator.open(
         accountId: accountId,
-        learningPathId: LearningContentBootstrapService.officialLearningPathId,
+        learningPathId: descriptor.learningPathId,
         locale: locale,
       );
 

@@ -4,21 +4,22 @@ import '../../domain/learning/learning_domain.dart';
 import 'learning_content_catalog.dart';
 import 'learning_content_import.dart';
 import 'learning_content_remote.dart';
+import 'official_learning_path_resolver.dart';
 
-/// Bootstrap offline-first do percurso oficial atualmente embarcado na app.
+/// Bootstrap offline-first do percurso oficial correspondente ao idioma que o
+/// utilizador está a praticar.
 ///
 /// A primeira execução garante uma cópia local válida antes de qualquer
 /// atualização remota. Atualizações posteriores continuam a ser feitas pela
 /// fronteira HTTP da Fase 2.2B.
 final class LearningContentBootstrapService {
   LearningContentBootstrapService({
-    Future<String> Function()? bundledSourceLoader,
+    Future<String> Function(String assetPath)? bundledSourceLoader,
     LearningContentImportService? importService,
     LearningContentCatalogService? catalogService,
     LearningContentRemoteService? remoteService,
   }) : _bundledSourceLoader =
-           bundledSourceLoader ??
-           (() => rootBundle.loadString(officialBaselineAssetPath)),
+           bundledSourceLoader ?? ((path) => rootBundle.loadString(path)),
        importService = importService ?? LearningContentImportService(),
        catalogService = catalogService ?? LearningContentCatalogService() {
     this.remoteService =
@@ -32,22 +33,30 @@ final class LearningContentBootstrapService {
   static final LearningContentBootstrapService instance =
       LearningContentBootstrapService();
 
-  static const String officialLearningPathId = 'student.fr-fr.phase1';
-  static const String officialBaselineAssetPath =
-      'assets/content/phase1_example_path.v1.json';
-  static const int officialBaselinePackageVersion = 1;
-  static const String officialBaselineSha256 =
-      '6d5bee9037aecaf70773e484076ad646d6b05d7f01bf0f00b8f5a70e798de968';
-
-  final Future<String> Function() _bundledSourceLoader;
+  final Future<String> Function(String assetPath) _bundledSourceLoader;
   final LearningContentImportService importService;
   final LearningContentCatalogService catalogService;
   late final LearningContentRemoteService remoteService;
 
-  /// Garante que existe conteúdo local ativo sem depender da rede.
-  Future<ActiveLearningContent> ensureLocalBaseline() async {
+  /// Garante que existe conteúdo local ativo para o idioma escolhido sem
+  /// depender da rede.
+  ///
+  /// Nunca faz downgrade: um pacote local válido mais recente que a baseline
+  /// embarcada é preservado e, se necessário, reativado.
+  Future<ActiveLearningContent> ensureLocalBaseline({
+    required String learningLanguageCode,
+  }) async {
+    final descriptor = OfficialLearningPathResolver.resolve(
+      learningLanguageCode,
+    );
+    final learningPathId = descriptor.learningPathId;
+
     try {
-      return await catalogService.loadActive(officialLearningPathId);
+      final active = await catalogService.loadActive(learningPathId);
+      if (active.package.packageVersion >=
+          descriptor.baselinePackageVersion) {
+        return active;
+      }
     } on LearningContentCatalogException catch (error) {
       if (error.code != LearningContentCatalogErrorCode.noActivePackage) {
         rethrow;
@@ -55,19 +64,23 @@ final class LearningContentBootstrapService {
     }
 
     // Se existirem pacotes previamente importados, recuperar primeiro a
-    // versão local mais recente que continue válida. Isto evita downgrade
-    // apenas porque o ponteiro do catálogo ainda não foi criado.
+    // versão local mais recente que continue válida. Pacotes abaixo da
+    // baseline embarcada não impedem a atualização local mínima.
     final localPackages = await importService.repository.listPackages(
-      officialLearningPathId,
+      learningPathId,
     );
     for (final package in localPackages.reversed) {
+      if (package.packageVersion < descriptor.baselinePackageVersion) {
+        break;
+      }
+
       try {
         await importService.validateStoredPackage(package);
         await catalogService.activate(
-          learningPathId: officialLearningPathId,
+          learningPathId: learningPathId,
           packageVersion: package.packageVersion,
         );
-        return await catalogService.loadActive(officialLearningPathId);
+        return await catalogService.loadActive(learningPathId);
       } on LearningContentImportException {
         // Tenta a versão local anterior; nenhuma linha é apagada.
       } on LearningContentException {
@@ -75,23 +88,37 @@ final class LearningContentBootstrapService {
       }
     }
 
-    final payload = await _bundledSourceLoader();
-    await importService.importPackage(
+    final payload = await _bundledSourceLoader(descriptor.baselineAssetPath);
+    final imported = await importService.importPackage(
       payloadJson: payload,
-      packageVersion: officialBaselinePackageVersion,
-      source: 'bundled:$officialBaselineAssetPath',
-      expectedSha256: officialBaselineSha256,
+      packageVersion: descriptor.baselinePackageVersion,
+      source: 'bundled:${descriptor.baselineAssetPath}',
+      expectedSha256: descriptor.baselineSha256,
     );
+
+    if (imported.path.id.value != learningPathId) {
+      throw StateError(
+        'Baseline ${descriptor.baselineAssetPath} pertence a '
+        '${imported.path.id.value}, não a $learningPathId.',
+      );
+    }
+
     await catalogService.activate(
-      learningPathId: officialLearningPathId,
-      packageVersion: officialBaselinePackageVersion,
+      learningPathId: learningPathId,
+      packageVersion: descriptor.baselinePackageVersion,
     );
-    return catalogService.loadActive(officialLearningPathId);
+    return catalogService.loadActive(learningPathId);
   }
 
-  /// Consulta a distribuição oficial. Deve ser chamada fora do caminho
-  /// crítico da UI; qualquer falha deixa a réplica local anterior intacta.
-  Future<LearningContentRefreshResult> refreshOfficialContent() {
-    return remoteService.refreshLearningPath(officialLearningPathId);
+  /// Consulta a distribuição oficial para o percurso correspondente ao idioma
+  /// escolhido. Deve ser chamada fora do caminho crítico da UI; qualquer
+  /// falha deixa a réplica local anterior intacta.
+  Future<LearningContentRefreshResult> refreshOfficialContent({
+    required String learningLanguageCode,
+  }) {
+    final descriptor = OfficialLearningPathResolver.resolve(
+      learningLanguageCode,
+    );
+    return remoteService.refreshLearningPath(descriptor.learningPathId);
   }
 }

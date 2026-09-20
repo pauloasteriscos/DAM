@@ -47,6 +47,7 @@ final class LearningMapWindowController extends ChangeNotifier {
   StackTrace? _errorStackTrace;
   bool _isLoading = false;
   bool _isActivityFlowRunning = false;
+  bool _isDisposed = false;
 
   final Map<int, double> _scrollOffsets = <int, double>{};
 
@@ -142,7 +143,7 @@ final class LearningMapWindowController extends ChangeNotifier {
         '$pathElementId.',
       );
       _errorStackTrace = null;
-      notifyListeners();
+      _notifyIfAlive();
       return false;
     }
 
@@ -197,7 +198,7 @@ final class LearningMapWindowController extends ChangeNotifier {
             '${recommendation.pathElementId}.',
           );
           _errorStackTrace = null;
-          notifyListeners();
+          _notifyIfAlive();
           return null;
         }
 
@@ -273,7 +274,7 @@ final class LearningMapWindowController extends ChangeNotifier {
     _isActivityFlowRunning = true;
     _error = null;
     _errorStackTrace = null;
-    notifyListeners();
+    _notifyIfAlive();
 
     try {
       final flow = LearningMapMissionFlow(
@@ -312,11 +313,11 @@ final class LearningMapWindowController extends ChangeNotifier {
     } catch (error, stackTrace) {
       _error = error;
       _errorStackTrace = stackTrace;
-      notifyListeners();
+      _notifyIfAlive();
       return null;
     } finally {
       _isActivityFlowRunning = false;
-      notifyListeners();
+      _notifyIfAlive();
     }
   }
 
@@ -352,7 +353,7 @@ final class LearningMapWindowController extends ChangeNotifier {
     _isLoading = true;
     _error = null;
     _errorStackTrace = null;
-    notifyListeners();
+    _notifyIfAlive();
 
     try {
       final result = await operation();
@@ -371,8 +372,22 @@ final class LearningMapWindowController extends ChangeNotifier {
       return false;
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _notifyIfAlive();
     }
+  }
+
+  void _notifyIfAlive() {
+    if (_isDisposed) {
+      return;
+    }
+
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }
 

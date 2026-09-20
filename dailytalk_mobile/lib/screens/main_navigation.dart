@@ -6,6 +6,7 @@ import '../config/feature_flags.dart';
 
 import '../l10n/app_localizations.dart';
 
+import '../state/app_learning_language_controller.dart';
 import '../state/app_locale_controller.dart';
 import '../state/app_session_controller.dart';
 import 'analytics_content.dart';
@@ -50,6 +51,33 @@ class _MainNavigationState extends State<MainNavigation> {
   /// Índice atualmente selecionado no menu inferior.
   int _selectedIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    AppLearningLanguageController.instance.addListener(
+      _handleLearningLanguageChanged,
+    );
+  }
+
+  @override
+  void dispose() {
+    AppLearningLanguageController.instance.removeListener(
+      _handleLearningLanguageChanged,
+    );
+    super.dispose();
+  }
+
+  void _handleLearningLanguageChanged() {
+    // Uma mudança de idioma invalida qualquer detalhe/runtime aberto no
+    // Navigator interno da Home. O utilizador regressa ao mapa e a raiz é
+    // reconstruída para carregar o percurso oficial correspondente.
+    _resetHomeRoute();
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   /// Lista das páginas associadas ao menu inferior.
   ///
   /// O IndexedStack mantém o estado das páginas ao trocar de aba.
@@ -62,6 +90,8 @@ class _MainNavigationState extends State<MainNavigation> {
     }
 
     final accountId = session.currentUser?.id.trim();
+    final learningLanguageCode =
+        AppLearningLanguageController.instance.languageCode;
 
     final useDynamicLearningMap = shouldUseLearningMapHome(
       featureEnabled: FeatureFlags.isEnabled(FeatureFlag.dynamicLearningMap),
@@ -73,7 +103,11 @@ class _MainNavigationState extends State<MainNavigation> {
         useDynamicLearningMap
         ? (footer) => LearningMapHomeHost(
             accountId: accountId!,
+            key: ValueKey<String>(
+              'learning-map-home-$learningLanguageCode',
+            ),
             locale: AppLocaleController.instance.languageCode,
+            learningLanguageCode: learningLanguageCode,
             footer: footer,
             fallback: const Center(
               child: Padding(

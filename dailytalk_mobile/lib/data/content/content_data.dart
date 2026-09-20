@@ -3,3 +3,4 @@ export 'learning_content_bootstrap.dart';
 export 'learning_content_catalog.dart';
 export 'learning_content_import.dart';
 export 'learning_content_remote.dart';
+export 'official_learning_path_resolver.dart';

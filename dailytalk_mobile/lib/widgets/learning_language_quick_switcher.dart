@@ -10,8 +10,8 @@ import '../state/app_session_controller.dart';
 ///
 /// O botão mostra apenas a bandeira. Ao tocar, abre um seletor rápido que
 /// altera `learningLanguageCode` usando a mesma preferência já usada pelo
-/// ecrã Language. Nesta etapa não altera o Learning Path ativo; essa ligação
-/// será feita na Fase 4.7B.2A.
+/// ecrã Language. O shell observa essa alteração, regressa ao mapa e carrega o
+/// percurso oficial associado ao novo idioma.
 class LearningLanguageQuickSwitcher extends StatelessWidget {
   const LearningLanguageQuickSwitcher({super.key, this.compact = false});
 
@@ -130,59 +130,52 @@ class LearningLanguageQuickSwitcher extends StatelessWidget {
                     Expanded(
                       child: ListView(
                         padding: EdgeInsets.zero,
-                        children: _languages
-                            .map((language) {
-                              final selected =
-                                  language.code == controller.languageCode;
-                              final sameAsApp =
-                                  language.code == appLanguageCode;
+                        children: _languages.map((language) {
+                    final selected =
+                        language.code == controller.languageCode;
+                    final sameAsApp = language.code == appLanguageCode;
 
-                              return ListTile(
-                                key: ValueKey<String>(
-                                  'learning-language-option-${language.code}',
-                                ),
-                                enabled: !sameAsApp,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                leading: _FlagImage(
-                                  language: language,
-                                  width: 34,
-                                  height: 23,
-                                ),
-                                title: Text(
-                                  language.name,
-                                  style: TextStyle(
-                                    color: sameAsApp
-                                        ? Colors.white38
-                                        : Colors.white,
-                                    fontWeight: selected
-                                        ? FontWeight.w800
-                                        : FontWeight.w600,
-                                  ),
-                                ),
-                                subtitle: sameAsApp
-                                    ? Text(
-                                        _tr('Idioma da aplicação'),
-                                        style: const TextStyle(
-                                          color: Colors.white38,
-                                        ),
-                                      )
-                                    : null,
-                                trailing: selected
-                                    ? const Icon(
-                                        Icons.check_circle,
-                                        color: Color(0xFF35C8FF),
-                                      )
-                                    : null,
-                                onTap: sameAsApp
-                                    ? null
-                                    : () => Navigator.of(
-                                        sheetContext,
-                                      ).pop(language.code),
-                              );
-                            })
-                            .toList(growable: false),
+                    return ListTile(
+                      key: ValueKey<String>(
+                        'learning-language-option-${language.code}',
+                      ),
+                      enabled: !sameAsApp,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      leading: _FlagImage(
+                        language: language,
+                        width: 34,
+                        height: 23,
+                      ),
+                      title: Text(
+                        language.name,
+                        style: TextStyle(
+                          color: sameAsApp ? Colors.white38 : Colors.white,
+                          fontWeight: selected
+                              ? FontWeight.w800
+                              : FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: sameAsApp
+                          ? Text(
+                              _tr('Idioma da aplicação'),
+                              style: const TextStyle(color: Colors.white38),
+                            )
+                          : null,
+                      trailing: selected
+                          ? const Icon(
+                              Icons.check_circle,
+                              color: Color(0xFF35C8FF),
+                            )
+                          : null,
+                      onTap: sameAsApp
+                          ? null
+                          : () => Navigator.of(
+                              sheetContext,
+                            ).pop(language.code),
+                    );
+                        }).toList(growable: false),
                       ),
                     ),
                   ],
@@ -220,9 +213,14 @@ class LearningLanguageQuickSwitcher extends StatelessWidget {
       return;
     }
 
+    final shouldSyncRemotely = session.isAuthenticated;
+
+    // A notificação pode fazer o shell regressar imediatamente ao mapa e
+    // desmontar o runtime onde o seletor foi aberto. A sincronização remota
+    // não pode depender de esse BuildContext continuar montado.
     await controller.setLanguageCode(normalized);
 
-    if (!context.mounted || !session.isAuthenticated) {
+    if (!shouldSyncRemotely) {
       return;
     }
 
@@ -264,8 +262,9 @@ class LearningLanguageQuickSwitcher extends StatelessWidget {
     final normalized = normalizeLearningLanguageCode(code);
     return _languages.firstWhere(
       (language) => language.code == normalized,
-      orElse: () =>
-          _languages.firstWhere((language) => language.code == 'it-IT'),
+      orElse: () => _languages.firstWhere(
+        (language) => language.code == 'it-IT',
+      ),
     );
   }
 }

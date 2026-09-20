@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'config/feature_flags.dart';
 import 'data/content/learning_content_assets.dart';
 import 'data/content/learning_content_bootstrap.dart';
+import 'data/content/official_learning_path_resolver.dart';
 import 'data/database/database_factory_config.dart';
 import 'data/services/learning_progress_startup_reconciliation_service.dart';
 import 'screens/auth_gate.dart';
@@ -20,22 +21,23 @@ Future<void> main() async {
   // Configura a base de dados conforme a plataforma atual.
   await configureDatabaseFactory();
 
-  // A primeira execução prepara o pacote oficial local sem depender da rede.
-  // Uma falha de conteúdo não impede autenticação/diagnóstico da aplicação.
+  // Lê os idiomas guardados antes de construir o primeiro ecrã. Desta forma,
+  // a UI e o percurso oficial arrancam já com a preferência persistida.
+  await AppLocaleController.instance.initialize();
+  await AppLearningLanguageController.instance.initialize();
+
+  // A primeira execução prepara o pacote oficial correspondente ao idioma de
+  // aprendizagem sem depender da rede. Uma falha de conteúdo não impede
+  // autenticação/diagnóstico da aplicação.
   try {
-    await LearningContentBootstrapService.instance.ensureLocalBaseline();
+    await LearningContentBootstrapService.instance.ensureLocalBaseline(
+      learningLanguageCode:
+          AppLearningLanguageController.instance.languageCode,
+    );
   } catch (error, stackTrace) {
     debugPrint('Falha ao preparar conteúdo oficial local: $error');
     debugPrintStack(stackTrace: stackTrace);
   }
-
-  // Lê o idioma guardado antes de construir o primeiro ecrã. Desta forma, a
-  // aplicação não apresenta primeiro português e só depois muda de idioma.
-  await AppLocaleController.instance.initialize();
-
-  // Carrega também o idioma de aprendizagem antes do primeiro frame para que
-  // a bandeira fixa represente imediatamente a preferência persistida.
-  await AppLearningLanguageController.instance.initialize();
 
   runApp(const DailyTalkApp());
 
@@ -54,8 +56,16 @@ Future<void> main() async {
 }
 
 Future<void> _refreshOfficialContentInBackground() async {
+  final learningLanguageCode =
+      AppLearningLanguageController.instance.languageCode;
+  final descriptor = OfficialLearningPathResolver.resolve(
+    learningLanguageCode,
+  );
+
   try {
-    await LearningContentBootstrapService.instance.refreshOfficialContent();
+    await LearningContentBootstrapService.instance.refreshOfficialContent(
+      learningLanguageCode: learningLanguageCode,
+    );
   } catch (error, stackTrace) {
     // Falha transitória de rede/conteúdo nunca elimina a última versão local.
     debugPrint('Atualização de conteúdo oficial adiada: $error');
@@ -68,7 +78,7 @@ Future<void> _refreshOfficialContentInBackground() async {
 
   try {
     await LearningContentAssetService.instance.refreshActiveAssets(
-      LearningContentBootstrapService.officialLearningPathId,
+      descriptor.learningPathId,
     );
   } catch (error, stackTrace) {
     // Assets são enriquecimento: a atividade textual permanece utilizável e

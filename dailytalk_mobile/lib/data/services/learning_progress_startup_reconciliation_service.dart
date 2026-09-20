@@ -6,6 +6,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../../domain/learning/learning_domain.dart';
 import '../../state/app_event_notifier.dart';
+import '../../state/app_learning_language_controller.dart';
 import '../../state/app_session_controller.dart';
 import '../api/dailytalk_api_service.dart';
 import '../commands/sync_command.dart';
@@ -85,7 +86,10 @@ final class LearningProgressStartupReconciliationService {
       },
       loadContext: () async {
         final active = await LearningContentBootstrapService.instance
-            .ensureLocalBaseline();
+            .ensureLocalBaseline(
+              learningLanguageCode:
+                  AppLearningLanguageController.instance.languageCode,
+            );
 
         return LearningProgressStartupContext(
           learningPath: active.path,

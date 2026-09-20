@@ -1,5 +1,6 @@
 import 'package:dailytalk_mobile/domain/learning/learning_models.dart';
 import 'package:dailytalk_mobile/screens/speech_practice_page.dart';
+import 'package:dailytalk_mobile/state/app_learning_language_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -72,4 +73,42 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('schema v2 speech resolves authored prompt in practice language', (
+    tester,
+  ) async {
+    await AppLearningLanguageController.instance.setLanguageCode(
+      'fr-FR',
+      persist: false,
+    );
+    addTearDown(() async {
+      await AppLearningLanguageController.instance.setLanguageCode(
+        'it-IT',
+        persist: false,
+      );
+    });
+
+    final execution = SpeechActivityExecution(
+      prompts: <SpeechExecutionPrompt>[
+        SpeechExecutionPrompt(
+          id: 'one',
+          text: LocalizedText(<String, String>{
+            'pt-PT': 'Repete: Bonjour !',
+            'fr-FR': 'Bonjour !',
+          }),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('pt', 'PT'),
+        home: SpeechPracticePage(execution: execution),
+      ),
+    );
+
+    expect(find.text('Bonjour !'), findsOneWidget);
+    expect(find.text('Repete: Bonjour !'), findsNothing);
+  });
+
 }

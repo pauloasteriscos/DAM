@@ -15,9 +15,10 @@ const List<String> supportedLearningLanguageCodes = <String>[
 
 /// Estado global do idioma que o utilizador pretende praticar.
 ///
-/// Este controlador ainda não escolhe o Learning Path. Nesta etapa ele apenas
-/// representa e persiste a preferência `target_language_code`. A ligação
-/// `learningLanguageCode -> learningPathId` pertence à Fase 4.7B.2A.
+/// Representa e persiste a preferência `target_language_code`. O Learning Map
+/// observa este estado e resolve o percurso oficial correspondente através do
+/// resolvedor oficial, mantendo a seleção de idioma separada da
+/// lógica de catálogo/progressão.
 class AppLearningLanguageController extends ChangeNotifier {
   AppLearningLanguageController._();
 
