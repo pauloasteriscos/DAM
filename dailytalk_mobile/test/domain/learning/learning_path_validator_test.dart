@@ -45,10 +45,11 @@ LearningPath _path({
   required Iterable<Activity> activities,
   required Iterable<Stage> stages,
   Iterable<Competency> competencies = const [],
+  int schemaVersion = 1,
 }) {
   return LearningPath(
     id: LearningPathId('phase1.increment-03'),
-    schemaVersion: SchemaVersion(1),
+    schemaVersion: SchemaVersion(schemaVersion),
     defaultLocale: 'pt-PT',
     title: _text('Percurso'),
     journeys: [
@@ -171,6 +172,24 @@ void main() {
     expect(
       _codes(result),
       contains(LearningPathValidationCode.missingRevisionCompetency),
+    );
+  });
+
+  test('schema v2 exige execution nas revisões', () {
+    final activityId = ActivityId('activity.first');
+    final result = validator.inspect(
+      _path(
+        schemaVersion: 2,
+        activities: [_activity(activityId)],
+        stages: [
+          _stage('stage.main', [_element('element.first', activityId)]),
+        ],
+      ),
+    );
+
+    expect(
+      _codes(result),
+      contains(LearningPathValidationCode.missingRevisionExecution),
     );
   });
 

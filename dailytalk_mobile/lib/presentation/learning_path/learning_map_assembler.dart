@@ -187,6 +187,9 @@ final class LearningMapAssembler {
                 normalizedLocale,
                 fallbackLocale: learningPath.defaultLocale,
               ),
+              contentSchemaVersion: learningPath.schemaVersion.value,
+              contentDefaultLocale: learningPath.defaultLocale,
+              execution: revision.execution,
               competencyIds: {
                 for (final competencyId in revision.competencies)
                   competencyId.value,

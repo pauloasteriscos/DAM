@@ -1,4 +1,5 @@
 import '../../domain/learning/learning_enums.dart';
+import '../../domain/learning/learning_models.dart';
 import '../../domain/learning/progression_engine.dart';
 
 /// Read model completo utilizado pela apresentaÃƒÂ§ÃƒÂ£o do percurso.
@@ -241,6 +242,9 @@ final class LearningMapElementViewModel {
     this.revisionId,
     this.activityType,
     this.instructions,
+    this.contentSchemaVersion = 1,
+    this.contentDefaultLocale = 'pt-PT',
+    this.execution,
     this.origin,
     this.visibility,
     this.recommendationRank,
@@ -256,6 +260,18 @@ final class LearningMapElementViewModel {
 
   final String? title;
   final String? instructions;
+
+  /// Content schema that authored this activity revision.
+  ///
+  /// Schema 1 intentionally keeps the legacy screen banks available. Schema 2
+  /// is execution-bound and must carry a compatible [execution] payload.
+  final int contentSchemaVersion;
+
+  /// Fallback locale declared by the active LearningPath package.
+  final String contentDefaultLocale;
+
+  /// Immutable executable payload of the exact current revision.
+  final ActivityExecution? execution;
 
   final Set<String> competencyIds;
 

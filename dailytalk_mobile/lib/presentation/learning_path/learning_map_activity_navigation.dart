@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/learning/learning_enums.dart';
+import '../../domain/learning/learning_models.dart';
 import '../../screens/dialogue_page.dart';
 import '../../screens/quiz_page.dart';
 import '../../screens/revision_page.dart';
+import '../../screens/speech_practice_page.dart';
 import '../../screens/vocabulary_pairs_page.dart';
 import 'learning_map_view_model.dart';
+import 'learning_mission_detail_page.dart';
 
 /// Result of resolving a Learning Map activity into app navigation.
 ///
@@ -64,9 +67,10 @@ final class LearningMapActivityNavigationDecision {
 /// - dialogue
 /// - quiz
 /// - review
+/// - speech
 ///
-/// Speech and integrated challenges remain fail-closed until a concrete
-/// activity screen is implemented for those types.
+/// Integrated challenges remain fail-closed until a concrete activity screen
+/// is implemented for that type.
 abstract final class LearningMapActivityNavigation {
   static LearningMapActivityNavigationDecision resolve(
     LearningMapElementViewModel element,
@@ -79,14 +83,32 @@ abstract final class LearningMapActivityNavigation {
       return const LearningMapActivityNavigationDecision.blocked();
     }
 
-    final destination = _destinationFor(element.activityType!);
+    final type = element.activityType!;
+    final execution = element.execution;
+
+    // Schema 2 certifies an exact revision. Falling back to a generic hardcoded
+    // bank here would execute content different from the revision represented
+    // by the Learning Map, so the boundary must fail closed.
+    if (element.contentSchemaVersion >= 2 &&
+        (execution == null || execution.activityType != type)) {
+      return const LearningMapActivityNavigationDecision.invalid();
+    }
+
+    final destination = _destinationFor(
+      type,
+      execution: element.contentSchemaVersion >= 2 ? execution : null,
+      contentDefaultLocale: element.contentDefaultLocale,
+    );
 
     if (destination == null) {
       return const LearningMapActivityNavigationDecision.unsupported();
     }
 
     return LearningMapActivityNavigationDecision.ready(
-      destination: destination,
+      destination: LearningMissionDetailPage(
+        mission: element,
+        runtimeDestination: destination,
+      ),
     );
   }
 
@@ -123,13 +145,32 @@ abstract final class LearningMapActivityNavigation {
     }
   }
 
-  static Widget? _destinationFor(LearningActivityType type) {
+  static Widget? _destinationFor(
+    LearningActivityType type, {
+    required ActivityExecution? execution,
+    required String contentDefaultLocale,
+  }) {
     return switch (type) {
-      LearningActivityType.vocabulary => const VocabularyPairsPage(),
-      LearningActivityType.dialogue => const DialoguePage(),
-      LearningActivityType.quiz => const QuizPage(),
-      LearningActivityType.review => const RevisionPage(),
-      LearningActivityType.speech => null,
+      LearningActivityType.vocabulary => VocabularyPairsPage(
+        execution: execution as VocabularyActivityExecution?,
+        contentDefaultLocale: contentDefaultLocale,
+      ),
+      LearningActivityType.dialogue => DialoguePage(
+        execution: execution as DialogueActivityExecution?,
+        contentDefaultLocale: contentDefaultLocale,
+      ),
+      LearningActivityType.quiz => QuizPage(
+        execution: execution as QuizActivityExecution?,
+        contentDefaultLocale: contentDefaultLocale,
+      ),
+      LearningActivityType.review => RevisionPage(
+        execution: execution as ReviewActivityExecution?,
+        contentDefaultLocale: contentDefaultLocale,
+      ),
+      LearningActivityType.speech => SpeechPracticePage(
+        execution: execution as SpeechActivityExecution?,
+        contentDefaultLocale: contentDefaultLocale,
+      ),
       LearningActivityType.integratedChallenge => null,
     };
   }

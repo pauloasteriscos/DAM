@@ -40,7 +40,7 @@ final class LearningContentException implements Exception {
   String toString() => '${code.name} em $location: $message';
 }
 
-/// Serializa e interpreta pacotes de conteúdo da versão 1.
+/// Serializa e interpreta pacotes de conteúdo das versões 1 e 2.
 ///
 /// A descodificação é fail-fast para estrutura e tipos e, depois de construir
 /// o agregado, executa a validação global de referências e ciclos.
@@ -49,7 +49,8 @@ final class LearningContentCodec {
     LearningPathValidator validator = const LearningPathValidator(),
   }) : _validator = validator;
 
-  static const int supportedSchemaVersion = 1;
+  static const int latestSchemaVersion = 2;
+  static const Set<int> supportedSchemaVersions = <int>{1, 2};
 
   final LearningPathValidator _validator;
 
@@ -87,7 +88,7 @@ final class LearningContentCodec {
       'competencies',
     });
     final schemaVersion = reader.integer('schemaVersion');
-    if (schemaVersion != supportedSchemaVersion) {
+    if (!supportedSchemaVersions.contains(schemaVersion)) {
       throw LearningContentException(
         code: LearningContentErrorCode.unsupportedSchemaVersion,
         location: r'$root.schemaVersion',
@@ -107,7 +108,7 @@ final class LearningContentCodec {
             .toList(growable: false),
         activities: reader
             .objects('activities')
-            .map(_activity)
+            .map((item) => _activity(item, schemaVersion: schemaVersion))
             .toList(growable: false),
         competencies: reader
             .objects('competencies')
@@ -144,7 +145,7 @@ final class LearningContentCodec {
   }
 
   Map<String, dynamic> encode(LearningPath path) {
-    if (path.schemaVersion.value != supportedSchemaVersion) {
+    if (!supportedSchemaVersions.contains(path.schemaVersion.value)) {
       throw LearningContentException(
         code: LearningContentErrorCode.unsupportedSchemaVersion,
         location: r'$root.schemaVersion',
@@ -168,7 +169,12 @@ final class LearningContentCodec {
       'title': _encodeLocalizedText(path.title),
       'journeys': path.journeys.map(_encodeJourney).toList(growable: false),
       'activities': path.activities
-          .map(_encodeActivity)
+          .map(
+            (activity) => _encodeActivity(
+              activity,
+              schemaVersion: path.schemaVersion.value,
+            ),
+          )
           .toList(growable: false),
       'competencies': path.competencies
           .map(_encodeCompetency)
@@ -200,7 +206,7 @@ final class LearningContentCodec {
     );
   }
 
-  Activity _activity(_JsonReader reader) {
+  Activity _activity(_JsonReader reader, {required int schemaVersion}) {
     reader.allowOnly({
       'id',
       'type',
@@ -208,19 +214,30 @@ final class LearningContentCodec {
       'currentRevisionId',
       'revisions',
     });
+    final type = reader.enumeration('type', LearningActivityType.values);
     return Activity(
       id: ActivityId(reader.string('id')),
-      type: reader.enumeration('type', LearningActivityType.values),
+      type: type,
       origin: reader.enumeration('origin', ContentOrigin.values),
       currentRevisionId: RevisionId(reader.string('currentRevisionId')),
       revisions: reader
           .objects('revisions')
-          .map(_activityRevision)
+          .map(
+            (item) => _activityRevision(
+              item,
+              schemaVersion: schemaVersion,
+              activityType: type,
+            ),
+          )
           .toList(growable: false),
     );
   }
 
-  ActivityRevision _activityRevision(_JsonReader reader) {
+  ActivityRevision _activityRevision(
+    _JsonReader reader, {
+    required int schemaVersion,
+    required LearningActivityType activityType,
+  }) {
     reader.allowOnly({
       'id',
       'activityId',
@@ -229,7 +246,13 @@ final class LearningContentCodec {
       'instructions',
       'visibility',
       'competencies',
+      if (schemaVersion >= 2) 'execution',
     });
+
+    final execution = schemaVersion >= 2
+        ? _activityExecution(reader.object('execution'), activityType)
+        : null;
+
     return ActivityRevision(
       id: RevisionId(reader.string('id')),
       activityId: ActivityId(reader.string('activityId')),
@@ -237,10 +260,129 @@ final class LearningContentCodec {
       title: _localizedText(reader.object('title')),
       instructions: _localizedText(reader.object('instructions')),
       visibility: reader.enumeration('visibility', ContentVisibility.values),
+      execution: execution,
       competencies: reader
           .strings('competencies')
           .map(CompetencyId.new)
           .toList(growable: false),
+    );
+  }
+
+  ActivityExecution _activityExecution(
+    _JsonReader reader,
+    LearningActivityType activityType,
+  ) {
+    final kind = reader.enumeration('kind', LearningActivityType.values);
+    if (kind != activityType) {
+      throw LearningContentException(
+        code: LearningContentErrorCode.invalidContent,
+        location: '${reader.location}.kind',
+        message:
+            'execution.kind=${kind.name} não corresponde ao tipo ${activityType.name}',
+      );
+    }
+
+    return switch (kind) {
+      LearningActivityType.vocabulary => _vocabularyExecution(reader),
+      LearningActivityType.dialogue => _dialogueExecution(reader),
+      LearningActivityType.speech => _speechExecution(reader),
+      LearningActivityType.quiz => _quizExecution(reader),
+      LearningActivityType.review => _reviewExecution(reader),
+      LearningActivityType.integratedChallenge => throw LearningContentException(
+        code: LearningContentErrorCode.invalidContent,
+        location: reader.location,
+        message:
+            'integratedChallenge ainda não possui runtime executável no schema 2',
+      ),
+    };
+  }
+
+  VocabularyActivityExecution _vocabularyExecution(_JsonReader reader) {
+    reader.allowOnly({'kind', 'items'});
+    return VocabularyActivityExecution(
+      items: reader.objects('items').map((item) {
+        item.allowOnly({'id', 'text'});
+        return VocabularyExecutionItem(
+          id: item.string('id'),
+          text: _localizedText(item.object('text')),
+        );
+      }),
+    );
+  }
+
+  DialogueActivityExecution _dialogueExecution(_JsonReader reader) {
+    reader.allowOnly({'kind', 'scenarioTitle', 'scenarioDescription', 'turns'});
+    return DialogueActivityExecution(
+      scenarioTitle: _localizedText(reader.object('scenarioTitle')),
+      scenarioDescription: _localizedText(reader.object('scenarioDescription')),
+      turns: reader.objects('turns').map((turn) {
+        turn.allowOnly({
+          'id',
+          'partnerMessage',
+          'prompt',
+          'correctReply',
+          'distractors',
+        });
+        return DialogueExecutionTurn(
+          id: turn.string('id'),
+          partnerMessage: _localizedText(turn.object('partnerMessage')),
+          prompt: _localizedText(turn.object('prompt')),
+          correctReply: _localizedText(turn.object('correctReply')),
+          distractors: turn.objects('distractors').map(_localizedText),
+        );
+      }),
+    );
+  }
+
+  SpeechActivityExecution _speechExecution(_JsonReader reader) {
+    reader.allowOnly({'kind', 'prompts'});
+    return SpeechActivityExecution(
+      prompts: reader.objects('prompts').map((prompt) {
+        prompt.allowOnly({'id', 'text'});
+        return SpeechExecutionPrompt(
+          id: prompt.string('id'),
+          text: _localizedText(prompt.object('text')),
+        );
+      }),
+    );
+  }
+
+  QuizActivityExecution _quizExecution(_JsonReader reader) {
+    reader.allowOnly({'kind', 'questions'});
+    return QuizActivityExecution(
+      questions: reader.objects('questions').map((question) {
+        question.allowOnly({
+          'id',
+          'category',
+          'scenario',
+          'prompt',
+          'correctAnswer',
+          'distractors',
+        });
+        return QuizExecutionQuestion(
+          id: question.string('id'),
+          category: _localizedText(question.object('category')),
+          scenario: _localizedText(question.object('scenario')),
+          prompt: _localizedText(question.object('prompt')),
+          correctAnswer: _localizedText(question.object('correctAnswer')),
+          distractors: question.objects('distractors').map(_localizedText),
+        );
+      }),
+    );
+  }
+
+  ReviewActivityExecution _reviewExecution(_JsonReader reader) {
+    reader.allowOnly({'kind', 'cards'});
+    return ReviewActivityExecution(
+      cards: reader.objects('cards').map((card) {
+        card.allowOnly({'id', 'category', 'context', 'text'});
+        return ReviewExecutionCard(
+          id: card.string('id'),
+          category: _localizedText(card.object('category')),
+          context: _localizedText(card.object('context')),
+          text: _localizedText(card.object('text')),
+        );
+      }),
     );
   }
 
@@ -330,27 +472,134 @@ final class LearningContentCodec {
     'description': _encodeLocalizedText(competency.description),
   };
 
-  Map<String, dynamic> _encodeActivity(Activity activity) => {
+  Map<String, dynamic> _encodeActivity(
+    Activity activity, {
+    required int schemaVersion,
+  }) => {
     'id': activity.id.value,
     'type': activity.type.name,
     'origin': activity.origin.name,
     'currentRevisionId': activity.currentRevisionId.value,
     'revisions': activity.revisions
-        .map(_encodeActivityRevision)
+        .map(
+          (revision) =>
+              _encodeActivityRevision(revision, schemaVersion: schemaVersion),
+        )
         .toList(growable: false),
   };
 
-  Map<String, dynamic> _encodeActivityRevision(ActivityRevision revision) => {
-    'id': revision.id.value,
-    'activityId': revision.activityId.value,
-    'revisionNumber': revision.revisionNumber,
-    'title': _encodeLocalizedText(revision.title),
-    'instructions': _encodeLocalizedText(revision.instructions),
-    'visibility': revision.visibility.name,
-    'competencies': revision.competencies
-        .map((competency) => competency.value)
-        .toList(growable: false),
-  };
+  Map<String, dynamic> _encodeActivityRevision(
+    ActivityRevision revision, {
+    required int schemaVersion,
+  }) {
+    final execution = revision.execution;
+
+    if (schemaVersion == 1 && execution != null) {
+      throw LearningContentException(
+        code: LearningContentErrorCode.invalidContent,
+        location: 'activity:${revision.activityId}/revision:${revision.id}',
+        message: 'schema 1 não suporta conteúdo execution',
+      );
+    }
+
+    if (schemaVersion >= 2 && execution == null) {
+      throw LearningContentException(
+        code: LearningContentErrorCode.invalidContent,
+        location: 'activity:${revision.activityId}/revision:${revision.id}',
+        message: 'schema $schemaVersion exige conteúdo execution',
+      );
+    }
+
+    return <String, dynamic>{
+      'id': revision.id.value,
+      'activityId': revision.activityId.value,
+      'revisionNumber': revision.revisionNumber,
+      'title': _encodeLocalizedText(revision.title),
+      'instructions': _encodeLocalizedText(revision.instructions),
+      'visibility': revision.visibility.name,
+      'competencies': revision.competencies
+          .map((competency) => competency.value)
+          .toList(growable: false),
+      if (execution != null) 'execution': _encodeActivityExecution(execution),
+    };
+  }
+
+  Map<String, dynamic> _encodeActivityExecution(ActivityExecution execution) {
+    return switch (execution) {
+      VocabularyActivityExecution() => <String, dynamic>{
+        'kind': execution.activityType.name,
+        'items': execution.items
+            .map(
+              (item) => <String, dynamic>{
+                'id': item.id,
+                'text': _encodeLocalizedText(item.text),
+              },
+            )
+            .toList(growable: false),
+      },
+      DialogueActivityExecution() => <String, dynamic>{
+        'kind': execution.activityType.name,
+        'scenarioTitle': _encodeLocalizedText(execution.scenarioTitle),
+        'scenarioDescription': _encodeLocalizedText(
+          execution.scenarioDescription,
+        ),
+        'turns': execution.turns
+            .map(
+              (turn) => <String, dynamic>{
+                'id': turn.id,
+                'partnerMessage': _encodeLocalizedText(turn.partnerMessage),
+                'prompt': _encodeLocalizedText(turn.prompt),
+                'correctReply': _encodeLocalizedText(turn.correctReply),
+                'distractors': turn.distractors
+                    .map(_encodeLocalizedText)
+                    .toList(growable: false),
+              },
+            )
+            .toList(growable: false),
+      },
+      SpeechActivityExecution() => <String, dynamic>{
+        'kind': execution.activityType.name,
+        'prompts': execution.prompts
+            .map(
+              (prompt) => <String, dynamic>{
+                'id': prompt.id,
+                'text': _encodeLocalizedText(prompt.text),
+              },
+            )
+            .toList(growable: false),
+      },
+      QuizActivityExecution() => <String, dynamic>{
+        'kind': execution.activityType.name,
+        'questions': execution.questions
+            .map(
+              (question) => <String, dynamic>{
+                'id': question.id,
+                'category': _encodeLocalizedText(question.category),
+                'scenario': _encodeLocalizedText(question.scenario),
+                'prompt': _encodeLocalizedText(question.prompt),
+                'correctAnswer': _encodeLocalizedText(question.correctAnswer),
+                'distractors': question.distractors
+                    .map(_encodeLocalizedText)
+                    .toList(growable: false),
+              },
+            )
+            .toList(growable: false),
+      },
+      ReviewActivityExecution() => <String, dynamic>{
+        'kind': execution.activityType.name,
+        'cards': execution.cards
+            .map(
+              (card) => <String, dynamic>{
+                'id': card.id,
+                'category': _encodeLocalizedText(card.category),
+                'context': _encodeLocalizedText(card.context),
+                'text': _encodeLocalizedText(card.text),
+              },
+            )
+            .toList(growable: false),
+      },
+    };
+  }
 
   Map<String, dynamic> _encodeJourney(Journey journey) => {
     'id': journey.id.value,

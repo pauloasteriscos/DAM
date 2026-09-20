@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../domain/learning/learning_models.dart';
 
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
@@ -17,6 +18,8 @@ class QuizPage extends StatefulWidget {
     super.key,
     this.userLanguageCode = 'pt-PT',
     this.learningLanguageCode = 'it-IT',
+    this.execution,
+    this.contentDefaultLocale = 'pt-PT',
   });
 
   /// Idioma da aplicação/utilizador.
@@ -24,6 +27,12 @@ class QuizPage extends StatefulWidget {
 
   /// Idioma que o utilizador quer praticar.
   final String learningLanguageCode;
+
+  /// Exact executable payload when opened from a schema-v2 Learning Path.
+  /// Null preserves the legacy random quiz bank entry point.
+  final QuizActivityExecution? execution;
+
+  final String contentDefaultLocale;
 
   @override
   State<QuizPage> createState() => _QuizPageState();
@@ -146,8 +155,16 @@ class _QuizPageState extends State<QuizPage> {
 
   /// Cria a ronda de perguntas e prepara as respostas da primeira pergunta.
   void _prepareQuiz({required bool resetScore}) {
-    _questions = _quizBank.toList()..shuffle(Random());
-    _questions = _questions.take(5).toList();
+    final execution = widget.execution;
+
+    if (execution != null) {
+      _questions = execution.questions
+          .map(_questionFromExecution)
+          .toList(growable: false);
+    } else {
+      _questions = _quizBank.toList()..shuffle(Random());
+      _questions = _questions.take(5).toList();
+    }
 
     _currentIndex = 0;
     _selectedAnswerId = null;
@@ -159,6 +176,54 @@ class _QuizPageState extends State<QuizPage> {
       _streak = 0;
       _lives = 3;
     }
+  }
+
+  _QuizQuestion _questionFromExecution(QuizExecutionQuestion question) {
+    return _QuizQuestion(
+      id: question.id,
+      category: _localizedFromExecution(
+        '${question.id}-category',
+        question.category,
+      ),
+      scenario: _localizedFromExecution(
+        '${question.id}-scenario',
+        question.scenario,
+      ),
+      prompt: _localizedFromExecution('${question.id}-prompt', question.prompt),
+      correctAnswer: _localizedFromExecution(
+        '${question.id}-correct',
+        question.correctAnswer,
+      ),
+      distractors: <_LocalizedText>[
+        for (var index = 0; index < question.distractors.length; index++)
+          _localizedFromExecution(
+            '${question.id}-distractor-$index',
+            question.distractors[index],
+          ),
+      ],
+      icon: Icons.quiz_outlined,
+      visualIcon: Icons.forum_outlined,
+    );
+  }
+
+  _LocalizedText _localizedFromExecution(String id, LocalizedText text) {
+    final translations = <String, String>{};
+
+    for (final entry in text.values.entries) {
+      translations[entry.key] = entry.value;
+      translations.putIfAbsent(_translationKey(entry.key), () => entry.value);
+    }
+
+    final fallback = text.resolve(
+      widget.contentDefaultLocale,
+      fallbackLocale: widget.contentDefaultLocale,
+    );
+    translations.putIfAbsent(
+      _translationKey(widget.contentDefaultLocale),
+      () => fallback,
+    );
+
+    return _LocalizedText(id: id, translations: translations);
   }
 
   /// Constrói e baralha as respostas da pergunta atual.

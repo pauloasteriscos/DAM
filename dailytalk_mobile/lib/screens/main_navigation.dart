@@ -44,6 +44,8 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   final Random _random = Random();
+  final GlobalKey<NavigatorState> _homeNavigatorKey =
+      GlobalKey<NavigatorState>();
 
   /// Índice atualmente selecionado no menu inferior.
   int _selectedIndex = 0;
@@ -85,11 +87,18 @@ class _MainNavigationState extends State<MainNavigation> {
           )
         : null;
 
-    final Widget home = HomeGamificada(
+    final Widget homeContent = HomeGamificada(
       isTestMode: session.isTestMode,
       onAuthenticated: handleAuthenticated,
       mapContentBuilder: dynamicMapBuilder,
     );
+
+    // Quando o Learning Path dinâmico está ativo, as rotas de missão vivem
+    // dentro da aba Home. Assim, detalhe e runtime substituem apenas o
+    // conteúdo da Home e o rodapé principal permanece fixo.
+    final Widget home = useDynamicLearningMap
+        ? HomeTabNavigator(navigatorKey: _homeNavigatorKey, child: homeContent)
+        : homeContent;
 
     return [
       home,
@@ -129,14 +138,39 @@ class _MainNavigationState extends State<MainNavigation> {
   /// Esta decisão reforça a lógica gamificada, evitando que o botão funcione
   /// apenas como uma página estática intermédia.
   Future<void> _onItemTapped(int index) async {
+    // Home é sempre o ponto de regresso ao mapa. Se o utilizador estiver no
+    // detalhe/runtime de uma missão, fecha a pilha interna antes de trocar.
+    if (index == 0) {
+      _resetHomeRoute();
+      if (mounted) {
+        setState(() {
+          _selectedIndex = 0;
+        });
+      }
+      return;
+    }
+
+    if (_selectedIndex == 0) {
+      _resetHomeRoute();
+    }
+
     if (index == 1) {
       await _openRandomPracticeActivity();
       return;
     }
 
-    setState(() {
-      _selectedIndex = index;
-    });
+    if (mounted) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+  }
+
+  void _resetHomeRoute() {
+    final navigator = _homeNavigatorKey.currentState;
+    if (navigator != null && navigator.canPop()) {
+      navigator.popUntil((route) => route.isFirst);
+    }
   }
 
   /// Abre uma atividade prática de forma aleatória.
@@ -196,6 +230,63 @@ class _MainNavigationState extends State<MainNavigation> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Navigator interno da aba Home.
+///
+/// As missões do Learning Path podem abrir detalhe e runtime sem cobrir o
+/// [BottomNavigationBar] pertencente a [MainNavigation]. O widget também
+/// mantém o conteúdo raiz atualizável quando sessão/locale mudam.
+final class HomeTabNavigator extends StatefulWidget {
+  const HomeTabNavigator({required this.child, this.navigatorKey, super.key});
+
+  final Widget child;
+  final GlobalKey<NavigatorState>? navigatorKey;
+
+  @override
+  State<HomeTabNavigator> createState() => _HomeTabNavigatorState();
+}
+
+final class _HomeTabNavigatorState extends State<HomeTabNavigator> {
+  late final ValueNotifier<Widget> _rootChild;
+
+  @override
+  void initState() {
+    super.initState();
+    _rootChild = ValueNotifier<Widget>(widget.child);
+  }
+
+  @override
+  void didUpdateWidget(HomeTabNavigator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _rootChild.value = widget.child;
+  }
+
+  @override
+  void dispose() {
+    _rootChild.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      key: widget.navigatorKey,
+      onGenerateRoute: (settings) {
+        if (settings.name != Navigator.defaultRouteName) {
+          return null;
+        }
+
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => ValueListenableBuilder<Widget>(
+            valueListenable: _rootChild,
+            builder: (_, child, _) => child,
+          ),
+        );
+      },
     );
   }
 }

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../domain/learning/learning_models.dart';
 
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
@@ -18,6 +19,8 @@ class DialoguePage extends StatefulWidget {
     super.key,
     this.userLanguageCode = 'pt-PT',
     this.learningLanguageCode = 'it-IT',
+    this.execution,
+    this.contentDefaultLocale = 'pt-PT',
   });
 
   /// Idioma da aplicação/utilizador.
@@ -25,6 +28,12 @@ class DialoguePage extends StatefulWidget {
 
   /// Idioma que o utilizador quer praticar.
   final String learningLanguageCode;
+
+  /// Exact executable payload when opened from a schema-v2 Learning Path.
+  /// Null preserves the legacy random dialogue bank entry point.
+  final DialogueActivityExecution? execution;
+
+  final String contentDefaultLocale;
 
   @override
   State<DialoguePage> createState() => _DialoguePageState();
@@ -152,8 +161,15 @@ class _DialoguePageState extends State<DialoguePage> {
 
   /// Prepara uma nova ronda de diálogo.
   void _prepareDialogue({required bool resetScore}) {
-    final scenarios = _dialogueBank.toList()..shuffle(Random());
-    _scenario = scenarios.first;
+    final execution = widget.execution;
+
+    if (execution != null) {
+      _scenario = _scenarioFromExecution(execution);
+    } else {
+      final scenarios = _dialogueBank.toList()..shuffle(Random());
+      _scenario = scenarios.first;
+    }
+
     _turnIndex = 0;
     _selectedReplyId = null;
     _hasAnswered = false;
@@ -166,6 +182,63 @@ class _DialoguePageState extends State<DialoguePage> {
       _streak = 0;
       _lives = 3;
     }
+  }
+
+  _DialogueScenario _scenarioFromExecution(
+    DialogueActivityExecution execution,
+  ) {
+    return _DialogueScenario(
+      id: 'mission-dialogue',
+      title: _localizedFromExecution('scenario-title', execution.scenarioTitle),
+      description: _localizedFromExecution(
+        'scenario-description',
+        execution.scenarioDescription,
+      ),
+      turns: execution.turns
+          .map(
+            (turn) => _DialogueTurn(
+              id: turn.id,
+              partnerMessage: _localizedFromExecution(
+                '${turn.id}-partner',
+                turn.partnerMessage,
+              ),
+              prompt: _localizedFromExecution('${turn.id}-prompt', turn.prompt),
+              correctReply: _localizedFromExecution(
+                '${turn.id}-correct',
+                turn.correctReply,
+              ),
+              distractors: <_LocalizedText>[
+                for (var index = 0; index < turn.distractors.length; index++)
+                  _localizedFromExecution(
+                    '${turn.id}-distractor-$index',
+                    turn.distractors[index],
+                  ),
+              ],
+            ),
+          )
+          .toList(growable: false),
+      icon: Icons.forum_outlined,
+    );
+  }
+
+  _LocalizedText _localizedFromExecution(String id, LocalizedText text) {
+    final translations = <String, String>{};
+
+    for (final entry in text.values.entries) {
+      translations[entry.key] = entry.value;
+      translations.putIfAbsent(_translationKey(entry.key), () => entry.value);
+    }
+
+    final fallback = text.resolve(
+      widget.contentDefaultLocale,
+      fallbackLocale: widget.contentDefaultLocale,
+    );
+    translations.putIfAbsent(
+      _translationKey(widget.contentDefaultLocale),
+      () => fallback,
+    );
+
+    return _LocalizedText(id: id, translations: translations);
   }
 
   /// Constrói e baralha as respostas possíveis do turno atual.

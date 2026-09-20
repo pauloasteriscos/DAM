@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../domain/learning/learning_models.dart';
 
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
@@ -19,10 +20,18 @@ class RevisionPage extends StatefulWidget {
     super.key,
     this.userLanguageCode = 'pt-PT',
     this.learningLanguageCode = 'it-IT',
+    this.execution,
+    this.contentDefaultLocale = 'pt-PT',
   });
 
   final String userLanguageCode;
   final String learningLanguageCode;
+
+  /// Exact executable payload when opened from a schema-v2 Learning Path.
+  /// Null preserves the legacy shuffled review bank entry point.
+  final ReviewActivityExecution? execution;
+
+  final String contentDefaultLocale;
 
   @override
   State<RevisionPage> createState() => _RevisionPageState();
@@ -128,8 +137,15 @@ class _RevisionPageState extends State<RevisionPage> {
 
   /// Cria uma ronda curta com cartões contextualizados para o DailyTalk.pt.
   void _startReview({required bool resetProgress}) {
-    _cards = _reviewBank.toList()..shuffle(Random());
-    _cards = _cards.take(8).toList();
+    final execution = widget.execution;
+
+    if (execution != null) {
+      _cards = execution.cards.map(_cardFromExecution).toList(growable: false);
+    } else {
+      _cards = _reviewBank.toList()..shuffle(Random());
+      _cards = _cards.take(8).toList();
+    }
+
     _currentIndex = 0;
     _isRevealed = false;
 
@@ -138,6 +154,35 @@ class _RevisionPageState extends State<RevisionPage> {
       _reviewCount = 0;
       _streak = 0;
     }
+  }
+
+  _ReviewCardItem _cardFromExecution(ReviewExecutionCard card) {
+    return _ReviewCardItem(
+      id: card.id,
+      category: _translationsFromExecution(card.category),
+      context: _translationsFromExecution(card.context),
+      translations: _translationsFromExecution(card.text),
+    );
+  }
+
+  Map<String, String> _translationsFromExecution(LocalizedText text) {
+    final translations = <String, String>{};
+
+    for (final entry in text.values.entries) {
+      translations[entry.key] = entry.value;
+      translations.putIfAbsent(_translationKey(entry.key), () => entry.value);
+    }
+
+    final fallback = text.resolve(
+      widget.contentDefaultLocale,
+      fallbackLocale: widget.contentDefaultLocale,
+    );
+    translations.putIfAbsent(
+      _translationKey(widget.contentDefaultLocale),
+      () => fallback,
+    );
+
+    return translations;
   }
 
   void _showMeaning() {

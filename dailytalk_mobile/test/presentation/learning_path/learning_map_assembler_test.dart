@@ -152,16 +152,78 @@ void main() {
       ),
     );
   });
+
+  test('schema v2 carries exact revision execution into the read model', () {
+    final execution = DialogueActivityExecution(
+      scenarioTitle: LocalizedText(<String, String>{
+        'en': 'Mission scenario',
+        'pt-PT': 'Cenário da missão',
+      }),
+      scenarioDescription: LocalizedText(<String, String>{
+        'en': 'Mission description',
+        'pt-PT': 'Descrição da missão',
+      }),
+      turns: <DialogueExecutionTurn>[
+        DialogueExecutionTurn(
+          id: 'turn-1',
+          partnerMessage: LocalizedText(<String, String>{
+            'en': 'Hello',
+            'pt-PT': 'Olá',
+          }),
+          prompt: LocalizedText(<String, String>{
+            'en': 'Reply',
+            'pt-PT': 'Responde',
+          }),
+          correctReply: LocalizedText(<String, String>{
+            'en': 'Hi',
+            'pt-PT': 'Olá!',
+          }),
+          distractors: <LocalizedText>[
+            LocalizedText(<String, String>{'en': 'Bye', 'pt-PT': 'Adeus'}),
+          ],
+        ),
+      ],
+    );
+
+    final model = const LearningMapAssembler().build(
+      learningPath: _buildPath(schemaVersion: 2, execution: execution),
+      packageVersion: 7,
+      recoveredFromFallback: false,
+      locale: 'pt-PT',
+      projection: <LearningProgressProjectionEntry>[
+        _projection(
+          elementId: 'element-dialogue',
+          activityId: 'activity-dialogue',
+          state: LearningActivityState.available,
+          reason: ProgressionReason.ready,
+          recommendationRank: 0,
+        ),
+        _projection(
+          elementId: 'checkpoint-1',
+          activityId: null,
+          state: LearningActivityState.locked,
+          reason: ProgressionReason.prerequisitesNotMet,
+        ),
+      ],
+      syncStates: const <String, ProgressSyncState>{},
+    );
+
+    final activity = model.journeys.single.stages.single.elements.first;
+
+    expect(activity.contentSchemaVersion, 2);
+    expect(activity.contentDefaultLocale, 'en');
+    expect(identical(activity.execution, execution), isTrue);
+  });
 }
 
-LearningPath _buildPath() {
+LearningPath _buildPath({int schemaVersion = 1, ActivityExecution? execution}) {
   final activityId = ActivityId('activity-dialogue');
   final revisionId = RevisionId('revision-dialogue-1');
   final competencyId = CompetencyId('communication');
 
   return LearningPath(
     id: LearningPathId('path-1'),
-    schemaVersion: SchemaVersion(1),
+    schemaVersion: SchemaVersion(schemaVersion),
     defaultLocale: 'en',
     title: LocalizedText(<String, String>{
       'en': 'Erasmus+ Learning Path',
@@ -217,6 +279,7 @@ LearningPath _buildPath() {
               'pt-PT': 'Pratica um diálogo.',
             }),
             visibility: ContentVisibility.public,
+            execution: execution,
             competencies: <CompetencyId>{competencyId},
           ),
         ],

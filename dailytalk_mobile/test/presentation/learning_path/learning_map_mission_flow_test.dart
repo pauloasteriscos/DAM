@@ -107,7 +107,11 @@ void main() {
     );
 
     final result = await flow.openAndRefreshAfterReturn(
-      _activity(id: 'speech', type: LearningActivityType.speech, rank: 0),
+      _activity(
+        id: 'challenge',
+        type: LearningActivityType.integratedChallenge,
+        rank: 0,
+      ),
     );
 
     expect(reloadCount, 0);

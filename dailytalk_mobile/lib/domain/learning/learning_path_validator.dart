@@ -11,6 +11,7 @@ enum LearningPathValidationCode {
   missingPrerequisiteActivity,
   missingPrerequisiteCompetency,
   missingRevisionCompetency,
+  missingRevisionExecution,
   cyclicActivityPrerequisite,
 }
 
@@ -84,6 +85,16 @@ final class LearningPathValidator {
 
     for (final activity in path.activities) {
       for (final revision in activity.revisions) {
+        if (path.schemaVersion.value >= 2 && revision.execution == null) {
+          issues.add(
+            LearningPathValidationIssue(
+              code: LearningPathValidationCode.missingRevisionExecution,
+              location: 'activity:${activity.id}/revision:${revision.id}',
+              reference: revision.id.value,
+            ),
+          );
+        }
+
         for (final competencyId in revision.competencies) {
           if (!competencyIds.contains(competencyId)) {
             issues.add(

@@ -1,0 +1,75 @@
+import 'package:dailytalk_mobile/domain/learning/learning_models.dart';
+import 'package:dailytalk_mobile/screens/speech_practice_page.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  testWidgets('schema v2 speech runtime consumes authored prompts in order', (
+    tester,
+  ) async {
+    final execution = SpeechActivityExecution(
+      prompts: <SpeechExecutionPrompt>[
+        SpeechExecutionPrompt(
+          id: 'one',
+          text: LocalizedText(<String, String>{
+            'pt-PT': 'Repete: Bonjour !',
+            'fr-FR': 'Bonjour !',
+          }),
+        ),
+        SpeechExecutionPrompt(
+          id: 'two',
+          text: LocalizedText(<String, String>{
+            'pt-PT': 'Repete: Merci !',
+            'fr-FR': 'Merci !',
+          }),
+        ),
+      ],
+    );
+
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('pt', 'PT'),
+        home: SpeechPracticePage(execution: execution),
+      ),
+    );
+
+    expect(find.text('Repete: Bonjour !'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('speech-confirm-repeat')),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('speech-confirm-repeat')),
+    );
+    await tester.pump();
+    expect(find.text('Repete: Merci !'), findsOneWidget);
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('speech-confirm-repeat')),
+    );
+    await tester.pump();
+    expect(find.text('Prática terminada'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('speech-back-to-mission')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('legacy speech remains executable without schema-v2 payload', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: SpeechPracticePage()));
+
+    expect(find.text('Bonjour !'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('speech-confirm-repeat')),
+      findsOneWidget,
+    );
+  });
+}

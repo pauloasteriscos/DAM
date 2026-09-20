@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../domain/learning/learning_models.dart';
 
 import '../data/dao/app_settings_dao.dart';
 import '../data/database/app_database.dart';
@@ -19,6 +20,8 @@ class VocabularyPairsPage extends StatefulWidget {
     super.key,
     this.userLanguageCode = 'pt-PT',
     this.learningLanguageCode = 'it-IT',
+    this.execution,
+    this.contentDefaultLocale = 'pt-PT',
   });
 
   /// Idioma do utilizador / idioma da aplicação.
@@ -26,6 +29,12 @@ class VocabularyPairsPage extends StatefulWidget {
 
   /// Idioma que o utilizador quer aprender.
   final String learningLanguageCode;
+
+  /// Executable content of the exact Learning Path revision.
+  /// Null keeps the legacy Home entry point backed by [_vocabularyBank].
+  final VocabularyActivityExecution? execution;
+
+  final String contentDefaultLocale;
 
   @override
   State<VocabularyPairsPage> createState() => _VocabularyPairsPageState();
@@ -153,30 +162,62 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
 
   /// Prepara uma nova ronda com pares contextualizados para o DailyTalk.pt.
   void _startNewRound() {
-    final List<_VocabularyItem> selectedItems = _vocabularyBank.toList()
-      ..shuffle(Random());
+    final execution = widget.execution;
 
-    final List<_VocabularyItem> roundItems = selectedItems.take(6).toList();
-
-    _leftCards = roundItems
-        .map(
-          (item) => _VocabularyPairCard(
-            id: item.id,
-            text: item.textFor(_translationKey(_userLanguageCode)),
-          ),
-        )
-        .toList();
-
-    _rightCards =
-        roundItems
-            .map(
-              (item) => _VocabularyPairCard(
-                id: item.id,
-                text: item.textFor(_translationKey(_learningLanguageCode)),
+    if (execution != null) {
+      // Mission-bound content preserves the authored item set. Only the target
+      // column is shuffled because matching pairs is the interaction itself.
+      _leftCards = execution.items
+          .map(
+            (item) => _VocabularyPairCard(
+              id: item.id,
+              text: item.text.resolve(
+                _userLanguageCode,
+                fallbackLocale: widget.contentDefaultLocale,
               ),
-            )
-            .toList()
-          ..shuffle(Random());
+            ),
+          )
+          .toList(growable: false);
+
+      _rightCards =
+          execution.items
+              .map(
+                (item) => _VocabularyPairCard(
+                  id: item.id,
+                  text: item.text.resolve(
+                    _learningLanguageCode,
+                    fallbackLocale: widget.contentDefaultLocale,
+                  ),
+                ),
+              )
+              .toList()
+            ..shuffle(Random());
+    } else {
+      final List<_VocabularyItem> selectedItems = _vocabularyBank.toList()
+        ..shuffle(Random());
+
+      final List<_VocabularyItem> roundItems = selectedItems.take(6).toList();
+
+      _leftCards = roundItems
+          .map(
+            (item) => _VocabularyPairCard(
+              id: item.id,
+              text: item.textFor(_translationKey(_userLanguageCode)),
+            ),
+          )
+          .toList();
+
+      _rightCards =
+          roundItems
+              .map(
+                (item) => _VocabularyPairCard(
+                  id: item.id,
+                  text: item.textFor(_translationKey(_learningLanguageCode)),
+                ),
+              )
+              .toList()
+            ..shuffle(Random());
+    }
 
     _matchedIds.clear();
     _selectedLeft = null;

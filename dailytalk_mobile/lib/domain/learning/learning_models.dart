@@ -76,6 +76,193 @@ final class LocalizedText {
   }
 }
 
+/// Conteúdo executável, imutável e tipado de uma revisão de atividade.
+///
+/// O tipo do payload é deliberadamente separado da UI. Widgets podem adaptar
+/// estes dados sem depender de mapas dinâmicos ou de bancos hardcoded.
+sealed class ActivityExecution {
+  const ActivityExecution();
+
+  LearningActivityType get activityType;
+}
+
+final class VocabularyActivityExecution extends ActivityExecution {
+  VocabularyActivityExecution({
+    required Iterable<VocabularyExecutionItem> items,
+  }) : items = List<VocabularyExecutionItem>.unmodifiable(items) {
+    _requireNonEmpty(this.items, 'items', 'vocabulário');
+    _ensureUniqueStrings(
+      this.items.map((item) => item.id),
+      'Vocabulary item id',
+    );
+  }
+
+  final List<VocabularyExecutionItem> items;
+
+  @override
+  LearningActivityType get activityType => LearningActivityType.vocabulary;
+}
+
+final class VocabularyExecutionItem {
+  VocabularyExecutionItem({required String id, required this.text})
+    : id = _validatedExecutionId(id, 'id');
+
+  final String id;
+  final LocalizedText text;
+}
+
+final class DialogueActivityExecution extends ActivityExecution {
+  DialogueActivityExecution({
+    required this.scenarioTitle,
+    required this.scenarioDescription,
+    required Iterable<DialogueExecutionTurn> turns,
+  }) : turns = List<DialogueExecutionTurn>.unmodifiable(turns) {
+    _requireNonEmpty(this.turns, 'turns', 'diálogo');
+    _ensureUniqueStrings(this.turns.map((turn) => turn.id), 'Dialogue turn id');
+  }
+
+  final LocalizedText scenarioTitle;
+  final LocalizedText scenarioDescription;
+  final List<DialogueExecutionTurn> turns;
+
+  @override
+  LearningActivityType get activityType => LearningActivityType.dialogue;
+}
+
+final class DialogueExecutionTurn {
+  DialogueExecutionTurn({
+    required String id,
+    required this.partnerMessage,
+    required this.prompt,
+    required this.correctReply,
+    required Iterable<LocalizedText> distractors,
+  }) : id = _validatedExecutionId(id, 'id'),
+       distractors = List<LocalizedText>.unmodifiable(distractors) {
+    _requireNonEmpty(this.distractors, 'distractors', 'turno de diálogo');
+  }
+
+  final String id;
+  final LocalizedText partnerMessage;
+  final LocalizedText prompt;
+  final LocalizedText correctReply;
+  final List<LocalizedText> distractors;
+}
+
+final class SpeechActivityExecution extends ActivityExecution {
+  SpeechActivityExecution({required Iterable<SpeechExecutionPrompt> prompts})
+    : prompts = List<SpeechExecutionPrompt>.unmodifiable(prompts) {
+    _requireNonEmpty(this.prompts, 'prompts', 'fala');
+    _ensureUniqueStrings(
+      this.prompts.map((prompt) => prompt.id),
+      'Speech prompt id',
+    );
+  }
+
+  final List<SpeechExecutionPrompt> prompts;
+
+  @override
+  LearningActivityType get activityType => LearningActivityType.speech;
+}
+
+final class SpeechExecutionPrompt {
+  SpeechExecutionPrompt({required String id, required this.text})
+    : id = _validatedExecutionId(id, 'id');
+
+  final String id;
+  final LocalizedText text;
+}
+
+final class QuizActivityExecution extends ActivityExecution {
+  QuizActivityExecution({required Iterable<QuizExecutionQuestion> questions})
+    : questions = List<QuizExecutionQuestion>.unmodifiable(questions) {
+    _requireNonEmpty(this.questions, 'questions', 'quiz');
+    _ensureUniqueStrings(
+      this.questions.map((question) => question.id),
+      'Quiz question id',
+    );
+  }
+
+  final List<QuizExecutionQuestion> questions;
+
+  @override
+  LearningActivityType get activityType => LearningActivityType.quiz;
+}
+
+final class QuizExecutionQuestion {
+  QuizExecutionQuestion({
+    required String id,
+    required this.category,
+    required this.scenario,
+    required this.prompt,
+    required this.correctAnswer,
+    required Iterable<LocalizedText> distractors,
+  }) : id = _validatedExecutionId(id, 'id'),
+       distractors = List<LocalizedText>.unmodifiable(distractors) {
+    _requireNonEmpty(this.distractors, 'distractors', 'pergunta de quiz');
+  }
+
+  final String id;
+  final LocalizedText category;
+  final LocalizedText scenario;
+  final LocalizedText prompt;
+  final LocalizedText correctAnswer;
+  final List<LocalizedText> distractors;
+}
+
+final class ReviewActivityExecution extends ActivityExecution {
+  ReviewActivityExecution({required Iterable<ReviewExecutionCard> cards})
+    : cards = List<ReviewExecutionCard>.unmodifiable(cards) {
+    _requireNonEmpty(this.cards, 'cards', 'revisão');
+    _ensureUniqueStrings(this.cards.map((card) => card.id), 'Review card id');
+  }
+
+  final List<ReviewExecutionCard> cards;
+
+  @override
+  LearningActivityType get activityType => LearningActivityType.review;
+}
+
+final class ReviewExecutionCard {
+  ReviewExecutionCard({
+    required String id,
+    required this.category,
+    required this.context,
+    required this.text,
+  }) : id = _validatedExecutionId(id, 'id');
+
+  final String id;
+  final LocalizedText category;
+  final LocalizedText context;
+  final LocalizedText text;
+}
+
+String _validatedExecutionId(String value, String name) {
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) {
+    throw ArgumentError.value(value, name, 'não pode estar vazio');
+  }
+  return trimmed;
+}
+
+void _requireNonEmpty<T>(List<T> values, String name, String context) {
+  if (values.isEmpty) {
+    throw ArgumentError.value(
+      values,
+      name,
+      '$context deve conter pelo menos um item',
+    );
+  }
+}
+
+void _ensureUniqueStrings(Iterable<String> ids, String label) {
+  final unique = <String>{};
+  for (final id in ids) {
+    if (!unique.add(id)) {
+      throw ArgumentError('$label duplicado: $id.');
+    }
+  }
+}
+
 final class Competency {
   const Competency({
     required this.id,
@@ -97,6 +284,7 @@ final class ActivityRevision {
     required this.title,
     required this.instructions,
     required this.visibility,
+    this.execution,
     Iterable<CompetencyId> competencies = const <CompetencyId>[],
   }) : competencies = UnmodifiableSetView(Set<CompetencyId>.of(competencies)) {
     if (revisionNumber < 1) {
@@ -114,6 +302,7 @@ final class ActivityRevision {
   final LocalizedText title;
   final LocalizedText instructions;
   final ContentVisibility visibility;
+  final ActivityExecution? execution;
   final Set<CompetencyId> competencies;
 }
 
@@ -139,6 +328,13 @@ final class Activity {
       if (revision.activityId != id) {
         throw ArgumentError(
           'A revisão ${revision.id} pertence a ${revision.activityId}, não a $id.',
+        );
+      }
+      final execution = revision.execution;
+      if (execution != null && execution.activityType != type) {
+        throw ArgumentError(
+          'A execução da revisão ${revision.id} é ${execution.activityType.name}, '
+          'mas a atividade $id é ${type.name}.',
         );
       }
       if (!revisionIds.add(revision.id)) {

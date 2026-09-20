@@ -38,28 +38,21 @@ void main() {
     expect(locked.canOpen, isFalse);
   });
 
-  test(
-    'skips unsupported recommended types and uses next supported mission',
-    () {
-      final model = _model(<LearningMapElementViewModel>[
-        _activity(
-          id: 'speech-primary',
-          type: LearningActivityType.speech,
-          rank: 0,
-        ),
-        _activity(
-          id: 'quiz-secondary',
-          type: LearningActivityType.quiz,
-          rank: 1,
-        ),
-      ]);
+  test('speech can now be the next navigable recommendation', () {
+    final model = _model(<LearningMapElementViewModel>[
+      _activity(
+        id: 'speech-primary',
+        type: LearningActivityType.speech,
+        rank: 0,
+      ),
+      _activity(id: 'quiz-secondary', type: LearningActivityType.quiz, rank: 1),
+    ]);
 
-      expect(
-        LearningMapNextMission.resolve(model)?.pathElementId,
-        'quiz-secondary',
-      );
-    },
-  );
+    expect(
+      LearningMapNextMission.resolve(model)?.pathElementId,
+      'speech-primary',
+    );
+  });
 
   test('skips integrated challenge while no concrete screen exists', () {
     final model = _model(<LearningMapElementViewModel>[
@@ -141,7 +134,11 @@ void main() {
         rank: 0,
         state: LearningActivityState.locked,
       ),
-      _activity(id: 'unsupported', type: LearningActivityType.speech, rank: 1),
+      _activity(
+        id: 'unsupported',
+        type: LearningActivityType.integratedChallenge,
+        rank: 1,
+      ),
     ]);
 
     expect(LearningMapNextMission.resolve(model), isNull);
