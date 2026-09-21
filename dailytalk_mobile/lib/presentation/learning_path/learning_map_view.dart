@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/learning/learning_enums.dart';
+import '../../l10n/app_localizations.dart';
+import '../../state/app_locale_controller.dart';
 import 'learning_map_view_model.dart';
 import 'learning_map_visuals.dart';
+
+String _translateLearningMapUi(
+  String source, {
+  Map<String, Object?> parameters = const <String, Object?>{},
+}) {
+  return AppTranslations.translate(
+    source,
+    AppLocaleController.instance.languageCode,
+    parameters: parameters,
+  );
+}
 
 typedef LearningMapActivityTap =
     void Function(LearningMapElementViewModel element);
@@ -207,7 +220,10 @@ final class _JourneyHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'JORNADA ${index + 1}',
+                  _translateLearningMapUi(
+                    'JORNADA {number}',
+                    parameters: <String, Object?>{'number': index + 1},
+                  ),
                   style: const TextStyle(
                     color: LearningMapVisualTokens.blue,
                     fontSize: 10,
@@ -367,7 +383,10 @@ final class _StageHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'ETAPA ${stageIndex + 1}',
+                    _translateLearningMapUi(
+                      'ETAPA {number}',
+                      parameters: <String, Object?>{'number': stageIndex + 1},
+                    ),
                     style: const TextStyle(
                       color: LearningMapVisualTokens.textSecondary,
                       fontSize: 10,
@@ -474,7 +493,10 @@ final class _LearningMapPrerequisiteConnector extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                summary.label,
+                _translateLearningMapUi(
+                  summary.label,
+                  parameters: summary.parameters,
+                ),
                 key: Key(
                   'learning-map-prerequisite-label-${target.pathElementId}',
                 ),
@@ -498,11 +520,13 @@ final class _PrerequisiteSummarySpec {
     required this.label,
     required this.icon,
     required this.accent,
+    this.parameters = const <String, Object?>{},
   });
 
   final String label;
   final IconData icon;
   final Color accent;
+  final Map<String, Object?> parameters;
 }
 
 _PrerequisiteSummarySpec _summarizePrerequisite(
@@ -546,47 +570,53 @@ _PrerequisiteSummarySpec _summarizePrerequisiteGroup(
   if (operator == PrerequisiteOperator.any) {
     if (flatActivityGroup) {
       return _PrerequisiteSummarySpec(
-        label:
-            'Completa 1 de ${rule.rules.length} miss\u00f5es para desbloquear',
+        label: 'Completa 1 de {count} missões para desbloquear',
         icon: Icons.alt_route_rounded,
         accent: LearningMapVisualTokens.cyan,
+        parameters: <String, Object?>{'count': rule.rules.length},
       );
     }
 
     if (flatCompetencyGroup) {
       return _PrerequisiteSummarySpec(
-        label:
-            'Ganha 1 de ${rule.rules.length} compet\u00eancias para desbloquear',
+        label: 'Ganha 1 de {count} competências para desbloquear',
         icon: Icons.workspace_premium_rounded,
         accent: LearningMapVisualTokens.gold,
+        parameters: <String, Object?>{'count': rule.rules.length},
       );
     }
 
     return _PrerequisiteSummarySpec(
-      label:
-          'Cumpre 1 de ${rule.rules.length} condi\u00e7\u00f5es para desbloquear',
+      label: 'Cumpre 1 de {count} condições para desbloquear',
       icon: Icons.alt_route_rounded,
       accent: LearningMapVisualTokens.cyan,
+      parameters: <String, Object?>{'count': rule.rules.length},
     );
   }
 
   if (flatActivityGroup) {
     return _PrerequisiteSummarySpec(
       label: rule.rules.length == 1
-          ? 'Completa a miss\u00e3o anterior para desbloquear'
-          : 'Completa as ${rule.rules.length} miss\u00f5es para desbloquear',
+          ? 'Completa a missão anterior para desbloquear'
+          : 'Completa as {count} missões para desbloquear',
       icon: Icons.lock_open_rounded,
       accent: LearningMapVisualTokens.gold,
+      parameters: rule.rules.length == 1
+          ? const <String, Object?>{}
+          : <String, Object?>{'count': rule.rules.length},
     );
   }
 
   if (flatCompetencyGroup) {
     return _PrerequisiteSummarySpec(
       label: rule.rules.length == 1
-          ? 'Ganha a compet\u00eancia necess\u00e1ria para desbloquear'
-          : 'Ganha as ${rule.rules.length} compet\u00eancias para desbloquear',
+          ? 'Ganha a competência necessária para desbloquear'
+          : 'Ganha as {count} competências para desbloquear',
       icon: Icons.workspace_premium_rounded,
       accent: LearningMapVisualTokens.gold,
+      parameters: rule.rules.length == 1
+          ? const <String, Object?>{}
+          : <String, Object?>{'count': rule.rules.length},
     );
   }
 
@@ -775,7 +805,7 @@ final class _SpecialPathElement extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  visual.label,
+                  _translateLearningMapUi(visual.label),
                   style: const TextStyle(
                     color: LearningMapVisualTokens.textPrimary,
                     fontSize: 14,
@@ -784,7 +814,9 @@ final class _SpecialPathElement extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  _structuralSubtitle(element.elementType),
+                  _translateLearningMapUi(
+                    _structuralSubtitle(element.elementType),
+                  ),
                   style: const TextStyle(
                     color: LearningMapVisualTokens.textSecondary,
                     fontSize: 11,
@@ -808,7 +840,7 @@ final class _SpecialPathElement extends StatelessWidget {
                 Icon(state.icon, size: 13, color: state.color),
                 const SizedBox(width: 4),
                 Text(
-                  state.label,
+                  _translateLearningMapUi(state.label),
                   style: TextStyle(
                     color: state.color,
                     fontSize: 10,

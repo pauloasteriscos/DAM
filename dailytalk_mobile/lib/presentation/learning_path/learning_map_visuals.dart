@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/learning/learning_enums.dart';
+import '../../l10n/app_localizations.dart';
+import '../../state/app_locale_controller.dart';
 import 'learning_map_view_model.dart';
+
+String _translateLearningMapUi(
+  String source, {
+  Map<String, Object?> parameters = const <String, Object?>{},
+}) {
+  return AppTranslations.translate(
+    source,
+    AppLocaleController.instance.languageCode,
+    parameters: parameters,
+  );
+}
 
 /// Shared visual tokens for the DailyTalk Learning Path.
 ///
@@ -133,7 +146,9 @@ final class LearningMapContextHeader extends StatelessWidget {
                   ),
                   SizedBox(height: compact ? 6 : 8),
                   Text(
-                    'Cada miss\u00e3o leva-te mais longe. Escolhe o teu pr\u00f3ximo passo.',
+                    _translateLearningMapUi(
+                      'Cada missão leva-te mais longe. Escolhe o teu próximo passo.',
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -198,7 +213,13 @@ final class LearningMapContextHeader extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                '${model.completedActivityCount} de ${model.totalActivityCount} miss\u00f5es conclu\u00eddas',
+                                _translateLearningMapUi(
+                                  '{completed} de {total} missões concluídas',
+                                  parameters: <String, Object?>{
+                                    'completed': model.completedActivityCount,
+                                    'total': model.totalActivityCount,
+                                  },
+                                ),
                                 style: TextStyle(
                                   color: LearningMapVisualTokens.textPrimary,
                                   fontSize: compact ? 13 : 14,
@@ -206,9 +227,11 @@ final class LearningMapContextHeader extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              const Text(
-                                'Continua a construir o teu percurso.',
-                                style: TextStyle(
+                              Text(
+                                _translateLearningMapUi(
+                                  'Continua a construir o teu percurso.',
+                                ),
+                                style: const TextStyle(
                                   color: LearningMapVisualTokens.textSecondary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
@@ -281,9 +304,9 @@ final class LearningMapContextHeader extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                const Text(
-                                  'Pr\u00f3xima miss\u00e3o',
-                                  style: TextStyle(
+                                Text(
+                                  _translateLearningMapUi('Próxima missão'),
+                                  style: const TextStyle(
                                     color: LearningMapVisualTokens.blue,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
@@ -343,14 +366,14 @@ final class LearningMapContextHeader extends StatelessWidget {
       return _HeaderContext(
         journey: journey.title,
         stage: journey.stages.isEmpty
-            ? 'Percurso de aprendizagem'
+            ? _translateLearningMapUi('Percurso de aprendizagem')
             : journey.stages.first.title,
       );
     }
 
-    return const _HeaderContext(
-      journey: 'Percurso de aprendizagem',
-      stage: 'Pr\u00f3ximo passo',
+    return _HeaderContext(
+      journey: _translateLearningMapUi('Percurso de aprendizagem'),
+      stage: _translateLearningMapUi('Próximo passo'),
     );
   }
 }
@@ -425,7 +448,7 @@ final class _HeroSyncBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: spec.label,
+      message: _translateLearningMapUi(spec.label),
       child: Container(
         key: const Key('learning-map-hero-sync'),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
@@ -440,7 +463,7 @@ final class _HeroSyncBadge extends StatelessWidget {
             Icon(spec.icon, color: spec.color, size: 15),
             const SizedBox(width: 6),
             Text(
-              spec.heroLabel,
+              _translateLearningMapUi(spec.heroLabel),
               style: const TextStyle(
                 color: LearningMapVisualTokens.heroText,
                 fontSize: 10,
@@ -459,19 +482,19 @@ final class _LocalFallbackBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
-      key: Key('learning-map-fallback-badge'),
+    return Row(
+      key: const Key('learning-map-fallback-badge'),
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Icon(
+        const Icon(
           Icons.offline_bolt_outlined,
           size: 15,
           color: LearningMapVisualTokens.gold,
         ),
-        SizedBox(width: 6),
+        const SizedBox(width: 6),
         Text(
-          'Conte\u00fado local recuperado',
-          style: TextStyle(
+          _translateLearningMapUi('Conteúdo local recuperado'),
+          style: const TextStyle(
             color: LearningMapVisualTokens.gold,
             fontSize: 11,
             fontWeight: FontWeight.w700,
@@ -511,7 +534,7 @@ final class LearningMapActivityNode extends StatelessWidget {
 
     final rawTitle = element.title?.trim();
     final resolvedTitle = rawTitle == null || rawTitle.isEmpty
-        ? 'Miss\u00e3o'
+        ? _translateLearningMapUi('Missão')
         : rawTitle;
     final enabled = element.canOpen && onTap != null;
 
@@ -592,7 +615,7 @@ final class LearningMapActivityNode extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            typeSpec.label,
+                            _translateLearningMapUi(typeSpec.label),
                             style: TextStyle(
                               color: typeSpec.accent,
                               fontSize: isPrimary ? 11 : 10,
@@ -654,18 +677,18 @@ final class LearningMapActivityNode extends StatelessWidget {
                       ),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Icon(
+                        const Icon(
                           Icons.play_arrow_rounded,
                           color: Colors.white,
                           size: 23,
                         ),
-                        SizedBox(width: 6),
+                        const SizedBox(width: 6),
                         Text(
-                          'Continuar',
-                          style: TextStyle(
+                          _translateLearningMapUi('Continuar'),
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.w900,
@@ -723,9 +746,9 @@ final class _RecommendationBadge extends StatelessWidget {
         color: const Color(0xFFE7F2FF),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: const Text(
-        'A seguir',
-        style: TextStyle(
+      child: Text(
+        _translateLearningMapUi('A seguir'),
+        style: const TextStyle(
           color: LearningMapVisualTokens.blue,
           fontSize: 10,
           fontWeight: FontWeight.w900,
@@ -756,7 +779,7 @@ final class _StateBadge extends StatelessWidget {
           Icon(spec.icon, size: 14, color: spec.accent),
           const SizedBox(width: 5),
           Text(
-            spec.label,
+            _translateLearningMapUi(spec.label),
             style: TextStyle(
               color: spec.accent,
               fontSize: 11,

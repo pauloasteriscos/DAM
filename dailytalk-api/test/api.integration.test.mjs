@@ -367,51 +367,51 @@ test(
       const expectedPackages = {
         "student.de-de.phase1": {
           schemaVersion: 2,
-          packageVersion: 1,
+          packageVersion: 2,
           sha256:
-            "36b8918f56626f9fa537a0a2a74d4314b2bc806bb899ba352ab07a87de0ac30b",
-          sizeBytes: 28700,
-          downloadPath: "/api/content/packages/student.de-de.phase1/1",
+            "e4f9a391a135b7b7f72bbd251d03bda9df323a31d668958300786b888c10c05d",
+          sizeBytes: 32251,
+          downloadPath: "/api/content/packages/student.de-de.phase1/2",
         },
         "student.en-us.phase1": {
           schemaVersion: 2,
-          packageVersion: 1,
+          packageVersion: 2,
           sha256:
-            "f8951f542e81f07221d46f2721b949cb30d67e8a97f62a770e95dbbb71871196",
-          sizeBytes: 28728,
-          downloadPath: "/api/content/packages/student.en-us.phase1/1",
+            "f9b7d8ec84926d149ff1c1a8e7296255e3de716dea77d81a31d68f827048cf45",
+          sizeBytes: 32279,
+          downloadPath: "/api/content/packages/student.en-us.phase1/2",
         },
         "student.es-es.phase1": {
           schemaVersion: 2,
-          packageVersion: 1,
+          packageVersion: 2,
           sha256:
-            "571c79de28444cc3421cad66123ca6c5c9ab24df99b941f17abc06f2c1d86e08",
-          sizeBytes: 28688,
-          downloadPath: "/api/content/packages/student.es-es.phase1/1",
+            "d16bb679fbd0dc6c9d9faf0c88f41ea1070f82f83c3e1e8d43314bd3796c24ae",
+          sizeBytes: 32239,
+          downloadPath: "/api/content/packages/student.es-es.phase1/2",
         },
         "student.fr-fr.phase1": {
           schemaVersion: 2,
-          packageVersion: 5,
+          packageVersion: 6,
           sha256:
-            "114d338f667364067a4c451b0a32039ee7384ef0dbcf65b57dbdd43def53404c",
-          sizeBytes: 28692,
-          downloadPath: "/api/content/packages/student.fr-fr.phase1/5",
+            "79bde8996567d933ad0ca8111da1004ffa938adfd8229697a11b94311dbef460",
+          sizeBytes: 32243,
+          downloadPath: "/api/content/packages/student.fr-fr.phase1/6",
         },
         "student.it-it.phase1": {
           schemaVersion: 2,
-          packageVersion: 1,
+          packageVersion: 2,
           sha256:
-            "cd90b7829d6668769af10d80f16b9ece5d9ad45f74dde822556bb35797ff1a9e",
-          sizeBytes: 28686,
-          downloadPath: "/api/content/packages/student.it-it.phase1/1",
+            "9a81e76376587e8c3ddfe93054dffc7f40c9d43d0fda841e70f33662fb917f39",
+          sizeBytes: 32237,
+          downloadPath: "/api/content/packages/student.it-it.phase1/2",
         },
         "student.pt-pt.phase1": {
           schemaVersion: 2,
-          packageVersion: 1,
+          packageVersion: 2,
           sha256:
-            "7c02afa87233cad2a175e7ba10c8d07e0340096a867b619b54d7359643e257e2",
-          sizeBytes: 28699,
-          downloadPath: "/api/content/packages/student.pt-pt.phase1/1",
+            "cece86320a578cf660bf0bb6c6d5ce7f6de60cbf1248bfcc4dc7d3b38c28ebd5",
+          sizeBytes: 32250,
+          downloadPath: "/api/content/packages/student.pt-pt.phase1/2",
         },
       };
 
@@ -449,12 +449,12 @@ test(
       assert.equal(catalogResponse.status, 200);
 
       const canonicalByPath = {
-        "student.de-de.phase1": "official_de_de_phase1_v1.json",
-        "student.en-us.phase1": "official_en_us_phase1_v1.json",
-        "student.es-es.phase1": "official_es_es_phase1_v1.json",
-        "student.fr-fr.phase1": "official_fr_fr_phase1_v5.json",
-        "student.it-it.phase1": "official_it_it_phase1_v1.json",
-        "student.pt-pt.phase1": "official_pt_pt_phase1_v1.json",
+        "student.de-de.phase1": "official_de_de_phase1_v2.json",
+        "student.en-us.phase1": "official_en_us_phase1_v2.json",
+        "student.es-es.phase1": "official_es_es_phase1_v2.json",
+        "student.fr-fr.phase1": "official_fr_fr_phase1_v6.json",
+        "student.it-it.phase1": "official_it_it_phase1_v2.json",
+        "student.pt-pt.phase1": "official_pt_pt_phase1_v2.json",
       };
 
       for (const [pathId, canonicalFile] of Object.entries(canonicalByPath)) {
@@ -517,6 +517,34 @@ test(
             `"sha256-${metadata.sha256}"`,
           );
         }
+      }
+    });
+
+    await t.test("v1 dos cinco percursos permanece disponível após publicação da v2", async () => {
+      const previous = {
+        "student.de-de.phase1": { sha256: "36b8918f56626f9fa537a0a2a74d4314b2bc806bb899ba352ab07a87de0ac30b", sizeBytes: 28700 },
+        "student.en-us.phase1": { sha256: "f8951f542e81f07221d46f2721b949cb30d67e8a97f62a770e95dbbb71871196", sizeBytes: 28728 },
+        "student.es-es.phase1": { sha256: "571c79de28444cc3421cad66123ca6c5c9ab24df99b941f17abc06f2c1d86e08", sizeBytes: 28688 },
+        "student.it-it.phase1": { sha256: "cd90b7829d6668769af10d80f16b9ece5d9ad45f74dde822556bb35797ff1a9e", sizeBytes: 28686 },
+        "student.pt-pt.phase1": { sha256: "7c02afa87233cad2a175e7ba10c8d07e0340096a867b619b54d7359643e257e2", sizeBytes: 28699 }
+      };
+
+      for (const [pathId, expected] of Object.entries(previous)) {
+        const response = await fetch(
+          `${API_BASE}/api/content/packages/${pathId}/1`,
+          { headers: { [ENV_HEADER]: "DEV" } },
+        );
+
+        assert.equal(response.status, 200);
+        assert.equal(response.headers.get("x-content-package-version"), "1");
+        assert.equal(response.headers.get("x-content-sha256"), expected.sha256);
+
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        assert.equal(bytes.byteLength, expected.sizeBytes);
+        assert.equal(
+          createHash("sha256").update(bytes).digest("hex"),
+          expected.sha256,
+        );
       }
     });
 
@@ -658,6 +686,49 @@ test(
       assert.ok(
         v5.competencies.every((item) => item.id.startsWith("arrival.fr-fr.")),
       );
+    });
+
+    await t.test("francês v6 enriquece vocabulário sem alterar v5", async () => {
+      const [v5Response, v6Response] = await Promise.all([
+        fetch(`${API_BASE}/api/content/packages/student.fr-fr.phase1/5`, {
+          headers: { [ENV_HEADER]: "DEV" },
+        }),
+        fetch(`${API_BASE}/api/content/packages/student.fr-fr.phase1/6`, {
+          headers: { [ENV_HEADER]: "DEV" },
+        }),
+      ]);
+
+      assert.equal(v5Response.status, 200);
+      assert.equal(v6Response.status, 200);
+
+      const v5 = await v5Response.json();
+      const v6 = await v6Response.json();
+      const v5Activity = v5.activities.find(
+        (item) => item.id === "arrival.vocabulary-01",
+      );
+      const v6Activity = v6.activities.find(
+        (item) => item.id === "arrival.vocabulary-01",
+      );
+
+      assert.ok(v5Activity);
+      assert.ok(v6Activity);
+      assert.equal(v5Activity.currentRevisionId, "arrival.vocabulary-01.revision-05");
+      assert.equal(v6Activity.currentRevisionId, "arrival.vocabulary-01.revision-06");
+      assert.equal(v5Activity.revisions[0].revisionNumber, 5);
+      assert.equal(v6Activity.revisions[0].revisionNumber, 6);
+
+      const lexicalIds = new Set(
+        v6Activity.revisions[0].execution.items.map((item) => item.id),
+      );
+      for (const id of [
+        "i-am",
+        "my-name-is",
+        "nice-to-meet-you",
+        "yes",
+        "thank-you-very-much",
+      ]) {
+        assert.equal(lexicalIds.has(id), true, `léxico ausente: ${id}`);
+      }
     });
 
     await t.test("pacote imutável suporta revalidação condicional por ETag", async () => {

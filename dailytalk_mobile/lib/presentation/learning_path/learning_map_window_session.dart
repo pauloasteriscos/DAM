@@ -168,12 +168,17 @@ final class LearningMapWindowCoordinator {
     required String accountId,
     required String learningPathId,
     required String locale,
+    String? scaffoldingLocale,
   }) async {
     final normalizedAccountId = _requiredValue(accountId, 'accountId');
 
     final normalizedPathId = _requiredValue(learningPathId, 'learningPathId');
 
     final normalizedLocale = _requiredValue(locale, 'locale');
+    final normalizedScaffoldingLocale = _requiredValue(
+      scaffoldingLocale ?? locale,
+      'scaffoldingLocale',
+    );
 
     // ÚNICA leitura externa do catálogo desta sessão.
     final active = await _loadActiveContent(normalizedPathId);
@@ -239,6 +244,7 @@ final class LearningMapWindowCoordinator {
       accountId: normalizedAccountId,
       learningPathId: normalizedPathId,
       locale: normalizedLocale,
+      scaffoldingLocale: normalizedScaffoldingLocale,
       activePath: active.path,
       totalStageCount: descriptors.length,
       stageIndexByPathElementId: stageIndexByPathElementId,
@@ -258,6 +264,7 @@ final class LearningMapWindowSession {
     required this.accountId,
     required this.learningPathId,
     required this.locale,
+    required this.scaffoldingLocale,
     required LearningPath activePath,
     required this.totalStageCount,
     required Map<String, int> stageIndexByPathElementId,
@@ -275,6 +282,7 @@ final class LearningMapWindowSession {
   final String accountId;
   final String learningPathId;
   final String locale;
+  final String scaffoldingLocale;
   final int totalStageCount;
 
   final LearningPath _activePath;
@@ -330,6 +338,7 @@ final class LearningMapWindowSession {
       activePath: _activePath,
       snapshot: snapshot,
       locale: locale,
+      scaffoldingLocale: scaffoldingLocale,
     );
   }
 

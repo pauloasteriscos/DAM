@@ -16,8 +16,8 @@ String _newerSource(String assetPath) {
   final revision2 =
       jsonDecode(jsonEncode(revisions.first)) as Map<String, dynamic>;
 
-  revision2['id'] = 'arrival.vocabulary-01.revision-02';
-  revision2['revisionNumber'] = 2;
+  revision2['id'] = 'arrival.vocabulary-01.revision-03';
+  revision2['revisionNumber'] = 3;
   revision2['title'] = <String, dynamic>{
     'pt-PT': 'Palavras de acolhimento — edição revista',
   };
@@ -95,7 +95,7 @@ void main() {
     );
 
     expect(first.path.id.value, 'student.it-it.phase1');
-    expect(first.package.packageVersion, 1);
+    expect(first.package.packageVersion, 2);
     expect(second.package.id, first.package.id);
     expect(assetReads, 1);
     expect(await db.query('learning_content_packages'), hasLength(1));
@@ -107,7 +107,7 @@ void main() {
     final v2 = _newerSource(descriptor.baselineAssetPath);
     await importer.importPackage(
       payloadJson: v2,
-      packageVersion: 2,
+      packageVersion: 3,
       source: 'local-test',
       expectedSha256: await importer.computeSha256(v2),
     );
@@ -120,7 +120,7 @@ void main() {
     );
 
     expect(active.path.id.value, 'student.it-it.phase1');
-    expect(active.package.packageVersion, 2);
+    expect(active.package.packageVersion, 3);
     expect(assetReads, 0);
     expect(await db.query('learning_content_packages'), hasLength(1));
     expect(await db.query('learning_content_catalog'), hasLength(1));
@@ -157,20 +157,20 @@ void main() {
   });
 
   test(
-    'baseline francesa v5 evolui sobre v4 sem reescrever histórico',
+    'baseline francesa v6 evolui sobre v5 sem reescrever histórico',
     () async {
-      const historicalAsset = 'assets/content/official_fr_fr_phase1.v4.json';
+      const historicalAsset = 'assets/content/official_fr_fr_phase1.v5.json';
       final historicalPayload = File(historicalAsset).readAsStringSync();
 
       await importer.importPackage(
         payloadJson: historicalPayload,
-        packageVersion: 4,
-        source: 'historical-fr-v4-test',
+        packageVersion: 5,
+        source: 'historical-fr-v5-test',
         expectedSha256: await importer.computeSha256(historicalPayload),
       );
       await catalogService.activate(
         learningPathId: 'student.fr-fr.phase1',
-        packageVersion: 4,
+        packageVersion: 5,
       );
 
       var assetReads = 0;
@@ -180,14 +180,14 @@ void main() {
       );
 
       expect(active.path.id.value, 'student.fr-fr.phase1');
-      expect(active.package.packageVersion, 5);
+      expect(active.package.packageVersion, 6);
       expect(active.path.schemaVersion.value, 2);
       expect(
         active.path.activities.every(
           (activity) =>
-              activity.currentRevisionId.value.endsWith('.revision-05') &&
+              activity.currentRevisionId.value.endsWith('.revision-06') &&
               activity.revisions.length == 1 &&
-              activity.currentRevision.revisionNumber == 5,
+              activity.currentRevision.revisionNumber == 6,
         ),
         isTrue,
       );

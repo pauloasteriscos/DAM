@@ -39,7 +39,7 @@ void main() {
       final path = p.join(tempDir.path, 'fresh-v6.db');
       final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-      expect(await db.getVersion(), 7);
+      expect(await db.getVersion(), 8);
       expect(await _foreignKeysEnabled(db), isTrue);
       expect(await _integrityCheck(db), 'ok');
 
@@ -62,6 +62,9 @@ void main() {
           'learning_content_asset_manifests',
           'learning_content_asset_entries',
           'learning_content_asset_cache',
+          'ui_translation_bundles',
+          'ui_translations',
+          'ui_translation_catalog',
         ]),
       );
 
@@ -97,6 +100,14 @@ void main() {
         await _indexExists(db, 'idx_learning_content_asset_cache_access'),
         isTrue,
       );
+      expect(
+        await _indexExists(db, 'idx_ui_translations_locale_version'),
+        isTrue,
+      );
+      expect(
+        await _indexExists(db, 'idx_ui_translation_catalog_active'),
+        isTrue,
+      );
 
       final settings = await db.query(
         'app_settings',
@@ -104,7 +115,7 @@ void main() {
         whereArgs: ['database_version'],
       );
       expect(settings, hasLength(1));
-      expect(settings.single['value'], '7');
+      expect(settings.single['value'], '8');
 
       await db.close();
     });
@@ -116,7 +127,7 @@ void main() {
 
         final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-        expect(await db.getVersion(), 7);
+        expect(await db.getVersion(), 8);
         expect(await _foreignKeysEnabled(db), isTrue);
         expect(await _integrityCheck(db), 'ok');
 
@@ -143,7 +154,7 @@ void main() {
         expect(clientId, isNotEmpty);
         expect(clientId, startsWith('legacy-1-'));
 
-        await _assertDatabaseVersionSetting(db, '7');
+        await _assertDatabaseVersionSetting(db, '8');
 
         await db.close();
       },
@@ -154,7 +165,7 @@ void main() {
 
       final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-      expect(await db.getVersion(), 7);
+      expect(await db.getVersion(), 8);
       expect(await _integrityCheck(db), 'ok');
 
       await _assertHistoricDataPreserved(db);
@@ -191,7 +202,7 @@ void main() {
       expect(clientId, isNotNull);
       expect(clientId, isNotEmpty);
 
-      await _assertDatabaseVersionSetting(db, '7');
+      await _assertDatabaseVersionSetting(db, '8');
 
       await db.close();
     });
@@ -215,7 +226,7 @@ void main() {
 
         db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-        expect(await db.getVersion(), 7);
+        expect(await db.getVersion(), 8);
         final rows = await db.query(
           'submissions',
           columns: ['client_submission_id'],
@@ -241,7 +252,7 @@ void main() {
         final path = await _createHistoricalV3Database(tempDir);
         final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-        expect(await db.getVersion(), 7);
+        expect(await db.getVersion(), 8);
         await _assertHistoricDataPreserved(db);
 
         final submissions = await db.query(
@@ -261,7 +272,7 @@ void main() {
         expect(await _tableExists(db, 'learning_content_packages'), isTrue);
         expect(await _tableExists(db, 'learning_content_catalog'), isTrue);
         expect(await _integrityCheck(db), 'ok');
-        await _assertDatabaseVersionSetting(db, '7');
+        await _assertDatabaseVersionSetting(db, '8');
 
         await db.close();
       },
@@ -304,7 +315,7 @@ void main() {
 
         db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-        expect(await db.getVersion(), 7);
+        expect(await db.getVersion(), 8);
         expect(
           await _tableExists(db, 'learning_content_asset_manifests'),
           isTrue,
@@ -339,7 +350,7 @@ void main() {
         expect(catalog.single['active_package_id'], packageId);
 
         expect(await _integrityCheck(db), 'ok');
-        await _assertDatabaseVersionSetting(db, '7');
+        await _assertDatabaseVersionSetting(db, '8');
         await db.close();
       },
     );
@@ -350,7 +361,7 @@ void main() {
         final path = p.join(tempDir.path, 'fase3-fresh-v6.db');
         final db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-        expect(await db.getVersion(), 7);
+        expect(await db.getVersion(), 8);
         expect(await _foreignKeysEnabled(db), isTrue);
 
         for (final table in <String>[
@@ -570,7 +581,7 @@ void main() {
         // Abertura pela aplicação deve executar somente o avanço necessário.
         db = await AppDatabase.instance.openDatabaseForTesting(path);
 
-        expect(await db.getVersion(), 7);
+        expect(await db.getVersion(), 8);
 
         for (final table in <String>[
           'learning_progress_completions',
@@ -599,7 +610,7 @@ void main() {
         expect(preservedQueue.single['attempt_count'], 2);
         expect(preservedQueue.single['last_error'], 'offline');
 
-        await _assertDatabaseVersionSetting(db, '7');
+        await _assertDatabaseVersionSetting(db, '8');
 
         expect(await db.rawQuery('PRAGMA foreign_key_check'), isEmpty);
         expect(await _integrityCheck(db), 'ok');

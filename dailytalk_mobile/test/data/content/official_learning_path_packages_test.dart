@@ -58,29 +58,32 @@ void main() {
     }
   });
 
-  test('baseline francesa v5 usa namespace próprio e RevisionIds novos', () {
-    final descriptor = OfficialLearningPathResolver.resolve('fr-FR');
-    final payload = File(descriptor.baselineAssetPath).readAsStringSync();
-    final path = codec.decodeString(payload);
+  test(
+    'baseline francesa v6 preserva namespace próprio e RevisionIds novos',
+    () {
+      final descriptor = OfficialLearningPathResolver.resolve('fr-FR');
+      final payload = File(descriptor.baselineAssetPath).readAsStringSync();
+      final path = codec.decodeString(payload);
 
-    expect(descriptor.baselinePackageVersion, 5);
-    expect(path.schemaVersion.value, 2);
-    expect(path.activities, hasLength(6));
-    expect(
-      path.activities.every(
-        (activity) =>
-            activity.currentRevisionId.value.endsWith('.revision-05') &&
-            activity.revisions.length == 1 &&
-            activity.currentRevision.revisionNumber == 5,
-      ),
-      isTrue,
-    );
+      expect(descriptor.baselinePackageVersion, 6);
+      expect(path.schemaVersion.value, 2);
+      expect(path.activities, hasLength(6));
+      expect(
+        path.activities.every(
+          (activity) =>
+              activity.currentRevisionId.value.endsWith('.revision-06') &&
+              activity.revisions.length == 1 &&
+              activity.currentRevision.revisionNumber == 6,
+        ),
+        isTrue,
+      );
 
-    expect(
-      path.competencies.map((competency) => competency.id.value),
-      everyElement(startsWith('arrival.fr-fr.')),
-    );
-  });
+      expect(
+        path.competencies.map((competency) => competency.id.value),
+        everyElement(startsWith('arrival.fr-fr.')),
+      );
+    },
+  );
 
   test('todos os idiomas ativos mantêm a mesma experiência estrutural', () {
     Map<String, Object?> experienceShape(String languageCode) {

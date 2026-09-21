@@ -90,6 +90,7 @@ class _MainNavigationState extends State<MainNavigation> {
     }
 
     final accountId = session.currentUser?.id.trim();
+    final appLanguageCode = AppLocaleController.instance.languageCode;
     final learningLanguageCode =
         AppLearningLanguageController.instance.languageCode;
 
@@ -103,10 +104,11 @@ class _MainNavigationState extends State<MainNavigation> {
         useDynamicLearningMap
         ? (footer) => LearningMapHomeHost(
             accountId: accountId!,
-            key: ValueKey<String>(
-              'learning-map-home-$learningLanguageCode',
-            ),
-            locale: AppLocaleController.instance.languageCode,
+            key: ValueKey<String>('learning-map-home-$learningLanguageCode'),
+            // TARGET segue o idioma praticado. APP/SCAFFOLDING seguem o
+            // idioma principal da aplicação, conforme LC-001.
+            locale: learningLanguageCode,
+            appLanguageCode: appLanguageCode,
             learningLanguageCode: learningLanguageCode,
             footer: footer,
             fallback: const Center(

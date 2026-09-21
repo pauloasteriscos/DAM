@@ -92,6 +92,40 @@ void main() {
     expect(activity.title, 'Talk about my home');
   });
 
+  test(
+    'separa TARGET do SCAFFOLDING: título segue aprendizagem e instrução segue app',
+    () {
+      final model = const LearningMapAssembler().build(
+        learningPath: _buildPath(),
+        packageVersion: 7,
+        recoveredFromFallback: false,
+        locale: 'en-US',
+        scaffoldingLocale: 'pt-PT',
+        projection: <LearningProgressProjectionEntry>[
+          _projection(
+            elementId: 'element-dialogue',
+            activityId: 'activity-dialogue',
+            state: LearningActivityState.available,
+            reason: ProgressionReason.ready,
+            recommendationRank: 0,
+          ),
+          _projection(
+            elementId: 'checkpoint-1',
+            activityId: null,
+            state: LearningActivityState.locked,
+            reason: ProgressionReason.prerequisitesNotMet,
+          ),
+        ],
+        syncStates: const <String, ProgressSyncState>{},
+      );
+
+      final activity = model.journeys.single.stages.single.elements.first;
+
+      expect(activity.title, 'Talk about my home');
+      expect(activity.instructions, 'Pratica um diálogo.');
+    },
+  );
+
   test('recusa projeção pertencente a outra versão do pacote', () {
     expect(
       () => const LearningMapAssembler().build(

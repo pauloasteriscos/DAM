@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/learning_language_quick_switcher.dart';
 
 import '../../domain/learning/learning_enums.dart';
+import '../../state/app_locale_controller.dart';
 import 'learning_map_view_model.dart';
 
 /// Child-friendly entry screen for a mission opened from the Learning Path.
@@ -22,7 +23,7 @@ final class LearningMissionDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final locale = mission.contentDefaultLocale;
+    final locale = AppLocaleController.instance.languageCode;
     final palette = _paletteFor(mission.activityType);
     final title = mission.title?.trim().isNotEmpty == true
         ? mission.title!.trim()
@@ -341,77 +342,145 @@ IconData _iconFor(LearningActivityType? type) => switch (type) {
 
 String _typeLabel(LearningActivityType? type, String locale) {
   final lang = locale.split('-').first.toLowerCase();
-  final pt = switch (type) {
-    LearningActivityType.vocabulary => 'Vocabulário',
-    LearningActivityType.dialogue => 'Diálogo',
-    LearningActivityType.speech => 'Fala',
-    LearningActivityType.quiz => 'Quiz',
-    LearningActivityType.review => 'Revisão',
-    _ => 'Desafio',
+  final labels = switch (lang) {
+    'en' => <LearningActivityType, String>{
+      LearningActivityType.vocabulary: 'Vocabulary',
+      LearningActivityType.dialogue: 'Dialogue',
+      LearningActivityType.speech: 'Speaking',
+      LearningActivityType.quiz: 'Quiz',
+      LearningActivityType.review: 'Review',
+      LearningActivityType.integratedChallenge: 'Challenge',
+    },
+    'es' => <LearningActivityType, String>{
+      LearningActivityType.vocabulary: 'Vocabulario',
+      LearningActivityType.dialogue: 'Diálogo',
+      LearningActivityType.speech: 'Expresión oral',
+      LearningActivityType.quiz: 'Cuestionario',
+      LearningActivityType.review: 'Repaso',
+      LearningActivityType.integratedChallenge: 'Desafío',
+    },
+    'fr' => <LearningActivityType, String>{
+      LearningActivityType.vocabulary: 'Vocabulaire',
+      LearningActivityType.dialogue: 'Dialogue',
+      LearningActivityType.speech: 'Expression orale',
+      LearningActivityType.quiz: 'Quiz',
+      LearningActivityType.review: 'Révision',
+      LearningActivityType.integratedChallenge: 'Défi',
+    },
+    'it' => <LearningActivityType, String>{
+      LearningActivityType.vocabulary: 'Vocabolario',
+      LearningActivityType.dialogue: 'Dialogo',
+      LearningActivityType.speech: 'Espressione orale',
+      LearningActivityType.quiz: 'Quiz',
+      LearningActivityType.review: 'Ripasso',
+      LearningActivityType.integratedChallenge: 'Sfida',
+    },
+    'de' => <LearningActivityType, String>{
+      LearningActivityType.vocabulary: 'Wortschatz',
+      LearningActivityType.dialogue: 'Dialog',
+      LearningActivityType.speech: 'Sprechen',
+      LearningActivityType.quiz: 'Quiz',
+      LearningActivityType.review: 'Wiederholung',
+      LearningActivityType.integratedChallenge: 'Herausforderung',
+    },
+    _ => <LearningActivityType, String>{
+      LearningActivityType.vocabulary: 'Vocabulário',
+      LearningActivityType.dialogue: 'Diálogo',
+      LearningActivityType.speech: 'Fala',
+      LearningActivityType.quiz: 'Quiz',
+      LearningActivityType.review: 'Revisão',
+      LearningActivityType.integratedChallenge: 'Desafio',
+    },
   };
-  final en = switch (type) {
-    LearningActivityType.vocabulary => 'Vocabulary',
-    LearningActivityType.dialogue => 'Dialogue',
-    LearningActivityType.speech => 'Speaking',
-    LearningActivityType.quiz => 'Quiz',
-    LearningActivityType.review => 'Review',
-    _ => 'Challenge',
-  };
-  final fr = switch (type) {
-    LearningActivityType.vocabulary => 'Vocabulaire',
-    LearningActivityType.dialogue => 'Dialogue',
-    LearningActivityType.speech => 'Expression orale',
-    LearningActivityType.quiz => 'Quiz',
-    LearningActivityType.review => 'Révision',
-    _ => 'Défi',
-  };
-  return lang == 'fr' ? fr : (lang == 'en' ? en : pt);
+  return labels[type ?? LearningActivityType.integratedChallenge]!;
 }
 
 String _goalFor(LearningActivityType? type, String locale) {
   final lang = locale.split('-').first.toLowerCase();
-  const pt = <LearningActivityType, String>{
-    LearningActivityType.vocabulary:
-        'Reconhecer e usar palavras úteis nesta situação.',
-    LearningActivityType.dialogue:
-        'Responder com naturalidade numa conversa curta.',
-    LearningActivityType.speech: 'Praticar frases importantes em voz alta.',
-    LearningActivityType.quiz: 'Confirmar que compreendeste o essencial.',
-    LearningActivityType.review: 'Consolidar o que já aprendeste.',
-    LearningActivityType.integratedChallenge:
-        'Juntar várias competências numa situação completa.',
+  final goals = switch (lang) {
+    'en' => <LearningActivityType, String>{
+      LearningActivityType.vocabulary:
+          'Recognise and use useful words for this situation.',
+      LearningActivityType.dialogue:
+          'Respond naturally in a short conversation.',
+      LearningActivityType.speech: 'Practise important phrases out loud.',
+      LearningActivityType.quiz: 'Check that you understood the essentials.',
+      LearningActivityType.review: 'Strengthen what you have already learned.',
+      LearningActivityType.integratedChallenge:
+          'Combine several skills in one complete situation.',
+    },
+    'es' => <LearningActivityType, String>{
+      LearningActivityType.vocabulary:
+          'Reconocer y usar palabras útiles en esta situación.',
+      LearningActivityType.dialogue:
+          'Responder con naturalidad en una conversación breve.',
+      LearningActivityType.speech: 'Practicar frases importantes en voz alta.',
+      LearningActivityType.quiz: 'Comprobar que has entendido lo esencial.',
+      LearningActivityType.review: 'Consolidar lo que ya has aprendido.',
+      LearningActivityType.integratedChallenge:
+          'Combinar varias competencias en una situación completa.',
+    },
+    'fr' => <LearningActivityType, String>{
+      LearningActivityType.vocabulary:
+          'Reconnaître et utiliser les mots utiles de cette situation.',
+      LearningActivityType.dialogue:
+          'Répondre naturellement dans une courte conversation.',
+      LearningActivityType.speech:
+          'Pratiquer à voix haute des phrases importantes.',
+      LearningActivityType.quiz: 'Vérifier que tu as compris l’essentiel.',
+      LearningActivityType.review: 'Consolider ce que tu as déjà appris.',
+      LearningActivityType.integratedChallenge:
+          'Combiner plusieurs compétences dans une situation complète.',
+    },
+    'it' => <LearningActivityType, String>{
+      LearningActivityType.vocabulary:
+          'Riconoscere e usare parole utili in questa situazione.',
+      LearningActivityType.dialogue:
+          'Rispondere in modo naturale in una breve conversazione.',
+      LearningActivityType.speech: 'Esercitare ad alta voce frasi importanti.',
+      LearningActivityType.quiz:
+          'Verificare di aver capito gli elementi essenziali.',
+      LearningActivityType.review: 'Consolidare ciò che hai già imparato.',
+      LearningActivityType.integratedChallenge:
+          'Combinare più competenze in una situazione completa.',
+    },
+    'de' => <LearningActivityType, String>{
+      LearningActivityType.vocabulary:
+          'Nützliche Wörter für diese Situation erkennen und verwenden.',
+      LearningActivityType.dialogue:
+          'In einem kurzen Gespräch natürlich antworten.',
+      LearningActivityType.speech: 'Wichtige Sätze laut üben.',
+      LearningActivityType.quiz:
+          'Prüfen, ob du das Wesentliche verstanden hast.',
+      LearningActivityType.review: 'Das bereits Gelernte festigen.',
+      LearningActivityType.integratedChallenge:
+          'Mehrere Kompetenzen in einer vollständigen Situation verbinden.',
+    },
+    _ => <LearningActivityType, String>{
+      LearningActivityType.vocabulary:
+          'Reconhecer e usar palavras úteis nesta situação.',
+      LearningActivityType.dialogue:
+          'Responder com naturalidade numa conversa curta.',
+      LearningActivityType.speech: 'Praticar frases importantes em voz alta.',
+      LearningActivityType.quiz: 'Confirmar que compreendeste o essencial.',
+      LearningActivityType.review: 'Consolidar o que já aprendeste.',
+      LearningActivityType.integratedChallenge:
+          'Juntar várias competências numa situação completa.',
+    },
   };
-  const en = <LearningActivityType, String>{
-    LearningActivityType.vocabulary:
-        'Recognise and use useful words for this situation.',
-    LearningActivityType.dialogue: 'Respond naturally in a short conversation.',
-    LearningActivityType.speech: 'Practise important phrases out loud.',
-    LearningActivityType.quiz: 'Check that you understood the essentials.',
-    LearningActivityType.review: 'Strengthen what you have already learned.',
-    LearningActivityType.integratedChallenge:
-        'Combine several skills in one complete situation.',
-  };
-  const fr = <LearningActivityType, String>{
-    LearningActivityType.vocabulary:
-        'Reconnaître et utiliser les mots utiles de cette situation.',
-    LearningActivityType.dialogue:
-        'Répondre naturellement dans une courte conversation.',
-    LearningActivityType.speech:
-        'Pratiquer à voix haute des phrases importantes.',
-    LearningActivityType.quiz: 'Vérifier que tu as compris l’essentiel.',
-    LearningActivityType.review: 'Consolider ce que tu as déjà appris.',
-    LearningActivityType.integratedChallenge:
-        'Combiner plusieurs compétences dans une situation complète.',
-  };
-  final key = type ?? LearningActivityType.integratedChallenge;
-  return lang == 'fr' ? fr[key]! : (lang == 'en' ? en[key]! : pt[key]!);
+  return goals[type ?? LearningActivityType.integratedChallenge]!;
 }
 
 String _competencyLabel(int count, String locale) {
   final lang = locale.split('-').first.toLowerCase();
-  if (lang == 'en') return count == 1 ? '1 skill' : '$count skills';
-  if (lang == 'fr') return count == 1 ? '1 compétence' : '$count compétences';
-  return count == 1 ? '1 competência' : '$count competências';
+  return switch (lang) {
+    'en' => count == 1 ? '1 skill' : '$count skills',
+    'es' => count == 1 ? '1 competencia' : '$count competencias',
+    'fr' => count == 1 ? '1 compétence' : '$count compétences',
+    'it' => count == 1 ? '1 competenza' : '$count competenze',
+    'de' => count == 1 ? '1 Kompetenz' : '$count Kompetenzen',
+    _ => count == 1 ? '1 competência' : '$count competências',
+  };
 }
 
 final class _MissionCopy {
@@ -436,9 +505,8 @@ final class _MissionCopy {
 }
 
 _MissionCopy _copy(String locale) {
-  final lang = locale.split('-').first.toLowerCase();
-  if (lang == 'en') {
-    return const _MissionCopy(
+  return switch (locale.split('-').first.toLowerCase()) {
+    'en' => const _MissionCopy(
       eyebrow: 'YOUR NEXT MISSION',
       fallbackTitle: 'Mission',
       goal: 'Goal',
@@ -447,28 +515,56 @@ _MissionCopy _copy(String locale) {
       start: 'Start mission',
       practiceAgain: 'Practise again',
       hint: 'Complete the activity to continue your journey.',
-    );
-  }
-  if (lang == 'fr') {
-    return const _MissionCopy(
+    ),
+    'es' => const _MissionCopy(
+      eyebrow: 'TU PRÓXIMA MISIÓN',
+      fallbackTitle: 'Misión',
+      goal: 'Objetivo',
+      ready: 'Lista para empezar',
+      completed: 'Completada',
+      start: 'Empezar misión',
+      practiceAgain: 'Practicar de nuevo',
+      hint: 'Completa la actividad para continuar tu recorrido.',
+    ),
+    'fr' => const _MissionCopy(
       eyebrow: 'TA PROCHAINE MISSION',
       fallbackTitle: 'Mission',
       goal: 'Objectif',
-      ready: 'Prêt à commencer',
+      ready: 'Prête à commencer',
       completed: 'Terminée',
       start: 'Commencer la mission',
       practiceAgain: 'Recommencer',
       hint: 'Termine l’activité pour poursuivre ton parcours.',
-    );
-  }
-  return const _MissionCopy(
-    eyebrow: 'A TUA PRÓXIMA MISSÃO',
-    fallbackTitle: 'Missão',
-    goal: 'Objetivo',
-    ready: 'Pronta para começar',
-    completed: 'Concluída',
-    start: 'Começar missão',
-    practiceAgain: 'Praticar novamente',
-    hint: 'Conclui a atividade para continuares a tua jornada.',
-  );
+    ),
+    'it' => const _MissionCopy(
+      eyebrow: 'LA TUA PROSSIMA MISSIONE',
+      fallbackTitle: 'Missione',
+      goal: 'Obiettivo',
+      ready: 'Pronta per iniziare',
+      completed: 'Completata',
+      start: 'Inizia missione',
+      practiceAgain: 'Esercitati di nuovo',
+      hint: 'Completa l’attività per continuare il tuo percorso.',
+    ),
+    'de' => const _MissionCopy(
+      eyebrow: 'DEINE NÄCHSTE MISSION',
+      fallbackTitle: 'Mission',
+      goal: 'Ziel',
+      ready: 'Bereit zum Start',
+      completed: 'Abgeschlossen',
+      start: 'Mission starten',
+      practiceAgain: 'Erneut üben',
+      hint: 'Schließe die Aktivität ab, um deinen Lernweg fortzusetzen.',
+    ),
+    _ => const _MissionCopy(
+      eyebrow: 'A TUA PRÓXIMA MISSÃO',
+      fallbackTitle: 'Missão',
+      goal: 'Objetivo',
+      ready: 'Pronta para começar',
+      completed: 'Concluída',
+      start: 'Começar missão',
+      practiceAgain: 'Praticar novamente',
+      hint: 'Conclui a atividade para continuares a tua jornada.',
+    ),
+  };
 }

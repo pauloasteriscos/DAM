@@ -1,9 +1,11 @@
 import 'package:dailytalk_mobile/domain/learning/learning_enums.dart';
 import 'package:dailytalk_mobile/domain/learning/learning_models.dart';
 import 'package:dailytalk_mobile/domain/learning/progression_engine.dart';
+import 'package:dailytalk_mobile/presentation/learning_path/learning_dialogue_runtime_page.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_map_activity_navigation.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_map_view_model.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_mission_detail_page.dart';
+import 'package:dailytalk_mobile/presentation/learning_path/learning_vocabulary_runtime_page.dart';
 import 'package:dailytalk_mobile/screens/dialogue_page.dart';
 import 'package:dailytalk_mobile/screens/quiz_page.dart';
 import 'package:dailytalk_mobile/screens/revision_page.dart';
@@ -170,6 +172,86 @@ void main() {
     expect(decision.destination, isNull);
     expect(decision.canNavigate, isFalse);
   });
+
+  test(
+    'schema v2 uses mission-bound visual runtimes for vocabulary and dialogue',
+    () {
+      final vocabularyExecution = VocabularyActivityExecution(
+        items: <VocabularyExecutionItem>[
+          VocabularyExecutionItem(
+            id: 'hello',
+            text: LocalizedText(<String, String>{
+              'pt-PT': 'Olá',
+              'it-IT': 'Ciao',
+            }),
+          ),
+        ],
+      );
+      final dialogueExecution = DialogueActivityExecution(
+        scenarioTitle: LocalizedText(<String, String>{
+          'pt-PT': 'Primeira apresentação',
+        }),
+        scenarioDescription: LocalizedText(<String, String>{
+          'pt-PT': 'Apresenta-te ao anfitrião.',
+        }),
+        turns: <DialogueExecutionTurn>[
+          DialogueExecutionTurn(
+            id: 'turn-1',
+            partnerMessage: LocalizedText(<String, String>{'it-IT': 'Ciao!'}),
+            prompt: LocalizedText(<String, String>{'pt-PT': 'Como respondes?'}),
+            correctReply: LocalizedText(<String, String>{'it-IT': 'Ciao!'}),
+            distractors: <LocalizedText>[
+              LocalizedText(<String, String>{'it-IT': 'Arrivederci!'}),
+            ],
+          ),
+        ],
+      );
+
+      final vocabulary = LearningMapActivityNavigation.resolve(
+        _activity(
+          type: LearningActivityType.vocabulary,
+          state: LearningActivityState.available,
+          contentSchemaVersion: 2,
+          execution: vocabularyExecution,
+        ),
+      );
+      final dialogue = LearningMapActivityNavigation.resolve(
+        _activity(
+          type: LearningActivityType.dialogue,
+          state: LearningActivityState.available,
+          contentSchemaVersion: 2,
+          execution: dialogueExecution,
+        ),
+      );
+
+      final vocabularyDetail =
+          vocabulary.destination! as LearningMissionDetailPage;
+      final dialogueDetail = dialogue.destination! as LearningMissionDetailPage;
+
+      expect(
+        vocabularyDetail.runtimeDestination,
+        isA<LearningVocabularyRuntimePage>(),
+      );
+      final vocabularyRuntime =
+          vocabularyDetail.runtimeDestination as LearningVocabularyRuntimePage;
+      expect(vocabularyRuntime.missionTitle, 'Activity vocabulary');
+      expect(vocabularyRuntime.competencyCount, 1);
+
+      expect(
+        dialogueDetail.runtimeDestination,
+        isA<LearningDialogueRuntimePage>(),
+      );
+      final dialogueRuntime =
+          dialogueDetail.runtimeDestination as LearningDialogueRuntimePage;
+      expect(dialogueRuntime.missionTitle, 'Activity dialogue');
+      expect(dialogueRuntime.competencyCount, 1);
+      expect(
+        vocabularyDetail.runtimeDestination,
+        isNot(isA<VocabularyPairsPage>()),
+      );
+      expect(dialogueDetail.runtimeDestination, isNot(isA<DialoguePage>()));
+    },
+  );
 
   test('schema v2 binds typed execution to the concrete screen', () {
     final execution = QuizActivityExecution(

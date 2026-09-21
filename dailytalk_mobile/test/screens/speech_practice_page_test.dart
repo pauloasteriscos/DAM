@@ -55,11 +55,13 @@ void main() {
       find.byKey(const ValueKey<String>('speech-confirm-repeat')),
     );
     await tester.pump();
-    expect(find.text('Prática terminada'), findsOneWidget);
+    await tester.pumpAndSettle();
     expect(
-      find.byKey(const ValueKey<String>('speech-back-to-mission')),
+      find.byKey(const ValueKey<String>('learning-activity-completed-page')),
       findsOneWidget,
     );
+    expect(find.text('Atividade concluída'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
   });
 
   testWidgets('legacy speech remains executable without schema-v2 payload', (
@@ -74,41 +76,41 @@ void main() {
     );
   });
 
-  testWidgets('schema v2 speech resolves authored prompt in practice language', (
-    tester,
-  ) async {
-    await AppLearningLanguageController.instance.setLanguageCode(
-      'fr-FR',
-      persist: false,
-    );
-    addTearDown(() async {
+  testWidgets(
+    'schema v2 speech resolves authored prompt in practice language',
+    (tester) async {
       await AppLearningLanguageController.instance.setLanguageCode(
-        'it-IT',
+        'fr-FR',
         persist: false,
       );
-    });
+      addTearDown(() async {
+        await AppLearningLanguageController.instance.setLanguageCode(
+          'it-IT',
+          persist: false,
+        );
+      });
 
-    final execution = SpeechActivityExecution(
-      prompts: <SpeechExecutionPrompt>[
-        SpeechExecutionPrompt(
-          id: 'one',
-          text: LocalizedText(<String, String>{
-            'pt-PT': 'Repete: Bonjour !',
-            'fr-FR': 'Bonjour !',
-          }),
+      final execution = SpeechActivityExecution(
+        prompts: <SpeechExecutionPrompt>[
+          SpeechExecutionPrompt(
+            id: 'one',
+            text: LocalizedText(<String, String>{
+              'pt-PT': 'Repete: Bonjour !',
+              'fr-FR': 'Bonjour !',
+            }),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('pt', 'PT'),
+          home: SpeechPracticePage(execution: execution),
         ),
-      ],
-    );
+      );
 
-    await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('pt', 'PT'),
-        home: SpeechPracticePage(execution: execution),
-      ),
-    );
-
-    expect(find.text('Bonjour !'), findsOneWidget);
-    expect(find.text('Repete: Bonjour !'), findsNothing);
-  });
-
+      expect(find.text('Bonjour !'), findsOneWidget);
+      expect(find.text('Repete: Bonjour !'), findsNothing);
+    },
+  );
 }

@@ -65,11 +65,21 @@ final class LearningMapWindowComposer {
     required LearningPath activePath,
     required LearningMapWindowReadSnapshot snapshot,
     required String locale,
+    String? scaffoldingLocale,
   }) {
     final normalizedLocale = locale.trim();
+    final normalizedScaffoldingLocale = (scaffoldingLocale ?? locale).trim();
 
     if (normalizedLocale.isEmpty) {
       throw ArgumentError.value(locale, 'locale', 'nao pode estar vazio');
+    }
+
+    if (normalizedScaffoldingLocale.isEmpty) {
+      throw ArgumentError.value(
+        scaffoldingLocale,
+        'scaffoldingLocale',
+        'nao pode estar vazio',
+      );
     }
 
     if (activePath.id.value != snapshot.learningPathId) {
@@ -116,6 +126,7 @@ final class LearningMapWindowComposer {
       packageVersion: snapshot.packageVersion,
       recoveredFromFallback: snapshot.recoveredFromFallback,
       locale: normalizedLocale,
+      scaffoldingLocale: normalizedScaffoldingLocale,
       projection: snapshot.windowProjection,
       syncStates: snapshot.windowSyncStates,
     );

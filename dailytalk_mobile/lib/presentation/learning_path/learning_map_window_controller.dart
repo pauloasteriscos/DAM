@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'learning_activity_completion_coordinator.dart';
 import 'learning_map_activity_navigation.dart';
 import 'learning_map_mission_flow.dart';
 import 'learning_map_window_segment_controls.dart';
@@ -47,7 +48,7 @@ final class LearningMapWindowController extends ChangeNotifier {
   StackTrace? _errorStackTrace;
   bool _isLoading = false;
   bool _isActivityFlowRunning = false;
-  bool _isDisposed = false;
+  bool _disposed = false;
 
   final Map<int, double> _scrollOffsets = <int, double>{};
 
@@ -143,7 +144,7 @@ final class LearningMapWindowController extends ChangeNotifier {
         '$pathElementId.',
       );
       _errorStackTrace = null;
-      _notifyIfAlive();
+      _notifyListenersIfAlive();
       return false;
     }
 
@@ -198,7 +199,7 @@ final class LearningMapWindowController extends ChangeNotifier {
             '${recommendation.pathElementId}.',
           );
           _errorStackTrace = null;
-          _notifyIfAlive();
+          _notifyListenersIfAlive();
           return null;
         }
 
@@ -274,7 +275,7 @@ final class LearningMapWindowController extends ChangeNotifier {
     _isActivityFlowRunning = true;
     _error = null;
     _errorStackTrace = null;
-    _notifyIfAlive();
+    _notifyListenersIfAlive();
 
     try {
       final flow = LearningMapMissionFlow(
@@ -313,11 +314,11 @@ final class LearningMapWindowController extends ChangeNotifier {
     } catch (error, stackTrace) {
       _error = error;
       _errorStackTrace = stackTrace;
-      _notifyIfAlive();
+      _notifyListenersIfAlive();
       return null;
     } finally {
       _isActivityFlowRunning = false;
-      _notifyIfAlive();
+      _notifyListenersIfAlive();
     }
   }
 
@@ -353,7 +354,7 @@ final class LearningMapWindowController extends ChangeNotifier {
     _isLoading = true;
     _error = null;
     _errorStackTrace = null;
-    _notifyIfAlive();
+    _notifyListenersIfAlive();
 
     try {
       final result = await operation();
@@ -362,9 +363,18 @@ final class LearningMapWindowController extends ChangeNotifier {
         return false;
       }
 
+      if (_disposed) {
+        // A leitura já terminou com sucesso. O controller destruído apenas
+        // descarta o resultado visual e não emite novas notificações.
+        return true;
+      }
+
       _composition = result;
       return true;
     } catch (error, stackTrace) {
+      if (_disposed) {
+        return false;
+      }
       // Fail-safe visual:
       // o último modelo válido permanece visível.
       _error = error;
@@ -372,12 +382,12 @@ final class LearningMapWindowController extends ChangeNotifier {
       return false;
     } finally {
       _isLoading = false;
-      _notifyIfAlive();
+      _notifyListenersIfAlive();
     }
   }
 
-  void _notifyIfAlive() {
-    if (_isDisposed) {
+  void _notifyListenersIfAlive() {
+    if (_disposed) {
       return;
     }
 
@@ -386,7 +396,7 @@ final class LearningMapWindowController extends ChangeNotifier {
 
   @override
   void dispose() {
-    _isDisposed = true;
+    _disposed = true;
     super.dispose();
   }
 }
@@ -401,6 +411,7 @@ final class LearningMapWindowViewport extends StatefulWidget {
     required this.controller,
     this.onActivityTap,
     this.activityOpenAction,
+    this.completionActionFactory,
     this.scrollController,
     this.footer,
     this.autoLoad = true,
@@ -414,6 +425,9 @@ final class LearningMapWindowViewport extends StatefulWidget {
   /// Optional test/integration override for opening activities.
   /// When null, ActivityNavigation.open is used.
   final LearningMapActivityOpenAction? activityOpenAction;
+
+  /// Fronteira de persistência usada pelos runtimes schema-v2.
+  final LearningActivityCompletionActionFactory? completionActionFactory;
 
   /// Pode ser injetado para integração/testes.
   ///
@@ -615,7 +629,11 @@ final class _LearningMapWindowViewportState
 
     final openAction =
         widget.activityOpenAction ??
-        (target) => LearningMapActivityNavigation.open(context, target);
+        (target) => LearningMapActivityNavigation.open(
+          context,
+          target,
+          completionActionFactory: widget.completionActionFactory,
+        );
 
     unawaited(
       widget.controller.openActivityAndRefresh(

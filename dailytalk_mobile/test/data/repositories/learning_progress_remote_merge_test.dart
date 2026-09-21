@@ -69,9 +69,9 @@ void main() {
   });
 
   test(
-    'Fase 3.5B2 — v6 para v7 cria estado de cursor sem destruir settings',
+    'Fase 3.5B2 — v6 para esquema atual cria estado de cursor sem destruir settings',
     () async {
-      final path = p.join(tempDir.path, 'migration-v6-v7.db');
+      final path = p.join(tempDir.path, 'migration-v6-current.db');
 
       db = await openDatabase(
         path,
@@ -124,10 +124,10 @@ void main() {
         whereArgs: const <Object?>['database_version'],
       );
 
-      expect(version.single['value'], '7');
+      expect(version.single['value'], '8');
 
       final pragma = await db!.rawQuery('PRAGMA user_version');
-      expect(pragma.single['user_version'], 7);
+      expect(pragma.single['user_version'], 8);
     },
   );
 

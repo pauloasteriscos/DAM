@@ -1,0 +1,876 @@
+{
+  "schemaVersion": 2,
+  "id": "student.fr-fr.phase1",
+  "defaultLocale": "pt-PT",
+  "title": {
+    "pt-PT": "Primeiros dias em França",
+    "en-US": "First days in France",
+    "es-ES": "Primeros días en Francia",
+    "fr-FR": "Premiers jours en France",
+    "it-IT": "Primi giorni in Francia",
+    "de-DE": "Erste Tage in Frankreich"
+  },
+  "journeys": [
+    {
+      "id": "arrival.journey",
+      "title": {
+        "pt-PT": "Chegada e acolhimento",
+        "en-US": "Arrival and welcome",
+        "es-ES": "Llegada y acogida",
+        "fr-FR": "Arrivée et accueil",
+        "it-IT": "Arrivo e accoglienza",
+        "de-DE": "Ankunft und Empfang"
+      },
+      "stages": [
+        {
+          "id": "arrival.stage-01",
+          "title": {
+            "pt-PT": "Primeiro contacto",
+            "en-US": "First contact",
+            "es-ES": "Primer contacto",
+            "fr-FR": "Premier contact",
+            "it-IT": "Primo contatto",
+            "de-DE": "Erster Kontakt"
+          },
+          "elements": [
+            {
+              "id": "arrival.vocabulary-01.element",
+              "type": "activity",
+              "activityId": "arrival.vocabulary-01",
+              "practicePreference": "vocabulary"
+            },
+            {
+              "id": "arrival.dialogue-01.element",
+              "type": "activity",
+              "activityId": "arrival.dialogue-01",
+              "practicePreference": "dialogue"
+            },
+            {
+              "id": "arrival.speech-01.element",
+              "type": "activity",
+              "activityId": "arrival.speech-01",
+              "practicePreference": "speech"
+            }
+          ]
+        },
+        {
+          "id": "arrival.stage-02",
+          "title": {
+            "pt-PT": "Comunicar à chegada",
+            "en-US": "Communicating on arrival",
+            "es-ES": "Comunicarse al llegar",
+            "fr-FR": "Communiquer à l’arrivée",
+            "it-IT": "Comunicare all’arrivo",
+            "de-DE": "Bei der Ankunft kommunizieren"
+          },
+          "elements": [
+            {
+              "id": "arrival.vocabulary-02.element",
+              "type": "activity",
+              "activityId": "arrival.vocabulary-02",
+              "prerequisites": {
+                "type": "activityCompleted",
+                "activityId": "arrival.vocabulary-01"
+              },
+              "practicePreference": "vocabulary"
+            },
+            {
+              "id": "arrival.dialogue-02.element",
+              "type": "activity",
+              "activityId": "arrival.dialogue-02",
+              "prerequisites": {
+                "type": "group",
+                "operator": "any",
+                "rules": [
+                  {
+                    "type": "activityCompleted",
+                    "activityId": "arrival.vocabulary-01"
+                  },
+                  {
+                    "type": "activityCompleted",
+                    "activityId": "arrival.dialogue-01"
+                  }
+                ]
+              },
+              "practicePreference": "dialogue"
+            },
+            {
+              "id": "arrival.speech-02.element",
+              "type": "activity",
+              "activityId": "arrival.speech-02",
+              "prerequisites": {
+                "type": "group",
+                "operator": "all",
+                "rules": [
+                  {
+                    "type": "activityCompleted",
+                    "activityId": "arrival.speech-01"
+                  },
+                  {
+                    "type": "competencyAchieved",
+                    "competencyId": "arrival.fr-fr.pronunciation-basics"
+                  }
+                ]
+              },
+              "practicePreference": "speech"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "activities": [
+    {
+      "id": "arrival.vocabulary-01",
+      "type": "vocabulary",
+      "origin": "official",
+      "currentRevisionId": "arrival.vocabulary-01.revision-06",
+      "revisions": [
+        {
+          "id": "arrival.vocabulary-01.revision-06",
+          "activityId": "arrival.vocabulary-01",
+          "revisionNumber": 6,
+          "title": {
+            "pt-PT": "Palavras e expressões de acolhimento",
+            "en-US": "Welcome words and phrases",
+            "es-ES": "Palabras y expresiones de bienvenida",
+            "fr-FR": "Mots et expressions d’accueil",
+            "it-IT": "Parole ed espressioni di benvenuto",
+            "de-DE": "Begrüßungswörter und -ausdrücke"
+          },
+          "instructions": {
+            "pt-PT": "Associe cada palavra ou expressão ao significado.",
+            "en-US": "Match each word or phrase to its meaning.",
+            "es-ES": "Relaciona cada palabra o expresión con su significado.",
+            "fr-FR": "Associe chaque mot ou expression à sa signification.",
+            "it-IT": "Abbina ogni parola o espressione al suo significato.",
+            "de-DE": "Ordne jedes Wort oder jeden Ausdruck seiner Bedeutung zu."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.fr-fr.greeting-basics"
+          ],
+          "execution": {
+            "kind": "vocabulary",
+            "items": [
+              {
+                "id": "hello",
+                "text": {
+                  "pt-PT": "Olá",
+                  "en-US": "Hello",
+                  "es-ES": "Hola",
+                  "fr-FR": "Bonjour",
+                  "it-IT": "Ciao",
+                  "de-DE": "Hallo"
+                }
+              },
+              {
+                "id": "good-morning",
+                "text": {
+                  "pt-PT": "Bom dia",
+                  "en-US": "Good morning",
+                  "es-ES": "Buenos días",
+                  "fr-FR": "Bonjour",
+                  "it-IT": "Buongiorno",
+                  "de-DE": "Guten Morgen"
+                }
+              },
+              {
+                "id": "thank-you",
+                "text": {
+                  "pt-PT": "Obrigado",
+                  "en-US": "Thank you",
+                  "es-ES": "Gracias",
+                  "fr-FR": "Merci",
+                  "it-IT": "Grazie",
+                  "de-DE": "Danke"
+                }
+              },
+              {
+                "id": "please",
+                "text": {
+                  "pt-PT": "Por favor",
+                  "en-US": "Please",
+                  "es-ES": "Por favor",
+                  "fr-FR": "S’il vous plaît",
+                  "it-IT": "Per favore",
+                  "de-DE": "Bitte"
+                }
+              },
+              {
+                "id": "i-am",
+                "text": {
+                  "pt-PT": "Eu sou…",
+                  "en-US": "I’m…",
+                  "es-ES": "Soy…",
+                  "fr-FR": "Je suis…",
+                  "it-IT": "Sono…",
+                  "de-DE": "Ich bin…"
+                }
+              },
+              {
+                "id": "my-name-is",
+                "text": {
+                  "pt-PT": "Chamo-me…",
+                  "en-US": "My name is…",
+                  "es-ES": "Me llamo…",
+                  "fr-FR": "Je m’appelle…",
+                  "it-IT": "Mi chiamo…",
+                  "de-DE": "Ich heiße…"
+                }
+              },
+              {
+                "id": "nice-to-meet-you",
+                "text": {
+                  "pt-PT": "Prazer!",
+                  "en-US": "Nice to meet you!",
+                  "es-ES": "¡Encantado!",
+                  "fr-FR": "Enchanté !",
+                  "it-IT": "Piacere!",
+                  "de-DE": "Freut mich!"
+                }
+              },
+              {
+                "id": "yes",
+                "text": {
+                  "pt-PT": "Sim",
+                  "en-US": "Yes",
+                  "es-ES": "Sí",
+                  "fr-FR": "Oui",
+                  "it-IT": "Sì",
+                  "de-DE": "Ja"
+                }
+              },
+              {
+                "id": "thank-you-very-much",
+                "text": {
+                  "pt-PT": "Muito obrigado.",
+                  "en-US": "Thank you very much.",
+                  "es-ES": "Muchas gracias.",
+                  "fr-FR": "Merci beaucoup.",
+                  "it-IT": "Grazie mille.",
+                  "de-DE": "Vielen Dank."
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "arrival.dialogue-01",
+      "type": "dialogue",
+      "origin": "official",
+      "currentRevisionId": "arrival.dialogue-01.revision-06",
+      "revisions": [
+        {
+          "id": "arrival.dialogue-01.revision-06",
+          "activityId": "arrival.dialogue-01",
+          "revisionNumber": 6,
+          "title": {
+            "pt-PT": "Apresentar-se",
+            "en-US": "Introduce yourself",
+            "es-ES": "Presentarse",
+            "fr-FR": "Se présenter",
+            "it-IT": "Presentarsi",
+            "de-DE": "Sich vorstellen"
+          },
+          "instructions": {
+            "pt-PT": "Complete o diálogo de apresentação.",
+            "en-US": "Complete the introduction dialogue.",
+            "es-ES": "Completa el diálogo de presentación.",
+            "fr-FR": "Complète le dialogue de présentation.",
+            "it-IT": "Completa il dialogo di presentazione.",
+            "de-DE": "Vervollständige den Vorstellungsdialog."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.fr-fr.greeting-basics"
+          ],
+          "execution": {
+            "kind": "dialogue",
+            "scenarioTitle": {
+              "pt-PT": "Primeira apresentação",
+              "en-US": "First introduction",
+              "es-ES": "Primera presentación",
+              "fr-FR": "Première présentation",
+              "it-IT": "Prima presentazione",
+              "de-DE": "Erste Vorstellung"
+            },
+            "scenarioDescription": {
+              "pt-PT": "Chegaste à família de acolhimento.",
+              "en-US": "You have arrived at your host family.",
+              "es-ES": "Has llegado a tu familia de acogida.",
+              "fr-FR": "Tu arrives dans ta famille d’accueil.",
+              "it-IT": "Sei arrivato dalla tua famiglia ospitante.",
+              "de-DE": "Du bist bei deiner Gastfamilie angekommen."
+            },
+            "turns": [
+              {
+                "id": "turn-01",
+                "partnerMessage": {
+                  "pt-PT": "Olá! Eu sou a Camille.",
+                  "en-US": "Hello! I’m Camille.",
+                  "es-ES": "¡Hola! Soy Camille.",
+                  "fr-FR": "Salut ! Je suis Camille.",
+                  "it-IT": "Ciao! Sono Camille.",
+                  "de-DE": "Hallo! Ich bin Camille."
+                },
+                "prompt": {
+                  "pt-PT": "Apresenta-te.",
+                  "en-US": "Introduce yourself.",
+                  "es-ES": "Preséntate.",
+                  "fr-FR": "Présente-toi.",
+                  "it-IT": "Presentati.",
+                  "de-DE": "Stell dich vor."
+                },
+                "correctReply": {
+                  "pt-PT": "Olá, eu sou o Paulo. Prazer!",
+                  "en-US": "Hello, I’m Paulo. Nice to meet you!",
+                  "es-ES": "Hola, soy Paulo. ¡Encantado!",
+                  "fr-FR": "Salut, je m’appelle Paulo. Enchanté !",
+                  "it-IT": "Ciao, sono Paulo. Piacere!",
+                  "de-DE": "Hallo, ich bin Paulo. Freut mich!"
+                },
+                "distractors": [
+                  {
+                    "pt-PT": "Onde fica a casa de banho?",
+                    "en-US": "Where is the bathroom?",
+                    "es-ES": "¿Dónde está el baño?",
+                    "fr-FR": "Où sont les toilettes ?",
+                    "it-IT": "Dov’è il bagno?",
+                    "de-DE": "Wo ist das Badezimmer?"
+                  },
+                  {
+                    "pt-PT": "Não quero comer.",
+                    "en-US": "I don’t want to eat.",
+                    "es-ES": "No quiero comer.",
+                    "fr-FR": "Je ne veux pas manger.",
+                    "it-IT": "Non voglio mangiare.",
+                    "de-DE": "Ich möchte nicht essen."
+                  }
+                ]
+              },
+              {
+                "id": "turn-02",
+                "partnerMessage": {
+                  "pt-PT": "Bem-vindo! Tiveste uma boa viagem?",
+                  "en-US": "Welcome! Did you have a good trip?",
+                  "es-ES": "¡Bienvenido! ¿Tuviste un buen viaje?",
+                  "fr-FR": "Bienvenue ! Tu as fait bon voyage ?",
+                  "it-IT": "Benvenuto! Hai fatto un buon viaggio?",
+                  "de-DE": "Willkommen! Hattest du eine gute Reise?"
+                },
+                "prompt": {
+                  "pt-PT": "Responde de forma natural.",
+                  "en-US": "Reply naturally.",
+                  "es-ES": "Responde de forma natural.",
+                  "fr-FR": "Réponds naturellement.",
+                  "it-IT": "Rispondi in modo naturale.",
+                  "de-DE": "Antworte natürlich."
+                },
+                "correctReply": {
+                  "pt-PT": "Sim, obrigado. A viagem correu bem.",
+                  "en-US": "Yes, thank you. The trip went well.",
+                  "es-ES": "Sí, gracias. El viaje fue bien.",
+                  "fr-FR": "Oui, merci. Le voyage s’est bien passé.",
+                  "it-IT": "Sì, grazie. Il viaggio è andato bene.",
+                  "de-DE": "Ja, danke. Die Reise ist gut verlaufen."
+                },
+                "distractors": [
+                  {
+                    "pt-PT": "Até amanhã.",
+                    "en-US": "See you tomorrow.",
+                    "es-ES": "Hasta mañana.",
+                    "fr-FR": "À demain.",
+                    "it-IT": "A domani.",
+                    "de-DE": "Bis morgen."
+                  },
+                  {
+                    "pt-PT": "Tenho uma caneta azul.",
+                    "en-US": "I have a blue pen.",
+                    "es-ES": "Tengo un bolígrafo azul.",
+                    "fr-FR": "J’ai un stylo bleu.",
+                    "it-IT": "Ho una penna blu.",
+                    "de-DE": "Ich habe einen blauen Stift."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "arrival.speech-01",
+      "type": "speech",
+      "origin": "official",
+      "currentRevisionId": "arrival.speech-01.revision-06",
+      "revisions": [
+        {
+          "id": "arrival.speech-01.revision-06",
+          "activityId": "arrival.speech-01",
+          "revisionNumber": 6,
+          "title": {
+            "pt-PT": "Dizer olá",
+            "en-US": "Say hello",
+            "es-ES": "Decir hola",
+            "fr-FR": "Dire bonjour",
+            "it-IT": "Dire ciao",
+            "de-DE": "Hallo sagen"
+          },
+          "instructions": {
+            "pt-PT": "Repita as saudações apresentadas.",
+            "en-US": "Repeat the greetings shown.",
+            "es-ES": "Repite los saludos mostrados.",
+            "fr-FR": "Répète les salutations présentées.",
+            "it-IT": "Ripeti i saluti mostrati.",
+            "de-DE": "Wiederhole die gezeigten Begrüßungen."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.fr-fr.pronunciation-basics"
+          ],
+          "execution": {
+            "kind": "speech",
+            "prompts": [
+              {
+                "id": "speech-hello",
+                "text": {
+                  "pt-PT": "Olá!",
+                  "en-US": "Hello!",
+                  "es-ES": "¡Hola!",
+                  "fr-FR": "Bonjour !",
+                  "it-IT": "Ciao!",
+                  "de-DE": "Hallo!"
+                }
+              },
+              {
+                "id": "speech-name",
+                "text": {
+                  "pt-PT": "Chamo-me Paulo.",
+                  "en-US": "My name is Paulo.",
+                  "es-ES": "Me llamo Paulo.",
+                  "fr-FR": "Je m’appelle Paulo.",
+                  "it-IT": "Mi chiamo Paulo.",
+                  "de-DE": "Ich heiße Paulo."
+                }
+              },
+              {
+                "id": "speech-thanks",
+                "text": {
+                  "pt-PT": "Muito obrigado.",
+                  "en-US": "Thank you very much.",
+                  "es-ES": "Muchas gracias.",
+                  "fr-FR": "Merci beaucoup.",
+                  "it-IT": "Grazie mille.",
+                  "de-DE": "Vielen Dank."
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "arrival.vocabulary-02",
+      "type": "vocabulary",
+      "origin": "official",
+      "currentRevisionId": "arrival.vocabulary-02.revision-06",
+      "revisions": [
+        {
+          "id": "arrival.vocabulary-02.revision-06",
+          "activityId": "arrival.vocabulary-02",
+          "revisionNumber": 6,
+          "title": {
+            "pt-PT": "Casa e ajuda",
+            "en-US": "Home and help",
+            "es-ES": "Casa y ayuda",
+            "fr-FR": "Maison et aide",
+            "it-IT": "Casa e aiuto",
+            "de-DE": "Zuhause und Hilfe"
+          },
+          "instructions": {
+            "pt-PT": "Associe cada palavra ou expressão ao significado.",
+            "en-US": "Match each word or phrase to its meaning.",
+            "es-ES": "Relaciona cada palabra o expresión con su significado.",
+            "fr-FR": "Associe chaque mot ou expression à sa signification.",
+            "it-IT": "Abbina ogni parola o espressione al suo significato.",
+            "de-DE": "Ordne jedes Wort oder jeden Ausdruck seiner Bedeutung zu."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.fr-fr.home-vocabulary"
+          ],
+          "execution": {
+            "kind": "vocabulary",
+            "items": [
+              {
+                "id": "bedroom",
+                "text": {
+                  "pt-PT": "Quarto",
+                  "en-US": "Bedroom",
+                  "es-ES": "Dormitorio",
+                  "fr-FR": "Chambre",
+                  "it-IT": "Camera da letto",
+                  "de-DE": "Schlafzimmer"
+                }
+              },
+              {
+                "id": "bathroom",
+                "text": {
+                  "pt-PT": "Casa de banho",
+                  "en-US": "Bathroom",
+                  "es-ES": "Baño",
+                  "fr-FR": "Salle de bain",
+                  "it-IT": "Bagno",
+                  "de-DE": "Badezimmer"
+                }
+              },
+              {
+                "id": "kitchen",
+                "text": {
+                  "pt-PT": "Cozinha",
+                  "en-US": "Kitchen",
+                  "es-ES": "Cocina",
+                  "fr-FR": "Cuisine",
+                  "it-IT": "Cucina",
+                  "de-DE": "Küche"
+                }
+              },
+              {
+                "id": "key",
+                "text": {
+                  "pt-PT": "Chave",
+                  "en-US": "Key",
+                  "es-ES": "Llave",
+                  "fr-FR": "Clé",
+                  "it-IT": "Chiave",
+                  "de-DE": "Schlüssel"
+                }
+              },
+              {
+                "id": "help",
+                "text": {
+                  "pt-PT": "Ajuda",
+                  "en-US": "Help",
+                  "es-ES": "Ayuda",
+                  "fr-FR": "Aide",
+                  "it-IT": "Aiuto",
+                  "de-DE": "Hilfe"
+                }
+              },
+              {
+                "id": "where-is-bathroom",
+                "text": {
+                  "pt-PT": "Onde fica a casa de banho?",
+                  "en-US": "Where is the bathroom?",
+                  "es-ES": "¿Dónde está el baño?",
+                  "fr-FR": "Où est la salle de bain ?",
+                  "it-IT": "Dov’è il bagno?",
+                  "de-DE": "Wo ist das Badezimmer?"
+                }
+              },
+              {
+                "id": "i-dont-understand",
+                "text": {
+                  "pt-PT": "Não compreendo.",
+                  "en-US": "I don’t understand.",
+                  "es-ES": "No entiendo.",
+                  "fr-FR": "Je ne comprends pas.",
+                  "it-IT": "Non capisco.",
+                  "de-DE": "Ich verstehe nicht."
+                }
+              },
+              {
+                "id": "very-nice",
+                "text": {
+                  "pt-PT": "Muito agradável",
+                  "en-US": "Very nice",
+                  "es-ES": "Muy agradable",
+                  "fr-FR": "Très agréable",
+                  "it-IT": "Molto bella",
+                  "de-DE": "Sehr schön"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "arrival.dialogue-02",
+      "type": "dialogue",
+      "origin": "official",
+      "currentRevisionId": "arrival.dialogue-02.revision-06",
+      "revisions": [
+        {
+          "id": "arrival.dialogue-02.revision-06",
+          "activityId": "arrival.dialogue-02",
+          "revisionNumber": 6,
+          "title": {
+            "pt-PT": "Conhecer a família",
+            "en-US": "Meet the family",
+            "es-ES": "Conocer a la familia",
+            "fr-FR": "Faire connaissance avec la famille",
+            "it-IT": "Conoscere la famiglia",
+            "de-DE": "Die Familie kennenlernen"
+          },
+          "instructions": {
+            "pt-PT": "Escolha respostas adequadas no diálogo.",
+            "en-US": "Choose suitable replies in the dialogue.",
+            "es-ES": "Elige respuestas adecuadas en el diálogo.",
+            "fr-FR": "Choisis des réponses adaptées dans le dialogue.",
+            "it-IT": "Scegli risposte adeguate nel dialogo.",
+            "de-DE": "Wähle passende Antworten im Dialog."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.fr-fr.greeting-basics"
+          ],
+          "execution": {
+            "kind": "dialogue",
+            "scenarioTitle": {
+              "pt-PT": "Conhecer a família",
+              "en-US": "Meet the family",
+              "es-ES": "Conocer a la familia",
+              "fr-FR": "Faire connaissance avec la famille",
+              "it-IT": "Conoscere la famiglia",
+              "de-DE": "Die Familie kennenlernen"
+            },
+            "scenarioDescription": {
+              "pt-PT": "Conversas simples durante o acolhimento.",
+              "en-US": "Simple conversations during the welcome.",
+              "es-ES": "Conversaciones sencillas durante la acogida.",
+              "fr-FR": "Échanges simples pendant l’accueil.",
+              "it-IT": "Conversazioni semplici durante l’accoglienza.",
+              "de-DE": "Einfache Gespräche während der Ankunft."
+            },
+            "turns": [
+              {
+                "id": "turn-01",
+                "partnerMessage": {
+                  "pt-PT": "Este é o teu quarto.",
+                  "en-US": "This is your room.",
+                  "es-ES": "Esta es tu habitación.",
+                  "fr-FR": "Voici ta chambre.",
+                  "it-IT": "Questa è la tua camera.",
+                  "de-DE": "Das ist dein Zimmer."
+                },
+                "prompt": {
+                  "pt-PT": "Agradece.",
+                  "en-US": "Say thank you.",
+                  "es-ES": "Da las gracias.",
+                  "fr-FR": "Remercie.",
+                  "it-IT": "Ringrazia.",
+                  "de-DE": "Bedanke dich."
+                },
+                "correctReply": {
+                  "pt-PT": "Obrigado! O quarto é muito agradável.",
+                  "en-US": "Thank you! The room is very nice.",
+                  "es-ES": "¡Gracias! La habitación es muy agradable.",
+                  "fr-FR": "Merci ! La chambre est très agréable.",
+                  "it-IT": "Grazie! La camera è molto bella.",
+                  "de-DE": "Danke! Das Zimmer ist sehr schön."
+                },
+                "distractors": [
+                  {
+                    "pt-PT": "Não sei o meu nome.",
+                    "en-US": "I don’t know my name.",
+                    "es-ES": "No sé mi nombre.",
+                    "fr-FR": "Je ne connais pas mon nom.",
+                    "it-IT": "Non so il mio nome.",
+                    "de-DE": "Ich kenne meinen Namen nicht."
+                  },
+                  {
+                    "pt-PT": "Quero ir para a escola agora.",
+                    "en-US": "I want to go to school now.",
+                    "es-ES": "Quiero ir a la escuela ahora.",
+                    "fr-FR": "Je veux aller à l’école maintenant.",
+                    "it-IT": "Voglio andare a scuola adesso.",
+                    "de-DE": "Ich möchte jetzt zur Schule gehen."
+                  }
+                ]
+              },
+              {
+                "id": "turn-02",
+                "partnerMessage": {
+                  "pt-PT": "Precisas de alguma coisa?",
+                  "en-US": "Do you need anything?",
+                  "es-ES": "¿Necesitas algo?",
+                  "fr-FR": "Tu as besoin de quelque chose ?",
+                  "it-IT": "Hai bisogno di qualcosa?",
+                  "de-DE": "Brauchst du etwas?"
+                },
+                "prompt": {
+                  "pt-PT": "Pede ajuda educadamente.",
+                  "en-US": "Ask for help politely.",
+                  "es-ES": "Pide ayuda con educación.",
+                  "fr-FR": "Demande de l’aide poliment.",
+                  "it-IT": "Chiedi aiuto con cortesia.",
+                  "de-DE": "Bitte höflich um Hilfe."
+                },
+                "correctReply": {
+                  "pt-PT": "Sim, por favor. Onde fica a casa de banho?",
+                  "en-US": "Yes, please. Where is the bathroom?",
+                  "es-ES": "Sí, por favor. ¿Dónde está el baño?",
+                  "fr-FR": "Oui, s’il vous plaît. Où est la salle de bain ?",
+                  "it-IT": "Sì, per favore. Dov’è il bagno?",
+                  "de-DE": "Ja, bitte. Wo ist das Badezimmer?"
+                },
+                "distractors": [
+                  {
+                    "pt-PT": "Tenho quinze anos.",
+                    "en-US": "I am fifteen years old.",
+                    "es-ES": "Tengo quince años.",
+                    "fr-FR": "J’ai quinze ans.",
+                    "it-IT": "Ho quindici anni.",
+                    "de-DE": "Ich bin fünfzehn Jahre alt."
+                  },
+                  {
+                    "pt-PT": "Bom apetite.",
+                    "en-US": "Enjoy your meal.",
+                    "es-ES": "Buen provecho.",
+                    "fr-FR": "Bon appétit.",
+                    "it-IT": "Buon appetito.",
+                    "de-DE": "Guten Appetit."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "arrival.speech-02",
+      "type": "speech",
+      "origin": "official",
+      "currentRevisionId": "arrival.speech-02.revision-06",
+      "revisions": [
+        {
+          "id": "arrival.speech-02.revision-06",
+          "activityId": "arrival.speech-02",
+          "revisionNumber": 6,
+          "title": {
+            "pt-PT": "Pedir ajuda",
+            "en-US": "Ask for help",
+            "es-ES": "Pedir ayuda",
+            "fr-FR": "Demander de l’aide",
+            "it-IT": "Chiedere aiuto",
+            "de-DE": "Um Hilfe bitten"
+          },
+          "instructions": {
+            "pt-PT": "Pronuncie as frases para pedir ajuda.",
+            "en-US": "Say the phrases used to ask for help.",
+            "es-ES": "Pronuncia las frases para pedir ayuda.",
+            "fr-FR": "Prononce les phrases pour demander de l’aide.",
+            "it-IT": "Pronuncia le frasi per chiedere aiuto.",
+            "de-DE": "Sprich die Sätze aus, mit denen du um Hilfe bittest."
+          },
+          "visibility": "public",
+          "competencies": [
+            "arrival.fr-fr.pronunciation-basics"
+          ],
+          "execution": {
+            "kind": "speech",
+            "prompts": [
+              {
+                "id": "speech-help",
+                "text": {
+                  "pt-PT": "Pode ajudar-me, por favor?",
+                  "en-US": "Can you help me, please?",
+                  "es-ES": "¿Puede ayudarme, por favor?",
+                  "fr-FR": "Pouvez-vous m’aider, s’il vous plaît ?",
+                  "it-IT": "Può aiutarmi, per favore?",
+                  "de-DE": "Können Sie mir bitte helfen?"
+                }
+              },
+              {
+                "id": "speech-bathroom",
+                "text": {
+                  "pt-PT": "Onde fica a casa de banho?",
+                  "en-US": "Where is the bathroom?",
+                  "es-ES": "¿Dónde está el baño?",
+                  "fr-FR": "Où est la salle de bain ?",
+                  "it-IT": "Dov’è il bagno?",
+                  "de-DE": "Wo ist das Badezimmer?"
+                }
+              },
+              {
+                "id": "speech-understand",
+                "text": {
+                  "pt-PT": "Não compreendo.",
+                  "en-US": "I don’t understand.",
+                  "es-ES": "No entiendo.",
+                  "fr-FR": "Je ne comprends pas.",
+                  "it-IT": "Non capisco.",
+                  "de-DE": "Ich verstehe nicht."
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "competencies": [
+    {
+      "id": "arrival.fr-fr.greeting-basics",
+      "title": {
+        "pt-PT": "Cumprimentos básicos",
+        "en-US": "Basic greetings",
+        "es-ES": "Saludos básicos",
+        "fr-FR": "Salutations de base",
+        "it-IT": "Saluti di base",
+        "de-DE": "Grundlegende Begrüßungen"
+      },
+      "description": {
+        "pt-PT": "Reconhecer e usar cumprimentos simples.",
+        "en-US": "Recognize and use simple greetings.",
+        "es-ES": "Reconocer y usar saludos sencillos.",
+        "fr-FR": "Reconnaître et utiliser des salutations simples.",
+        "it-IT": "Riconoscere e usare saluti semplici.",
+        "de-DE": "Einfache Begrüßungen erkennen und verwenden."
+      }
+    },
+    {
+      "id": "arrival.fr-fr.pronunciation-basics",
+      "title": {
+        "pt-PT": "Pronúncia inicial",
+        "en-US": "Initial pronunciation",
+        "es-ES": "Pronunciación inicial",
+        "fr-FR": "Prononciation initiale",
+        "it-IT": "Pronuncia iniziale",
+        "de-DE": "Erste Aussprache"
+      },
+      "description": {
+        "pt-PT": "Pronunciar expressões essenciais de forma compreensível.",
+        "en-US": "Pronounce essential expressions clearly enough to be understood.",
+        "es-ES": "Pronunciar expresiones esenciales de forma comprensible.",
+        "fr-FR": "Prononcer des expressions essentielles de manière compréhensible.",
+        "it-IT": "Pronunciare espressioni essenziali in modo comprensibile.",
+        "de-DE": "Wichtige Ausdrücke verständlich aussprechen."
+      }
+    },
+    {
+      "id": "arrival.fr-fr.home-vocabulary",
+      "title": {
+        "pt-PT": "Vocabulário da casa",
+        "en-US": "Home vocabulary",
+        "es-ES": "Vocabulario de la casa",
+        "fr-FR": "Vocabulaire de la maison",
+        "it-IT": "Vocabolario della casa",
+        "de-DE": "Wortschatz rund ums Haus"
+      },
+      "description": {
+        "pt-PT": "Reconhecer objetos comuns numa casa de acolhimento.",
+        "en-US": "Recognize common objects in a host home.",
+        "es-ES": "Reconocer objetos comunes en una casa de acogida.",
+        "fr-FR": "Reconnaître des objets courants dans une famille d’accueil.",
+        "it-IT": "Riconoscere oggetti comuni in una casa ospitante.",
+        "de-DE": "Häufige Gegenstände in einer Gastfamilie erkennen."
+      }
+    }
+  ]
+}

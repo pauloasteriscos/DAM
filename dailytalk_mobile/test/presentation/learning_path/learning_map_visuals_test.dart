@@ -2,10 +2,19 @@ import 'package:dailytalk_mobile/domain/learning/learning_enums.dart';
 import 'package:dailytalk_mobile/domain/learning/progression_engine.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_map_view_model.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_map_visuals.dart';
+import 'package:dailytalk_mobile/state/app_locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  setUp(() async {
+    await AppLocaleController.instance.setLanguageCode('pt-PT');
+  });
+
+  tearDown(() async {
+    await AppLocaleController.instance.setLanguageCode('pt-PT');
+  });
+
   testWidgets('header uses LearningMapViewModel context and progress', (
     tester,
   ) async {
@@ -123,6 +132,33 @@ void main() {
     );
     expect(find.text('A seguir'), findsOneWidget);
   });
+
+  testWidgets(
+    'system language localizes map chrome without changing mission content',
+    (tester) async {
+      await AppLocaleController.instance.setLanguageCode('en-US');
+
+      final element = _activity(
+        id: 'italian-mission',
+        state: LearningActivityState.available,
+        recommendationRank: 0,
+        title: 'Parole di benvenuto',
+      );
+
+      await _pumpNode(tester, element, onTap: () {});
+
+      expect(find.text('Dialogue'), findsOneWidget);
+      expect(find.text('Available'), findsOneWidget);
+      expect(find.text('Up next'), findsOneWidget);
+      expect(find.text('Continue'), findsOneWidget);
+      expect(find.text('Parole di benvenuto'), findsOneWidget);
+
+      expect(find.text('Diálogo'), findsNothing);
+      expect(find.text('Disponível'), findsNothing);
+      expect(find.text('A seguir'), findsNothing);
+      expect(find.text('Continuar'), findsNothing);
+    },
+  );
 
   testWidgets('locked node cannot trigger navigation callback', (tester) async {
     var taps = 0;

@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import '../../domain/learning/learning_enums.dart';
 import '../../domain/learning/learning_models.dart';
 import '../../screens/dialogue_page.dart';
+import 'learning_activity_completion_coordinator.dart';
+import 'learning_dialogue_runtime_page.dart';
 import '../../screens/quiz_page.dart';
 import '../../screens/revision_page.dart';
 import '../../screens/speech_practice_page.dart';
 import '../../screens/vocabulary_pairs_page.dart';
+import 'learning_vocabulary_runtime_page.dart';
 import 'learning_map_view_model.dart';
 import 'learning_mission_detail_page.dart';
 
@@ -73,8 +76,9 @@ final class LearningMapActivityNavigationDecision {
 /// is implemented for that type.
 abstract final class LearningMapActivityNavigation {
   static LearningMapActivityNavigationDecision resolve(
-    LearningMapElementViewModel element,
-  ) {
+    LearningMapElementViewModel element, {
+    LearningActivityCompletionActionFactory? completionActionFactory,
+  }) {
     if (!element.isActivity || element.activityType == null) {
       return const LearningMapActivityNavigationDecision.invalid();
     }
@@ -94,10 +98,17 @@ abstract final class LearningMapActivityNavigation {
       return const LearningMapActivityNavigationDecision.invalid();
     }
 
+    final completionAction = element.contentSchemaVersion >= 2
+        ? completionActionFactory?.call(element)
+        : null;
+
     final destination = _destinationFor(
       type,
       execution: element.contentSchemaVersion >= 2 ? execution : null,
       contentDefaultLocale: element.contentDefaultLocale,
+      missionTitle: element.title,
+      competencyCount: element.competencyIds.length,
+      completionAction: completionAction,
     );
 
     if (destination == null) {
@@ -114,9 +125,13 @@ abstract final class LearningMapActivityNavigation {
 
   static Future<LearningMapActivityNavigationOutcome> open(
     BuildContext context,
-    LearningMapElementViewModel element,
-  ) async {
-    final decision = resolve(element);
+    LearningMapElementViewModel element, {
+    LearningActivityCompletionActionFactory? completionActionFactory,
+  }) async {
+    final decision = resolve(
+      element,
+      completionActionFactory: completionActionFactory,
+    );
 
     switch (decision.disposition) {
       case LearningMapActivityNavigationDisposition.blocked:
@@ -149,16 +164,33 @@ abstract final class LearningMapActivityNavigation {
     LearningActivityType type, {
     required ActivityExecution? execution,
     required String contentDefaultLocale,
+    required String? missionTitle,
+    required int competencyCount,
+    required LearningActivityCompletionAction? completionAction,
   }) {
     return switch (type) {
-      LearningActivityType.vocabulary => VocabularyPairsPage(
-        execution: execution as VocabularyActivityExecution?,
-        contentDefaultLocale: contentDefaultLocale,
-      ),
-      LearningActivityType.dialogue => DialoguePage(
-        execution: execution as DialogueActivityExecution?,
-        contentDefaultLocale: contentDefaultLocale,
-      ),
+      LearningActivityType.vocabulary =>
+        execution == null
+            ? VocabularyPairsPage(contentDefaultLocale: contentDefaultLocale)
+            : LearningVocabularyRuntimePage(
+                execution: execution as VocabularyActivityExecution,
+                contentDefaultLocale: contentDefaultLocale,
+                missionTitle: missionTitle,
+                competencyCount: competencyCount,
+                onActivityCompleted: completionAction,
+                returnToLearningMapOnCompletion: true,
+              ),
+      LearningActivityType.dialogue =>
+        execution == null
+            ? DialoguePage(contentDefaultLocale: contentDefaultLocale)
+            : LearningDialogueRuntimePage(
+                execution: execution as DialogueActivityExecution,
+                contentDefaultLocale: contentDefaultLocale,
+                missionTitle: missionTitle,
+                competencyCount: competencyCount,
+                onActivityCompleted: completionAction,
+                returnToLearningMapOnCompletion: true,
+              ),
       LearningActivityType.quiz => QuizPage(
         execution: execution as QuizActivityExecution?,
         contentDefaultLocale: contentDefaultLocale,
@@ -170,6 +202,10 @@ abstract final class LearningMapActivityNavigation {
       LearningActivityType.speech => SpeechPracticePage(
         execution: execution as SpeechActivityExecution?,
         contentDefaultLocale: contentDefaultLocale,
+        missionTitle: missionTitle,
+        competencyCount: competencyCount,
+        onActivityCompleted: completionAction,
+        returnToLearningMapOnCompletion: true,
       ),
       LearningActivityType.integratedChallenge => null,
     };

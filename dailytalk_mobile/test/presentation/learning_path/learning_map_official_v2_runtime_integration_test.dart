@@ -6,10 +6,10 @@ import 'package:dailytalk_mobile/domain/learning/progression_engine.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_map_activity_navigation.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_map_assembler.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_map_view_model.dart';
+import 'package:dailytalk_mobile/presentation/learning_path/learning_dialogue_runtime_page.dart';
+import 'package:dailytalk_mobile/presentation/learning_path/learning_vocabulary_runtime_page.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_mission_detail_page.dart';
-import 'package:dailytalk_mobile/screens/dialogue_page.dart';
 import 'package:dailytalk_mobile/screens/speech_practice_page.dart';
-import 'package:dailytalk_mobile/screens/vocabulary_pairs_page.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -123,14 +123,19 @@ void main() {
       final vocabularyDetail =
           vocabularyDecision.destination! as LearningMissionDetailPage;
       expect(vocabularyDetail.mission.revisionId, vocabulary.revisionId);
-      expect(vocabularyDetail.runtimeDestination, isA<VocabularyPairsPage>());
+      expect(
+        vocabularyDetail.runtimeDestination,
+        isA<LearningVocabularyRuntimePage>(),
+      );
 
       final vocabularyPage =
-          vocabularyDetail.runtimeDestination as VocabularyPairsPage;
+          vocabularyDetail.runtimeDestination as LearningVocabularyRuntimePage;
       expect(vocabularyPage.execution, same(vocabulary.execution));
       expect(vocabularyPage.contentDefaultLocale, 'pt-PT');
+      expect(vocabularyPage.missionTitle, vocabulary.title);
+      expect(vocabularyPage.competencyCount, vocabulary.competencyIds.length);
 
-      final vocabularyExecution = vocabularyPage.execution!;
+      final vocabularyExecution = vocabularyPage.execution;
       expect(vocabularyExecution.items.first.id, 'hello');
       expect(
         vocabularyExecution.items.first.text.resolve(
@@ -150,13 +155,19 @@ void main() {
       final dialogueDetail =
           dialogueDecision.destination! as LearningMissionDetailPage;
       expect(dialogueDetail.mission.revisionId, dialogue.revisionId);
-      expect(dialogueDetail.runtimeDestination, isA<DialoguePage>());
+      expect(
+        dialogueDetail.runtimeDestination,
+        isA<LearningDialogueRuntimePage>(),
+      );
 
-      final dialoguePage = dialogueDetail.runtimeDestination as DialoguePage;
+      final dialoguePage =
+          dialogueDetail.runtimeDestination as LearningDialogueRuntimePage;
       expect(dialoguePage.execution, same(dialogue.execution));
       expect(dialoguePage.contentDefaultLocale, 'pt-PT');
+      expect(dialoguePage.missionTitle, dialogue.title);
+      expect(dialoguePage.competencyCount, dialogue.competencyIds.length);
 
-      final dialogueExecution = dialoguePage.execution!;
+      final dialogueExecution = dialoguePage.execution;
       expect(dialogueExecution.turns.first.id, 'turn-01');
       expect(
         dialogueExecution.scenarioTitle.resolve(
@@ -181,6 +192,8 @@ void main() {
       final speechPage = speechDetail.runtimeDestination as SpeechPracticePage;
       expect(speechPage.execution, same(speech.execution));
       expect(speechPage.contentDefaultLocale, 'pt-PT');
+      expect(speechPage.missionTitle, speech.title);
+      expect(speechPage.competencyCount, speech.competencyIds.length);
 
       final speechExecution = speechPage.execution!;
       expect(speechExecution.prompts.first.id, 'speech-hello');

@@ -40,7 +40,8 @@ class AppTranslations {
   static String? _lookupExact(String source, String language) {
     return _translations[language]?[source] ??
         _supplementalTranslations[language]?[source] ??
-        _domainTranslations[language]?[source];
+        _domainTranslations[language]?[source] ??
+        _learningPathTranslations[language]?[source];
   }
 
   static String _translatePrefixed(String source, String language) {
@@ -1616,6 +1617,274 @@ class AppTranslations {
     },
   };
 
+  /// Textos de interface específicos do percurso de aprendizagem.
+  ///
+  /// As chaves continuam em português, tal como no restante tradutor da app.
+  /// O conteúdo pedagógico (títulos, instruções, prompts) não passa por este
+  /// mapa: é resolvido pelo `learningLanguageCode` a partir do pacote oficial.
+  static const Map<String, Map<String, String>> _learningPathTranslations = {
+    'en': {
+      'Cada missão leva-te mais longe. Escolhe o teu próximo passo.':
+          'Every mission takes you further. Choose your next step.',
+      '{completed} de {total} missões concluídas':
+          '{completed} of {total} missions completed',
+      'Continua a construir o teu percurso.':
+          'Keep building your learning path.',
+      'Próxima missão': 'Next mission',
+      'Próximo passo': 'Next step',
+      'Conteúdo local recuperado': 'Local content restored',
+      'Missão': 'Mission',
+      'A seguir': 'Up next',
+      'Disponível': 'Available',
+      'Continuar': 'Continue',
+      'Fala': 'Speaking',
+      'Bloqueada': 'Locked',
+      'Em progresso': 'In progress',
+      'Concluída': 'Completed',
+      'Tudo guardado': 'All saved',
+      'Por guardar': 'Pending save',
+      'Não guardado': 'Not saved',
+      'JORNADA {number}': 'JOURNEY {number}',
+      'ETAPA {number}': 'STAGE {number}',
+      'Completa uma missão para desbloquear': 'Complete a mission to unlock',
+      'Completa a missão anterior para desbloquear':
+          'Complete the previous mission to unlock',
+      'Ganha a competência necessária para desbloquear':
+          'Earn the required skill to unlock',
+      'Completa 1 de {count} missões para desbloquear':
+          'Complete 1 of {count} missions to unlock',
+      'Ganha 1 de {count} competências para desbloquear':
+          'Earn 1 of {count} skills to unlock',
+      'Cumpre 1 de {count} condições para desbloquear':
+          'Meet 1 of {count} conditions to unlock',
+      'Completa as {count} missões para desbloquear':
+          'Complete all {count} missions to unlock',
+      'Ganha as {count} competências para desbloquear':
+          'Earn all {count} skills to unlock',
+      'Completa todas as condições para desbloquear':
+          'Meet all conditions to unlock',
+      'Revê e consolida o que aprendeste':
+          'Review and reinforce what you have learned',
+      'Pratica num contexto da jornada': 'Practise in a journey context',
+      'Celebra o progresso alcançado': 'Celebrate the progress you have made',
+      'Checkpoint': 'Checkpoint',
+      'Cena': 'Scene',
+      'Recompensa': 'Reward',
+      'Bloqueado': 'Locked',
+      'Em curso': 'In progress',
+      'Concluído': 'Completed',
+    },
+    'es': {
+      'Cada missão leva-te mais longe. Escolhe o teu próximo passo.':
+          'Cada misión te lleva más lejos. Elige tu próximo paso.',
+      '{completed} de {total} missões concluídas':
+          '{completed} de {total} misiones completadas',
+      'Continua a construir o teu percurso.':
+          'Sigue construyendo tu recorrido de aprendizaje.',
+      'Próxima missão': 'Próxima misión',
+      'Próximo passo': 'Siguiente paso',
+      'Conteúdo local recuperado': 'Contenido local recuperado',
+      'Missão': 'Misión',
+      'A seguir': 'A continuación',
+      'Disponível': 'Disponible',
+      'Continuar': 'Continuar',
+      'Fala': 'Expresión oral',
+      'Bloqueada': 'Bloqueada',
+      'Em progresso': 'En curso',
+      'Concluída': 'Completada',
+      'Tudo guardado': 'Todo guardado',
+      'Por guardar': 'Pendiente de guardar',
+      'Não guardado': 'No guardado',
+      'JORNADA {number}': 'RECORRIDO {number}',
+      'ETAPA {number}': 'ETAPA {number}',
+      'Completa uma missão para desbloquear':
+          'Completa una misión para desbloquear',
+      'Completa a missão anterior para desbloquear':
+          'Completa la misión anterior para desbloquear',
+      'Ganha a competência necessária para desbloquear':
+          'Consigue la competencia necesaria para desbloquear',
+      'Completa 1 de {count} missões para desbloquear':
+          'Completa 1 de {count} misiones para desbloquear',
+      'Ganha 1 de {count} competências para desbloquear':
+          'Consigue 1 de {count} competencias para desbloquear',
+      'Cumpre 1 de {count} condições para desbloquear':
+          'Cumple 1 de {count} condiciones para desbloquear',
+      'Completa as {count} missões para desbloquear':
+          'Completa las {count} misiones para desbloquear',
+      'Ganha as {count} competências para desbloquear':
+          'Consigue las {count} competencias para desbloquear',
+      'Completa todas as condições para desbloquear':
+          'Cumple todas las condiciones para desbloquear',
+      'Revê e consolida o que aprendeste':
+          'Repasa y consolida lo que has aprendido',
+      'Pratica num contexto da jornada':
+          'Practica en un contexto del recorrido',
+      'Celebra o progresso alcançado': 'Celebra el progreso alcanzado',
+      'Checkpoint': 'Punto de control',
+      'Cena': 'Escena',
+      'Recompensa': 'Recompensa',
+      'Bloqueado': 'Bloqueado',
+      'Em curso': 'En curso',
+      'Concluído': 'Completado',
+    },
+    'fr': {
+      'Cada missão leva-te mais longe. Escolhe o teu próximo passo.':
+          'Chaque mission te fait avancer. Choisis ta prochaine étape.',
+      '{completed} de {total} missões concluídas':
+          '{completed} sur {total} missions terminées',
+      'Continua a construir o teu percurso.':
+          'Continue à construire ton parcours d’apprentissage.',
+      'Próxima missão': 'Prochaine mission',
+      'Próximo passo': 'Prochaine étape',
+      'Conteúdo local recuperado': 'Contenu local récupéré',
+      'Missão': 'Mission',
+      'A seguir': 'À suivre',
+      'Disponível': 'Disponible',
+      'Continuar': 'Continuer',
+      'Fala': 'Expression orale',
+      'Bloqueada': 'Verrouillée',
+      'Em progresso': 'En cours',
+      'Concluída': 'Terminée',
+      'Tudo guardado': 'Tout est enregistré',
+      'Por guardar': 'À enregistrer',
+      'Não guardado': 'Non enregistré',
+      'JORNADA {number}': 'PARCOURS {number}',
+      'ETAPA {number}': 'ÉTAPE {number}',
+      'Completa uma missão para desbloquear':
+          'Termine une mission pour déverrouiller',
+      'Completa a missão anterior para desbloquear':
+          'Termine la mission précédente pour déverrouiller',
+      'Ganha a competência necessária para desbloquear':
+          'Acquiers la compétence requise pour déverrouiller',
+      'Completa 1 de {count} missões para desbloquear':
+          'Termine 1 mission sur {count} pour déverrouiller',
+      'Ganha 1 de {count} competências para desbloquear':
+          'Acquiers 1 compétence sur {count} pour déverrouiller',
+      'Cumpre 1 de {count} condições para desbloquear':
+          'Remplis 1 condition sur {count} pour déverrouiller',
+      'Completa as {count} missões para desbloquear':
+          'Termine les {count} missions pour déverrouiller',
+      'Ganha as {count} competências para desbloquear':
+          'Acquiers les {count} compétences pour déverrouiller',
+      'Completa todas as condições para desbloquear':
+          'Remplis toutes les conditions pour déverrouiller',
+      'Revê e consolida o que aprendeste':
+          'Révise et consolide ce que tu as appris',
+      'Pratica num contexto da jornada':
+          'Entraîne-toi dans un contexte du parcours',
+      'Celebra o progresso alcançado': 'Célèbre les progrès accomplis',
+      'Checkpoint': 'Point de contrôle',
+      'Cena': 'Scène',
+      'Recompensa': 'Récompense',
+      'Bloqueado': 'Verrouillé',
+      'Em curso': 'En cours',
+      'Concluído': 'Terminé',
+    },
+    'it': {
+      'Cada missão leva-te mais longe. Escolhe o teu próximo passo.':
+          'Ogni missione ti porta più avanti. Scegli il prossimo passo.',
+      '{completed} de {total} missões concluídas':
+          '{completed} di {total} missioni completate',
+      'Continua a construir o teu percurso.':
+          'Continua a costruire il tuo percorso di apprendimento.',
+      'Próxima missão': 'Prossima missione',
+      'Próximo passo': 'Prossimo passo',
+      'Conteúdo local recuperado': 'Contenuto locale ripristinato',
+      'Missão': 'Missione',
+      'A seguir': 'A seguire',
+      'Disponível': 'Disponibile',
+      'Continuar': 'Continua',
+      'Fala': 'Espressione orale',
+      'Bloqueada': 'Bloccata',
+      'Em progresso': 'In corso',
+      'Concluída': 'Completata',
+      'Tudo guardado': 'Tutto salvato',
+      'Por guardar': 'Da salvare',
+      'Não guardado': 'Non salvato',
+      'JORNADA {number}': 'PERCORSO {number}',
+      'ETAPA {number}': 'FASE {number}',
+      'Completa uma missão para desbloquear':
+          'Completa una missione per sbloccare',
+      'Completa a missão anterior para desbloquear':
+          'Completa la missione precedente per sbloccare',
+      'Ganha a competência necessária para desbloquear':
+          'Ottieni la competenza necessaria per sbloccare',
+      'Completa 1 de {count} missões para desbloquear':
+          'Completa 1 di {count} missioni per sbloccare',
+      'Ganha 1 de {count} competências para desbloquear':
+          'Ottieni 1 di {count} competenze per sbloccare',
+      'Cumpre 1 de {count} condições para desbloquear':
+          'Soddisfa 1 di {count} condizioni per sbloccare',
+      'Completa as {count} missões para desbloquear':
+          'Completa tutte le {count} missioni per sbloccare',
+      'Ganha as {count} competências para desbloquear':
+          'Ottieni tutte le {count} competenze per sbloccare',
+      'Completa todas as condições para desbloquear':
+          'Soddisfa tutte le condizioni per sbloccare',
+      'Revê e consolida o que aprendeste':
+          'Ripassa e consolida ciò che hai imparato',
+      'Pratica num contexto da jornada': 'Esercitati nel contesto del percorso',
+      'Celebra o progresso alcançado': 'Celebra i progressi raggiunti',
+      'Checkpoint': 'Checkpoint',
+      'Cena': 'Scena',
+      'Recompensa': 'Ricompensa',
+      'Bloqueado': 'Bloccato',
+      'Em curso': 'In corso',
+      'Concluído': 'Completato',
+    },
+    'de': {
+      'Cada missão leva-te mais longe. Escolhe o teu próximo passo.':
+          'Jede Mission bringt dich weiter. Wähle deinen nächsten Schritt.',
+      '{completed} de {total} missões concluídas':
+          '{completed} von {total} Missionen abgeschlossen',
+      'Continua a construir o teu percurso.': 'Baue deinen Lernweg weiter aus.',
+      'Próxima missão': 'Nächste Mission',
+      'Próximo passo': 'Nächster Schritt',
+      'Conteúdo local recuperado': 'Lokaler Inhalt wiederhergestellt',
+      'Missão': 'Mission',
+      'A seguir': 'Als Nächstes',
+      'Disponível': 'Verfügbar',
+      'Continuar': 'Weiter',
+      'Fala': 'Sprechen',
+      'Bloqueada': 'Gesperrt',
+      'Em progresso': 'In Bearbeitung',
+      'Concluída': 'Abgeschlossen',
+      'Tudo guardado': 'Alles gespeichert',
+      'Por guardar': 'Noch zu speichern',
+      'Não guardado': 'Nicht gespeichert',
+      'JORNADA {number}': 'LERNREISE {number}',
+      'ETAPA {number}': 'ETAPPE {number}',
+      'Completa uma missão para desbloquear':
+          'Schließe eine Mission ab, um freizuschalten',
+      'Completa a missão anterior para desbloquear':
+          'Schließe die vorherige Mission ab, um freizuschalten',
+      'Ganha a competência necessária para desbloquear':
+          'Erwirb die erforderliche Kompetenz, um freizuschalten',
+      'Completa 1 de {count} missões para desbloquear':
+          'Schließe 1 von {count} Missionen ab, um freizuschalten',
+      'Ganha 1 de {count} competências para desbloquear':
+          'Erwirb 1 von {count} Kompetenzen, um freizuschalten',
+      'Cumpre 1 de {count} condições para desbloquear':
+          'Erfülle 1 von {count} Bedingungen, um freizuschalten',
+      'Completa as {count} missões para desbloquear':
+          'Schließe alle {count} Missionen ab, um freizuschalten',
+      'Ganha as {count} competências para desbloquear':
+          'Erwirb alle {count} Kompetenzen, um freizuschalten',
+      'Completa todas as condições para desbloquear':
+          'Erfülle alle Bedingungen, um freizuschalten',
+      'Revê e consolida o que aprendeste':
+          'Wiederhole und festige, was du gelernt hast',
+      'Pratica num contexto da jornada': 'Übe im Kontext der Lernreise',
+      'Celebra o progresso alcançado': 'Feiere deinen Fortschritt',
+      'Checkpoint': 'Kontrollpunkt',
+      'Cena': 'Szene',
+      'Recompensa': 'Belohnung',
+      'Bloqueado': 'Gesperrt',
+      'Em curso': 'In Bearbeitung',
+      'Concluído': 'Abgeschlossen',
+    },
+  };
+
   static const Map<String, Map<String, String>> _prefixTranslations = {
     'en': {
       'Perfil: ': 'Profile: ',
@@ -1840,6 +2109,8 @@ class AppTranslations {
     'Idioma da aplicação e idioma a praticar devem ser diferentes.':
         'The application language and practice language must be different.',
     'Escolhe dois idiomas diferentes.': 'Choose two different languages.',
+    'Idioma guardado neste dispositivo. A sincronização será tentada mais tarde.':
+        'Language saved on this device. Sync will be retried later.',
     'Guardar idiomas': 'Save languages',
     'A guardar...': 'Saving...',
     'Guardado neste dispositivo: {source} → {target}. Entra para sincronizar.':
@@ -2024,6 +2295,8 @@ class AppTranslations {
     'Idioma da aplicação e idioma a praticar devem ser diferentes.':
         'El idioma de la aplicación y el idioma de práctica deben ser diferentes.',
     'Escolhe dois idiomas diferentes.': 'Elige dos idiomas diferentes.',
+    'Idioma guardado neste dispositivo. A sincronização será tentada mais tarde.':
+        'Idioma guardado en este dispositivo. La sincronización se volverá a intentar más tarde.',
     'Guardar idiomas': 'Guardar idiomas',
     'A guardar...': 'Guardando...',
     'Seleciona o teu perfil': 'Selecciona tu perfil',
@@ -2204,6 +2477,8 @@ class AppTranslations {
     'Idioma da aplicação e idioma a praticar devem ser diferentes.':
         'La langue de l’application et la langue à pratiquer doivent être différentes.',
     'Escolhe dois idiomas diferentes.': 'Choisis deux langues différentes.',
+    'Idioma guardado neste dispositivo. A sincronização será tentada mais tarde.':
+        'Langue enregistrée sur cet appareil. La synchronisation sera réessayée plus tard.',
     'Guardar idiomas': 'Enregistrer les langues',
     'A guardar...': 'Enregistrement...',
     'Seleciona o teu perfil': 'Sélectionne ton profil',
@@ -2384,6 +2659,8 @@ class AppTranslations {
     'Idioma da aplicação e idioma a praticar devem ser diferentes.':
         'La lingua dell’applicazione e quella da praticare devono essere diverse.',
     'Escolhe dois idiomas diferentes.': 'Scegli due lingue diverse.',
+    'Idioma guardado neste dispositivo. A sincronização será tentada mais tarde.':
+        'Lingua salvata su questo dispositivo. La sincronizzazione verrà ritentata più tardi.',
     'Guardar idiomas': 'Salva lingue',
     'A guardar...': 'Salvataggio...',
     'Seleciona o teu perfil': 'Seleziona il tuo profilo',
@@ -2564,6 +2841,8 @@ class AppTranslations {
     'Idioma da aplicação e idioma a praticar devem ser diferentes.':
         'App-Sprache und Übungssprache müssen unterschiedlich sein.',
     'Escolhe dois idiomas diferentes.': 'Wähle zwei unterschiedliche Sprachen.',
+    'Idioma guardado neste dispositivo. A sincronização será tentada mais tarde.':
+        'Sprache auf diesem Gerät gespeichert. Die Synchronisierung wird später erneut versucht.',
     'Guardar idiomas': 'Sprachen speichern',
     'A guardar...': 'Wird gespeichert...',
     'Seleciona o teu perfil': 'Wähle dein Profil',

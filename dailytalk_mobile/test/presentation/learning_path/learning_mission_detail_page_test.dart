@@ -2,10 +2,19 @@ import 'package:dailytalk_mobile/domain/learning/learning_enums.dart';
 import 'package:dailytalk_mobile/domain/learning/progression_engine.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_map_view_model.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_mission_detail_page.dart';
+import 'package:dailytalk_mobile/state/app_locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  setUp(() async {
+    await AppLocaleController.instance.setLanguageCode('pt-PT');
+  });
+
+  tearDown(() async {
+    await AppLocaleController.instance.setLanguageCode('pt-PT');
+  });
+
   testWidgets(
     'renders a child-friendly mission entry before the runtime at 360px',
     (tester) async {
@@ -52,6 +61,48 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('RUNTIME_47B1'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'keeps interface locale separate from already-resolved learning content',
+    (tester) async {
+      await AppLocaleController.instance.setLanguageCode('en-US');
+
+      final mission = LearningMapElementViewModel(
+        pathElementId: 'arrival.vocabulary-01',
+        elementType: PathElementType.activity,
+        activityId: 'arrival.vocabulary-01',
+        revisionId: 'revision-03',
+        activityType: LearningActivityType.vocabulary,
+        title: 'Parole di benvenuto',
+        instructions: 'Abbina ogni espressione al suo significato.',
+        competencyIds: const <String>{'greeting'},
+        state: LearningActivityState.available,
+        reason: ProgressionReason.ready,
+        syncState: ProgressSyncState.clean,
+        practicePreference: PracticePreference.balanced,
+        contentDefaultLocale: 'it-IT',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: LearningMissionDetailPage(
+            mission: mission,
+            runtimeDestination: const Scaffold(body: Text('RUNTIME')),
+          ),
+        ),
+      );
+
+      expect(find.text('YOUR NEXT MISSION'), findsOneWidget);
+      expect(find.text('Vocabulary'), findsOneWidget);
+      expect(find.text('Goal'), findsOneWidget);
+      expect(find.text('Start mission'), findsOneWidget);
+      expect(find.text('Parole di benvenuto'), findsOneWidget);
+      expect(
+        find.text('Abbina ogni espressione al suo significato.'),
+        findsOneWidget,
+      );
     },
   );
 }

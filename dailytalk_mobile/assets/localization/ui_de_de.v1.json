@@ -1,0 +1,23 @@
+{
+  "locale": "de-DE",
+  "bundleVersion": 1,
+  "schemaVersion": 1,
+  "translations": {
+    "common.continue": "Weiter",
+    "common.cancel": "Abbrechen",
+    "common.save": "Speichern",
+    "common.retry": "Erneut versuchen",
+    "learningMap.allSaved": "Alles gespeichert",
+    "learningMap.nextMission": "Nächste Mission",
+    "learningMap.available": "Verfügbar",
+    "learningMap.upNext": "Als Nächstes",
+    "learningMap.journey": "LERNREISE {number}",
+    "learningMap.stage": "ETAPPE {number}",
+    "activityType.vocabulary": "Wortschatz",
+    "activityType.dialogue": "Dialog",
+    "activityType.speech": "Sprechen",
+    "system.languageSavedSyncDeferred": "Sprache auf diesem Gerät gespeichert. Die Synchronisierung wird später erneut versucht.",
+    "system.languagePairSaved": "Gespeichert: {source} → {target}",
+    "system.chooseDifferentLanguages": "Wähle zwei unterschiedliche Sprachen."
+  }
+}

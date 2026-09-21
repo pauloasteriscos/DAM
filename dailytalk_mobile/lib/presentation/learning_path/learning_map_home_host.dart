@@ -8,6 +8,7 @@ import '../../data/content/official_learning_path_resolver.dart';
 import '../../data/database/app_database.dart';
 import '../../data/repositories/learning_progress_read_repository.dart';
 import '../../data/repositories/learning_progress_repository.dart';
+import 'learning_activity_completion_coordinator.dart';
 import 'learning_map_window_controller.dart';
 import 'learning_map_window_session.dart';
 
@@ -45,6 +46,7 @@ final class LearningMapHomeHost extends StatefulWidget {
   const LearningMapHomeHost({
     required this.accountId,
     required this.locale,
+    required this.appLanguageCode,
     required this.learningLanguageCode,
     required this.fallback,
     this.footer,
@@ -52,7 +54,14 @@ final class LearningMapHomeHost extends StatefulWidget {
   });
 
   final String accountId;
+
+  /// Locale TARGET usado para títulos e conteúdo a aprender.
+  /// Deve corresponder ao learningLanguageCode.
   final String locale;
+
+  /// Locale APP/SCAFFOLDING usado para instruções, dicas e explicações.
+  final String appLanguageCode;
+
   final String learningLanguageCode;
   final Widget fallback;
 
@@ -66,6 +75,7 @@ final class LearningMapHomeHost extends StatefulWidget {
 
 final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
   LearningMapWindowController? _controller;
+  LearningActivityCompletionCoordinator? _completionCoordinator;
 
   bool _loading = true;
   bool _failed = false;
@@ -84,9 +94,11 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
 
     if (oldWidget.accountId != widget.accountId ||
         oldWidget.locale != widget.locale ||
+        oldWidget.appLanguageCode != widget.appLanguageCode ||
         oldWidget.learningLanguageCode != widget.learningLanguageCode) {
       _controller?.dispose();
       _controller = null;
+      _completionCoordinator = null;
 
       setState(() {
         _loading = true;
@@ -108,6 +120,7 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
     try {
       final accountId = widget.accountId.trim();
       final locale = widget.locale.trim();
+      final appLanguageCode = widget.appLanguageCode.trim();
       final learningLanguageCode = widget.learningLanguageCode.trim();
 
       if (accountId.isEmpty) {
@@ -116,6 +129,12 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
 
       if (locale.isEmpty) {
         throw StateError('Learning Map requires a non-empty locale.');
+      }
+
+      if (appLanguageCode.isEmpty) {
+        throw StateError(
+          'Learning Map requires a non-empty app language code.',
+        );
       }
 
       if (learningLanguageCode.isEmpty) {
@@ -127,6 +146,15 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
       final descriptor = OfficialLearningPathResolver.resolve(
         learningLanguageCode,
       );
+
+      if (locale.toLowerCase() !=
+          descriptor.learningLanguageCode.toLowerCase()) {
+        throw StateError(
+          'Learning Map content locale $locale does not match '
+          'learning language ${descriptor.learningLanguageCode}.',
+        );
+      }
+
       final database = await AppDatabase.instance.database;
       final catalogService = LearningContentCatalogService();
 
@@ -144,6 +172,14 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
       // It is idempotent and does not create outbox work by itself.
       final progressRepository = LearningProgressRepository(database);
 
+      final completionCoordinator =
+          LearningActivityCompletionCoordinator.fromRepository(
+            accountId: accountId,
+            learningPath: active.path,
+            packageVersion: active.package.packageVersion,
+            repository: progressRepository,
+          );
+
       await progressRepository.ensureProjection(
         accountId: accountId,
         learningPath: active.path,
@@ -159,6 +195,7 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
         accountId: accountId,
         learningPathId: descriptor.learningPathId,
         locale: locale,
+        scaffoldingLocale: appLanguageCode,
       );
 
       createdController = LearningMapWindowController(session: windowSession);
@@ -170,6 +207,7 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
 
       setState(() {
         _controller = createdController;
+        _completionCoordinator = completionCoordinator;
         _loading = false;
         _failed = false;
       });
@@ -185,6 +223,7 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
 
       setState(() {
         _controller = null;
+        _completionCoordinator = null;
         _loading = false;
         _failed = true;
       });
@@ -205,8 +244,9 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
     }
 
     final controller = _controller;
+    final completionCoordinator = _completionCoordinator;
 
-    if (_loading || controller == null) {
+    if (_loading || controller == null || completionCoordinator == null) {
       return const ColoredBox(
         color: Color(0xFF061823),
         child: Center(child: CircularProgressIndicator()),
@@ -215,6 +255,7 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
 
     return LearningMapWindowViewport(
       controller: controller,
+      completionActionFactory: completionCoordinator.actionFor,
       footer: widget.footer,
     );
   }

@@ -83,10 +83,12 @@ final class LearningMapReadService {
     required String accountId,
     required String learningPathId,
     required String locale,
+    String? scaffoldingLocale,
   }) async {
     final normalizedAccountId = accountId.trim();
     final normalizedPathId = learningPathId.trim();
     final normalizedLocale = locale.trim();
+    final normalizedScaffoldingLocale = (scaffoldingLocale ?? locale).trim();
 
     if (normalizedAccountId.isEmpty) {
       throw ArgumentError.value(accountId, 'accountId', 'não pode estar vazio');
@@ -102,6 +104,14 @@ final class LearningMapReadService {
 
     if (normalizedLocale.isEmpty) {
       throw ArgumentError.value(locale, 'locale', 'não pode estar vazio');
+    }
+
+    if (normalizedScaffoldingLocale.isEmpty) {
+      throw ArgumentError.value(
+        scaffoldingLocale,
+        'scaffoldingLocale',
+        'não pode estar vazio',
+      );
     }
 
     final active = await _loadActiveContent(normalizedPathId);
@@ -133,6 +143,7 @@ final class LearningMapReadService {
       packageVersion: active.packageVersion,
       recoveredFromFallback: active.recoveredFromFallback,
       locale: normalizedLocale,
+      scaffoldingLocale: normalizedScaffoldingLocale,
       projection: projection,
       syncStates: syncStates,
     );

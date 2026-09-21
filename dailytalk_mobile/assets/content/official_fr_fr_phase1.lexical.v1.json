@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "learningPathId": "student.fr-fr.phase1",
+  "activities": [
+    {
+      "activityId": "arrival.vocabulary-01",
+      "introduces": [
+        "hello",
+        "good-morning",
+        "thank-you",
+        "please",
+        "i-am",
+        "my-name-is",
+        "nice-to-meet-you",
+        "yes",
+        "thank-you-very-much"
+      ],
+      "practises": [
+        "hello",
+        "good-morning",
+        "thank-you",
+        "please",
+        "i-am",
+        "my-name-is",
+        "nice-to-meet-you",
+        "yes",
+        "thank-you-very-much"
+      ],
+      "reinforces": []
+    },
+    {
+      "activityId": "arrival.dialogue-01",
+      "introduces": [],
+      "practises": [
+        "hello",
+        "i-am",
+        "nice-to-meet-you",
+        "yes",
+        "thank-you"
+      ],
+      "reinforces": []
+    },
+    {
+      "activityId": "arrival.speech-01",
+      "introduces": [],
+      "practises": [
+        "hello",
+        "my-name-is",
+        "thank-you-very-much"
+      ],
+      "reinforces": []
+    },
+    {
+      "activityId": "arrival.vocabulary-02",
+      "introduces": [
+        "bedroom",
+        "bathroom",
+        "kitchen",
+        "key",
+        "help",
+        "where-is-bathroom",
+        "i-dont-understand",
+        "very-nice"
+      ],
+      "practises": [
+        "bedroom",
+        "bathroom",
+        "kitchen",
+        "key",
+        "help",
+        "where-is-bathroom",
+        "i-dont-understand",
+        "very-nice"
+      ],
+      "reinforces": []
+    },
+    {
+      "activityId": "arrival.dialogue-02",
+      "introduces": [],
+      "practises": [
+        "thank-you",
+        "very-nice",
+        "yes",
+        "please",
+        "where-is-bathroom"
+      ],
+      "reinforces": [
+        "thank-you",
+        "please"
+      ]
+    },
+    {
+      "activityId": "arrival.speech-02",
+      "introduces": [],
+      "practises": [
+        "help",
+        "please",
+        "where-is-bathroom",
+        "i-dont-understand"
+      ],
+      "reinforces": [
+        "please"
+      ]
+    }
+  ]
+}

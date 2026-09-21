@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/ui_localization_contract.dart';
+import '../l10n/ui_text_resolver.dart';
 
 import '../state/app_learning_language_controller.dart';
 import '../state/app_locale_controller.dart';
@@ -31,18 +33,6 @@ Future<LanguagePreferenceApplyResult?> openLanguageSelectionFlow(
     return null;
   }
 
-  final appName = _languageOptionName(selection.appLanguageCode);
-  final learningName = _languageOptionName(selection.learningLanguageCode);
-  final savedMessage = AppTranslations.translate(
-    'Guardado: {source} → {target}',
-    AppLocaleController.instance.languageCode,
-    parameters: <String, Object?>{'source': appName, 'target': learningName},
-  );
-  final localMessage = AppTranslations.translate(
-    'Idioma guardado neste dispositivo. A sincronização será tentada mais tarde.',
-    AppLocaleController.instance.languageCode,
-  );
-
   final result = await LanguagePreferencesCoordinator.instance.apply(
     appLanguageCode: selection.appLanguageCode,
     learningLanguageCode: selection.learningLanguageCode,
@@ -52,9 +42,24 @@ Future<LanguagePreferenceApplyResult?> openLanguageSelectionFlow(
     return result;
   }
 
+  // Resolve a mensagem só DEPOIS de aplicar a preferência. Se o próprio
+  // appLanguageCode mudou nesta operação, o SnackBar já usa o novo idioma.
+  final appName = _languageOptionName(result.appLanguageCode);
+  final learningName = _languageOptionName(result.learningLanguageCode);
+  final savedMessage = UiTextResolver.text(
+    UiTranslationKeys.systemLanguagePairSaved,
+    legacySource: 'Guardado: {source} → {target}',
+    parameters: <String, Object?>{'source': appName, 'target': learningName},
+  );
+  final localMessage = UiTextResolver.text(
+    UiTranslationKeys.systemLanguageSavedSyncDeferred,
+    legacySource:
+        'Idioma guardado neste dispositivo. A sincronização será tentada mais tarde.',
+  );
+
   ScaffoldMessenger.maybeOf(context)?.showSnackBar(
     SnackBar(
-      content: AppText(
+      content: Text(
         result.remoteSyncAttempted && !result.remoteSynced
             ? localMessage
             : savedMessage,
@@ -156,7 +161,14 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
   Future<void> _saveLanguages() async {
     if (_nativeLanguageCode == _targetLanguageCode) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: AppText('Escolhe dois idiomas diferentes.')),
+        SnackBar(
+          content: Text(
+            UiTextResolver.text(
+              UiTranslationKeys.systemChooseDifferentLanguages,
+              legacySource: 'Escolhe dois idiomas diferentes.',
+            ),
+          ),
+        ),
       );
       return;
     }

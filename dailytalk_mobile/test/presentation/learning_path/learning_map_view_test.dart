@@ -3,10 +3,19 @@ import 'package:dailytalk_mobile/domain/learning/progression_engine.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_map_view.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_map_view_model.dart';
 import 'package:dailytalk_mobile/presentation/learning_path/learning_map_visuals.dart';
+import 'package:dailytalk_mobile/state/app_locale_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  setUp(() async {
+    await AppLocaleController.instance.setLanguageCode('pt-PT');
+  });
+
+  tearDown(() async {
+    await AppLocaleController.instance.setLanguageCode('pt-PT');
+  });
+
   testWidgets('composes Journey Stage and Mission in authored order', (
     tester,
   ) async {
@@ -50,6 +59,84 @@ void main() {
 
     expect(rendered, <String>['mission-1', 'mission-2']);
   });
+
+  testWidgets(
+    'English system chrome stays English while learning content stays Italian',
+    (tester) async {
+      await AppLocaleController.instance.setLanguageCode('en-US');
+
+      final mission = LearningMapElementViewModel(
+        pathElementId: 'arrival.vocabulary-01.element',
+        elementType: PathElementType.activity,
+        activityId: 'arrival.vocabulary-01',
+        revisionId: 'arrival.vocabulary-01.r1',
+        activityType: LearningActivityType.vocabulary,
+        title: 'Parole di benvenuto',
+        instructions: 'Abbina ogni espressione al suo significato.',
+        competencyIds: const <String>{'greeting'},
+        state: LearningActivityState.available,
+        reason: ProgressionReason.ready,
+        syncState: ProgressSyncState.clean,
+        practicePreference: PracticePreference.vocabulary,
+        recommendationRank: 0,
+        contentDefaultLocale: 'it-IT',
+      );
+
+      final model = LearningMapViewModel(
+        learningPathId: 'student.it-it.phase1',
+        title: 'Primi giorni in Italia',
+        locale: 'it-IT',
+        packageVersion: 1,
+        recoveredFromFallback: false,
+        completedActivityCount: 0,
+        totalActivityCount: 1,
+        journeys: <LearningMapJourneyViewModel>[
+          LearningMapJourneyViewModel(
+            id: 'arrival',
+            title: 'Arrivo e accoglienza',
+            stages: <LearningMapStageViewModel>[
+              LearningMapStageViewModel(
+                id: 'first-contact',
+                title: 'Primo contatto',
+                elements: <LearningMapElementViewModel>[mission],
+              ),
+            ],
+          ),
+        ],
+      );
+
+      await _pumpMap(tester, model, onActivityTap: (_) {});
+
+      expect(find.text('Primi giorni in Italia'), findsOneWidget);
+      expect(find.text('Arrivo e accoglienza'), findsWidgets);
+      expect(find.text('Primo contatto'), findsWidgets);
+      expect(find.text('Parole di benvenuto'), findsWidgets);
+
+      expect(find.text('JOURNEY 1'), findsOneWidget);
+      expect(find.text('STAGE 1'), findsOneWidget);
+      expect(find.text('Vocabulary'), findsOneWidget);
+      expect(find.text('Available'), findsOneWidget);
+      expect(find.text('Up next'), findsOneWidget);
+      expect(find.text('Continue'), findsOneWidget);
+      expect(find.text('Next mission'), findsOneWidget);
+      expect(find.text('All saved'), findsOneWidget);
+      expect(
+        find.text('Every mission takes you further. Choose your next step.'),
+        findsOneWidget,
+      );
+      expect(find.text('0 of 1 missions completed'), findsOneWidget);
+      expect(find.text('Keep building your learning path.'), findsOneWidget);
+
+      expect(find.text('JORNADA 1'), findsNothing);
+      expect(find.text('ETAPA 1'), findsNothing);
+      expect(find.text('Vocabulário'), findsNothing);
+      expect(find.text('Disponível'), findsNothing);
+      expect(find.text('A seguir'), findsNothing);
+      expect(find.text('Continuar'), findsNothing);
+      expect(find.text('Próxima missão'), findsNothing);
+      expect(find.text('Tudo guardado'), findsNothing);
+    },
+  );
 
   testWidgets('stage progress is derived only from Stage ViewModel', (
     tester,

@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
-import '../widgets/learning_language_quick_switcher.dart';
-
+import '../domain/learning/learning_enums.dart';
 import '../domain/learning/learning_models.dart';
+import '../presentation/learning_path/learning_activity_completed_page.dart';
+import '../presentation/learning_path/learning_activity_completion_coordinator.dart';
 import '../state/app_learning_language_controller.dart';
+import '../state/app_locale_controller.dart';
+import '../widgets/learning_language_quick_switcher.dart';
 
 /// Runtime leve para missões de fala do Learning Path.
 ///
@@ -18,10 +23,18 @@ final class SpeechPracticePage extends StatefulWidget {
     super.key,
     this.execution,
     this.contentDefaultLocale = 'pt-PT',
+    this.missionTitle,
+    this.competencyCount = 0,
+    this.onActivityCompleted,
+    this.returnToLearningMapOnCompletion = false,
   });
 
   final SpeechActivityExecution? execution;
   final String contentDefaultLocale;
+  final String? missionTitle;
+  final int competencyCount;
+  final LearningActivityCompletionAction? onActivityCompleted;
+  final bool returnToLearningMapOnCompletion;
 
   @override
   State<SpeechPracticePage> createState() => _SpeechPracticePageState();
@@ -30,6 +43,7 @@ final class SpeechPracticePage extends StatefulWidget {
 final class _SpeechPracticePageState extends State<SpeechPracticePage> {
   int _index = 0;
   bool _finished = false;
+  bool _persistingCompletion = false;
 
   List<String> _prompts(BuildContext context) {
     final execution = widget.execution;
@@ -49,6 +63,63 @@ final class _SpeechPracticePageState extends State<SpeechPracticePage> {
           fallbackLocale: widget.contentDefaultLocale,
         ),
     ];
+  }
+
+  Future<void> _openCompletion(int promptCount) async {
+    if (_persistingCompletion) {
+      return;
+    }
+
+    setState(() {
+      _persistingCompletion = true;
+    });
+
+    try {
+      await widget.onActivityCompleted?.call();
+
+      if (!mounted) {
+        return;
+      }
+
+      final appLanguage = AppLocaleController.instance.languageCode;
+      final copy = _speechCompletionCopyFor(appLanguage);
+      final configuredTitle = widget.missionTitle?.trim();
+      final title = configuredTitle != null && configuredTitle.isNotEmpty
+          ? configuredTitle
+          : copy.title;
+
+      await Navigator.of(context).pushReplacement<void, void>(
+        MaterialPageRoute<void>(
+          builder: (_) => LearningActivityCompletedPage(
+            activityType: LearningActivityType.speech,
+            title: title,
+            competencyCount: widget.competencyCount,
+            returnToLearningMap: widget.returnToLearningMapOnCompletion,
+            metrics: <LearningCompletionMetric>[
+              LearningCompletionMetric(
+                label: copy.phrasesMetric,
+                value: '$promptCount',
+                icon: Icons.record_voice_over_rounded,
+              ),
+              LearningCompletionMetric(
+                label: copy.modeMetric,
+                value: copy.guidedMode,
+                icon: Icons.mic_rounded,
+              ),
+            ],
+          ),
+        ),
+      );
+    } catch (error, stackTrace) {
+      debugPrint('Learning progress persistence failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (mounted) {
+        setState(() {
+          _persistingCompletion = false;
+        });
+      }
+    }
   }
 
   @override
@@ -194,18 +265,25 @@ final class _SpeechPracticePageState extends State<SpeechPracticePage> {
                   const SizedBox(height: 18),
                   FilledButton.icon(
                     key: const ValueKey<String>('speech-confirm-repeat'),
-                    onPressed: () {
-                      if (_index < prompts.length - 1) {
-                        setState(() {
-                          _index++;
-                        });
-                        return;
-                      }
+                    onPressed: _persistingCompletion
+                        ? null
+                        : () {
+                            if (_index < prompts.length - 1) {
+                              setState(() {
+                                _index++;
+                              });
+                              return;
+                            }
 
-                      setState(() {
-                        _finished = true;
-                      });
-                    },
+                            if (widget.execution != null) {
+                              unawaited(_openCompletion(prompts.length));
+                              return;
+                            }
+
+                            setState(() {
+                              _finished = true;
+                            });
+                          },
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(56),
                       backgroundColor: const Color(0xFF8258E8),
@@ -286,4 +364,59 @@ final class _SpeechPracticePageState extends State<SpeechPracticePage> {
       ),
     );
   }
+}
+
+final class _SpeechCompletionCopy {
+  const _SpeechCompletionCopy({
+    required this.title,
+    required this.phrasesMetric,
+    required this.modeMetric,
+    required this.guidedMode,
+  });
+
+  final String title;
+  final String phrasesMetric;
+  final String modeMetric;
+  final String guidedMode;
+}
+
+_SpeechCompletionCopy _speechCompletionCopyFor(String locale) {
+  return switch (locale.split('-').first.toLowerCase()) {
+    'en' => const _SpeechCompletionCopy(
+      title: 'Practise out loud',
+      phrasesMetric: 'Phrases',
+      modeMetric: 'Mode',
+      guidedMode: 'Guided',
+    ),
+    'es' => const _SpeechCompletionCopy(
+      title: 'Practica en voz alta',
+      phrasesMetric: 'Frases',
+      modeMetric: 'Modo',
+      guidedMode: 'Guiado',
+    ),
+    'fr' => const _SpeechCompletionCopy(
+      title: 'Pratique à voix haute',
+      phrasesMetric: 'Phrases',
+      modeMetric: 'Mode',
+      guidedMode: 'Guidé',
+    ),
+    'it' => const _SpeechCompletionCopy(
+      title: 'Esercitati ad alta voce',
+      phrasesMetric: 'Frasi',
+      modeMetric: 'Modalità',
+      guidedMode: 'Guidata',
+    ),
+    'de' => const _SpeechCompletionCopy(
+      title: 'Laut sprechen üben',
+      phrasesMetric: 'Sätze',
+      modeMetric: 'Modus',
+      guidedMode: 'Geführt',
+    ),
+    _ => const _SpeechCompletionCopy(
+      title: 'Pratica em voz alta',
+      phrasesMetric: 'Frases',
+      modeMetric: 'Modo',
+      guidedMode: 'Guiado',
+    ),
+  };
 }

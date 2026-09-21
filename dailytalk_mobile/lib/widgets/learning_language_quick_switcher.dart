@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../l10n/ui_localization_contract.dart';
+import '../l10n/ui_text_resolver.dart';
 import '../state/app_learning_language_controller.dart';
 import '../state/app_locale_controller.dart';
 import '../state/language_preferences_coordinator.dart';
@@ -213,7 +215,14 @@ class LearningLanguageQuickSwitcher extends StatelessWidget {
     if (normalized == appLanguageCode) {
       if (context.mounted) {
         ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-          SnackBar(content: Text(_tr('Escolhe dois idiomas diferentes.'))),
+          SnackBar(
+            content: Text(
+              UiTextResolver.text(
+                UiTranslationKeys.systemChooseDifferentLanguages,
+                legacySource: 'Escolhe dois idiomas diferentes.',
+              ),
+            ),
+          ),
         );
       }
       return;
@@ -228,8 +237,10 @@ class LearningLanguageQuickSwitcher extends StatelessWidget {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
         SnackBar(
           content: Text(
-            _tr(
-              'Idioma guardado neste dispositivo. A sincronização será tentada mais tarde.',
+            UiTextResolver.text(
+              UiTranslationKeys.systemLanguageSavedSyncDeferred,
+              legacySource:
+                  'Idioma guardado neste dispositivo. A sincronização será tentada mais tarde.',
             ),
           ),
         ),

@@ -40,13 +40,23 @@ final class LearningMapAssembler {
     required int packageVersion,
     required bool recoveredFromFallback,
     required String locale,
+    String? scaffoldingLocale,
     required List<LearningProgressProjectionEntry> projection,
     required Map<String, ProgressSyncState> syncStates,
   }) {
     final normalizedLocale = locale.trim();
+    final normalizedScaffoldingLocale = (scaffoldingLocale ?? locale).trim();
 
     if (normalizedLocale.isEmpty) {
       throw ArgumentError.value(locale, 'locale', 'não pode estar vazio');
+    }
+
+    if (normalizedScaffoldingLocale.isEmpty) {
+      throw ArgumentError.value(
+        scaffoldingLocale,
+        'scaffoldingLocale',
+        'não pode estar vazio',
+      );
     }
 
     final projectionByElement = <String, LearningProgressProjectionEntry>{};
@@ -184,7 +194,7 @@ final class LearningMapAssembler {
                 fallbackLocale: learningPath.defaultLocale,
               ),
               instructions: revision.instructions.resolve(
-                normalizedLocale,
+                normalizedScaffoldingLocale,
                 fallbackLocale: learningPath.defaultLocale,
               ),
               contentSchemaVersion: learningPath.schemaVersion.value,
