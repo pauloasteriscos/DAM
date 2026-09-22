@@ -1241,17 +1241,25 @@ app.post(
       const requestedLearningProgressCursor =
         batch.pull?.learningProgress?.cursor;
 
+      const requestedLearningProgressPathId =
+        batch.pull?.learningProgress?.learningPathId;
+
       if (requestedLearningProgressCursor !== undefined) {
         const cursorRow = await c.env.DB.prepare(
-          `SELECT seq
-           FROM learning_progress_sync_feed
-           WHERE user_id = ?
-             AND completion_id = ?
+          `SELECT f.seq
+           FROM learning_progress_sync_feed f
+           INNER JOIN learning_progress_completions c
+             ON c.id = f.completion_id
+           WHERE f.user_id = ?
+             AND f.completion_id = ?
+             AND (? IS NULL OR c.learning_path_id = ?)
            LIMIT 1`,
         )
           .bind(
             user.id,
             requestedLearningProgressCursor,
+            requestedLearningProgressPathId ?? null,
+            requestedLearningProgressPathId ?? null,
           )
           .first<{ seq: number }>();
 
@@ -1650,12 +1658,15 @@ app.post(
            INNER JOIN learning_progress_completions c
              ON c.id = f.completion_id
            WHERE f.user_id = ?
+             AND (? IS NULL OR c.learning_path_id = ?)
              AND f.seq > ?
            ORDER BY f.seq ASC
            LIMIT ?`,
         )
           .bind(
             user.id,
+            requestedLearningProgressPathId ?? null,
+            requestedLearningProgressPathId ?? null,
             learningProgressCursor,
             limit + 1,
           )

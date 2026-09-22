@@ -121,6 +121,7 @@ final class LearningProgressStartupReconciliationService {
       <String, Future<SyncCommandResult>>{};
 
   bool _started = false;
+  bool _retryRequestedWhileActive = false;
   Future<void>? _activeSessionExecution;
   AppLifecycleListener? _lifecycleListener;
 
@@ -155,6 +156,7 @@ final class LearningProgressStartupReconciliationService {
     }
 
     _started = false;
+    _retryRequestedWhileActive = false;
 
     _sessionListenable.removeListener(_onSessionChanged);
 
@@ -176,8 +178,13 @@ final class LearningProgressStartupReconciliationService {
     }
 
     if (_activeSessionExecution != null) {
+      // Coalesce concorrencia sem perder o evento: se uma conclusão local
+      // ocorrer depois do claim da execução atual, haverá uma segunda passagem.
+      _retryRequestedWhileActive = true;
       return;
     }
+
+    _retryRequestedWhileActive = false;
 
     final execution = _reconcileAuthenticatedSession();
 
@@ -207,6 +214,11 @@ final class LearningProgressStartupReconciliationService {
     } finally {
       if (identical(_activeSessionExecution, execution)) {
         _activeSessionExecution = null;
+
+        if (_retryRequestedWhileActive) {
+          _retryRequestedWhileActive = false;
+          retryIfAuthenticated();
+        }
       }
     }
   }

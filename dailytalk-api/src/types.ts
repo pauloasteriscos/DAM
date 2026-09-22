@@ -169,6 +169,7 @@ export const SecureProgressItem = z.union([
 ]);
 
 export const SecureLearningProgressPull = z.object({
+  learningPathId: z.string().trim().min(1).max(300).optional(),
   cursor: z.string().trim().min(1).max(1024).optional(),
   limit: z.number().int().min(1).max(100).default(50),
 }).strict();

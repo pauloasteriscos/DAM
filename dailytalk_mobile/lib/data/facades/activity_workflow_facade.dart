@@ -253,6 +253,7 @@ class ActivityWorkflowFacade {
     final learningResult = await SyncLearningProgressOutboxCommand(
       apiService: apiService,
       syncQueueDao: SyncQueueDao(db),
+      forceRetry: true,
     ).execute();
 
     final syncedCount =
@@ -263,6 +264,9 @@ class ActivityWorkflowFacade {
 
     final success = submissionsResult.success && learningResult.success;
 
+    // A tentativa manual terminou. A Home e SQLite-first e deve reler
+    // imediatamente o estado tecnico persistido da outbox.
+    AppEventNotifier.instance.notifySyncCompleted();
     return SyncCommandResult(
       success: success,
       syncedCount: syncedCount,

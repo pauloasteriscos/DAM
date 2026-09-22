@@ -6,15 +6,15 @@ typedef SyncQueueClock = DateTime Function();
 
 /// Política determinística de backoff da outbox.
 ///
-/// 1.ª falha: 5 min
-/// 2.ª falha: 10 min
-/// 3.ª falha: 20 min
-/// 4.ª falha: 40 min
-/// seguintes: máximo 60 min
+/// 1.ª falha: 5 s
+/// 2.ª falha: 10 s
+/// 3.ª falha: 20 s
+/// 4.ª falha: 40 s
+/// seguintes: máximo 60 s
 final class SyncQueueRetryPolicy {
   const SyncQueueRetryPolicy({
-    this.baseDelay = const Duration(minutes: 5),
-    this.maxDelay = const Duration(hours: 1),
+    this.baseDelay = const Duration(seconds: 5),
+    this.maxDelay = const Duration(minutes: 1),
   });
 
   final Duration baseDelay;
@@ -209,6 +209,7 @@ class SyncQueueDao {
     required String entityType,
     int limit = 20,
     Duration processingLease = const Duration(minutes: 15),
+    bool ignoreRetrySchedule = false,
   }) async {
     final normalizedEntityType = entityType.trim();
 
@@ -254,9 +255,15 @@ class SyncQueueDao {
         where: '''
           entity_type = ?
           AND sync_status IN (?, ?)
-          AND (next_retry_at IS NULL OR next_retry_at <= ?)
+          AND (? = 1 OR next_retry_at IS NULL OR next_retry_at <= ?)
         ''',
-        whereArgs: <Object?>[normalizedEntityType, 'pending', 'failed', nowIso],
+        whereArgs: <Object?>[
+          normalizedEntityType,
+          'pending',
+          'failed',
+          ignoreRetrySchedule ? 1 : 0,
+          nowIso,
+        ],
         orderBy: 'created_at ASC, id ASC',
         limit: limit,
       );
@@ -273,13 +280,14 @@ class SyncQueueDao {
             id = ?
             AND entity_type = ?
             AND sync_status IN (?, ?)
-            AND (next_retry_at IS NULL OR next_retry_at <= ?)
+            AND (? = 1 OR next_retry_at IS NULL OR next_retry_at <= ?)
           ''',
           whereArgs: <Object?>[
             id,
             normalizedEntityType,
             'pending',
             'failed',
+            ignoreRetrySchedule ? 1 : 0,
             nowIso,
           ],
         );

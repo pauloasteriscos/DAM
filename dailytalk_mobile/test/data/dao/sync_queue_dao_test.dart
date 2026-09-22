@@ -143,16 +143,16 @@ void main() {
 
         expect(
           rows.single['next_retry_at'],
-          DateTime.utc(2026, 9, 10, 17, 25).toIso8601String(),
+          DateTime.utc(2026, 9, 10, 17, 20, 5).toIso8601String(),
         );
 
         expect(await dao.getPendingItems(), isEmpty);
 
-        now = DateTime.utc(2026, 9, 10, 17, 24, 59);
+        now = DateTime.utc(2026, 9, 10, 17, 20, 4, 999);
 
         expect(await dao.getPendingItems(), isEmpty);
 
-        now = DateTime.utc(2026, 9, 10, 17, 25);
+        now = DateTime.utc(2026, 9, 10, 17, 20, 5);
 
         expect(await dao.getPendingItems(), hasLength(1));
       },
@@ -173,7 +173,7 @@ void main() {
 
       await dao.markFailed(id: id, error: 'timeout');
 
-      now = DateTime.utc(2026, 9, 10, 18, 5);
+      now = DateTime.utc(2026, 9, 10, 18, 0, 5);
 
       expect(await dao.claimPendingItems(), hasLength(1));
 
@@ -187,7 +187,7 @@ void main() {
 
       expect(
         rows.single['next_retry_at'],
-        DateTime.utc(2026, 9, 10, 18, 15).toIso8601String(),
+        DateTime.utc(2026, 9, 10, 18, 0, 15).toIso8601String(),
       );
     });
 
@@ -222,6 +222,60 @@ void main() {
       expect(stored, isNot(contains('eyJ')));
     });
 
+    test('claim manual ignora next_retry_at sem desativar backoff', () async {
+      final path = p.join(tempDir.path, 'manual-force-retry.db');
+
+      final now = DateTime.utc(2026, 9, 10, 18, 45);
+
+      db = await AppDatabase.instance.openDatabaseForTesting(path);
+
+      final dao = SyncQueueDao(db!, clock: () => now);
+
+      final id = await enqueueLearningCompletion(dao);
+
+      expect(
+        await dao.claimPendingItemsByEntityType(
+          entityType: 'learning_progress_completion',
+        ),
+        hasLength(1),
+      );
+
+      expect(await dao.markFailed(id: id, error: 'network offline'), 1);
+
+      final failedRows = await db!.query(
+        'sync_queue',
+        where: 'id = ?',
+        whereArgs: <Object?>[id],
+      );
+
+      expect(failedRows.single['sync_status'], 'failed');
+
+      expect(
+        failedRows.single['next_retry_at'],
+        now.add(const Duration(seconds: 5)).toIso8601String(),
+      );
+
+      // Automático continua sujeito ao cooldown.
+      expect(
+        await dao.claimPendingItemsByEntityType(
+          entityType: 'learning_progress_completion',
+        ),
+        isEmpty,
+      );
+
+      // Ação manual explícita pode tentar imediatamente.
+      final forced = await dao.claimPendingItemsByEntityType(
+        entityType: 'learning_progress_completion',
+        ignoreRetrySchedule: true,
+      );
+
+      expect(forced, hasLength(1));
+      expect(forced.single['id'], id);
+      expect(forced.single['sync_status'], 'processing');
+
+      // O claim manual não altera o contador de falhas.
+      expect(forced.single['attempt_count'], 1);
+    });
     test(
       'processing abandonado é recuperado após expiração do lease',
       () async {
@@ -284,7 +338,7 @@ void main() {
 
       await dao.markFailed(id: id, error: 'network offline');
 
-      now = DateTime.utc(2026, 9, 10, 20, 5);
+      now = DateTime.utc(2026, 9, 10, 20, 0, 5);
 
       expect(await dao.claimPendingItems(), hasLength(1));
 

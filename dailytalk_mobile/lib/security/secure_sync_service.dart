@@ -38,6 +38,7 @@ class SecureSyncService {
   Future<Map<String, dynamic>> synchronizeProgress(
     List<Map<String, dynamic>> items, {
     bool pullLearningProgress = false,
+    String? learningProgressPathId,
     String? learningProgressCursor,
     int learningProgressLimit = 50,
   }) async {
@@ -80,9 +81,35 @@ class SecureSyncService {
       normalizedLearningProgressCursor = value;
     }
 
-    if (!pullLearningProgress && normalizedLearningProgressCursor != null) {
+    String? normalizedLearningProgressPathId;
+
+    if (learningProgressPathId != null) {
+      final value = learningProgressPathId.trim();
+
+      if (value.isEmpty) {
+        throw ArgumentError.value(
+          learningProgressPathId,
+          'learningProgressPathId',
+          'Não pode estar vazio.',
+        );
+      }
+
+      normalizedLearningProgressPathId = value;
+    }
+
+    if (pullLearningProgress && normalizedLearningProgressPathId == null) {
       throw ArgumentError(
-        'learningProgressCursor exige pullLearningProgress=true.',
+        'learningProgressPathId é obrigatório quando '
+        'pullLearningProgress=true.',
+      );
+    }
+
+    if (!pullLearningProgress &&
+        (normalizedLearningProgressCursor != null ||
+            normalizedLearningProgressPathId != null)) {
+      throw ArgumentError(
+        'learningProgressPathId/cursor exigem '
+        'pullLearningProgress=true.',
       );
     }
 
@@ -110,6 +137,7 @@ class SecureSyncService {
       if (pullLearningProgress)
         'pull': <String, dynamic>{
           'learningProgress': <String, dynamic>{
+            'learningPathId': normalizedLearningProgressPathId,
             'cursor': ?normalizedLearningProgressCursor,
             'limit': learningProgressLimit,
           },

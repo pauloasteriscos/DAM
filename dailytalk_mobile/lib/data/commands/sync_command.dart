@@ -235,6 +235,7 @@ class SyncLearningProgressOutboxCommand implements SyncCommand {
     required this.apiService,
     required this.syncQueueDao,
     this.reconciliation,
+    this.forceRetry = false,
   });
 
   static const String _entityType = 'learning_progress_completion';
@@ -242,6 +243,12 @@ class SyncLearningProgressOutboxCommand implements SyncCommand {
   final DailyTalkApiService apiService;
   final SyncQueueDao syncQueueDao;
   final LearningProgressReconciliationContext? reconciliation;
+
+  /// Ignora apenas o agendamento de retry ao reclamar itens.
+  ///
+  /// Usado pela ação manual explícita do utilizador. Uma eventual falha
+  /// continua a passar por markFailed e volta ao backoff normal.
+  final bool forceRetry;
 
   static Future<SyncCommandResult>? _activePushExecution;
 
@@ -297,6 +304,7 @@ class SyncLearningProgressOutboxCommand implements SyncCommand {
     final pending = await syncQueueDao.claimPendingItemsByEntityType(
       entityType: _entityType,
       limit: 50,
+      ignoreRetrySchedule: forceRetry,
     );
 
     // Compatibilidade estrita com a Fase 3.4B.
@@ -419,6 +427,7 @@ class SyncLearningProgressOutboxCommand implements SyncCommand {
     var response = await apiService.secureSyncProgress(
       valid.map((item) => item.serverItem).toList(growable: false),
       pullLearningProgress: true,
+      learningProgressPathId: context.learningPath.id.value,
       learningProgressCursor: cursor,
       learningProgressLimit: context.pullLimit,
     );
@@ -460,6 +469,7 @@ class SyncLearningProgressOutboxCommand implements SyncCommand {
       response = await apiService.secureSyncProgress(
         const <Map<String, dynamic>>[],
         pullLearningProgress: true,
+        learningProgressPathId: context.learningPath.id.value,
         learningProgressCursor: cursor,
         learningProgressLimit: context.pullLimit,
       );

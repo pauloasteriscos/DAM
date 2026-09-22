@@ -2057,6 +2057,275 @@ test(
         phase35Sequence += 1;
       },
     );
+    await t.test(
+      "Fase 4.7D — pull de learning progress é isolado por learningPath",
+      async () => {
+        const pathA = "student.phase47d-a.phase1";
+        const pathB = "student.phase47d-b.phase1";
+
+        const clientA =
+          `phase47d-path-a-${crypto.randomUUID()}`;
+
+        const clientB =
+          `phase47d-path-b-${crypto.randomUUID()}`;
+
+        const now = new Date();
+
+        // --------------------------------------------------------
+        // 1. Push de A + B no mesmo lote, pull somente de A.
+        // --------------------------------------------------------
+
+        const pushBatch = {
+          version: 1,
+          batchId: `phase47d-mixed-${crypto.randomUUID()}`,
+          deviceId,
+          issuedAt: now.toISOString(),
+          expiresAt: new Date(
+            now.getTime() + 5 * 60 * 1000,
+          ).toISOString(),
+          sequence: phase35Sequence,
+          items: [
+            {
+              type: "activityCompletion",
+              clientCompletionId: clientA,
+              learningPathId: pathA,
+              activityId: "arrival.vocabulary-47d-a",
+              revisionId: "arrival.vocabulary-47d-a.r1",
+              packageVersion: 3,
+              completedAt: now.toISOString(),
+            },
+            {
+              type: "activityCompletion",
+              clientCompletionId: clientB,
+              learningPathId: pathB,
+              activityId: "arrival.vocabulary-47d-b",
+              revisionId: "arrival.vocabulary-47d-b.r1",
+              packageVersion: 3,
+              completedAt: now.toISOString(),
+            },
+          ],
+          pull: {
+            learningProgress: {
+              learningPathId: pathA,
+              limit: 50,
+            },
+          },
+        };
+
+        const pushEnvelope = await makeSyncEnvelope({
+          batch: pushBatch,
+          deviceId,
+          deviceKeys,
+        });
+
+        const pushed = await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope: pushEnvelope },
+        });
+
+        assert.equal(pushed.response.status, 200);
+
+        const pushedDecoded = await decodeSyncResponse(
+          pushed.payload.envelope,
+          deviceId,
+          deviceKeys,
+        );
+
+        assert.equal(pushedDecoded.results.length, 2);
+
+        const pullA =
+          pushedDecoded.pull?.learningProgress;
+
+        assert.ok(pullA);
+        assert.equal(pullA.items.length, 1);
+
+        assert.equal(
+          pullA.items[0].learningPathId,
+          pathA,
+        );
+
+        assert.equal(
+          pullA.items[0].clientCompletionId,
+          clientA,
+        );
+
+        assert.equal(typeof pullA.nextCursor, "string");
+
+        const cursorA = pullA.nextCursor;
+
+        phase35Sequence += 1;
+
+        // --------------------------------------------------------
+        // 2. Pull independente de B.
+        // --------------------------------------------------------
+
+        const pullBNow = new Date();
+
+        const pullBBatch = {
+          version: 1,
+          batchId: `phase47d-pull-b-${crypto.randomUUID()}`,
+          deviceId,
+          issuedAt: pullBNow.toISOString(),
+          expiresAt: new Date(
+            pullBNow.getTime() + 5 * 60 * 1000,
+          ).toISOString(),
+          sequence: phase35Sequence,
+          items: [],
+          pull: {
+            learningProgress: {
+              learningPathId: pathB,
+              limit: 50,
+            },
+          },
+        };
+
+        const pullBEnvelope = await makeSyncEnvelope({
+          batch: pullBBatch,
+          deviceId,
+          deviceKeys,
+        });
+
+        const pulledB = await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope: pullBEnvelope },
+        });
+
+        assert.equal(pulledB.response.status, 200);
+
+        const pulledBDecoded = await decodeSyncResponse(
+          pulledB.payload.envelope,
+          deviceId,
+          deviceKeys,
+        );
+
+        const pullB =
+          pulledBDecoded.pull?.learningProgress;
+
+        assert.ok(pullB);
+        assert.equal(pullB.items.length, 1);
+
+        assert.equal(
+          pullB.items[0].learningPathId,
+          pathB,
+        );
+
+        assert.equal(
+          pullB.items[0].clientCompletionId,
+          clientB,
+        );
+
+        assert.equal(typeof pullB.nextCursor, "string");
+
+        const cursorB = pullB.nextCursor;
+
+        phase35Sequence += 1;
+
+        // --------------------------------------------------------
+        // 3. Cursor de A NÃO pode ser usado no percurso B.
+        // --------------------------------------------------------
+
+        const wrongNow = new Date();
+
+        const wrongCursorBatch = {
+          version: 1,
+          batchId:
+            `phase47d-wrong-path-cursor-${crypto.randomUUID()}`,
+          deviceId,
+          issuedAt: wrongNow.toISOString(),
+          expiresAt: new Date(
+            wrongNow.getTime() + 5 * 60 * 1000,
+          ).toISOString(),
+          sequence: phase35Sequence,
+          items: [],
+          pull: {
+            learningProgress: {
+              learningPathId: pathB,
+              cursor: cursorA,
+              limit: 50,
+            },
+          },
+        };
+
+        const wrongEnvelope = await makeSyncEnvelope({
+          batch: wrongCursorBatch,
+          deviceId,
+          deviceKeys,
+        });
+
+        const wrong = await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope: wrongEnvelope },
+        });
+
+        assert.equal(wrong.response.status, 400);
+
+        // O pedido rejeitado não pode consumir a sequence.
+        // Reutilizamos exatamente a mesma no pedido válido.
+
+        const validNow = new Date();
+
+        const validBatch = {
+          version: 1,
+          batchId:
+            `phase47d-valid-path-cursor-${crypto.randomUUID()}`,
+          deviceId,
+          issuedAt: validNow.toISOString(),
+          expiresAt: new Date(
+            validNow.getTime() + 5 * 60 * 1000,
+          ).toISOString(),
+          sequence: phase35Sequence,
+          items: [],
+          pull: {
+            learningProgress: {
+              learningPathId: pathB,
+              cursor: cursorB,
+              limit: 50,
+            },
+          },
+        };
+
+        const validEnvelope = await makeSyncEnvelope({
+          batch: validBatch,
+          deviceId,
+          deviceKeys,
+        });
+
+        const valid = await boundRequest({
+          route: "/api/sync/progress",
+          method: "POST",
+          token: accessToken,
+          deviceKeys,
+          body: { envelope: validEnvelope },
+        });
+
+        assert.equal(valid.response.status, 200);
+
+        const validDecoded = await decodeSyncResponse(
+          valid.payload.envelope,
+          deviceId,
+          deviceKeys,
+        );
+
+        const validPull =
+          validDecoded.pull?.learningProgress;
+
+        assert.ok(validPull);
+        assert.equal(validPull.items.length, 0);
+        assert.equal(validPull.hasMore, false);
+        assert.equal(validPull.nextCursor, cursorB);
+
+        phase35Sequence += 1;
+      },
+    );
     await t.test("JWS de sync assinado por chave errada é rejeitado", async () => {
       const now = new Date();
       const batch = {

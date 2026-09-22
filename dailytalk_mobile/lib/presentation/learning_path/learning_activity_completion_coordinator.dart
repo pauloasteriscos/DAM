@@ -22,15 +22,19 @@ typedef LearningActivityCompletionWriter =
 /// Cada action cria um clientCompletionId apenas uma vez e reutiliza o mesmo
 /// identificador em retries. Assim, a UI não inventa factos duplicados quando
 /// uma escrita local é repetida.
+typedef LearningActivityCompletionPersisted = void Function();
+
 final class LearningActivityCompletionCoordinator {
   LearningActivityCompletionCoordinator({
     required this.accountId,
     required this.learningPath,
     required this.packageVersion,
     required LearningActivityCompletionWriter completeActivity,
+    LearningActivityCompletionPersisted? onCompletionPersisted,
     DateTime Function()? clock,
     String Function()? clientCompletionIdFactory,
   }) : _completeActivity = completeActivity,
+       _onCompletionPersisted = onCompletionPersisted,
        _clock = clock ?? DateTime.now,
        _clientCompletionIdFactory =
            clientCompletionIdFactory ?? _defaultClientCompletionId;
@@ -40,12 +44,14 @@ final class LearningActivityCompletionCoordinator {
     required LearningPath learningPath,
     required int packageVersion,
     required LearningProgressRepository repository,
+    LearningActivityCompletionPersisted? onCompletionPersisted,
   }) {
     return LearningActivityCompletionCoordinator(
       accountId: accountId,
       learningPath: learningPath,
       packageVersion: packageVersion,
       completeActivity: repository.completeActivity,
+      onCompletionPersisted: onCompletionPersisted,
     );
   }
 
@@ -54,6 +60,7 @@ final class LearningActivityCompletionCoordinator {
   final int packageVersion;
 
   final LearningActivityCompletionWriter _completeActivity;
+  final LearningActivityCompletionPersisted? _onCompletionPersisted;
   final DateTime Function() _clock;
   final String Function() _clientCompletionIdFactory;
 
@@ -102,6 +109,10 @@ final class LearningActivityCompletionCoordinator {
       guarded = _completeActivity(write)
           .then<void>((_) {
             persisted = true;
+
+            // A conclusão já está duravelmente persistida e a aprendizagem
+            // local não espera rede. Apenas agenda a convergência em background.
+            _onCompletionPersisted?.call();
           })
           .whenComplete(() {
             if (identical(inFlight, guarded)) {

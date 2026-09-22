@@ -142,6 +142,7 @@ class DailyTalkApiService {
   Future<Map<String, dynamic>> secureSyncProgress(
     List<Map<String, dynamic>> items, {
     bool pullLearningProgress = false,
+    String? learningProgressPathId,
     String? learningProgressCursor,
     int learningProgressLimit = 50,
   }) {
@@ -193,6 +194,7 @@ class DailyTalkApiService {
     return _secureSyncService.synchronizeProgress(
       items,
       pullLearningProgress: pullLearningProgress,
+      learningProgressPathId: learningProgressPathId,
       learningProgressCursor: learningProgressCursor,
       learningProgressLimit: learningProgressLimit,
     );

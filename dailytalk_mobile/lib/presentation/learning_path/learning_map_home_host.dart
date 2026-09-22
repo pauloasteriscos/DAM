@@ -8,6 +8,8 @@ import '../../data/content/official_learning_path_resolver.dart';
 import '../../data/database/app_database.dart';
 import '../../data/repositories/learning_progress_read_repository.dart';
 import '../../data/repositories/learning_progress_repository.dart';
+import '../../data/services/learning_progress_startup_reconciliation_service.dart';
+import '../../state/app_event_notifier.dart';
 import 'learning_activity_completion_coordinator.dart';
 import 'learning_map_window_controller.dart';
 import 'learning_map_window_session.dart';
@@ -82,9 +84,19 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
 
   int _generation = 0;
 
+  int _lastSyncVersion = 0;
+  bool _syncRefreshQueued = false;
+  Future<void>? _syncRefreshExecution;
+
   @override
   void initState() {
     super.initState();
+
+    final appEvents = AppEventNotifier.instance;
+
+    _lastSyncVersion = appEvents.syncVersion;
+    appEvents.addListener(_handleAppEvent);
+
     _startLoad();
   }
 
@@ -96,9 +108,13 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
         oldWidget.locale != widget.locale ||
         oldWidget.appLanguageCode != widget.appLanguageCode ||
         oldWidget.learningLanguageCode != widget.learningLanguageCode) {
+      _controller?.removeListener(_handleControllerChangedForSync);
       _controller?.dispose();
       _controller = null;
       _completionCoordinator = null;
+
+      _syncRefreshQueued = false;
+      _lastSyncVersion = AppEventNotifier.instance.syncVersion;
 
       setState(() {
         _loading = true;
@@ -112,6 +128,80 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
   void _startLoad() {
     final generation = ++_generation;
     unawaited(_load(generation));
+  }
+
+  void _handleAppEvent() {
+    final currentSyncVersion = AppEventNotifier.instance.syncVersion;
+
+    if (currentSyncVersion == _lastSyncVersion) {
+      return;
+    }
+
+    _lastSyncVersion = currentSyncVersion;
+    _syncRefreshQueued = true;
+
+    _scheduleSyncRefresh();
+  }
+
+  void _handleControllerChangedForSync() {
+    final controller = _controller;
+
+    if (!mounted ||
+        !_syncRefreshQueued ||
+        _syncRefreshExecution != null ||
+        controller == null ||
+        controller.isLoading ||
+        controller.isActivityFlowRunning) {
+      return;
+    }
+
+    _scheduleSyncRefresh();
+  }
+
+  void _scheduleSyncRefresh() {
+    final controller = _controller;
+
+    if (!mounted ||
+        !_syncRefreshQueued ||
+        _syncRefreshExecution != null ||
+        controller == null ||
+        controller.isLoading ||
+        controller.isActivityFlowRunning) {
+      return;
+    }
+
+    _syncRefreshQueued = false;
+
+    final execution = _reloadSyncState(controller);
+
+    _syncRefreshExecution = execution;
+
+    unawaited(
+      execution.whenComplete(() {
+        if (!identical(_syncRefreshExecution, execution)) {
+          return;
+        }
+
+        _syncRefreshExecution = null;
+
+        if (mounted && _syncRefreshQueued) {
+          _scheduleSyncRefresh();
+        }
+      }),
+    );
+  }
+
+  Future<void> _reloadSyncState(LearningMapWindowController controller) async {
+    final reloaded = await controller.reloadCurrent();
+
+    if (!mounted || !identical(controller, _controller)) {
+      return;
+    }
+
+    if (!reloaded &&
+        (controller.isLoading || controller.isActivityFlowRunning)) {
+      _syncRefreshQueued = true;
+    }
   }
 
   Future<void> _load(int generation) async {
@@ -178,6 +268,9 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
             learningPath: active.path,
             packageVersion: active.package.packageVersion,
             repository: progressRepository,
+            onCompletionPersisted: LearningProgressStartupReconciliationService
+                .instance
+                .retryIfAuthenticated,
           );
 
       await progressRepository.ensureProjection(
@@ -205,12 +298,16 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
         return;
       }
 
+      createdController.addListener(_handleControllerChangedForSync);
+
       setState(() {
         _controller = createdController;
         _completionCoordinator = completionCoordinator;
         _loading = false;
         _failed = false;
       });
+
+      _scheduleSyncRefresh();
     } catch (error, stackTrace) {
       createdController?.dispose();
 
@@ -233,7 +330,12 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
   @override
   void dispose() {
     _generation++;
+
+    AppEventNotifier.instance.removeListener(_handleAppEvent);
+
+    _controller?.removeListener(_handleControllerChangedForSync);
     _controller?.dispose();
+
     super.dispose();
   }
 

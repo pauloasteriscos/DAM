@@ -32,6 +32,7 @@ final class _FakeApiService extends DailyTalkApiService {
     List<Map<String, dynamic>> items, {
     bool pullLearningProgress = false,
     String? learningProgressCursor,
+    String? learningProgressPathId,
     int learningProgressLimit = 50,
   }) {
     calls += 1;
