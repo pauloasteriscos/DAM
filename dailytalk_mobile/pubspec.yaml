@@ -12,7 +12,7 @@ publish_to: 'none'
 # No Android, a versão é usada como versionName e o build como versionCode.
 # No iOS, correspondem a CFBundleShortVersionString e CFBundleVersion.
 # No Windows, a versão identifica major, minor e patch, e o build funciona como sufixo.
-version: 1.1.0+14
+version: 1.1.1+15
 
 environment:
   sdk: ^3.11.5

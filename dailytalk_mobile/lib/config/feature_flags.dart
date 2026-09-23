@@ -53,19 +53,19 @@ abstract final class FeatureFlags {
   static const FeatureFlagSnapshot build = FeatureFlagSnapshot(
     remoteContentCatalog: bool.fromEnvironment(
       'DAILYTALK_FEATURE_REMOTE_CONTENT_CATALOG',
-      defaultValue: false,
+      defaultValue: true,
     ),
     remoteContentAssets: bool.fromEnvironment(
       'DAILYTALK_FEATURE_REMOTE_CONTENT_ASSETS',
-      defaultValue: false,
+      defaultValue: true,
     ),
     progressionEngineV2: bool.fromEnvironment(
       'DAILYTALK_FEATURE_PROGRESSION_ENGINE_V2',
-      defaultValue: false,
+      defaultValue: true,
     ),
     dynamicLearningMap: bool.fromEnvironment(
       'DAILYTALK_FEATURE_DYNAMIC_LEARNING_MAP',
-      defaultValue: false,
+      defaultValue: true,
     ),
     communityActivities: bool.fromEnvironment(
       'DAILYTALK_FEATURE_COMMUNITY_ACTIVITIES',
