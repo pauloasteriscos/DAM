@@ -109,10 +109,20 @@ final class _InMemoryProgressServer extends DailyTalkApiService {
       return response;
     }
 
+    final normalizedPathId = learningProgressPathId?.trim();
+
+    if (normalizedPathId == null || normalizedPathId.isEmpty) {
+      throw StateError('learningProgressPathId ausente no pull multi-device.');
+    }
+
+    final pathFeed = _feed
+        .where((fact) => fact['learningPathId'] == normalizedPathId)
+        .toList(growable: false);
+
     var start = 0;
 
     if (learningProgressCursor != null) {
-      final cursorIndex = _feed.indexWhere(
+      final cursorIndex = pathFeed.indexWhere(
         (fact) => fact['completionId'] == learningProgressCursor,
       );
 
@@ -125,9 +135,9 @@ final class _InMemoryProgressServer extends DailyTalkApiService {
 
     final candidateEnd = start + learningProgressLimit;
 
-    final end = candidateEnd < _feed.length ? candidateEnd : _feed.length;
+    final end = candidateEnd < pathFeed.length ? candidateEnd : pathFeed.length;
 
-    final page = _feed
+    final page = pathFeed
         .sublist(start, end)
         .map(Map<String, dynamic>.from)
         .toList(growable: false);
@@ -140,7 +150,7 @@ final class _InMemoryProgressServer extends DailyTalkApiService {
       'learningProgress': <String, dynamic>{
         'items': page,
         'nextCursor': nextCursor,
-        'hasMore': end < _feed.length,
+        'hasMore': end < pathFeed.length,
       },
     };
 

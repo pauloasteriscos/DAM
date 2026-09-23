@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { rm, writeFile } from "node:fs/promises";
+import { rmSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
@@ -9,6 +10,8 @@ const ROOT = process.cwd();
 const API_BASE = "http://127.0.0.1:8792";
 const PERSIST_DIR = path.join(ROOT, ".wrangler", "phase0-security-test-state");
 const CONFIG_FILE = path.join(ROOT, "wrangler.security.test.generated.jsonc");
+const SECURITY_ENV = "security-test";
+const SECURITY_VARS_FILE = path.join(ROOT, `.dev.vars.${SECURITY_ENV}`);
 const ENV_HEADER = "X-DailyTalk-Environment";
 const TEST_PASSWORD = "Phase0-Security-Test-Password-2026!";
 const SERVER_SIGNING_KID = "phase0-server-signing-v1";
@@ -26,6 +29,18 @@ const decoder = new TextDecoder();
 let worker = null;
 let workerLog = "";
 let serverKeys = null;
+
+function cleanupGeneratedSecurityArtifactsSync() {
+  for (const target of [CONFIG_FILE, SECURITY_VARS_FILE]) {
+    try {
+      rmSync(target, { force: true });
+    } catch {
+      // Best effort no encerramento do processo.
+    }
+  }
+}
+
+process.on("exit", cleanupGeneratedSecurityArtifactsSync);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -536,6 +551,66 @@ async function writeSecurityConfig() {
     agreement: serverAgreement,
   };
 
+  const secrets = {
+    JWT_SECRET:
+      `phase0-security-${crypto.randomUUID()}-${crypto.randomUUID()}`,
+    SYNC_SERVER_SIGNING_PRIVATE_JWK: JSON.stringify(
+      serverSigning.privateJwk,
+    ),
+    SYNC_SERVER_AGREEMENT_PRIVATE_JWK: JSON.stringify(
+      serverAgreement.privateJwk,
+    ),
+  };
+
+  const quoteDevVar = (value) => {
+    const text = String(value);
+
+    if (text.includes("'") || text.includes("\\n") || text.includes("\\r")) {
+      throw new Error("Valor incompatível com o fixture .dev.vars de teste.");
+    }
+
+    return `'${text}'`;
+  };
+
+  const secretFile = Object.entries(secrets)
+    .map(([key, value]) => `${key}=${quoteDevVar(value)}`)
+    .join("\n");
+
+  const environmentConfig = {
+    name: "dailytalk-api-phase0-security-test",
+    vars: {
+      APP_ENV: "DEV",
+      JWT_EXPIRES_SECONDS: "900",
+      DEVICE_SESSION_EXPIRES_DAYS: "730",
+      DPOP_MAX_AGE_SECONDS: "300",
+      AUTO_CREATE_SECURITY_SCHEMA: "false",
+      ALLOW_LEGACY_DEVICE_ENROLLMENT: "true",
+      SYNC_MAX_BATCH_SIZE: "50",
+      SYNC_SERVER_SIGNING_KEY_ID: SERVER_SIGNING_KID,
+      SYNC_SERVER_AGREEMENT_KEY_ID: SERVER_AGREEMENT_KID,
+      SYNC_SERVER_SIGNING_PUBLIC_JWK: JSON.stringify(
+        serverSigning.publicJwk,
+      ),
+      SYNC_SERVER_AGREEMENT_PUBLIC_JWK: JSON.stringify(
+        serverAgreement.publicJwk,
+      ),
+      CORS_ORIGIN: "http://localhost:5555,http://127.0.0.1:5555",
+      PASSWORD_RESET_DEBUG: "false",
+    },
+    secrets: {
+      required: Object.keys(secrets),
+    },
+    d1_databases: [
+      {
+        binding: "DB",
+        database_name: "dailytalk-security-test",
+        database_id: "00000000-0000-0000-0000-000000000002",
+        migrations_dir: "migrations",
+        migrations_table: "d1_migrations",
+      },
+    ],
+  };
+
   const config = {
     "$schema": "node_modules/wrangler/config-schema.json",
     name: "dailytalk-api-phase0-security-test",
@@ -550,43 +625,16 @@ async function writeSecurityConfig() {
     observability: {
       enabled: false,
     },
-    vars: {
-      APP_ENV: "DEV",
-      JWT_SECRET:
-        "phase0-security-test-only-secret-do-not-use-outside-tests-2026",
-      JWT_EXPIRES_SECONDS: "900",
-      DEVICE_SESSION_EXPIRES_DAYS: "730",
-      DPOP_MAX_AGE_SECONDS: "300",
-      AUTO_CREATE_SECURITY_SCHEMA: "false",
-      ALLOW_LEGACY_DEVICE_ENROLLMENT: "true",
-      SYNC_MAX_BATCH_SIZE: "50",
-      SYNC_SERVER_SIGNING_KEY_ID: SERVER_SIGNING_KID,
-      SYNC_SERVER_AGREEMENT_KEY_ID: SERVER_AGREEMENT_KID,
-      SYNC_SERVER_SIGNING_PRIVATE_JWK: JSON.stringify(
-        serverSigning.privateJwk,
-      ),
-      SYNC_SERVER_SIGNING_PUBLIC_JWK: JSON.stringify(
-        serverSigning.publicJwk,
-      ),
-      SYNC_SERVER_AGREEMENT_PRIVATE_JWK: JSON.stringify(
-        serverAgreement.privateJwk,
-      ),
-      SYNC_SERVER_AGREEMENT_PUBLIC_JWK: JSON.stringify(
-        serverAgreement.publicJwk,
-      ),
-      CORS_ORIGIN: "http://localhost:5555,http://127.0.0.1:5555",
-      PASSWORD_RESET_DEBUG: "false",
+    env: {
+      [SECURITY_ENV]: environmentConfig,
     },
-    d1_databases: [
-      {
-        binding: "DB",
-        database_name: "dailytalk-security-test",
-        database_id: "00000000-0000-0000-0000-000000000002",
-        migrations_dir: "migrations",
-        migrations_table: "d1_migrations",
-      },
-    ],
   };
+
+  await writeFile(
+    SECURITY_VARS_FILE,
+    `${secretFile}\n`,
+    { encoding: "utf8", mode: 0o600 },
+  );
 
   await writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), "utf8");
 }
@@ -618,47 +666,60 @@ async function startWorker() {
   await stopWorker();
   await removePath(PERSIST_DIR);
   await removePath(CONFIG_FILE);
-  await writeSecurityConfig();
+  await removePath(SECURITY_VARS_FILE);
 
-  await runCommand([
-    "wrangler",
-    "d1",
-    "migrations",
-    "apply",
-    "DB",
-    "--config",
-    CONFIG_FILE,
-    "--local",
-    "--persist-to",
-    PERSIST_DIR,
-  ]);
+  try {
+    await writeSecurityConfig();
 
-  workerLog = "";
-  worker = spawn(
-    process.execPath,
-    [
-      wranglerCli,
-      "dev",
+    await runCommand([
+      "wrangler",
+      "d1",
+      "migrations",
+      "apply",
+      "DB",
       "--config",
       CONFIG_FILE,
+      "--env",
+      SECURITY_ENV,
+      "--local",
       "--persist-to",
       PERSIST_DIR,
-      "--log-level",
-      "warn",
-    ],
-    {
-      cwd: ROOT,
-      stdio: ["ignore", "pipe", "pipe"],
-      shell: false,
-      windowsHide: true,
-    },
-  );
+    ]);
 
-  worker.stdout?.on("data", appendWorkerLog);
-  worker.stderr?.on("data", appendWorkerLog);
-  worker.on("error", (error) => appendWorkerLog(String(error)));
+    workerLog = "";
+    worker = spawn(
+      process.execPath,
+      [
+        wranglerCli,
+        "dev",
+        "--config",
+        CONFIG_FILE,
+        "--env",
+        SECURITY_ENV,
+        "--persist-to",
+        PERSIST_DIR,
+        "--log-level",
+        "warn",
+      ],
+      {
+        cwd: ROOT,
+        stdio: ["ignore", "pipe", "pipe"],
+        shell: false,
+        windowsHide: true,
+      },
+    );
 
-  await waitForApi();
+    worker.stdout?.on("data", appendWorkerLog);
+    worker.stderr?.on("data", appendWorkerLog);
+    worker.on("error", (error) => appendWorkerLog(String(error)));
+
+    await waitForApi();
+  } catch (error) {
+    await stopWorker();
+    await removePath(CONFIG_FILE, { finalCleanup: true });
+    await removePath(SECURITY_VARS_FILE, { finalCleanup: true });
+    throw error;
+  }
 }
 
 async function apiRequest(
@@ -789,6 +850,7 @@ test(
       await stopWorker();
       await removePath(PERSIST_DIR, { finalCleanup: true });
       await removePath(CONFIG_FILE, { finalCleanup: true });
+      await removePath(SECURITY_VARS_FILE, { finalCleanup: true });
     });
 
     const deviceKeys = {
@@ -1221,9 +1283,39 @@ test(
       });
 
       assert.equal(response.status, 409);
-      assert.match(
-        String(payload.error),
-        /Sequência de sincronização repetida/i,
+      assert.equal(payload.success, false);
+      assert.equal(typeof payload.envelope, "string");
+      assert.equal(payload.lastAcceptedSequence, undefined);
+      assert.equal(payload.errorCode, undefined);
+
+      const decodedRecovery = await decodeSyncResponse(
+        payload.envelope,
+        deviceId,
+        deviceKeys,
+      );
+
+      assert.equal(decodedRecovery.batchId, repeatedSequence.batchId);
+      assert.equal(decodedRecovery.deviceId, deviceId);
+      assert.equal(decodedRecovery.sequence, repeatedSequence.sequence);
+      assert.equal(
+        decodedRecovery.errorCode,
+        "SYNC_SEQUENCE_REPEATED",
+      );
+      assert.equal(
+        decodedRecovery.lastAcceptedSequence,
+        original.sequence,
+      );
+
+      const tamperedEnvelope =
+        payload.envelope.slice(0, -1) +
+        (payload.envelope.endsWith("A") ? "B" : "A");
+
+      await assert.rejects(() =>
+        decodeSyncResponse(
+          tamperedEnvelope,
+          deviceId,
+          deviceKeys,
+        ),
       );
     });
 

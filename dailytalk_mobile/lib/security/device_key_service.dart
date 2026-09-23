@@ -62,7 +62,7 @@ class DeviceKeyService {
   String get _legacyAgreementPublicKey =>
       _key('dailytalk_device_x25519_public_v1');
 
-  Future<void> _sequenceQueue = Future<void>.value();
+  static Future<void> _sequenceQueue = Future<void>.value();
 
   Future<DeviceKeyMaterial> loadOrCreate() async {
     final installationId = await _loadOrCreateInstallationId();
@@ -112,6 +112,36 @@ class DeviceKeyService {
       final next = current + 1;
       await _secureStorage.write(key: _sequenceKey, value: next.toString());
       return next;
+    });
+
+    _sequenceQueue = operation.then<void>((_) {}, onError: (_) {});
+    return operation;
+  }
+
+  /// Eleva monotonamente o contador local de Secure Sync.
+  ///
+  /// O valor só pode avançar. Esta operação é usada após uma resposta
+  /// JWS/JWE autenticada do servidor indicar o último contador aceite.
+  Future<int> ensureSyncSequenceAtLeast(int minimum) {
+    if (minimum < 0) {
+      throw ArgumentError.value(
+        minimum,
+        'minimum',
+        'deve ser igual ou superior a zero',
+      );
+    }
+
+    final operation = _sequenceQueue.then((_) async {
+      final raw = await _secureStorage.read(key: _sequenceKey);
+      final current = int.tryParse(raw ?? '') ?? 0;
+
+      if (current >= minimum) {
+        return current;
+      }
+
+      await _secureStorage.write(key: _sequenceKey, value: minimum.toString());
+
+      return minimum;
     });
 
     _sequenceQueue = operation.then<void>((_) {}, onError: (_) {});

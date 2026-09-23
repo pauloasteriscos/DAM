@@ -125,89 +125,181 @@ class SecureSyncService {
 
     final material = await _deviceKeyService.loadOrCreate();
     final serverKeys = await _loadServerKeys();
-    final issuedAt = DateTime.now().toUtc();
-    final batch = <String, dynamic>{
-      'version': 1,
-      'batchId': randomBase64Url(24),
-      'deviceId': currentDeviceId,
-      'issuedAt': issuedAt.toIso8601String(),
-      'expiresAt': issuedAt.add(const Duration(minutes: 2)).toIso8601String(),
-      'sequence': await _deviceKeyService.nextSyncSequence(),
-      'items': items,
-      if (pullLearningProgress)
-        'pull': <String, dynamic>{
-          'learningProgress': <String, dynamic>{
-            'learningPathId': normalizedLearningProgressPathId,
-            'cursor': ?normalizedLearningProgressCursor,
-            'limit': learningProgressLimit,
+    var sequenceRecoveryAttempt = 0;
+
+    while (true) {
+      final issuedAt = DateTime.now().toUtc();
+      final batch = <String, dynamic>{
+        'version': 1,
+        'batchId': randomBase64Url(24),
+        'deviceId': currentDeviceId,
+        'issuedAt': issuedAt.toIso8601String(),
+        'expiresAt': issuedAt.add(const Duration(minutes: 2)).toIso8601String(),
+        'sequence': await _deviceKeyService.nextSyncSequence(),
+        'items': items,
+        if (pullLearningProgress)
+          'pull': <String, dynamic>{
+            'learningProgress': <String, dynamic>{
+              'learningPathId': normalizedLearningProgressPathId,
+              'cursor': ?normalizedLearningProgressCursor,
+              'limit': learningProgressLimit,
+            },
           },
-        },
-    };
-    final batchPayload = utf8Bytes(jsonEncode(batch));
-    if (batchPayload.length > 256 * 1024) {
-      throw const FormatException(
-        'O lote de sincronização excede o limite seguro de 256 KB.',
+      };
+      final batchPayload = utf8Bytes(jsonEncode(batch));
+      if (batchPayload.length > 256 * 1024) {
+        throw const FormatException(
+          'O lote de sincronização excede o limite seguro de 256 KB.',
+        );
+      }
+
+      final signed = await _joseService.sign(
+        payload: batchPayload,
+        privateKeyPair: material.signingKeyPair,
+        keyId: currentDeviceId,
+        type: 'dailytalk-sync+jws',
       );
-    }
+      final envelope = await _joseService.encrypt(
+        plaintext: utf8Bytes(signed),
+        recipientPublicKey: serverKeys.agreementPublicKey,
+        recipientKeyId: serverKeys.agreementKeyId,
+        senderParty: currentDeviceId,
+        recipientParty: serverKeys.agreementKeyId,
+        type: 'dailytalk-sync+jwe',
+      );
+      final uri = Uri.parse('${AppConfig.apiBaseUrl}/sync/progress');
+      final response = await _client
+          .post(
+            uri,
+            headers: await _authSessionService.authenticatedHeaders(
+              method: 'POST',
+              uri: uri,
+            ),
+            body: jsonEncode({'envelope': envelope}),
+          )
+          .timeout(AppConfig.apiTimeout);
+      if (response.statusCode == 409) {
+        AppConfig.assertResponseEnvironment(response.headers);
 
-    final signed = await _joseService.sign(
-      payload: batchPayload,
-      privateKeyPair: material.signingKeyPair,
-      keyId: currentDeviceId,
-      type: 'dailytalk-sync+jws',
-    );
-    final envelope = await _joseService.encrypt(
-      plaintext: utf8Bytes(signed),
-      recipientPublicKey: serverKeys.agreementPublicKey,
-      recipientKeyId: serverKeys.agreementKeyId,
-      senderParty: currentDeviceId,
-      recipientParty: serverKeys.agreementKeyId,
-      type: 'dailytalk-sync+jwe',
-    );
-    final uri = Uri.parse('${AppConfig.apiBaseUrl}/sync/progress');
-    final response = await _client
-        .post(
-          uri,
-          headers: await _authSessionService.authenticatedHeaders(
-            method: 'POST',
-            uri: uri,
-          ),
-          body: jsonEncode({'envelope': envelope}),
-        )
-        .timeout(AppConfig.apiTimeout);
-    final responseMap = _decodeResponse(response);
-    final responseEnvelope = responseMap['envelope']?.toString();
-    if (responseEnvelope == null || responseEnvelope.isEmpty) {
-      throw const FormatException('A API não devolveu o envelope de resposta.');
-    }
+        final outerDecoded = response.body.isEmpty
+            ? <String, dynamic>{}
+            : jsonDecode(response.body);
 
-    final signedResponse = await _joseService.decrypt(
-      compact: responseEnvelope,
-      recipientPrivateKeyPair: material.agreementKeyPair,
-      expectedRecipientKeyId: currentDeviceId,
-      expectedSenderParty: serverKeys.agreementKeyId,
-      expectedRecipientParty: currentDeviceId,
-      expectedType: 'dailytalk-sync-response+jwe',
-    );
-    final payload = await _joseService.verify(
-      compact: utf8.decode(signedResponse),
-      publicKey: serverKeys.signingPublicKey,
-      expectedKeyId: serverKeys.signingKeyId,
-      expectedType: 'dailytalk-sync-response+jws',
-    );
-    final decoded = jsonDecode(utf8.decode(payload));
-    if (decoded is! Map) {
-      throw const FormatException('Resposta segura de sincronização inválida.');
-    }
-    final result = Map<String, dynamic>.from(decoded);
+        if (outerDecoded is Map) {
+          final outer = Map<String, dynamic>.from(outerDecoded);
+          final recoveryEnvelope = outer['envelope']?.toString();
 
-    if (result['batchId'] != batch['batchId'] ||
-        result['deviceId'] != currentDeviceId ||
-        result['sequence'] != batch['sequence']) {
-      throw const FormatException('Resposta segura não corresponde ao pedido.');
-    }
+          if (recoveryEnvelope != null && recoveryEnvelope.isNotEmpty) {
+            final signedRecovery = await _joseService.decrypt(
+              compact: recoveryEnvelope,
+              recipientPrivateKeyPair: material.agreementKeyPair,
+              expectedRecipientKeyId: currentDeviceId,
+              expectedSenderParty: serverKeys.agreementKeyId,
+              expectedRecipientParty: currentDeviceId,
+              expectedType: 'dailytalk-sync-response+jwe',
+            );
 
-    return result;
+            final recoveryPayload = await _joseService.verify(
+              compact: utf8.decode(signedRecovery),
+              publicKey: serverKeys.signingPublicKey,
+              expectedKeyId: serverKeys.signingKeyId,
+              expectedType: 'dailytalk-sync-response+jws',
+            );
+
+            final decodedRecovery = jsonDecode(utf8.decode(recoveryPayload));
+
+            if (decodedRecovery is! Map) {
+              throw const FormatException(
+                'Resposta segura de recuperação inválida.',
+              );
+            }
+
+            final recovery = Map<String, dynamic>.from(decodedRecovery);
+
+            if (recovery['batchId'] != batch['batchId'] ||
+                recovery['deviceId'] != currentDeviceId ||
+                recovery['sequence'] != batch['sequence']) {
+              throw const FormatException(
+                'Resposta segura de recuperação não corresponde ao pedido.',
+              );
+            }
+
+            if (recovery['errorCode'] == 'SYNC_SEQUENCE_REPEATED') {
+              final rawLastAccepted = recovery['lastAcceptedSequence'];
+              final lastAcceptedSequence = rawLastAccepted is int
+                  ? rawLastAccepted
+                  : int.tryParse(rawLastAccepted?.toString() ?? '');
+              final rejectedSequence = batch['sequence'] as int;
+
+              if (lastAcceptedSequence == null ||
+                  lastAcceptedSequence < rejectedSequence) {
+                throw const FormatException(
+                  'Contador de recuperação Secure Sync inválido.',
+                );
+              }
+
+              if (sequenceRecoveryAttempt >= 1) {
+                throw StateError(
+                  'A recuperação automática da sequência não convergiu.',
+                );
+              }
+
+              await _deviceKeyService.ensureSyncSequenceAtLeast(
+                lastAcceptedSequence,
+              );
+
+              sequenceRecoveryAttempt += 1;
+              continue;
+            }
+
+            throw Exception(
+              recovery['error']?.toString() ??
+                  'Conflito seguro de sincronização.',
+            );
+          }
+        }
+      }
+
+      final responseMap = _decodeResponse(response);
+      final responseEnvelope = responseMap['envelope']?.toString();
+      if (responseEnvelope == null || responseEnvelope.isEmpty) {
+        throw const FormatException(
+          'A API não devolveu o envelope de resposta.',
+        );
+      }
+
+      final signedResponse = await _joseService.decrypt(
+        compact: responseEnvelope,
+        recipientPrivateKeyPair: material.agreementKeyPair,
+        expectedRecipientKeyId: currentDeviceId,
+        expectedSenderParty: serverKeys.agreementKeyId,
+        expectedRecipientParty: currentDeviceId,
+        expectedType: 'dailytalk-sync-response+jwe',
+      );
+      final payload = await _joseService.verify(
+        compact: utf8.decode(signedResponse),
+        publicKey: serverKeys.signingPublicKey,
+        expectedKeyId: serverKeys.signingKeyId,
+        expectedType: 'dailytalk-sync-response+jws',
+      );
+      final decoded = jsonDecode(utf8.decode(payload));
+      if (decoded is! Map) {
+        throw const FormatException(
+          'Resposta segura de sincronização inválida.',
+        );
+      }
+      final result = Map<String, dynamic>.from(decoded);
+
+      if (result['batchId'] != batch['batchId'] ||
+          result['deviceId'] != currentDeviceId ||
+          result['sequence'] != batch['sequence']) {
+        throw const FormatException(
+          'Resposta segura não corresponde ao pedido.',
+        );
+      }
+
+      return result;
+    }
   }
 
   Future<_ServerSyncKeys> _loadServerKeys() async {

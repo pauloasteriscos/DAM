@@ -17,6 +17,7 @@ typedef _Handler =
       List<Map<String, dynamic>> items, {
       required bool pullLearningProgress,
       String? learningProgressCursor,
+      String? learningProgressPathId,
       required int learningProgressLimit,
     });
 
@@ -37,10 +38,17 @@ final class _FakeApiService extends DailyTalkApiService {
   }) {
     calls += 1;
 
+    if (pullLearningProgress &&
+        (learningProgressPathId == null ||
+            learningProgressPathId.trim().isEmpty)) {
+      throw StateError('learningProgressPathId ausente no startup/resume.');
+    }
+
     return handler(
       items,
       pullLearningProgress: pullLearningProgress,
       learningProgressCursor: learningProgressCursor,
+      learningProgressPathId: learningProgressPathId,
       learningProgressLimit: learningProgressLimit,
     );
   }
@@ -133,6 +141,7 @@ void main() {
         items, {
         required bool pullLearningProgress,
         String? learningProgressCursor,
+        String? learningProgressPathId,
         required int learningProgressLimit,
       }) async {
         // B não possui absolutamente nada para enviar.
@@ -253,6 +262,7 @@ void main() {
         items, {
         required bool pullLearningProgress,
         String? learningProgressCursor,
+        String? learningProgressPathId,
         required int learningProgressLimit,
       }) async {
         expect(items, isEmpty);

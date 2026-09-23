@@ -19,6 +19,7 @@ typedef _SyncHandler =
       List<Map<String, dynamic>> items, {
       required bool pullLearningProgress,
       String? learningProgressCursor,
+      String? learningProgressPathId,
       required int learningProgressLimit,
     });
 
@@ -39,10 +40,19 @@ final class _FakeApiService extends DailyTalkApiService {
   }) {
     calls += 1;
 
+    if (pullLearningProgress &&
+        (learningProgressPathId == null ||
+            learningProgressPathId.trim().isEmpty)) {
+      throw StateError(
+        'learningProgressPathId ausente num pull de reconciliação.',
+      );
+    }
+
     return handler(
       items,
       pullLearningProgress: pullLearningProgress,
       learningProgressCursor: learningProgressCursor,
+      learningProgressPathId: learningProgressPathId,
       learningProgressLimit: learningProgressLimit,
     );
   }
@@ -204,6 +214,7 @@ void main() {
       items, {
       required bool pullLearningProgress,
       String? learningProgressCursor,
+      String? learningProgressPathId,
       required int learningProgressLimit,
     }) async {
       expect(items, isEmpty);
@@ -263,6 +274,7 @@ void main() {
       items, {
       required bool pullLearningProgress,
       String? learningProgressCursor,
+      String? learningProgressPathId,
       required int learningProgressLimit,
     }) async {
       expect(items, hasLength(1));
@@ -324,6 +336,7 @@ void main() {
       items, {
       required bool pullLearningProgress,
       String? learningProgressCursor,
+      String? learningProgressPathId,
       required int learningProgressLimit,
     }) async {
       final item = items.single;
@@ -376,6 +389,7 @@ void main() {
       items, {
       required bool pullLearningProgress,
       String? learningProgressCursor,
+      String? learningProgressPathId,
       required int learningProgressLimit,
     }) async {
       final item = items.single;
@@ -435,6 +449,7 @@ void main() {
       items, {
       required bool pullLearningProgress,
       String? learningProgressCursor,
+      String? learningProgressPathId,
       required int learningProgressLimit,
     }) async {
       expect(pullLearningProgress, isTrue);
@@ -521,6 +536,7 @@ void main() {
         items, {
         required bool pullLearningProgress,
         String? learningProgressCursor,
+        String? learningProgressPathId,
         required int learningProgressLimit,
       }) async {
         final wrong = _resultFor(items.single);
@@ -597,6 +613,7 @@ void main() {
       items, {
       required bool pullLearningProgress,
       String? learningProgressCursor,
+      String? learningProgressPathId,
       required int learningProgressLimit,
     }) async {
       expect(items, isEmpty);

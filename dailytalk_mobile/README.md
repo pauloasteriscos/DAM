@@ -1,7 +1,7 @@
 # DailyTalk.pt Mobile
 
-**Versão atual:** 1.0.13+13
-**Estado:** desenvolvimento ativo, com arquitetura offline-first, sincronização segura, Learning Path orientado por dados e Quality Gate automatizado
+**Versão atual:** 1.1.0+14
+**Estado:** desenvolvimento ativo orientado a produção, com arquitetura offline-first, Secure Sync, Learning Path orientado por dados, convergência multi-dispositivo e Quality Gate automatizado
 
 O objetivo da aplicação é apoiar crianças e jovens em mobilidade escolar, normalmente entre os 11 e os 15 anos, na prática de comunicação em situações reais do quotidiano escolar, através de atividades gamificadas como vocabulário, áudio, diálogos, quizzes e desafios.
 
@@ -32,12 +32,12 @@ A aplicação já possui:
   - Estudante;
   - Anfitrião;
   - Professor;
-- estrutura SQLite local usando sqflite;
+- estrutura SQLite local usando sqflite, incluindo catálogo local, progresso, projeções, fila de sincronização e estado de reconciliação por percurso;
 - página de configuração e criação de atividade;
 - fluxo de submissão de respostas;
 - gravação local de atividades, submissões e resultados;
 - página de resultados com histórico de pontuações e estado de sincronização;
-- estrutura inicial de sincronização de submissões pendentes;
+- sincronização persistente de progresso e submissões, com suporte offline-first, retry e reconciliação automática;
 - atualização automática da área de resultados após submissões ou sincronizações;
 - integração com backend real em Cloudflare Workers;
 - persistência remota em Cloudflare D1;
@@ -51,7 +51,7 @@ A aplicação já possui:
 - validação de sessão contra a API;
 - preferências associadas ao utilizador autenticado;
 - submissões associadas ao utilizador autenticado;
-- possibilidade de testar escrita em mobile e leitura na Web, e vice-versa;
+- convergência de progresso entre dispositivos autenticados na mesma conta, incluindo alterações realizadas offline em clientes diferentes;
 - recuperação de palavra-passe em modo protótipo/debug;
 - reformulação visual dos ecrãs de entrada, criação de conta, recuperação de palavra-passe, seleção de idioma, configuração de atividade, atividade/desafio, resultados/análises, conta, ajustes e notas privadas;
 - aplicação da identidade visual escura/azul do DailyTalk.pt aos novos ecrãs de atividade;
@@ -65,6 +65,33 @@ A aplicação já possui:
 - correção do layout da Home gamificada em orientação horizontal;
 - bateria automatizada de testes em expansão, integrada nos gates de qualidade do projeto;
 - análise estática e builds multiplataforma usados como critérios de validação antes da promoção de alterações.
+
+---
+
+## Marco 1.1.0 — offline-first, Secure Sync e convergência multi-dispositivo
+
+A versão **1.1.0+14** marca a consolidação da arquitetura de progresso e sincronização do DailyTalk.pt como uma base orientada a produção. O progresso das atividades é persistido primeiro no dispositivo e a experiência de aprendizagem não fica dependente da disponibilidade imediata da rede.
+
+O estado atual inclui:
+
+- conclusão local imediata de atividades, incluindo funcionamento offline;
+- fila persistente de sincronização com retry e backoff;
+- desbloqueio e progressão local sem bloquear a experiência à espera da rede;
+- reconciliação automática quando a conectividade volta a estar disponível;
+- progresso e cursores de sincronização isolados por Learning Path;
+- convergência entre múltiplos dispositivos autenticados na mesma conta;
+- união dos factos de progresso sem perda de conclusões realizadas offline em dispositivos diferentes;
+- idempotência baseada em identificadores de conclusão do cliente, distinguindo retry de uma nova tentativa legítima da mesma atividade;
+- indicação reativa do estado de sincronização na Home, sem polling;
+- recuperação segura de divergência do contador monotónico de sincronização;
+- proteção do Secure Sync através de DPoP, JWS com Ed25519, JWE com X25519 + AES-256-GCM e TLS;
+- respostas de recuperação de sequence drift protegidas pelo mesmo envelope criptográfico do protocolo;
+- harness de segurança isolado do `.dev.vars` normal do programador, com segredos efémeros próprios de teste e D1 local isolado;
+- validação real de cenário offline → online e de convergência entre dois dispositivos;
+- suite Flutter com **399 testes automatizados** no gate deste marco;
+- suite local da API com **35 testes de integração**, **32 testes de segurança** e **9 testes de migrations** no gate deste marco.
+
+Este marco representa uma mudança importante face ao protótipo académico inicial: a sincronização deixou de ser apenas uma funcionalidade complementar e passou a constituir uma camada explícita de consistência, segurança e continuidade da experiência entre dispositivos e períodos de conectividade instável.
 
 ---
 
@@ -249,7 +276,7 @@ A arquitetura atual contempla:
 - autenticação com JWT;
 - armazenamento seguro do token na aplicação;
 - sincronização de preferências e submissões;
-- utilização de SQLite local para cache, histórico e suporte offline básico.
+- utilização de SQLite local como fonte operacional imediata para catálogo, progresso, projeções e outbox offline-first.
 
 O backend disponibiliza endpoints para:
 
@@ -275,6 +302,14 @@ Exemplo de fluxo suportado:
 Em modo teste, a aplicação não tenta sincronizar dados que dependam de autenticação. As preferências podem ser alteradas localmente para permitir a experimentação, mas submissões, resultados persistentes e análises personalizadas ficam associados apenas a uma sessão autenticada.
 
 ---
+
+### Estado atual da sincronização de progresso
+
+A evolução pós-Sprint 4 substituiu a sincronização meramente auxiliar por um fluxo offline-first explícito. A conclusão de uma atividade é persistida localmente antes de qualquer dependência da rede, atualiza imediatamente a projeção de progresso e pode permanecer pendente na outbox até que a API volte a estar disponível.
+
+O Secure Sync utiliza um lote autenticado e protegido ponta a ponta no nível da aplicação. A sessão é vinculada ao dispositivo através de DPoP; o conteúdo de sincronização é assinado com Ed25519, cifrado através de X25519 + AES-256-GCM e transportado sobre TLS. O servidor aplica idempotência, validação monotónica de sequence e isolamento de pull por `learningPathId`.
+
+A reconciliação suporta múltiplos dispositivos. Cada dispositivo mantém identidade e contador próprios, enquanto os factos de conclusão aceites no servidor podem ser posteriormente obtidos pelos outros dispositivos. Desta forma, percursos realizados offline em clientes diferentes convergem para a união dos factos válidos sem exigir que um dispositivo escolha ou sobrescreva o estado do outro.
 
 ## Controlo de utilizador e segurança
 
@@ -314,6 +349,14 @@ Este ponto de controlo de utilizador deverá receber atenção especial quando o
 - gestão de permissões por perfil.
 
 ---
+
+### Reforço de segurança pós-protótipo
+
+A camada atual de segurança já não se limita ao JWT inicial das sprints académicas. As sessões de dispositivo utilizam DPoP para vincular o token à chave do cliente e reduzir o risco de reutilização de tokens roubados. O Secure Sync acrescenta assinatura e cifra do payload com Ed25519, X25519 e AES-256-GCM.
+
+O protocolo rejeita replay de provas DPoP, métodos ou URLs inconsistentes, `ath` incorreto, assinatura por chave diferente, JWE adulterado, reutilização incompatível de `batchId`, conflito de `clientCompletionId` e sequences repetidas. Quando existe sequence drift legítimo, o servidor devolve os metadados de recuperação dentro de uma resposta novamente assinada e cifrada; o cliente só atualiza o contador após validar o envelope, a assinatura e o binding ao batch, dispositivo e sequence rejeitados.
+
+O harness de integração de segurança utiliza ambiente Wrangler dedicado, segredos efémeros e D1 local isolado. Os testes não necessitam de renomear, substituir ou reutilizar o `.dev.vars` normal do ambiente de desenvolvimento.
 
 ## Recuperação de palavra-passe
 
@@ -744,13 +787,13 @@ A base local foi pensada para suportar:
 
 - cache de atividades;
 - armazenamento de submissões pendentes;
-- funcionamento offline básico;
-- sincronização posterior;
+- funcionamento offline-first para progresso e conteúdo já disponível localmente;
+- outbox persistente e sincronização posterior com retry/backoff;
 - histórico de resultados;
 - dados analíticos;
 - configurações locais da app;
 - preferências locais;
-- apoio à navegação offline.
+- projeções de progresso e cursores de reconciliação independentes por Learning Path.
 
 As principais áreas de dados previstas são:
 
@@ -775,7 +818,11 @@ A base remota suporta:
 - utilizadores;
 - preferências de utilizador;
 - submissões de atividades;
-- tokens de recuperação de palavra-passe.
+- tokens de recuperação de palavra-passe;
+- dispositivos e sessões vinculadas;
+- factos de conclusão de atividades;
+- feed monotónico de progresso por percurso;
+- metadados necessários à idempotência e à reconciliação multi-dispositivo.
 
 A base remota não substitui totalmente o SQLite local. A estratégia adotada é híbrida:
 
@@ -917,7 +964,7 @@ A entrega académica da Sprint 4 foi identificada como `1.0.0+1` e preservada at
 A versão atual desta linha de desenvolvimento é:
 
 ```yaml
-version: 1.0.13+13
+version: 1.1.0+14
 ```
 
 As tags continuam a ser utilizadas para preservar pontos estáveis e reproduzíveis da evolução do projeto. Uma nova tag só deve ser criada depois de concluídos os gates de qualidade e da promoção deliberada das alterações para o repositório.
@@ -954,7 +1001,7 @@ As próximas etapas do projeto poderão incluir:
 - autenticação real com Conta Google ou outro serviço externo;
 - verificação de email;
 - abertura da atividade em WebView;
-- melhoria da sincronização offline-first;
+- otimização de eficiência dos ciclos automáticos de reconciliação e sincronização;
 - criação de atividades pela comunidade;
 - sistema de likes;
 - ranking de atividades;
@@ -966,7 +1013,7 @@ As próximas etapas do projeto poderão incluir:
 - reforço da documentação técnica e de utilização;
 - validação final dos ecrãs gamificados em Android e Web;
 - reforço das atividades de áudio e desafio final;
-- persistência detalhada de progresso por atividade;
+- expansão das métricas pedagógicas derivadas do progresso já persistido por atividade;
 - revisão final de acessibilidade visual, contraste e tamanhos de toque.
 
 ---
@@ -1110,6 +1157,25 @@ O objetivo desta política não é atualizar automaticamente todas as dependênc
 Para um produto ainda no início do seu ciclo de vida, esta abordagem permite continuar o desenvolvimento sobre uma base atualizada e controlada, evitando transportar desnecessariamente dívida técnica para as fases seguintes.
 
 * * *
+
+## Gate técnico do marco 1.1.0
+
+Antes da promoção desta versão, a base DEV foi validada com:
+
+```text
+Flutter analyze                     sem problemas
+Flutter test                        399/399
+Flutter Web profile build           concluído
+API integration                     35/35
+Security DPoP/JWS/JWE               32/32
+D1 migrations                       9/9
+Offline → online E2E                validado
+Convergência multi-dispositivo      validada
+Artefactos efémeros de segurança    removidos após o teste
+D1 remoto                           não alterado durante os gates
+```
+
+A promoção para o repositório deve continuar a seguir a política de cópia seletiva DEV → GIT, staging explícito dos ficheiros pretendidos e validação do CI antes da criação de uma tag estável.
 
 ## Observações
 

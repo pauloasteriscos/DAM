@@ -165,3 +165,6 @@ dist
 .env*
 !.env.example
 .wrangler/
+
+# generated local security harness config
+wrangler.security.test.generated.jsonc

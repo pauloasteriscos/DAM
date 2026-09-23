@@ -28,6 +28,12 @@ final class _FakeApiService extends DailyTalkApiService {
     int learningProgressLimit = 50,
   }) {
     calls += 1;
+    if (pullLearningProgress ||
+        learningProgressCursor != null ||
+        learningProgressPathId != null) {
+      throw StateError('Outbox push-only recebeu parâmetros de pull.');
+    }
+
     return handler(items);
   }
 }

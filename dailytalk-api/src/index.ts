@@ -1366,8 +1366,38 @@ app.post(
 
       if (!existingBatch) {
         if (batch.sequence <= Number(device.last_sequence ?? 0)) {
+          const recoveryPayload = utf8(
+            JSON.stringify({
+              version: 1,
+              batchId: batch.batchId,
+              deviceId,
+              sequence: batch.sequence,
+              processedAt: new Date().toISOString(),
+              results: [],
+              error: "Sequência de sincronização repetida",
+              errorCode: "SYNC_SEQUENCE_REPEATED",
+              lastAcceptedSequence: Number(device.last_sequence ?? 0),
+            }),
+          );
+
+          const signedRecovery = await signCompactJws({
+            payload: recoveryPayload,
+            privateJwk: serverSigningPrivate,
+            keyId: serverSigningKeyId,
+            type: "dailytalk-sync-response+jws",
+          });
+
+          const recoveryEnvelope = await encryptCompactJwe({
+            plaintext: utf8(signedRecovery),
+            recipientPublicJwk: deviceAgreementPublic,
+            recipientKeyId: deviceId,
+            senderParty: serverAgreementKeyId,
+            recipientParty: deviceId,
+            type: "dailytalk-sync-response+jwe",
+          });
+
           return c.json(
-            { error: "Sequência de sincronização repetida" },
+            { success: false, envelope: recoveryEnvelope },
             409,
           );
         }
