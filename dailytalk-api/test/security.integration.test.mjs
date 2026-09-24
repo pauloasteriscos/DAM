@@ -546,6 +546,18 @@ async function writeSecurityConfig() {
   const serverSigning = await generateOkpPair("Ed25519");
   const serverAgreement = await generateOkpPair("X25519");
 
+  // Regression PRD 2026-09-24:
+  // reproduce Ed25519 JWK metadata that previously broke Web Crypto import.
+  // The Worker must normalize the JWK before crypto.subtle.importKey().
+  serverSigning.publicJwk = {
+    ...serverSigning.publicJwk,
+    alg: "Ed25519",
+  };
+  serverSigning.privateJwk = {
+    ...serverSigning.privateJwk,
+    alg: "Ed25519",
+  };
+
   serverKeys = {
     signing: serverSigning,
     agreement: serverAgreement,
@@ -1117,6 +1129,7 @@ test(
       assert.equal(payload.signingKey.kid, SERVER_SIGNING_KID);
       assert.equal(payload.signingKey.crv, "Ed25519");
       assert.equal(payload.signingKey.d, undefined);
+      assert.equal(payload.signingKey.alg, undefined);
       assert.equal(payload.agreementKey.kid, SERVER_AGREEMENT_KID);
       assert.equal(payload.agreementKey.crv, "X25519");
       assert.equal(payload.agreementKey.d, undefined);
