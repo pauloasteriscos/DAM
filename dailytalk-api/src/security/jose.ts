@@ -79,7 +79,29 @@ export function parseOkpJwk(
     throw new Error(`A JWK pública ${expectedCurve} não pode conter 'd'`);
   }
 
-  return parsed as OkpPublicJwk | OkpPrivateJwk;
+  const normalized: OkpPublicJwk = {
+    kty: "OKP",
+    crv: expectedCurve,
+    x: parsed.x,
+  };
+
+  const parsedWithKid = parsed as JsonWebKey & { kid?: unknown };
+
+  if (
+    typeof parsedWithKid.kid === "string" &&
+    parsedWithKid.kid.trim().length > 0
+  ) {
+    normalized.kid = parsedWithKid.kid;
+  }
+
+  if (!requirePrivate) {
+    return normalized;
+  }
+
+  return {
+    ...normalized,
+    d: parsed.d as string,
+  };
 }
 
 export function publicOnlyJwk(jwk: OkpPublicJwk | OkpPrivateJwk): OkpPublicJwk {
