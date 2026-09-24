@@ -44,7 +44,29 @@ final class _LearningVocabularyRuntimePageState
   final Set<String> _matchedIds = <String>{};
 
   late final List<VocabularyExecutionItem> _leftItems;
-  late final List<VocabularyExecutionItem> _rightItems;
+  late final Map<String, VocabularyExecutionItem> _itemById;
+
+  /// Fixed visual slots. The board shows the maximum number of pairs that
+  /// fits without scrolling, with a pedagogical minimum of 3 and maximum of 6.
+  final List<VocabularyExecutionItem?> _leftSlots =
+      List<VocabularyExecutionItem?>.filled(6, null, growable: false);
+  final List<VocabularyExecutionItem?> _rightSlots =
+      List<VocabularyExecutionItem?>.filled(6, null, growable: false);
+
+  /// Activity items that have not yet entered the visible board.
+  final List<String> _pendingIds = <String>[];
+
+  /// Correct slots waiting for batch replacement. Two correct pairs free four
+  /// cards; only those slots are reused and shuffled. Unmatched cards never
+  /// move.
+  final Set<int> _matchedLeftSlotIndexes = <int>{};
+  final Set<int> _matchedRightSlotIndexes = <int>{};
+
+  /// IDs currently fading out before their slots receive new content.
+  final Set<String> _fadingIds = <String>{};
+
+  /// Newly inserted IDs start transparent and then fade in.
+  final Set<String> _enteringIds = <String>{};
 
   String? _selectedLeftId;
   String? _selectedRightId;
@@ -52,6 +74,12 @@ final class _LearningVocabularyRuntimePageState
   String? _wrongRightId;
   int _attempts = 0;
   bool _persistingCompletion = false;
+  bool _isResolvingSelection = false;
+
+  int _visiblePairCapacity = 0;
+  int? _scheduledPairCapacity;
+
+  final Random _random = Random();
 
   bool get _finished =>
       _leftItems.isNotEmpty && _matchedIds.length == _leftItems.length;
@@ -60,12 +88,191 @@ final class _LearningVocabularyRuntimePageState
   void initState() {
     super.initState();
     _leftItems = List<VocabularyExecutionItem>.of(widget.execution.items);
-    _rightItems = List<VocabularyExecutionItem>.of(widget.execution.items)
-      ..shuffle(Random());
+    _itemById = <String, VocabularyExecutionItem>{
+      for (final item in _leftItems) item.id: item,
+    };
+    _pendingIds.addAll(_leftItems.map((item) => item.id));
+
+    // Populate authored content on the first frame too. LayoutBuilder may
+    // still reduce the capacity to the best 3..6 value before interaction.
+    _buildBoardForCapacity(6);
+  }
+
+  int _calculateVisiblePairCapacity(double availableHeight) {
+    const double preferredCardHeight = 72;
+    const double verticalGap = 10;
+
+    final calculated =
+        ((availableHeight + verticalGap) / (preferredCardHeight + verticalGap))
+            .floor();
+
+    if (calculated < 3) {
+      return 3;
+    }
+    if (calculated > 6) {
+      return 6;
+    }
+    return calculated;
+  }
+
+  void _schedulePairCapacityUpdate(int capacity) {
+    if (capacity == _visiblePairCapacity ||
+        capacity == _scheduledPairCapacity) {
+      return;
+    }
+
+    // Once the user starts the round, keep every unmatched card spatially
+    // stable. A new capacity can be chosen before the first attempt/reset.
+    if (_visiblePairCapacity != 0 &&
+        (_attempts > 0 || _matchedIds.isNotEmpty)) {
+      return;
+    }
+
+    _scheduledPairCapacity = capacity;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      final nextCapacity = _scheduledPairCapacity;
+      _scheduledPairCapacity = null;
+
+      if (nextCapacity == null || nextCapacity == _visiblePairCapacity) {
+        return;
+      }
+
+      setState(() {
+        _buildBoardForCapacity(nextCapacity);
+      });
+    });
+  }
+
+  void _buildBoardForCapacity(int capacity) {
+    _leftSlots.fillRange(0, _leftSlots.length, null);
+    _rightSlots.fillRange(0, _rightSlots.length, null);
+    _matchedLeftSlotIndexes.clear();
+    _matchedRightSlotIndexes.clear();
+
+    final availableIds = _leftItems
+        .where((item) => !_matchedIds.contains(item.id))
+        .map((item) => item.id)
+        .toList();
+
+    final visibleIds = availableIds.take(capacity).toList();
+
+    _pendingIds
+      ..clear()
+      ..addAll(availableIds.skip(visibleIds.length));
+
+    for (var index = 0; index < visibleIds.length; index++) {
+      _leftSlots[index] = _itemById[visibleIds[index]];
+    }
+
+    final shuffledRightIds = List<String>.from(visibleIds)..shuffle(_random);
+    for (var index = 0; index < shuffledRightIds.length; index++) {
+      _rightSlots[index] = _itemById[shuffledRightIds[index]];
+    }
+
+    _visiblePairCapacity = capacity;
+  }
+
+  Future<void> _animateAndRefillMatchedSlots() async {
+    final waitingIds = <String>[];
+
+    for (final leftIndex in _matchedLeftSlotIndexes) {
+      final item = _leftSlots[leftIndex];
+      if (item == null) {
+        continue;
+      }
+
+      final hasMatchingRightSlot = _matchedRightSlotIndexes.any(
+        (rightIndex) => _rightSlots[rightIndex]?.id == item.id,
+      );
+
+      if (hasMatchingRightSlot) {
+        waitingIds.add(item.id);
+      }
+    }
+
+    if (waitingIds.length < 2 || _pendingIds.isEmpty) {
+      return;
+    }
+
+    waitingIds.shuffle(_random);
+
+    final replaceCount = min(waitingIds.length, _pendingIds.length);
+    final replaceIds = waitingIds.take(replaceCount).toList(growable: false);
+
+    // First make only the cards that will actually be replaced fade out.
+    setState(() {
+      _fadingIds.addAll(replaceIds);
+    });
+
+    await Future<void>.delayed(const Duration(milliseconds: 240));
+    if (!mounted) {
+      return;
+    }
+
+    final leftIndexes = <int>[];
+    final rightIndexes = <int>[];
+
+    for (final id in replaceIds) {
+      final leftIndex = _leftSlots.indexWhere((item) => item?.id == id);
+      final rightIndex = _rightSlots.indexWhere((item) => item?.id == id);
+
+      if (leftIndex >= 0 && rightIndex >= 0) {
+        leftIndexes.add(leftIndex);
+        rightIndexes.add(rightIndex);
+      }
+    }
+
+    final actualReplacementCount = min(leftIndexes.length, rightIndexes.length);
+
+    if (actualReplacementCount == 0) {
+      setState(() {
+        _fadingIds.removeAll(replaceIds);
+      });
+      return;
+    }
+
+    final nextIds = <String>[];
+    for (var index = 0; index < actualReplacementCount; index++) {
+      final pendingIndex = _random.nextInt(_pendingIds.length);
+      nextIds.add(_pendingIds.removeAt(pendingIndex));
+    }
+
+    final leftIds = List<String>.from(nextIds)..shuffle(_random);
+    final rightIds = List<String>.from(nextIds)..shuffle(_random);
+
+    setState(() {
+      for (var index = 0; index < actualReplacementCount; index++) {
+        _leftSlots[leftIndexes[index]] = _itemById[leftIds[index]];
+        _rightSlots[rightIndexes[index]] = _itemById[rightIds[index]];
+
+        _matchedLeftSlotIndexes.remove(leftIndexes[index]);
+        _matchedRightSlotIndexes.remove(rightIndexes[index]);
+      }
+
+      _fadingIds.removeAll(replaceIds);
+      _enteringIds.addAll(nextIds);
+    });
+
+    // Give Flutter one frame with the new cards at opacity zero, then fade in.
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _enteringIds.removeAll(nextIds);
+    });
+
+    await Future<void>.delayed(const Duration(milliseconds: 220));
   }
 
   void _select(VocabularyExecutionItem item, {required bool left}) {
-    if (_matchedIds.contains(item.id) || _finished) {
+    if (_isResolvingSelection || _matchedIds.contains(item.id) || _finished) {
       return;
     }
 
@@ -80,14 +287,27 @@ final class _LearningVocabularyRuntimePageState
     });
 
     if (_selectedLeftId != null && _selectedRightId != null) {
-      _evaluateSelection();
+      unawaited(_evaluateSelection());
     }
   }
 
   Future<void> _evaluateSelection() async {
+    if (_isResolvingSelection) {
+      return;
+    }
+
     final leftId = _selectedLeftId;
     final rightId = _selectedRightId;
     if (leftId == null || rightId == null) {
+      return;
+    }
+
+    final leftSlotIndex = _leftSlots.indexWhere((item) => item?.id == leftId);
+    final rightSlotIndex = _rightSlots.indexWhere(
+      (item) => item?.id == rightId,
+    );
+
+    if (leftSlotIndex < 0 || rightSlotIndex < 0) {
       return;
     }
 
@@ -95,8 +315,35 @@ final class _LearningVocabularyRuntimePageState
       setState(() {
         _attempts++;
         _matchedIds.add(leftId);
+        _matchedLeftSlotIndexes.add(leftSlotIndex);
+        _matchedRightSlotIndexes.add(rightSlotIndex);
         _selectedLeftId = null;
         _selectedRightId = null;
+        _wrongLeftId = null;
+        _wrongRightId = null;
+        _isResolvingSelection = true;
+      });
+
+      // Keep the successful association visible long enough to be perceived.
+      await Future<void>.delayed(const Duration(milliseconds: 380));
+      if (!mounted) {
+        return;
+      }
+
+      final hasTwoMatchedPairs =
+          _matchedLeftSlotIndexes.length >= 2 &&
+          _matchedRightSlotIndexes.length >= 2;
+
+      if (hasTwoMatchedPairs && _pendingIds.isNotEmpty) {
+        await _animateAndRefillMatchedSlots();
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isResolvingSelection = false;
       });
       return;
     }
@@ -105,6 +352,7 @@ final class _LearningVocabularyRuntimePageState
       _attempts++;
       _wrongLeftId = leftId;
       _wrongRightId = rightId;
+      _isResolvingSelection = true;
     });
 
     await Future<void>.delayed(const Duration(milliseconds: 520));
@@ -117,18 +365,33 @@ final class _LearningVocabularyRuntimePageState
       _selectedRightId = null;
       _wrongLeftId = null;
       _wrongRightId = null;
+      _isResolvingSelection = false;
     });
   }
 
   void _reset() {
     setState(() {
       _matchedIds.clear();
+      _matchedLeftSlotIndexes.clear();
+      _matchedRightSlotIndexes.clear();
+      _fadingIds.clear();
+      _enteringIds.clear();
       _selectedLeftId = null;
       _selectedRightId = null;
       _wrongLeftId = null;
       _wrongRightId = null;
       _attempts = 0;
-      _rightItems.shuffle(Random());
+      _isResolvingSelection = false;
+
+      if (_visiblePairCapacity > 0) {
+        _buildBoardForCapacity(_visiblePairCapacity);
+      } else {
+        _leftSlots.fillRange(0, _leftSlots.length, null);
+        _rightSlots.fillRange(0, _rightSlots.length, null);
+        _pendingIds
+          ..clear()
+          ..addAll(_leftItems.map((item) => item.id));
+      }
     });
   }
 
@@ -201,6 +464,7 @@ final class _LearningVocabularyRuntimePageState
             final copy = _copyFor(appLanguage);
             final total = _leftItems.length;
             final completed = _matchedIds.length;
+            final displayFinished = _finished;
 
             return Scaffold(
               backgroundColor: const Color(0xFFF4F8FB),
@@ -232,25 +496,41 @@ final class _LearningVocabularyRuntimePageState
                           ),
                           const SizedBox(height: 14),
                           Expanded(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Expanded(
-                                  child: _buildColumn(
-                                    items: _leftItems,
-                                    languageCode: appLanguage,
-                                    left: true,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: _buildColumn(
-                                    items: _rightItems,
-                                    languageCode: learningLanguage,
-                                    left: false,
-                                  ),
-                                ),
-                              ],
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final calculatedCapacity =
+                                    _calculateVisiblePairCapacity(
+                                      constraints.maxHeight,
+                                    );
+                                _schedulePairCapacityUpdate(calculatedCapacity);
+
+                                final visibleCount = _visiblePairCapacity == 0
+                                    ? calculatedCapacity
+                                    : _visiblePairCapacity;
+
+                                return Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: _buildColumn(
+                                        items: _leftSlots,
+                                        visibleCount: visibleCount,
+                                        languageCode: appLanguage,
+                                        left: true,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: _buildColumn(
+                                        items: _rightSlots,
+                                        visibleCount: visibleCount,
+                                        languageCode: learningLanguage,
+                                        left: false,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -259,9 +539,10 @@ final class _LearningVocabularyRuntimePageState
                             completed: completed,
                             total: total,
                             attempts: _attempts,
-                            finished: _finished,
+                            finished: displayFinished,
                             onReset: _reset,
-                            onComplete: _persistingCompletion
+                            onComplete:
+                                _persistingCompletion || _isResolvingSelection
                                 ? null
                                 : () => unawaited(_openCompletion(copy)),
                           ),
@@ -279,34 +560,56 @@ final class _LearningVocabularyRuntimePageState
   }
 
   Widget _buildColumn({
-    required List<VocabularyExecutionItem> items,
+    required List<VocabularyExecutionItem?> items,
+    required int visibleCount,
     required String languageCode,
     required bool left,
   }) {
-    return ListView.separated(
+    final count = min(visibleCount, _leftItems.length);
+
+    return Column(
       key: ValueKey<String>(
         left ? 'mission-vocab-left' : 'mission-vocab-right',
       ),
-      itemCount: items.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return _PairCard(
-          key: ValueKey<String>(
-            'mission-vocab-${left ? 'left' : 'right'}-${item.id}',
+      children: <Widget>[
+        for (var index = 0; index < count; index++) ...<Widget>[
+          if (index > 0) const SizedBox(height: 10),
+          Expanded(
+            child: items[index] == null
+                ? const SizedBox.expand()
+                : AnimatedOpacity(
+                    duration: const Duration(milliseconds: 240),
+                    curve: Curves.easeOut,
+                    opacity:
+                        _fadingIds.contains(items[index]!.id) ||
+                            _enteringIds.contains(items[index]!.id)
+                        ? 0
+                        : _matchedIds.contains(items[index]!.id)
+                        ? 0.52
+                        : 1,
+                    child: SizedBox.expand(
+                      child: _PairCard(
+                        key: ValueKey<String>(
+                          'mission-vocab-${left ? 'left' : 'right'}-${items[index]!.id}',
+                        ),
+                        text: items[index]!.text.resolve(
+                          languageCode,
+                          fallbackLocale: widget.contentDefaultLocale,
+                        ),
+                        matched: _matchedIds.contains(items[index]!.id),
+                        selected: left
+                            ? _selectedLeftId == items[index]!.id
+                            : _selectedRightId == items[index]!.id,
+                        wrong: left
+                            ? _wrongLeftId == items[index]!.id
+                            : _wrongRightId == items[index]!.id,
+                        onTap: () => _select(items[index]!, left: left),
+                      ),
+                    ),
+                  ),
           ),
-          text: item.text.resolve(
-            languageCode,
-            fallbackLocale: widget.contentDefaultLocale,
-          ),
-          matched: _matchedIds.contains(item.id),
-          selected: left
-              ? _selectedLeftId == item.id
-              : _selectedRightId == item.id,
-          wrong: left ? _wrongLeftId == item.id : _wrongRightId == item.id,
-          onTap: () => _select(item, left: left),
-        );
-      },
+        ],
+      ],
     );
   }
 }

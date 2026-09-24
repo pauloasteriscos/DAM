@@ -45,7 +45,7 @@ void main() {
       await tester.tap(
         find.byKey(const ValueKey<String>('mission-vocab-right-hello')),
       );
-      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 450));
 
       await tester.tap(
         find.byKey(const ValueKey<String>('mission-vocab-left-thanks')),
@@ -53,7 +53,7 @@ void main() {
       await tester.tap(
         find.byKey(const ValueKey<String>('mission-vocab-right-thanks')),
       );
-      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 450));
 
       expect(find.text('Prática terminada'), findsOneWidget);
 

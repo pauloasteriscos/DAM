@@ -41,6 +41,8 @@ void main() {
         ),
       );
 
+      await tester.pump();
+
       expect(find.text('FONTE_47A2'), findsOneWidget);
       expect(find.text('ALVO_47A2'), findsOneWidget);
     },

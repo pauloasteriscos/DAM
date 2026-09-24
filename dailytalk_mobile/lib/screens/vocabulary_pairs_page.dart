@@ -54,6 +54,28 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
   late List<_VocabularyPairCard> _leftCards;
   late List<_VocabularyPairCard> _rightCards;
 
+  late Map<String, _VocabularyPairCard> _leftCardById;
+  late Map<String, _VocabularyPairCard> _rightCardById;
+
+  /// Slots visiveis do tabuleiro.
+  ///
+  /// A capacidade e calculada pela altura util e fica entre 3 e 6 pares.
+  final List<_VocabularyPairCard?> _leftSlots =
+      List<_VocabularyPairCard?>.filled(6, null, growable: false);
+
+  final List<_VocabularyPairCard?> _rightSlots =
+      List<_VocabularyPairCard?>.filled(6, null, growable: false);
+
+  /// IDs da ronda que ainda nao foram apresentados no tabuleiro.
+  final List<String> _pendingIds = <String>[];
+
+  /// Slots acertados que aguardam a reposicao em lote.
+  ///
+  /// Dois pares acertados = quatro cards. Apenas estes slots sao reutilizados;
+  /// todos os cards nao acertados permanecem exatamente na mesma posicao.
+  final Set<int> _matchedLeftSlotIndexes = <int>{};
+  final Set<int> _matchedRightSlotIndexes = <int>{};
+
   final Set<String> _matchedIds = <String>{};
 
   _VocabularyPairCard? _selectedLeft;
@@ -64,6 +86,13 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
 
   int _attempts = 0;
   String _feedbackKey = 'choosePairs';
+
+  int _visiblePairCapacity = 0;
+  int? _scheduledPairCapacity;
+
+  bool _isResolvingSelection = false;
+
+  final Random _random = Random();
 
   bool get _isCompleted =>
       _leftCards.isNotEmpty && _matchedIds.length == _leftCards.length;
@@ -220,6 +249,28 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
             ..shuffle(Random());
     }
 
+    _leftCardById = <String, _VocabularyPairCard>{
+      for (final card in _leftCards) card.id: card,
+    };
+
+    _rightCardById = <String, _VocabularyPairCard>{
+      for (final card in _rightCards) card.id: card,
+    };
+
+    _leftSlots.fillRange(0, _leftSlots.length, null);
+    _rightSlots.fillRange(0, _rightSlots.length, null);
+
+    _pendingIds
+      ..clear()
+      ..addAll(_leftCards.map((card) => card.id));
+
+    _matchedLeftSlotIndexes.clear();
+    _matchedRightSlotIndexes.clear();
+
+    _visiblePairCapacity = 0;
+    _scheduledPairCapacity = null;
+    _isResolvingSelection = false;
+
     _matchedIds.clear();
     _selectedLeft = null;
     _selectedRight = null;
@@ -230,7 +281,136 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
   }
 
   /// Trata a seleção de um cartão da esquerda ou da direita.
+  /// Calcula o maior numero de pares que cabe sem scroll.
+  ///
+  /// Mantemos os limites pedagogicos acordados: minimo 3, maximo 6.
+  int _calculateVisiblePairCapacity(double availableHeight) {
+    const double preferredCardHeight = 74;
+    const double verticalGap = 10;
+
+    final int calculated =
+        ((availableHeight + verticalGap) / (preferredCardHeight + verticalGap))
+            .floor();
+
+    return calculated.clamp(3, 6);
+  }
+
+  /// Agenda a configuracao do tabuleiro depois de conhecermos a altura real.
+  ///
+  /// Depois de a ronda comecar, a capacidade fica estavel para impedir que
+  /// cards nao acertados mudem de posicao.
+  void _schedulePairCapacityUpdate(int capacity) {
+    if (capacity == _visiblePairCapacity ||
+        capacity == _scheduledPairCapacity) {
+      return;
+    }
+
+    if (_visiblePairCapacity != 0 &&
+        (_attempts > 0 || _matchedIds.isNotEmpty)) {
+      return;
+    }
+
+    _scheduledPairCapacity = capacity;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      final int? nextCapacity = _scheduledPairCapacity;
+      _scheduledPairCapacity = null;
+
+      if (nextCapacity == null || nextCapacity == _visiblePairCapacity) {
+        return;
+      }
+
+      setState(() {
+        _buildBoardForCapacity(nextCapacity);
+      });
+    });
+  }
+
+  /// Monta o conjunto inicial visivel.
+  ///
+  /// Os mesmos IDs ficam disponiveis nos dois lados, mas a coluna direita e
+  /// embaralhada independentemente.
+  void _buildBoardForCapacity(int capacity) {
+    _leftSlots.fillRange(0, _leftSlots.length, null);
+    _rightSlots.fillRange(0, _rightSlots.length, null);
+
+    final List<String> availableIds = _leftCards
+        .where((card) => !_matchedIds.contains(card.id))
+        .map((card) => card.id)
+        .toList();
+
+    final List<String> visibleIds = availableIds.take(capacity).toList();
+
+    _pendingIds
+      ..clear()
+      ..addAll(availableIds.skip(visibleIds.length));
+
+    for (int index = 0; index < visibleIds.length; index++) {
+      _leftSlots[index] = _leftCardById[visibleIds[index]];
+    }
+
+    final List<String> shuffledRightIds = List<String>.from(visibleIds)
+      ..shuffle(_random);
+
+    for (int index = 0; index < shuffledRightIds.length; index++) {
+      _rightSlots[index] = _rightCardById[shuffledRightIds[index]];
+    }
+
+    _visiblePairCapacity = capacity;
+  }
+
+  /// Reutiliza apenas os slots libertados pelos pares acertados.
+  ///
+  /// A reposicao ocorre em lote quando existem pelo menos dois pares
+  /// acertados (quatro cards). Os novos cards sao embaralhados apenas entre
+  /// esses slots. Os restantes permanecem fixos.
+  void _refillMatchedSlots() {
+    final List<int> leftIndexes = _matchedLeftSlotIndexes.toList()
+      ..shuffle(_random);
+    final List<int> rightIndexes = _matchedRightSlotIndexes.toList()
+      ..shuffle(_random);
+
+    for (final int index in leftIndexes) {
+      _leftSlots[index] = null;
+    }
+
+    for (final int index in rightIndexes) {
+      _rightSlots[index] = null;
+    }
+
+    final int freePairs = min(leftIndexes.length, rightIndexes.length);
+    final int refillCount = min(freePairs, _pendingIds.length);
+
+    if (refillCount > 0) {
+      final List<String> nextIds = <String>[];
+
+      for (int i = 0; i < refillCount; i++) {
+        final int pendingIndex = _random.nextInt(_pendingIds.length);
+        nextIds.add(_pendingIds.removeAt(pendingIndex));
+      }
+
+      final List<String> leftIds = List<String>.from(nextIds)..shuffle(_random);
+      final List<String> rightIds = List<String>.from(nextIds)
+        ..shuffle(_random);
+
+      for (int i = 0; i < refillCount; i++) {
+        _leftSlots[leftIndexes[i]] = _leftCardById[leftIds[i]];
+        _rightSlots[rightIndexes[i]] = _rightCardById[rightIds[i]];
+      }
+    }
+
+    _matchedLeftSlotIndexes.clear();
+    _matchedRightSlotIndexes.clear();
+  }
+
   void _selectCard(_VocabularyPairCard card, {required bool isLeft}) {
+    if (_isResolvingSelection) {
+      return;
+    }
     if (_matchedIds.contains(card.id)) {
       return;
     }
@@ -253,6 +433,10 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
 
   /// Valida se os dois cartões selecionados pertencem ao mesmo par.
   Future<void> _checkCurrentSelection() async {
+    if (_isResolvingSelection) {
+      return;
+    }
+
     final _VocabularyPairCard? left = _selectedLeft;
     final _VocabularyPairCard? right = _selectedRight;
 
@@ -260,13 +444,52 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
       return;
     }
 
+    final int leftSlotIndex = _leftSlots.indexWhere(
+      (card) => card?.id == left.id,
+    );
+
+    final int rightSlotIndex = _rightSlots.indexWhere(
+      (card) => card?.id == right.id,
+    );
+
+    if (leftSlotIndex < 0 || rightSlotIndex < 0) {
+      return;
+    }
+
     if (left.id == right.id) {
       setState(() {
         _attempts++;
         _matchedIds.add(left.id);
+        _matchedLeftSlotIndexes.add(leftSlotIndex);
+        _matchedRightSlotIndexes.add(rightSlotIndex);
+        _feedbackKey = _isCompleted ? 'completed' : 'correct';
+        _isResolvingSelection = true;
+      });
+
+      // Mostra o estado verde/check antes de reutilizar os slots.
+      await Future<void>.delayed(const Duration(milliseconds: 350));
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        final bool hasTwoMatchedPairs =
+            _matchedLeftSlotIndexes.length >= 2 &&
+            _matchedRightSlotIndexes.length >= 2;
+
+        // Se ja nao houver novos cards, os acertados podem simplesmente sair.
+        // Caso contrario, esperamos dois pares para poder embaralhar quatro
+        // cards entre os slots libertados.
+        if (hasTwoMatchedPairs || _pendingIds.isEmpty) {
+          _refillMatchedSlots();
+        }
+
         _selectedLeft = null;
         _selectedRight = null;
-        _feedbackKey = _isCompleted ? 'completed' : 'correct';
+        _wrongLeftId = null;
+        _wrongRightId = null;
+        _isResolvingSelection = false;
       });
 
       return;
@@ -277,6 +500,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
       _wrongLeftId = left.id;
       _wrongRightId = right.id;
       _feedbackKey = 'tryAgain';
+      _isResolvingSelection = true;
     });
 
     await Future<void>.delayed(const Duration(milliseconds: 750));
@@ -290,6 +514,7 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
       _selectedRight = null;
       _wrongLeftId = null;
       _wrongRightId = null;
+      _isResolvingSelection = false;
     });
   }
 
@@ -496,23 +721,40 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
                   ),
                   const SizedBox(height: 12),
                   Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        _buildCardsColumn(
-                          title: _languageName(_userLanguageCode),
-                          subtitle: _ui('sourceColumn'),
-                          cards: _leftCards,
-                          isLeft: true,
-                        ),
-                        const SizedBox(width: 14),
-                        _buildCardsColumn(
-                          title: _languageName(_learningLanguageCode),
-                          subtitle: _ui('targetColumn'),
-                          cards: _rightCards,
-                          isLeft: false,
-                        ),
-                      ],
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final int calculatedCapacity =
+                            _calculateVisiblePairCapacity(
+                              constraints.maxHeight,
+                            );
+
+                        _schedulePairCapacityUpdate(calculatedCapacity);
+
+                        final int visibleCount = _visiblePairCapacity == 0
+                            ? calculatedCapacity
+                            : _visiblePairCapacity;
+
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            _buildCardsColumn(
+                              title: _languageName(_userLanguageCode),
+                              subtitle: _ui('sourceColumn'),
+                              cards: _leftSlots,
+                              visibleCount: visibleCount,
+                              isLeft: true,
+                            ),
+                            const SizedBox(width: 14),
+                            _buildCardsColumn(
+                              title: _languageName(_learningLanguageCode),
+                              subtitle: _ui('targetColumn'),
+                              cards: _rightSlots,
+                              visibleCount: visibleCount,
+                              isLeft: false,
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -563,24 +805,34 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
   Widget _buildCardsColumn({
     required String title,
     required String subtitle,
-    required List<_VocabularyPairCard> cards,
+    required List<_VocabularyPairCard?> cards,
+    required int visibleCount,
     required bool isLeft,
   }) {
+    final int count = min(visibleCount, cards.length);
+
     return Expanded(
       child: Semantics(
         label: '$subtitle: $title',
-        child: ListView.separated(
-          itemCount: cards.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 10),
-          itemBuilder: (context, index) {
-            return _buildPairCard(cards[index], isLeft: isLeft);
-          },
+        child: Column(
+          children: <Widget>[
+            for (int index = 0; index < count; index++) ...<Widget>[
+              if (index > 0) const SizedBox(height: 10),
+              Expanded(
+                child: cards[index] == null
+                    ? const SizedBox.expand()
+                    : SizedBox.expand(
+                        child: _buildPairCard(cards[index]!, isLeft: isLeft),
+                      ),
+              ),
+            ],
+          ],
         ),
       ),
     );
   }
 
-  /// Constrói cada cartão selecionável do jogo.
+  /// Constroi cada cartao selecionavel do jogo.
   Widget _buildPairCard(_VocabularyPairCard card, {required bool isLeft}) {
     final bool isMatched = _matchedIds.contains(card.id);
     final bool isSelected = isLeft
@@ -619,7 +871,9 @@ class _VocabularyPairsPageState extends State<VocabularyPairsPage> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: isMatched ? null : () => _selectCard(card, isLeft: isLeft),
+          onTap: isMatched || _isResolvingSelection
+              ? null
+              : () => _selectCard(card, isLeft: isLeft),
           borderRadius: BorderRadius.circular(20),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
