@@ -302,6 +302,186 @@ const arrivalReferenceV3PronunciationMetadata: OfficialAssetBlobMetadata = {
   immutable: true,
 };
 
+const studentDeDePhase1V7ManifestBase64 =
+  'ewogICJtYW5pZmVzdFZlcnNpb24iOiAxLAogICJwYXRoSWQiOiAic3R1ZGVudC5kZS1kZS5waGFzZTEiLAogICJwYWNrYWdlVmVyc2lvbiI6IDcsCiAgImFz' +
+  'c2V0cyI6IFtdCn0K';
+
+const studentDeDePhase1V7ManifestMetadata: OfficialAssetManifestMetadata = {
+  pathId: "student.de-de.phase1",
+  packageVersion: 7,
+  manifestVersion: 1,
+  sha256: "28ad8261128d514b66bf860efbd912cd347358367228664cbd530e263de547e0",
+  sizeBytes: 102,
+  contentType: "application/json",
+  downloadPath: "/api/content/assets/manifests/student.de-de.phase1/7",
+  immutable: true,
+};
+
+const studentEnUsPhase1V7ManifestBase64 =
+  'ewogICJtYW5pZmVzdFZlcnNpb24iOiAxLAogICJwYXRoSWQiOiAic3R1ZGVudC5lbi11cy5waGFzZTEiLAogICJwYWNrYWdlVmVyc2lvbiI6IDcsCiAgImFz' +
+  'c2V0cyI6IFtdCn0K';
+
+const studentEnUsPhase1V7ManifestMetadata: OfficialAssetManifestMetadata = {
+  pathId: "student.en-us.phase1",
+  packageVersion: 7,
+  manifestVersion: 1,
+  sha256: "ecec36a4bdc543540c0cd64b5dde8aae932ee746838069da996e8cc9c6575259",
+  sizeBytes: 102,
+  contentType: "application/json",
+  downloadPath: "/api/content/assets/manifests/student.en-us.phase1/7",
+  immutable: true,
+};
+
+const studentEsEsPhase1V7ManifestBase64 =
+  'ewogICJtYW5pZmVzdFZlcnNpb24iOiAxLAogICJwYXRoSWQiOiAic3R1ZGVudC5lcy1lcy5waGFzZTEiLAogICJwYWNrYWdlVmVyc2lvbiI6IDcsCiAgImFz' +
+  'c2V0cyI6IFtdCn0K';
+
+const studentEsEsPhase1V7ManifestMetadata: OfficialAssetManifestMetadata = {
+  pathId: "student.es-es.phase1",
+  packageVersion: 7,
+  manifestVersion: 1,
+  sha256: "3ef9a3c89abdb4a5d147d87cc1e3510700cc5c6c04f3842ee7473c4e04122e96",
+  sizeBytes: 102,
+  contentType: "application/json",
+  downloadPath: "/api/content/assets/manifests/student.es-es.phase1/7",
+  immutable: true,
+};
+
+const studentFrFrPhase1V7ManifestBase64 =
+  'ewogICJtYW5pZmVzdFZlcnNpb24iOiAxLAogICJwYXRoSWQiOiAic3R1ZGVudC5mci1mci5waGFzZTEiLAogICJwYWNrYWdlVmVyc2lvbiI6IDcsCiAgImFz' +
+  'c2V0cyI6IFtdCn0K';
+
+const studentFrFrPhase1V7ManifestMetadata: OfficialAssetManifestMetadata = {
+  pathId: "student.fr-fr.phase1",
+  packageVersion: 7,
+  manifestVersion: 1,
+  sha256: "7da99c2e2a77acc29d094aa31442ade2513be6b8ca6150a2fe3c3abd48e213cd",
+  sizeBytes: 102,
+  contentType: "application/json",
+  downloadPath: "/api/content/assets/manifests/student.fr-fr.phase1/7",
+  immutable: true,
+};
+
+const studentItItPhase1V7ManifestBase64 =
+  'ewogICJtYW5pZmVzdFZlcnNpb24iOiAxLAogICJwYXRoSWQiOiAic3R1ZGVudC5pdC1pdC5waGFzZTEiLAogICJwYWNrYWdlVmVyc2lvbiI6IDcsCiAgImFz' +
+  'c2V0cyI6IFtdCn0K';
+
+const studentItItPhase1V7ManifestMetadata: OfficialAssetManifestMetadata = {
+  pathId: "student.it-it.phase1",
+  packageVersion: 7,
+  manifestVersion: 1,
+  sha256: "21a281db9fb36dc22fc4a5d2df3781246f99caf4a745d9c4fb9a022229b76a31",
+  sizeBytes: 102,
+  contentType: "application/json",
+  downloadPath: "/api/content/assets/manifests/student.it-it.phase1/7",
+  immutable: true,
+};
+
+const studentPtPtPhase1V7ManifestBase64 =
+  'ewogICJtYW5pZmVzdFZlcnNpb24iOiAxLAogICJwYXRoSWQiOiAic3R1ZGVudC5wdC1wdC5waGFzZTEiLAogICJwYWNrYWdlVmVyc2lvbiI6IDcsCiAgImFz' +
+  'c2V0cyI6IFtdCn0K';
+
+const studentPtPtPhase1V7ManifestMetadata: OfficialAssetManifestMetadata = {
+  pathId: "student.pt-pt.phase1",
+  packageVersion: 7,
+  manifestVersion: 1,
+  sha256: "e840b04ab3b8c097de4fb32d50cb6846351c9e06b0692aecef93c3349b52bdee",
+  sizeBytes: 102,
+  contentType: "application/json",
+  downloadPath: "/api/content/assets/manifests/student.pt-pt.phase1/7",
+  immutable: true,
+};
+
+const studentDeDePhase1V8ManifestBase64 =
+  'ewogICJtYW5pZmVzdFZlcnNpb24iOiAxLAogICJwYXRoSWQiOiAic3R1ZGVudC5kZS1kZS5waGFzZTEiLAogICJwYWNrYWdlVmVyc2lvbiI6IDgsCiAgImFz' +
+  'c2V0cyI6IFtdCn0K';
+
+const studentDeDePhase1V8ManifestMetadata: OfficialAssetManifestMetadata = {
+  pathId: "student.de-de.phase1",
+  packageVersion: 8,
+  manifestVersion: 1,
+  sha256: "7422f936066b3fbc50fbadaa90f677b893af045496b5bef34d8ccb3900ce25a2",
+  sizeBytes: 102,
+  contentType: "application/json",
+  downloadPath: "/api/content/assets/manifests/student.de-de.phase1/8",
+  immutable: true,
+};
+
+const studentEnUsPhase1V8ManifestBase64 =
+  'ewogICJtYW5pZmVzdFZlcnNpb24iOiAxLAogICJwYXRoSWQiOiAic3R1ZGVudC5lbi11cy5waGFzZTEiLAogICJwYWNrYWdlVmVyc2lvbiI6IDgsCiAgImFz' +
+  'c2V0cyI6IFtdCn0K';
+
+const studentEnUsPhase1V8ManifestMetadata: OfficialAssetManifestMetadata = {
+  pathId: "student.en-us.phase1",
+  packageVersion: 8,
+  manifestVersion: 1,
+  sha256: "3770316ea91808778d17b30f29563f5e83f5a3fd5dde2516ee9234b3279dba30",
+  sizeBytes: 102,
+  contentType: "application/json",
+  downloadPath: "/api/content/assets/manifests/student.en-us.phase1/8",
+  immutable: true,
+};
+
+const studentEsEsPhase1V8ManifestBase64 =
+  'ewogICJtYW5pZmVzdFZlcnNpb24iOiAxLAogICJwYXRoSWQiOiAic3R1ZGVudC5lcy1lcy5waGFzZTEiLAogICJwYWNrYWdlVmVyc2lvbiI6IDgsCiAgImFz' +
+  'c2V0cyI6IFtdCn0K';
+
+const studentEsEsPhase1V8ManifestMetadata: OfficialAssetManifestMetadata = {
+  pathId: "student.es-es.phase1",
+  packageVersion: 8,
+  manifestVersion: 1,
+  sha256: "6d4a1c49eb6eeedb352a6ef26ac2cfe9c5ab3ec69fe76d7e906c1607f79f62c2",
+  sizeBytes: 102,
+  contentType: "application/json",
+  downloadPath: "/api/content/assets/manifests/student.es-es.phase1/8",
+  immutable: true,
+};
+
+const studentFrFrPhase1V8ManifestBase64 =
+  'ewogICJtYW5pZmVzdFZlcnNpb24iOiAxLAogICJwYXRoSWQiOiAic3R1ZGVudC5mci1mci5waGFzZTEiLAogICJwYWNrYWdlVmVyc2lvbiI6IDgsCiAgImFz' +
+  'c2V0cyI6IFtdCn0K';
+
+const studentFrFrPhase1V8ManifestMetadata: OfficialAssetManifestMetadata = {
+  pathId: "student.fr-fr.phase1",
+  packageVersion: 8,
+  manifestVersion: 1,
+  sha256: "1949776eb16bdec02ce268e298e88cafd7582c07bcd5394d8d6703c391bdba2c",
+  sizeBytes: 102,
+  contentType: "application/json",
+  downloadPath: "/api/content/assets/manifests/student.fr-fr.phase1/8",
+  immutable: true,
+};
+
+const studentItItPhase1V8ManifestBase64 =
+  'ewogICJtYW5pZmVzdFZlcnNpb24iOiAxLAogICJwYXRoSWQiOiAic3R1ZGVudC5pdC1pdC5waGFzZTEiLAogICJwYWNrYWdlVmVyc2lvbiI6IDgsCiAgImFz' +
+  'c2V0cyI6IFtdCn0K';
+
+const studentItItPhase1V8ManifestMetadata: OfficialAssetManifestMetadata = {
+  pathId: "student.it-it.phase1",
+  packageVersion: 8,
+  manifestVersion: 1,
+  sha256: "d4ae1eacc88a305df95960229e779cf6aa0fde54bfd48b0d11d0783fc6bad783",
+  sizeBytes: 102,
+  contentType: "application/json",
+  downloadPath: "/api/content/assets/manifests/student.it-it.phase1/8",
+  immutable: true,
+};
+
+const studentPtPtPhase1V8ManifestBase64 =
+  'ewogICJtYW5pZmVzdFZlcnNpb24iOiAxLAogICJwYXRoSWQiOiAic3R1ZGVudC5wdC1wdC5waGFzZTEiLAogICJwYWNrYWdlVmVyc2lvbiI6IDgsCiAgImFz' +
+  'c2V0cyI6IFtdCn0K';
+
+const studentPtPtPhase1V8ManifestMetadata: OfficialAssetManifestMetadata = {
+  pathId: "student.pt-pt.phase1",
+  packageVersion: 8,
+  manifestVersion: 1,
+  sha256: "6766214c1f163d6c9e4e4d1cc8c71f4ebd9dbbfbfc7d7cec51593933ad4c362e",
+  sizeBytes: 102,
+  contentType: "application/json",
+  downloadPath: "/api/content/assets/manifests/student.pt-pt.phase1/8",
+  immutable: true,
+};
+
 function decodeBase64(value: string): Uint8Array {
   const binary = atob(value);
   const bytes = new Uint8Array(binary.length);
@@ -319,6 +499,56 @@ const manifests: OfficialAssetManifest[] = [
   {
     metadata: studentFrFrPhase1V3ManifestMetadata,
     bytes: decodeBase64(studentFrFrPhase1V3ManifestBase64),
+  },
+
+  {
+    metadata: studentDeDePhase1V7ManifestMetadata,
+    bytes: decodeBase64(studentDeDePhase1V7ManifestBase64),
+  },
+  {
+    metadata: studentEnUsPhase1V7ManifestMetadata,
+    bytes: decodeBase64(studentEnUsPhase1V7ManifestBase64),
+  },
+  {
+    metadata: studentEsEsPhase1V7ManifestMetadata,
+    bytes: decodeBase64(studentEsEsPhase1V7ManifestBase64),
+  },
+  {
+    metadata: studentFrFrPhase1V7ManifestMetadata,
+    bytes: decodeBase64(studentFrFrPhase1V7ManifestBase64),
+  },
+  {
+    metadata: studentItItPhase1V7ManifestMetadata,
+    bytes: decodeBase64(studentItItPhase1V7ManifestBase64),
+  },
+  {
+    metadata: studentPtPtPhase1V7ManifestMetadata,
+    bytes: decodeBase64(studentPtPtPhase1V7ManifestBase64),
+  },
+
+  {
+    metadata: studentDeDePhase1V8ManifestMetadata,
+    bytes: decodeBase64(studentDeDePhase1V8ManifestBase64),
+  },
+  {
+    metadata: studentEnUsPhase1V8ManifestMetadata,
+    bytes: decodeBase64(studentEnUsPhase1V8ManifestBase64),
+  },
+  {
+    metadata: studentEsEsPhase1V8ManifestMetadata,
+    bytes: decodeBase64(studentEsEsPhase1V8ManifestBase64),
+  },
+  {
+    metadata: studentFrFrPhase1V8ManifestMetadata,
+    bytes: decodeBase64(studentFrFrPhase1V8ManifestBase64),
+  },
+  {
+    metadata: studentItItPhase1V8ManifestMetadata,
+    bytes: decodeBase64(studentItItPhase1V8ManifestBase64),
+  },
+  {
+    metadata: studentPtPtPhase1V8ManifestMetadata,
+    bytes: decodeBase64(studentPtPtPhase1V8ManifestBase64),
   },
 ];
 

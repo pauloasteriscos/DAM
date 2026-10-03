@@ -9,8 +9,20 @@ import 'learning_models.dart';
 enum LearningLexicalPackageValidationCode {
   coverageViolation,
   missingVocabularyExecution,
+
+  // Codigo historico preservado para compatibilidade.
   introducedItemMissingFromExecution,
+
+  // Um item declarado como pratica deve existir na execucao.
+  practisedItemMissingFromExecution,
+
+  // Um item executado deve estar classificado em practises.
   vocabularyItemMissingFromContract,
+
+  // Regras de papel lexical especificas de atividades vocabulary.
+  introducedItemMissingFromPractice,
+  reinforcedItemMissingFromPractice,
+  conflictingVocabularyRoles,
 }
 
 final class LearningLexicalPackageValidationIssue {
@@ -42,10 +54,16 @@ final class LearningLexicalPackageValidationResult {
 
 /// Validação editorial sobre o pacote oficial já descodificado.
 ///
-/// Complementa [LearningLexicalCoverageValidator] com uma verificação
-/// importante: o contrato não pode "inventar" palavras que não existam na
-/// execução de vocabulário e também não pode deixar itens de vocabulário sem
-/// classificação explícita como introdução.
+/// Complementa [LearningLexicalCoverageValidator] com regras editoriais
+/// especificas para atividades de vocabulary:
+///
+/// - `execution.items` e `practises` representam o mesmo conjunto;
+/// - `introduces` deve ser subconjunto de `practises`;
+/// - `reinforces` deve ser subconjunto de `practises`;
+/// - um item vocabulary nao pode ser simultaneamente novo e reforco.
+///
+/// A cobertura temporal/por etapa continua sob responsabilidade de
+/// [LearningLexicalCoverageValidator].
 final class LearningLexicalPackageValidator {
   const LearningLexicalPackageValidator({
     LearningLexicalCoverageValidator coverageValidator =
@@ -100,6 +118,8 @@ final class LearningLexicalPackageValidator {
 
       final executionIds = execution.items.map((item) => item.id).toSet();
 
+      // Mantem o codigo de erro historico para itens explicitamente
+      // introduzidos que deixem de existir na execucao.
       for (final lexicalId in activityContract.introduces) {
         if (!executionIds.contains(lexicalId)) {
           issues.add(
@@ -113,14 +133,68 @@ final class LearningLexicalPackageValidator {
         }
       }
 
+      // Em vocabulary, practises e a lista canonica do que e executado.
+      // Itens praticados que nao sao introduces continuam validos quando
+      // sao revisao/reforco de lexico previamente coberto.
+      for (final lexicalId in activityContract.practises) {
+        if (!executionIds.contains(lexicalId) &&
+            !activityContract.introduces.contains(lexicalId)) {
+          issues.add(
+            LearningLexicalPackageValidationIssue(
+              code: LearningLexicalPackageValidationCode
+                  .practisedItemMissingFromExecution,
+              location: 'activity:${activity.id.value}',
+              reference: lexicalId,
+            ),
+          );
+        }
+      }
+
       for (final executionId in executionIds) {
-        if (!activityContract.introduces.contains(executionId)) {
+        if (!activityContract.practises.contains(executionId)) {
           issues.add(
             LearningLexicalPackageValidationIssue(
               code: LearningLexicalPackageValidationCode
                   .vocabularyItemMissingFromContract,
               location: 'activity:${activity.id.value}',
               reference: executionId,
+            ),
+          );
+        }
+      }
+
+      for (final lexicalId in activityContract.introduces) {
+        if (!activityContract.practises.contains(lexicalId)) {
+          issues.add(
+            LearningLexicalPackageValidationIssue(
+              code: LearningLexicalPackageValidationCode
+                  .introducedItemMissingFromPractice,
+              location: 'activity:${activity.id.value}',
+              reference: lexicalId,
+            ),
+          );
+        }
+      }
+
+      for (final lexicalId in activityContract.reinforces) {
+        if (!activityContract.practises.contains(lexicalId)) {
+          issues.add(
+            LearningLexicalPackageValidationIssue(
+              code: LearningLexicalPackageValidationCode
+                  .reinforcedItemMissingFromPractice,
+              location: 'activity:${activity.id.value}',
+              reference: lexicalId,
+            ),
+          );
+        }
+
+        if (activityContract.introduces.contains(lexicalId)) {
+          issues.add(
+            LearningLexicalPackageValidationIssue(
+              code: LearningLexicalPackageValidationCode
+                  .conflictingVocabularyRoles,
+              location: 'activity:${activity.id.value}',
+              reference: lexicalId,
             ),
           );
         }

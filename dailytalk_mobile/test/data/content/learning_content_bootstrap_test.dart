@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-String _newerSource(String assetPath) {
+String _newerSource(String assetPath, {required int revisionNumber}) {
   final package =
       jsonDecode(File(assetPath).readAsStringSync()) as Map<String, dynamic>;
   final activities = package['activities']! as List<dynamic>;
@@ -16,8 +16,8 @@ String _newerSource(String assetPath) {
   final revision2 =
       jsonDecode(jsonEncode(revisions.first)) as Map<String, dynamic>;
 
-  revision2['id'] = 'arrival.vocabulary-01.revision-03';
-  revision2['revisionNumber'] = 3;
+  revision2['id'] = 'arrival.vocabulary-01.revision-$revisionNumber';
+  revision2['revisionNumber'] = revisionNumber;
   revision2['title'] = <String, dynamic>{
     'pt-PT': 'Palavras de acolhimento — edição revista',
   };
@@ -95,7 +95,7 @@ void main() {
     );
 
     expect(first.path.id.value, 'student.it-it.phase1');
-    expect(first.package.packageVersion, 2);
+    expect(first.package.packageVersion, 8);
     expect(second.package.id, first.package.id);
     expect(assetReads, 1);
     expect(await db.query('learning_content_packages'), hasLength(1));
@@ -104,12 +104,12 @@ void main() {
 
   test('bootstrap prefere pacote local mais recente sem downgrade', () async {
     final descriptor = OfficialLearningPathResolver.resolve('it-IT');
-    final v2 = _newerSource(descriptor.baselineAssetPath);
+    final v9 = _newerSource(descriptor.baselineAssetPath, revisionNumber: 9);
     await importer.importPackage(
-      payloadJson: v2,
-      packageVersion: 3,
+      payloadJson: v9,
+      packageVersion: 9,
       source: 'local-test',
-      expectedSha256: await importer.computeSha256(v2),
+      expectedSha256: await importer.computeSha256(v9),
     );
 
     var assetReads = 0;
@@ -120,7 +120,7 @@ void main() {
     );
 
     expect(active.path.id.value, 'student.it-it.phase1');
-    expect(active.package.packageVersion, 3);
+    expect(active.package.packageVersion, 9);
     expect(assetReads, 0);
     expect(await db.query('learning_content_packages'), hasLength(1));
     expect(await db.query('learning_content_catalog'), hasLength(1));
@@ -156,46 +156,79 @@ void main() {
     });
   });
 
-  test(
-    'baseline francesa v6 evolui sobre v5 sem reescrever histórico',
-    () async {
-      const historicalAsset = 'assets/content/official_fr_fr_phase1.v5.json';
+  test('release 8 evolui sobre v7 sem reescrever hist\u00f3rico', () async {
+    const previousVersions = <String, int>{
+      'pt-PT': 7,
+      'en-US': 7,
+      'es-ES': 7,
+      'fr-FR': 7,
+      'it-IT': 7,
+      'de-DE': 7,
+    };
+
+    for (final entry in previousVersions.entries) {
+      final descriptor = OfficialLearningPathResolver.resolve(entry.key);
+      final historicalName = entry.key.toLowerCase().replaceAll('-', '_');
+      final historicalAsset =
+          'assets/content/official_${historicalName}_phase1.v${entry.value}.json';
       final historicalPayload = File(historicalAsset).readAsStringSync();
 
       await importer.importPackage(
         payloadJson: historicalPayload,
-        packageVersion: 5,
-        source: 'historical-fr-v5-test',
+        packageVersion: entry.value,
+        source: 'historical-${entry.key}-v${entry.value}-test',
         expectedSha256: await importer.computeSha256(historicalPayload),
       );
       await catalogService.activate(
-        learningPathId: 'student.fr-fr.phase1',
-        packageVersion: 5,
+        learningPathId: descriptor.learningPathId,
+        packageVersion: entry.value,
       );
 
       var assetReads = 0;
       final bootstrap = bootstrapWithCounter(() => assetReads += 1);
       final active = await bootstrap.ensureLocalBaseline(
-        learningLanguageCode: 'fr-FR',
+        learningLanguageCode: entry.key,
       );
 
-      expect(active.path.id.value, 'student.fr-fr.phase1');
-      expect(active.package.packageVersion, 6);
-      expect(active.path.schemaVersion.value, 2);
       expect(
-        active.path.activities.every(
-          (activity) =>
-              activity.currentRevisionId.value.endsWith('.revision-06') &&
-              activity.revisions.length == 1 &&
-              activity.currentRevision.revisionNumber == 6,
-        ),
-        isTrue,
+        active.path.id.value,
+        descriptor.learningPathId,
+        reason: entry.key,
       );
+      expect(active.package.packageVersion, 8, reason: entry.key);
+      expect(active.path.schemaVersion.value, 2, reason: entry.key);
+
+      final languageNamespace = descriptor.learningPathId.split('.')[1];
       expect(
         active.path.competencies.map((competency) => competency.id.value),
-        everyElement(startsWith('arrival.fr-fr.')),
+        everyElement(startsWith('arrival.$languageNamespace.')),
+        reason: entry.key,
       );
-      expect(assetReads, 1);
-    },
-  );
+
+      expect(assetReads, 1, reason: entry.key);
+
+      final packageRows = await db.query(
+        'learning_content_packages',
+        columns: <String>['package_version', 'payload_json'],
+        where: 'learning_path_id = ?',
+        whereArgs: <Object?>[descriptor.learningPathId],
+        orderBy: 'package_version ASC',
+      );
+
+      expect(
+        packageRows.map((row) => row['package_version']).toSet(),
+        <Object?>{entry.value, 8},
+        reason: '${entry.key} package history',
+      );
+
+      final historicalRow = packageRows.singleWhere(
+        (row) => row['package_version'] == entry.value,
+      );
+      expect(
+        historicalRow['payload_json'],
+        historicalPayload,
+        reason: '${entry.key} historical bytes changed',
+      );
+    }
+  });
 }

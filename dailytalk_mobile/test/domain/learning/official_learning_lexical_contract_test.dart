@@ -11,32 +11,32 @@ void main() {
   const cases =
       <({String contentAsset, String lexicalAsset, String expectedPathId})>[
         (
-          contentAsset: 'assets/content/official_pt_pt_phase1.v2.json',
+          contentAsset: 'assets/content/official_pt_pt_phase1.v8.json',
           lexicalAsset: 'assets/content/official_pt_pt_phase1.lexical.v1.json',
           expectedPathId: 'student.pt-pt.phase1',
         ),
         (
-          contentAsset: 'assets/content/official_en_us_phase1.v2.json',
+          contentAsset: 'assets/content/official_en_us_phase1.v8.json',
           lexicalAsset: 'assets/content/official_en_us_phase1.lexical.v1.json',
           expectedPathId: 'student.en-us.phase1',
         ),
         (
-          contentAsset: 'assets/content/official_es_es_phase1.v2.json',
+          contentAsset: 'assets/content/official_es_es_phase1.v8.json',
           lexicalAsset: 'assets/content/official_es_es_phase1.lexical.v1.json',
           expectedPathId: 'student.es-es.phase1',
         ),
         (
-          contentAsset: 'assets/content/official_fr_fr_phase1.v6.json',
+          contentAsset: 'assets/content/official_fr_fr_phase1.v8.json',
           lexicalAsset: 'assets/content/official_fr_fr_phase1.lexical.v1.json',
           expectedPathId: 'student.fr-fr.phase1',
         ),
         (
-          contentAsset: 'assets/content/official_it_it_phase1.v2.json',
+          contentAsset: 'assets/content/official_it_it_phase1.v8.json',
           lexicalAsset: 'assets/content/official_it_it_phase1.lexical.v1.json',
           expectedPathId: 'student.it-it.phase1',
         ),
         (
-          contentAsset: 'assets/content/official_de_de_phase1.v2.json',
+          contentAsset: 'assets/content/official_de_de_phase1.v8.json',
           lexicalAsset: 'assets/content/official_de_de_phase1.lexical.v1.json',
           expectedPathId: 'student.de-de.phase1',
         ),
@@ -91,13 +91,13 @@ void main() {
           (activity) => activity.type.name == 'vocabulary',
         )) {
           final execution = activity.currentRevision.execution;
-          final introduced = contractsById[activity.id]!.introduces;
+          final practised = contractsById[activity.id]!.practises;
           final executionIds = (execution as dynamic).items
               .map<String>((item) => item.id as String)
               .toSet();
 
           expect(
-            introduced,
+            practised,
             executionIds,
             reason: '${item.expectedPathId}/${activity.id.value}',
           );

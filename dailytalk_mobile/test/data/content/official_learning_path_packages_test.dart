@@ -59,140 +59,171 @@ void main() {
   });
 
   test(
-    'baseline francesa v6 preserva namespace próprio e RevisionIds novos',
+    'release 8 uniforme preserva baseline anterior e evolui Lição 3 por nova revisão',
     () {
-      final descriptor = OfficialLearningPathResolver.resolve('fr-FR');
-      final payload = File(descriptor.baselineAssetPath).readAsStringSync();
-      final path = codec.decodeString(payload);
+      const codec = LearningContentCodec();
 
-      expect(descriptor.baselinePackageVersion, 6);
-      expect(path.schemaVersion.value, 2);
-      expect(path.activities, hasLength(6));
-      expect(
-        path.activities.every(
-          (activity) =>
-              activity.currentRevisionId.value.endsWith('.revision-06') &&
-              activity.revisions.length == 1 &&
-              activity.currentRevision.revisionNumber == 6,
-        ),
-        isTrue,
-      );
+      const previousVersions = <String, int>{
+        'pt-PT': 2,
+        'en-US': 2,
+        'es-ES': 2,
+        'fr-FR': 6,
+        'it-IT': 2,
+        'de-DE': 2,
+      };
 
-      expect(
-        path.competencies.map((competency) => competency.id.value),
-        everyElement(startsWith('arrival.fr-fr.')),
-      );
+      for (final entry in previousVersions.entries) {
+        final descriptor = OfficialLearningPathResolver.resolve(entry.key);
+
+        expect(descriptor.baselinePackageVersion, 8, reason: entry.key);
+
+        final current = codec.decodeString(
+          File(descriptor.baselineAssetPath).readAsStringSync(),
+        );
+
+        final historicalName = entry.key.toLowerCase().replaceAll('-', '_');
+        final previous = codec.decodeString(
+          File(
+            'assets/content/official_${historicalName}_phase1.v${entry.value}.json',
+          ).readAsStringSync(),
+        );
+
+        expect(
+          current.id.value,
+          previous.id.value,
+          reason: '${entry.key} path id',
+        );
+
+        final languageNamespace = current.id.value.split('.')[1];
+
+        expect(
+          current.competencies.every(
+            (competency) =>
+                competency.id.value.startsWith('arrival.$languageNamespace.'),
+          ),
+          isTrue,
+          reason: '${entry.key} competency namespace',
+        );
+
+        final previousRevisionByActivity = <String, String>{
+          for (final activity in previous.activities)
+            activity.id.value: activity.currentRevisionId.value,
+        };
+
+        for (final activity in current.activities) {
+          final previousRevision =
+              previousRevisionByActivity[activity.id.value];
+
+          if (previousRevision == null) {
+            continue;
+          }
+
+          expect(
+            activity.currentRevisionId.value,
+            previousRevision,
+            reason:
+                '${entry.key} published revision changed: ${activity.id.value}',
+          );
+        }
+
+        expect(
+          current.activities,
+          hasLength(previous.activities.length + 1),
+          reason: '${entry.key} activity count',
+        );
+
+        final lesson3 = current.activities.singleWhere(
+          (activity) => activity.id.value == 'arrival.vocabulary-03',
+        );
+
+        expect(
+          lesson3.currentRevisionId.value,
+          'arrival.vocabulary-03.revision-02',
+          reason: entry.key,
+        );
+        expect(lesson3.revisions, hasLength(2), reason: entry.key);
+        expect(
+          lesson3.revisions.map((revision) => revision.id.value),
+          orderedEquals(<String>[
+            'arrival.vocabulary-03.revision-01',
+            'arrival.vocabulary-03.revision-02',
+          ]),
+          reason: entry.key,
+        );
+        expect(lesson3.revisions[0].revisionNumber, 1, reason: entry.key);
+        expect(lesson3.revisions[1].revisionNumber, 2, reason: entry.key);
+      }
     },
   );
 
-  test('todos os idiomas ativos mantêm a mesma experiência estrutural', () {
-    Map<String, Object?> experienceShape(String languageCode) {
+  test('release 8 preserva revision-01 da Lição 3 e ativa revision-02', () {
+    for (final languageCode
+        in OfficialLearningPathResolver.supportedLearningLanguageCodes) {
       final descriptor = OfficialLearningPathResolver.resolve(languageCode);
-      final json =
+      final historicalName = languageCode.toLowerCase().replaceAll('-', '_');
+
+      final release7 =
+          jsonDecode(
+                File(
+                  'assets/content/official_${historicalName}_phase1.v7.json',
+                ).readAsStringSync(),
+              )
+              as Map<String, dynamic>;
+      final release8 =
           jsonDecode(File(descriptor.baselineAssetPath).readAsStringSync())
               as Map<String, dynamic>;
 
-      final journeys = (json['journeys'] as List<dynamic>)
+      final release7Activity = (release7['activities']! as List)
+          .cast<Map<String, dynamic>>()
+          .singleWhere((activity) => activity['id'] == 'arrival.vocabulary-03');
+      final release8Activity = (release8['activities']! as List)
+          .cast<Map<String, dynamic>>()
+          .singleWhere((activity) => activity['id'] == 'arrival.vocabulary-03');
+
+      expect(
+        release7Activity['currentRevisionId'],
+        'arrival.vocabulary-03.revision-01',
+        reason: '$languageCode v7 current revision',
+      );
+      expect(
+        release8Activity['currentRevisionId'],
+        'arrival.vocabulary-03.revision-02',
+        reason: '$languageCode v8 current revision',
+      );
+
+      final release7Revisions = (release7Activity['revisions']! as List)
           .cast<Map<String, dynamic>>();
-      final activities = (json['activities'] as List<dynamic>)
+      final release8Revisions = (release8Activity['revisions']! as List)
           .cast<Map<String, dynamic>>();
 
-      Map<String, Object?> normalizePrerequisite(dynamic value) {
-        if (value == null) {
-          return const <String, Object?>{};
-        }
+      expect(release7Revisions, hasLength(1), reason: languageCode);
+      expect(release8Revisions, hasLength(2), reason: languageCode);
 
-        final rule = value as Map<String, dynamic>;
-        final type = rule['type'] as String;
+      final release7Revision01 = release7Revisions.singleWhere(
+        (revision) => revision['id'] == 'arrival.vocabulary-03.revision-01',
+      );
+      final release8Revision01 = release8Revisions.singleWhere(
+        (revision) => revision['id'] == 'arrival.vocabulary-03.revision-01',
+      );
+      final release8Revision02 = release8Revisions.singleWhere(
+        (revision) => revision['id'] == 'arrival.vocabulary-03.revision-02',
+      );
 
-        if (type == 'activityCompleted') {
-          return <String, Object?>{
-            'type': type,
-            'activityId': rule['activityId'],
-          };
-        }
-
-        if (type == 'competencyAchieved') {
-          final competencyId = rule['competencyId'] as String;
-          return <String, Object?>{
-            'type': type,
-            'competencySuffix': competencyId.split('.').last,
-          };
-        }
-
-        final rules = (rule['rules'] as List<dynamic>)
-            .map(normalizePrerequisite)
-            .toList(growable: false);
-
-        return <String, Object?>{
-          'type': type,
-          'operator': rule['operator'],
-          'rules': rules,
-        };
-      }
-
-      int payloadCount(Map<String, dynamic> execution) {
-        for (final key in const <String>[
-          'items',
-          'turns',
-          'prompts',
-          'questions',
-          'steps',
-        ]) {
-          final value = execution[key];
-          if (value is List<dynamic>) {
-            return value.length;
-          }
-        }
-        return 0;
-      }
-
-      return <String, Object?>{
-        'stages': <Object?>[
-          for (final journey in journeys)
-            for (final stage
-                in (journey['stages'] as List<dynamic>)
-                    .cast<Map<String, dynamic>>())
-              <String, Object?>{
-                'id': stage['id'],
-                'elements': (stage['elements'] as List<dynamic>)
-                    .cast<Map<String, dynamic>>()
-                    .map(
-                      (element) => <String, Object?>{
-                        'id': element['id'],
-                        'activityId': element['activityId'],
-                        'practicePreference': element['practicePreference'],
-                        'prerequisites': normalizePrerequisite(
-                          element['prerequisites'],
-                        ),
-                      },
-                    )
-                    .toList(growable: false),
-              },
-        ],
-        'activities': activities
-            .map((activity) {
-              final revision = (activity['revisions'] as List<dynamic>)
-                  .cast<Map<String, dynamic>>()
-                  .single;
-              final execution = revision['execution'] as Map<String, dynamic>;
-
-              return <String, Object?>{
-                'id': activity['id'],
-                'type': activity['type'],
-                'executionKind': execution['kind'],
-                'payloadCount': payloadCount(execution),
-              };
-            })
-            .toList(growable: false),
-      };
-    }
-
-    final reference = experienceShape('en-US');
-
-    for (final languageCode
-        in OfficialLearningPathResolver.supportedLearningLanguageCodes) {
-      expect(experienceShape(languageCode), reference, reason: languageCode);
+      expect(
+        release8Revision01,
+        equals(release7Revision01),
+        reason: '$languageCode revision-01 immutable history',
+      );
+      expect(
+        release8Revision02['revisionNumber'],
+        2,
+        reason: '$languageCode revision-02 number',
+      );
+      expect(
+        release8Revision02['activityId'],
+        'arrival.vocabulary-03',
+        reason: '$languageCode revision-02 activity',
+      );
     }
   });
 }

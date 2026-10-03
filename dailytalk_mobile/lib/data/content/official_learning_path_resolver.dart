@@ -29,57 +29,57 @@ abstract final class OfficialLearningPathResolver {
     'de-DE',
   ];
 
-  static const Map<String, OfficialLearningPathDescriptor> _descriptors =
-      <String, OfficialLearningPathDescriptor>{
-        'pt-PT': OfficialLearningPathDescriptor(
-          learningLanguageCode: 'pt-PT',
-          learningPathId: 'student.pt-pt.phase1',
-          baselineAssetPath: 'assets/content/official_pt_pt_phase1.v2.json',
-          baselinePackageVersion: 2,
-          baselineSha256:
-              'cece86320a578cf660bf0bb6c6d5ce7f6de60cbf1248bfcc4dc7d3b38c28ebd5',
-        ),
-        'en-US': OfficialLearningPathDescriptor(
-          learningLanguageCode: 'en-US',
-          learningPathId: 'student.en-us.phase1',
-          baselineAssetPath: 'assets/content/official_en_us_phase1.v2.json',
-          baselinePackageVersion: 2,
-          baselineSha256:
-              'f9b7d8ec84926d149ff1c1a8e7296255e3de716dea77d81a31d68f827048cf45',
-        ),
-        'es-ES': OfficialLearningPathDescriptor(
-          learningLanguageCode: 'es-ES',
-          learningPathId: 'student.es-es.phase1',
-          baselineAssetPath: 'assets/content/official_es_es_phase1.v2.json',
-          baselinePackageVersion: 2,
-          baselineSha256:
-              'd16bb679fbd0dc6c9d9faf0c88f41ea1070f82f83c3e1e8d43314bd3796c24ae',
-        ),
-        'fr-FR': OfficialLearningPathDescriptor(
-          learningLanguageCode: 'fr-FR',
-          learningPathId: 'student.fr-fr.phase1',
-          baselineAssetPath: 'assets/content/official_fr_fr_phase1.v6.json',
-          baselinePackageVersion: 6,
-          baselineSha256:
-              '79bde8996567d933ad0ca8111da1004ffa938adfd8229697a11b94311dbef460',
-        ),
-        'it-IT': OfficialLearningPathDescriptor(
-          learningLanguageCode: 'it-IT',
-          learningPathId: 'student.it-it.phase1',
-          baselineAssetPath: 'assets/content/official_it_it_phase1.v2.json',
-          baselinePackageVersion: 2,
-          baselineSha256:
-              '9a81e76376587e8c3ddfe93054dffc7f40c9d43d0fda841e70f33662fb917f39',
-        ),
-        'de-DE': OfficialLearningPathDescriptor(
-          learningLanguageCode: 'de-DE',
-          learningPathId: 'student.de-de.phase1',
-          baselineAssetPath: 'assets/content/official_de_de_phase1.v2.json',
-          baselinePackageVersion: 2,
-          baselineSha256:
-              'e4f9a391a135b7b7f72bbd251d03bda9df323a31d668958300786b888c10c05d',
-        ),
-      };
+  static const Map<String, OfficialLearningPathDescriptor>
+  _descriptors = <String, OfficialLearningPathDescriptor>{
+    'pt-PT': OfficialLearningPathDescriptor(
+      learningLanguageCode: 'pt-PT',
+      learningPathId: 'student.pt-pt.phase1',
+      baselineAssetPath: 'assets/content/official_pt_pt_phase1.v8.json',
+      baselinePackageVersion: 8,
+      baselineSha256:
+          'a0ae0cc9bfe51afdd179b64c054c424ea965ffea05df5c58c0399d15eb565deb',
+    ),
+    'en-US': OfficialLearningPathDescriptor(
+      learningLanguageCode: 'en-US',
+      learningPathId: 'student.en-us.phase1',
+      baselineAssetPath: 'assets/content/official_en_us_phase1.v8.json',
+      baselinePackageVersion: 8,
+      baselineSha256:
+          '00479e9b72f7b454e1c7e0b20d0c596d7218c1e9e39207ba035ba85ca9ad75ea',
+    ),
+    'es-ES': OfficialLearningPathDescriptor(
+      learningLanguageCode: 'es-ES',
+      learningPathId: 'student.es-es.phase1',
+      baselineAssetPath: 'assets/content/official_es_es_phase1.v8.json',
+      baselinePackageVersion: 8,
+      baselineSha256:
+          '60821d6685cb9fa495e855c9e9741138199e95358a5ca3c41e626b5efd5d267a',
+    ),
+    'fr-FR': OfficialLearningPathDescriptor(
+      learningLanguageCode: 'fr-FR',
+      learningPathId: 'student.fr-fr.phase1',
+      baselineAssetPath: 'assets/content/official_fr_fr_phase1.v8.json',
+      baselinePackageVersion: 8,
+      baselineSha256:
+          '067f58f44c6d9c4982e76b008e9a05ed1b42d770cf6af6a704c579819e18d05a',
+    ),
+    'it-IT': OfficialLearningPathDescriptor(
+      learningLanguageCode: 'it-IT',
+      learningPathId: 'student.it-it.phase1',
+      baselineAssetPath: 'assets/content/official_it_it_phase1.v8.json',
+      baselinePackageVersion: 8,
+      baselineSha256:
+          'de3f5cacfd44300e630816a3be2b371f0e3c78230d2e04996151b72dbfed6f25',
+    ),
+    'de-DE': OfficialLearningPathDescriptor(
+      learningLanguageCode: 'de-DE',
+      learningPathId: 'student.de-de.phase1',
+      baselineAssetPath: 'assets/content/official_de_de_phase1.v8.json',
+      baselinePackageVersion: 8,
+      baselineSha256:
+          'f37dc1d55004e6f15b9024d7d6b1fbc8754a7efec9dafc29d1475a31163a21e5',
+    ),
+  };
 
   static String? normalizeSupportedLanguageCode(String? languageCode) {
     if (languageCode == null || languageCode.trim().isEmpty) {

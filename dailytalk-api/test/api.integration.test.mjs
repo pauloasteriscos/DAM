@@ -365,54 +365,54 @@ test(
       assert.ok(Array.isArray(payload.packages));
 
       const expectedPackages = {
-        "student.de-de.phase1": {
-          schemaVersion: 2,
-          packageVersion: 2,
-          sha256:
-            "e4f9a391a135b7b7f72bbd251d03bda9df323a31d668958300786b888c10c05d",
-          sizeBytes: 32251,
-          downloadPath: "/api/content/packages/student.de-de.phase1/2",
-        },
-        "student.en-us.phase1": {
-          schemaVersion: 2,
-          packageVersion: 2,
-          sha256:
-            "f9b7d8ec84926d149ff1c1a8e7296255e3de716dea77d81a31d68f827048cf45",
-          sizeBytes: 32279,
-          downloadPath: "/api/content/packages/student.en-us.phase1/2",
-        },
-        "student.es-es.phase1": {
-          schemaVersion: 2,
-          packageVersion: 2,
-          sha256:
-            "d16bb679fbd0dc6c9d9faf0c88f41ea1070f82f83c3e1e8d43314bd3796c24ae",
-          sizeBytes: 32239,
-          downloadPath: "/api/content/packages/student.es-es.phase1/2",
-        },
-        "student.fr-fr.phase1": {
-          schemaVersion: 2,
-          packageVersion: 6,
-          sha256:
-            "79bde8996567d933ad0ca8111da1004ffa938adfd8229697a11b94311dbef460",
-          sizeBytes: 32243,
-          downloadPath: "/api/content/packages/student.fr-fr.phase1/6",
-        },
-        "student.it-it.phase1": {
-          schemaVersion: 2,
-          packageVersion: 2,
-          sha256:
-            "9a81e76376587e8c3ddfe93054dffc7f40c9d43d0fda841e70f33662fb917f39",
-          sizeBytes: 32237,
-          downloadPath: "/api/content/packages/student.it-it.phase1/2",
-        },
-        "student.pt-pt.phase1": {
-          schemaVersion: 2,
-          packageVersion: 2,
-          sha256:
-            "cece86320a578cf660bf0bb6c6d5ce7f6de60cbf1248bfcc4dc7d3b38c28ebd5",
-          sizeBytes: 32250,
-          downloadPath: "/api/content/packages/student.pt-pt.phase1/2",
-        },
+                                                "student.de-de.phase1": {
+            schemaVersion: 2,
+            packageVersion: 8,
+            sha256:
+              "f37dc1d55004e6f15b9024d7d6b1fbc8754a7efec9dafc29d1475a31163a21e5",
+            sizeBytes: 42694,
+            downloadPath: "/api/content/packages/student.de-de.phase1/8",
+          },
+                                                "student.en-us.phase1": {
+            schemaVersion: 2,
+            packageVersion: 8,
+            sha256:
+              "00479e9b72f7b454e1c7e0b20d0c596d7218c1e9e39207ba035ba85ca9ad75ea",
+            sizeBytes: 42722,
+            downloadPath: "/api/content/packages/student.en-us.phase1/8",
+          },
+                                                "student.es-es.phase1": {
+            schemaVersion: 2,
+            packageVersion: 8,
+            sha256:
+              "60821d6685cb9fa495e855c9e9741138199e95358a5ca3c41e626b5efd5d267a",
+            sizeBytes: 42682,
+            downloadPath: "/api/content/packages/student.es-es.phase1/8",
+          },
+                                                "student.fr-fr.phase1": {
+            schemaVersion: 2,
+            packageVersion: 8,
+            sha256:
+              "067f58f44c6d9c4982e76b008e9a05ed1b42d770cf6af6a704c579819e18d05a",
+            sizeBytes: 42686,
+            downloadPath: "/api/content/packages/student.fr-fr.phase1/8",
+          },
+                                                "student.it-it.phase1": {
+            schemaVersion: 2,
+            packageVersion: 8,
+            sha256:
+              "de3f5cacfd44300e630816a3be2b371f0e3c78230d2e04996151b72dbfed6f25",
+            sizeBytes: 42680,
+            downloadPath: "/api/content/packages/student.it-it.phase1/8",
+          },
+                                                "student.pt-pt.phase1": {
+            schemaVersion: 2,
+            packageVersion: 8,
+            sha256:
+              "a0ae0cc9bfe51afdd179b64c054c424ea965ffea05df5c58c0399d15eb565deb",
+            sizeBytes: 42693,
+            downloadPath: "/api/content/packages/student.pt-pt.phase1/8",
+          },
       };
 
       assert.equal(
@@ -449,12 +449,12 @@ test(
       assert.equal(catalogResponse.status, 200);
 
       const canonicalByPath = {
-        "student.de-de.phase1": "official_de_de_phase1_v2.json",
-        "student.en-us.phase1": "official_en_us_phase1_v2.json",
-        "student.es-es.phase1": "official_es_es_phase1_v2.json",
-        "student.fr-fr.phase1": "official_fr_fr_phase1_v6.json",
-        "student.it-it.phase1": "official_it_it_phase1_v2.json",
-        "student.pt-pt.phase1": "official_pt_pt_phase1_v2.json",
+        "student.de-de.phase1": "official_de_de_phase1_v8.json",
+        "student.en-us.phase1": "official_en_us_phase1_v8.json",
+        "student.es-es.phase1": "official_es_es_phase1_v8.json",
+        "student.fr-fr.phase1": "official_fr_fr_phase1_v8.json",
+        "student.it-it.phase1": "official_it_it_phase1_v8.json",
+        "student.pt-pt.phase1": "official_pt_pt_phase1_v8.json",
       };
 
       for (const [pathId, canonicalFile] of Object.entries(canonicalByPath)) {
@@ -505,8 +505,8 @@ test(
         assert.deepEqual(Buffer.from(bytes), canonicalBytes);
 
         const decoded = JSON.parse(new TextDecoder().decode(bytes));
-        assert.equal(decoded.activities.length, 6);
-        assert.equal(decoded.journeys[0].stages.length, 2);
+        assert.equal(decoded.activities.length, 7);
+        assert.equal(decoded.journeys[0].stages.length, 3);
         assert.equal(decoded.schemaVersion, 2);
         assert.equal(decoded.id, pathId);
 
@@ -520,7 +520,84 @@ test(
       }
     });
 
-    await t.test("v1 dos cinco percursos permanece disponível após publicação da v2", async () => {
+            await t.test("Release 7 content remains available after Release 8", async () => {
+      const release7 = {
+        "student.de-de.phase1": {
+          sha256: "b0dc4df0fbca2ba8d0f90af41bfd7a6e1dd6af8b66d8b5208d61b920aded2f6f",
+          sizeBytes: 103880,
+        },
+        "student.en-us.phase1": {
+          sha256: "9afd6a47a0d12000e366d05139c87998f6a4f2d312448ba8aba29334172980de",
+          sizeBytes: 103908,
+        },
+        "student.es-es.phase1": {
+          sha256: "fbc4a65caefc03bdffd32366872bb4ee246fc96b5b9513a24e438041975acc3b",
+          sizeBytes: 103868,
+        },
+        "student.fr-fr.phase1": {
+          sha256: "31e952f4d2ced0c36bb2f21534ce115d94fe02015e1e324db70e264bde8578c1",
+          sizeBytes: 103872,
+        },
+        "student.it-it.phase1": {
+          sha256: "203f147d0af7387286ba52c57fd1291a4aa94982f2354290078ab287734741df",
+          sizeBytes: 103866,
+        },
+        "student.pt-pt.phase1": {
+          sha256: "50ac6d0248aa44f231c7ab0eac75029aa954db20b82433f5bf67f2a2d74a2441",
+          sizeBytes: 103879,
+        },
+      };
+
+      for (const [pathId, expected] of Object.entries(release7)) {
+        const response = await fetch(
+          `${API_BASE}/api/content/packages/${pathId}/7`,
+          { headers: { [ENV_HEADER]: "DEV" } },
+        );
+
+        assert.equal(response.status, 200);
+        assert.equal(
+          response.headers.get("cache-control"),
+          "public, max-age=31536000, immutable",
+        );
+        assert.equal(response.headers.get("x-content-package-version"), "7");
+        assert.equal(response.headers.get("x-content-sha256"), expected.sha256);
+
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        assert.equal(bytes.byteLength, expected.sizeBytes);
+        assert.equal(
+          createHash("sha256").update(bytes).digest("hex"),
+          expected.sha256,
+        );
+      }
+    });
+await t.test("pre-Release 7 baseline remains available after Release 8", async () => {
+      const previous = {
+        "student.de-de.phase1": 2,
+        "student.en-us.phase1": 2,
+        "student.es-es.phase1": 2,
+        "student.fr-fr.phase1": 6,
+        "student.it-it.phase1": 2,
+        "student.pt-pt.phase1": 2,
+      };
+
+      for (const [pathId, packageVersion] of Object.entries(previous)) {
+        const response = await fetch(
+          `${API_BASE}/api/content/packages/${pathId}/${packageVersion}`,
+          { headers: { [ENV_HEADER]: "DEV" } },
+        );
+
+        assert.equal(response.status, 200);
+        assert.equal(
+          response.headers.get("x-content-package-version"),
+          String(packageVersion),
+        );
+        assert.equal(
+          response.headers.get("cache-control"),
+          "public, max-age=31536000, immutable",
+        );
+      }
+    });
+await t.test("v1 dos cinco percursos permanece disponível após publicação da v7", async () => {
       const previous = {
         "student.de-de.phase1": { sha256: "36b8918f56626f9fa537a0a2a74d4314b2bc806bb899ba352ab07a87de0ac30b", sizeBytes: 28700 },
         "student.en-us.phase1": { sha256: "f8951f542e81f07221d46f2721b949cb30d67e8a97f62a770e95dbbb71871196", sizeBytes: 28728 },
@@ -764,7 +841,139 @@ test(
       assert.equal(response.headers.get("cache-control"), "no-store");
     });
 
-    await t.test("catálogo de assets publica manifesto do pacote v3", async () => {
+            await t.test("Release 8 publica manifestos de assets vazios para os seis percursos", async () => {
+      const canonicalByPath = {
+        "student.de-de.phase1": "official_asset_manifest_de_de_v8.json",
+        "student.en-us.phase1": "official_asset_manifest_en_us_v8.json",
+        "student.es-es.phase1": "official_asset_manifest_es_es_v8.json",
+        "student.fr-fr.phase1": "official_asset_manifest_fr_fr_v8.json",
+        "student.it-it.phase1": "official_asset_manifest_it_it_v8.json",
+        "student.pt-pt.phase1": "official_asset_manifest_pt_pt_v8.json",
+      };
+
+      const { response: catalogResponse, payload } =
+        await apiRequest("/api/content/assets/catalog");
+
+      assert.equal(catalogResponse.status, 200);
+      assert.equal(payload.success, true);
+      assert.equal(payload.assetCatalogVersion, 1);
+
+      for (const [pathId, canonicalFile] of Object.entries(canonicalByPath)) {
+        const metadata = payload.manifests.find(
+          (item) => item.pathId === pathId && item.packageVersion === 8,
+        );
+
+        assert.ok(metadata, `manifesto v8 ausente para ${pathId}`);
+        assert.equal(metadata.manifestVersion, 1);
+        assert.equal(
+          metadata.downloadPath,
+          `/api/content/assets/manifests/${pathId}/8`,
+        );
+
+        const response = await fetch(
+          `${API_BASE}${metadata.downloadPath}`,
+          { headers: { [ENV_HEADER]: "DEV" } },
+        );
+
+        assert.equal(response.status, 200);
+        assert.equal(
+          response.headers.get("cache-control"),
+          "public, max-age=31536000, immutable",
+        );
+        assert.equal(response.headers.get("x-content-package-version"), "8");
+
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        assert.equal(bytes.byteLength, metadata.sizeBytes);
+        assert.equal(
+          createHash("sha256").update(bytes).digest("hex"),
+          metadata.sha256,
+        );
+
+        const canonicalBytes = await readFile(
+          path.join(ROOT, "docs", "phase2", canonicalFile),
+        );
+        assert.deepEqual(Buffer.from(bytes), canonicalBytes);
+
+        const decoded = JSON.parse(new TextDecoder().decode(bytes));
+        assert.equal(decoded.manifestVersion, 1);
+        assert.equal(decoded.pathId, pathId);
+        assert.equal(decoded.packageVersion, 8);
+        assert.deepEqual(decoded.assets, []);
+      }
+    });
+await t.test("Release 7 publica manifestos de assets vazios para os seis percursos", async () => {
+      const canonicalByPath = {
+        "student.de-de.phase1": "official_asset_manifest_de_de_v7.json",
+        "student.en-us.phase1": "official_asset_manifest_en_us_v7.json",
+        "student.es-es.phase1": "official_asset_manifest_es_es_v7.json",
+        "student.fr-fr.phase1": "official_asset_manifest_fr_fr_v7.json",
+        "student.it-it.phase1": "official_asset_manifest_it_it_v7.json",
+        "student.pt-pt.phase1": "official_asset_manifest_pt_pt_v7.json",
+      };
+
+      const { response: catalogResponse, payload } =
+        await apiRequest("/api/content/assets/catalog");
+
+      assert.equal(catalogResponse.status, 200);
+      assert.equal(payload.success, true);
+      assert.equal(payload.assetCatalogVersion, 1);
+
+      for (const [pathId, canonicalFile] of Object.entries(canonicalByPath)) {
+        const metadata = payload.manifests.find(
+          (item) => item.pathId === pathId && item.packageVersion === 7,
+        );
+
+        assert.ok(metadata, `manifesto v7 ausente para ${pathId}`);
+        assert.equal(metadata.manifestVersion, 1);
+        assert.equal(metadata.contentType, "application/json");
+        assert.equal(
+          metadata.downloadPath,
+          `/api/content/assets/manifests/${pathId}/7`,
+        );
+
+        const response = await fetch(
+          `${API_BASE}${metadata.downloadPath}`,
+          { headers: { [ENV_HEADER]: "DEV" } },
+        );
+
+        assert.equal(response.status, 200);
+        assert.equal(
+          response.headers.get("cache-control"),
+          "public, max-age=31536000, immutable",
+        );
+        assert.equal(
+          response.headers.get("x-asset-manifest-sha256"),
+          metadata.sha256,
+        );
+        assert.equal(
+          response.headers.get("x-asset-manifest-version"),
+          "1",
+        );
+        assert.equal(
+          response.headers.get("x-content-package-version"),
+          "7",
+        );
+
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        assert.equal(bytes.byteLength, metadata.sizeBytes);
+        assert.equal(
+          createHash("sha256").update(bytes).digest("hex"),
+          metadata.sha256,
+        );
+
+        const canonicalBytes = await readFile(
+          path.join(ROOT, "docs", "phase2", canonicalFile),
+        );
+        assert.deepEqual(Buffer.from(bytes), canonicalBytes);
+
+        const decoded = JSON.parse(new TextDecoder().decode(bytes));
+        assert.equal(decoded.manifestVersion, 1);
+        assert.equal(decoded.pathId, pathId);
+        assert.equal(decoded.packageVersion, 7);
+        assert.deepEqual(decoded.assets, []);
+      }
+    });
+await t.test("catálogo de assets publica manifesto do pacote v3", async () => {
       const { response, payload } = await apiRequest(
         "/api/content/assets/catalog",
       );
