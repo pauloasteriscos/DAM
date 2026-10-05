@@ -14,24 +14,25 @@ Widget _buildSettingsInTestMode() {
     child: AppSessionScope(
       controller: AppSessionController.instance,
       child: const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: Color(0xFF0D1B22),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(16),
-            child: SettingsContent(),
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          backgroundColor: Color(0xFF0D1B22),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(16),
+              child: SettingsContent(),
+            ),
           ),
         ),
-      ),
       ),
     ),
   );
 }
 
 void main() {
-  testWidgets('Ajustes em modo teste distingue preferências locais e conta',
-      (tester) async {
+  testWidgets('Ajustes em modo teste distingue preferências locais e conta', (
+    tester,
+  ) async {
     await tester.pumpWidget(_buildSettingsInTestMode());
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -39,14 +40,16 @@ void main() {
     expect(find.text('Conta'), findsOneWidget);
     expect(find.text('Perfil'), findsOneWidget);
     expect(find.text('Language'), findsOneWidget);
+    expect(find.text('Personalização'), findsWidgets);
     expect(find.text('Sincronizar'), findsOneWidget);
     expect(find.textContaining('Alterar idiomas localmente'), findsOneWidget);
     expect(find.textContaining('Escolher perfil localmente'), findsOneWidget);
     expect(find.textContaining('Entra para sincronizar'), findsOneWidget);
   });
 
-  testWidgets('Funcionalidade protegida mostra diálogo de conta necessária',
-      (tester) async {
+  testWidgets('Funcionalidade protegida mostra diálogo de conta necessária', (
+    tester,
+  ) async {
     await tester.pumpWidget(_buildSettingsInTestMode());
     await tester.pump(const Duration(milliseconds: 300));
 

@@ -20,6 +20,9 @@ class AppSettingsDao {
   /// Idioma que o utilizador quer praticar/aprender.
   static const String targetLanguageKey = 'target_language_code';
 
+  /// Estilo visual do controlo de velocidade de áudio.
+  static const String audioSpeedControlStyleKey = 'audio_speed_control_style';
+
   /// Guarda uma configuração simples.
   Future<void> setValue({
     required String key,
@@ -134,5 +137,19 @@ class AppSettingsDao {
   /// Lê o idioma que o utilizador quer praticar.
   Future<String> getTargetLanguageCode() async {
     return await getString(targetLanguageKey) ?? 'it-IT';
+  }
+
+  /// Guarda apenas a preferência visual do controlo de velocidade.
+  Future<void> setAudioSpeedControlStyle(String value) async {
+    await setValue(
+      key: audioSpeedControlStyleKey,
+      value: value,
+      valueType: 'text',
+    );
+  }
+
+  /// Lê a preferência visual do controlo de velocidade.
+  Future<String?> getAudioSpeedControlStyle() {
+    return getString(audioSpeedControlStyleKey);
   }
 }

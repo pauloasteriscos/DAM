@@ -3,6 +3,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../audio/vocabulary_pronunciation_player.dart';
+import '../../state/audio_speed_preferences_controller.dart';
+import '../../widgets/audio_speed_selector.dart';
+
 import '../../domain/learning/learning_enums.dart';
 import '../../domain/learning/learning_models.dart';
 import '../../state/app_learning_language_controller.dart';
@@ -25,6 +29,9 @@ final class LearningVocabularyRuntimePage extends StatefulWidget {
     this.competencyCount = 0,
     this.onActivityCompleted,
     this.returnToLearningMapOnCompletion = false,
+    this.pronunciationPlayer,
+    this.audioPreferencesController,
+    this.initialAudioSpeed = 1,
   });
 
   final VocabularyActivityExecution execution;
@@ -33,6 +40,9 @@ final class LearningVocabularyRuntimePage extends StatefulWidget {
   final int competencyCount;
   final LearningActivityCompletionAction? onActivityCompleted;
   final bool returnToLearningMapOnCompletion;
+  final VocabularyPronunciationPlayer? pronunciationPlayer;
+  final AudioSpeedPreferencesController? audioPreferencesController;
+  final double initialAudioSpeed;
 
   @override
   State<LearningVocabularyRuntimePage> createState() =>
@@ -80,6 +90,17 @@ final class _LearningVocabularyRuntimePageState
   int? _scheduledPairCapacity;
 
   final Random _random = Random();
+  static const List<double> _audioSpeeds = <double>[0.5, 0.75, 1, 1.25, 1.5];
+
+  late final VocabularyPronunciationPlayer _pronunciationPlayer;
+  late final bool _ownsPronunciationPlayer;
+  late final AudioSpeedPreferencesController _audioPreferencesController;
+  late double _audioSpeed;
+
+  bool _audioAvailable = false;
+  String? _audioCheckedLocale;
+  String? _audioCheckPendingLocale;
+  int _audioAvailabilityRequest = 0;
 
   bool get _finished =>
       _leftItems.isNotEmpty && _matchedIds.length == _leftItems.length;
@@ -87,6 +108,14 @@ final class _LearningVocabularyRuntimePageState
   @override
   void initState() {
     super.initState();
+    _ownsPronunciationPlayer = widget.pronunciationPlayer == null;
+    _pronunciationPlayer =
+        widget.pronunciationPlayer ?? TtsVocabularyPronunciationPlayer();
+    _audioPreferencesController =
+        widget.audioPreferencesController ??
+        AudioSpeedPreferencesController.instance;
+    _audioSpeed = widget.initialAudioSpeed;
+    unawaited(_audioPreferencesController.ensureLoaded());
     _leftItems = List<VocabularyExecutionItem>.of(widget.execution.items);
     _itemById = <String, VocabularyExecutionItem>{
       for (final item in _leftItems) item.id: item,
@@ -96,6 +125,14 @@ final class _LearningVocabularyRuntimePageState
     // Populate authored content on the first frame too. LayoutBuilder may
     // still reduce the capacity to the best 3..6 value before interaction.
     _buildBoardForCapacity(6);
+  }
+
+  @override
+  void dispose() {
+    if (_ownsPronunciationPlayer) {
+      unawaited(_pronunciationPlayer.stop());
+    }
+    super.dispose();
   }
 
   int _calculateVisiblePairCapacity(double availableHeight) {
@@ -269,6 +306,74 @@ final class _LearningVocabularyRuntimePageState
     });
 
     await Future<void>.delayed(const Duration(milliseconds: 220));
+  }
+
+  void _scheduleAudioAvailabilityCheck(String locale) {
+    if (_audioCheckedLocale == locale || _audioCheckPendingLocale == locale) {
+      return;
+    }
+
+    _audioCheckPendingLocale = locale;
+    final request = ++_audioAvailabilityRequest;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      var available = false;
+      try {
+        available = await _pronunciationPlayer.isAvailable(locale: locale);
+      } on Object {
+        available = false;
+      }
+
+      if (!mounted || request != _audioAvailabilityRequest) {
+        return;
+      }
+
+      setState(() {
+        _audioCheckedLocale = locale;
+        _audioCheckPendingLocale = null;
+        _audioAvailable = available;
+      });
+    });
+  }
+
+  bool _audioEnabledFor(String locale) =>
+      _audioCheckedLocale == locale && _audioAvailable;
+
+  Future<void> _speakPronunciation(
+    VocabularyExecutionItem item,
+    String languageCode,
+  ) async {
+    if (!_audioEnabledFor(languageCode)) {
+      return;
+    }
+
+    final text = item.text.resolve(
+      languageCode,
+      fallbackLocale: widget.contentDefaultLocale,
+    );
+
+    final played = await _pronunciationPlayer.speak(
+      text: text,
+      locale: languageCode,
+      speed: _audioSpeed,
+    );
+
+    if (!played && mounted) {
+      setState(() {
+        if (_audioCheckedLocale == languageCode) {
+          _audioAvailable = false;
+        }
+      });
+    }
+  }
+
+  void _setAudioSpeed(double speed) {
+    if (_audioSpeed == speed) {
+      return;
+    }
+    setState(() {
+      _audioSpeed = speed;
+    });
   }
 
   void _select(VocabularyExecutionItem item, {required bool left}) {
@@ -466,92 +571,114 @@ final class _LearningVocabularyRuntimePageState
             final completed = _matchedIds.length;
             final displayFinished = _finished;
 
-            return Scaffold(
-              backgroundColor: const Color(0xFFF4F8FB),
-              appBar: AppBar(
-                elevation: 0,
-                backgroundColor: const Color(0xFF071C25),
-                foregroundColor: Colors.white,
-                titleSpacing: 0,
-                title: const Text(
-                  'DailyTalk.pt',
-                  style: TextStyle(fontWeight: FontWeight.w800),
-                ),
-                actions: const <Widget>[LearningLanguageQuickSwitcher()],
-              ),
-              body: SafeArea(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 760),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
-                      child: Column(
-                        children: <Widget>[
-                          _Header(
-                            copy: copy,
-                            completed: completed,
-                            total: total,
-                            appLanguage: appLanguage,
-                            learningLanguage: learningLanguage,
-                          ),
-                          const SizedBox(height: 14),
-                          Expanded(
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                final calculatedCapacity =
-                                    _calculateVisiblePairCapacity(
-                                      constraints.maxHeight,
+            _scheduleAudioAvailabilityCheck(learningLanguage);
+
+            return AnimatedBuilder(
+              animation: _audioPreferencesController,
+              builder: (context, _) {
+                return Scaffold(
+                  backgroundColor: const Color(0xFFF4F8FB),
+                  appBar: AppBar(
+                    elevation: 0,
+                    backgroundColor: const Color(0xFF071C25),
+                    foregroundColor: Colors.white,
+                    titleSpacing: 0,
+                    title: const Text(
+                      'DailyTalk.pt',
+                      style: TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                    actions: const <Widget>[LearningLanguageQuickSwitcher()],
+                  ),
+                  body: SafeArea(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 760),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                          child: Column(
+                            children: <Widget>[
+                              _Header(
+                                copy: copy,
+                                completed: completed,
+                                total: total,
+                                appLanguage: appLanguage,
+                                learningLanguage: learningLanguage,
+                              ),
+                              const SizedBox(height: 10),
+                              AudioSpeedSelector(
+                                style: _audioPreferencesController.style,
+                                speeds: _audioSpeeds,
+                                selectedSpeed: _audioSpeed,
+                                onSelected: _setAudioSpeed,
+                                title: copy.audioSpeed,
+                              ),
+                              const SizedBox(height: 10),
+                              Expanded(
+                                child: LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    final calculatedCapacity =
+                                        _calculateVisiblePairCapacity(
+                                          constraints.maxHeight,
+                                        );
+                                    _schedulePairCapacityUpdate(
+                                      calculatedCapacity,
                                     );
-                                _schedulePairCapacityUpdate(calculatedCapacity);
 
-                                final visibleCount = _visiblePairCapacity == 0
-                                    ? calculatedCapacity
-                                    : _visiblePairCapacity;
+                                    final visibleCount =
+                                        _visiblePairCapacity == 0
+                                        ? calculatedCapacity
+                                        : _visiblePairCapacity;
 
-                                return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: _buildColumn(
-                                        items: _leftSlots,
-                                        visibleCount: visibleCount,
-                                        languageCode: appLanguage,
-                                        left: true,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: _buildColumn(
-                                        items: _rightSlots,
-                                        visibleCount: visibleCount,
-                                        languageCode: learningLanguage,
-                                        left: false,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
+                                    return Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: _buildColumn(
+                                            items: _leftSlots,
+                                            visibleCount: visibleCount,
+                                            languageCode: appLanguage,
+                                            copy: copy,
+                                            left: true,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: _buildColumn(
+                                            items: _rightSlots,
+                                            visibleCount: visibleCount,
+                                            languageCode: learningLanguage,
+                                            copy: copy,
+                                            left: false,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              _Footer(
+                                copy: copy,
+                                completed: completed,
+                                total: total,
+                                attempts: _attempts,
+                                finished: displayFinished,
+                                onReset: _reset,
+                                onComplete:
+                                    _persistingCompletion ||
+                                        _isResolvingSelection
+                                    ? null
+                                    : () => unawaited(_openCompletion(copy)),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 12),
-                          _Footer(
-                            copy: copy,
-                            completed: completed,
-                            total: total,
-                            attempts: _attempts,
-                            finished: displayFinished,
-                            onReset: _reset,
-                            onComplete:
-                                _persistingCompletion || _isResolvingSelection
-                                ? null
-                                : () => unawaited(_openCompletion(copy)),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             );
           },
         );
@@ -563,9 +690,11 @@ final class _LearningVocabularyRuntimePageState
     required List<VocabularyExecutionItem?> items,
     required int visibleCount,
     required String languageCode,
+    required _VocabularyRuntimeCopy copy,
     required bool left,
   }) {
     final count = min(visibleCount, _leftItems.length);
+    final audioEnabled = !left && _audioEnabledFor(languageCode);
 
     return Column(
       key: ValueKey<String>(
@@ -603,7 +732,30 @@ final class _LearningVocabularyRuntimePageState
                         wrong: left
                             ? _wrongLeftId == items[index]!.id
                             : _wrongRightId == items[index]!.id,
-                        onTap: () => _select(items[index]!, left: left),
+                        showAudioIcon: !left,
+                        audioEnabled: audioEnabled,
+                        audioKey: left
+                            ? null
+                            : ValueKey<String>(
+                                'mission-vocab-audio-${items[index]!.id}',
+                              ),
+                        audioTooltip: left ? null : copy.listen,
+                        onAudioTap: left || !audioEnabled
+                            ? null
+                            : () => unawaited(
+                                _speakPronunciation(
+                                  items[index]!,
+                                  languageCode,
+                                ),
+                              ),
+                        onTap: () {
+                          if (!left && audioEnabled) {
+                            unawaited(
+                              _speakPronunciation(items[index]!, languageCode),
+                            );
+                          }
+                          _select(items[index]!, left: left);
+                        },
                       ),
                     ),
                   ),
@@ -729,6 +881,11 @@ final class _PairCard extends StatelessWidget {
     required this.selected,
     required this.wrong,
     required this.onTap,
+    this.showAudioIcon = false,
+    this.audioEnabled = false,
+    this.audioKey,
+    this.audioTooltip,
+    this.onAudioTap,
   });
 
   final String text;
@@ -736,6 +893,11 @@ final class _PairCard extends StatelessWidget {
   final bool selected;
   final bool wrong;
   final VoidCallback onTap;
+  final bool showAudioIcon;
+  final bool audioEnabled;
+  final Key? audioKey;
+  final String? audioTooltip;
+  final VoidCallback? onAudioTap;
 
   @override
   Widget build(BuildContext context) {
@@ -784,6 +946,19 @@ final class _PairCard extends StatelessWidget {
                   ),
                 ),
               ),
+              if (showAudioIcon) ...<Widget>[
+                const SizedBox(width: 4),
+                IconButton(
+                  key: audioKey,
+                  onPressed: audioEnabled ? onAudioTap : null,
+                  tooltip: audioTooltip,
+                  visualDensity: VisualDensity.compact,
+                  iconSize: 20,
+                  color: const Color(0xFF168CFF),
+                  disabledColor: const Color(0xFF9AAAB3),
+                  icon: const Icon(Icons.volume_up_rounded),
+                ),
+              ],
               if (matched) ...<Widget>[
                 const SizedBox(width: 5),
                 const Icon(
@@ -895,6 +1070,8 @@ final class _VocabularyRuntimeCopy {
     required this.continueLabel,
     required this.pairsMetric,
     required this.attemptsMetric,
+    required this.audioSpeed,
+    required this.listen,
   });
 
   final String typeLabel;
@@ -907,6 +1084,8 @@ final class _VocabularyRuntimeCopy {
   final String continueLabel;
   final String pairsMetric;
   final String attemptsMetric;
+  final String audioSpeed;
+  final String listen;
 }
 
 _VocabularyRuntimeCopy _copyFor(String locale) {
@@ -922,6 +1101,8 @@ _VocabularyRuntimeCopy _copyFor(String locale) {
       continueLabel: 'Continue',
       pairsMetric: 'Pairs',
       attemptsMetric: 'Attempts',
+      audioSpeed: 'Audio speed',
+      listen: 'Listen',
     ),
     'es' => const _VocabularyRuntimeCopy(
       typeLabel: 'Vocabulario',
@@ -934,6 +1115,8 @@ _VocabularyRuntimeCopy _copyFor(String locale) {
       continueLabel: 'Continuar',
       pairsMetric: 'Parejas',
       attemptsMetric: 'Intentos',
+      audioSpeed: 'Velocidad del audio',
+      listen: 'Escuchar',
     ),
     'fr' => const _VocabularyRuntimeCopy(
       typeLabel: 'Vocabulaire',
@@ -946,6 +1129,8 @@ _VocabularyRuntimeCopy _copyFor(String locale) {
       continueLabel: 'Continuer',
       pairsMetric: 'Paires',
       attemptsMetric: 'Tentatives',
+      audioSpeed: 'Vitesse audio',
+      listen: 'Écouter',
     ),
     'it' => const _VocabularyRuntimeCopy(
       typeLabel: 'Vocabolario',
@@ -958,6 +1143,8 @@ _VocabularyRuntimeCopy _copyFor(String locale) {
       continueLabel: 'Continua',
       pairsMetric: 'Coppie',
       attemptsMetric: 'Tentativi',
+      audioSpeed: 'Velocità audio',
+      listen: 'Ascolta',
     ),
     'de' => const _VocabularyRuntimeCopy(
       typeLabel: 'Wortschatz',
@@ -970,6 +1157,8 @@ _VocabularyRuntimeCopy _copyFor(String locale) {
       continueLabel: 'Weiter',
       pairsMetric: 'Paare',
       attemptsMetric: 'Versuche',
+      audioSpeed: 'Audiogeschwindigkeit',
+      listen: 'Anhören',
     ),
     _ => const _VocabularyRuntimeCopy(
       typeLabel: 'Vocabulário',
@@ -982,6 +1171,8 @@ _VocabularyRuntimeCopy _copyFor(String locale) {
       continueLabel: 'Continuar',
       pairsMetric: 'Pares',
       attemptsMetric: 'Tentativas',
+      audioSpeed: 'Velocidade do áudio',
+      listen: 'Ouvir',
     ),
   };
 }

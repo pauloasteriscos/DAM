@@ -6,6 +6,7 @@ import '../data/facades/activity_workflow_facade.dart';
 import '../screens/account_page.dart';
 import '../screens/create_activity_page.dart';
 import '../screens/language_selection_page.dart';
+import '../screens/personalization_page.dart';
 import '../screens/login_form_page.dart';
 import '../screens/my_activities_page.dart';
 import '../screens/register_page.dart';
@@ -37,6 +38,15 @@ class TopOverflowMenu extends StatelessWidget {
 
           case _TopMenuAction.language:
             await openLanguageSelectionFlow(context);
+            break;
+
+          case _TopMenuAction.personalization:
+            Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) => const PersonalizationPage(),
+              ),
+            );
             break;
 
           case _TopMenuAction.createActivity:
@@ -99,6 +109,13 @@ class TopOverflowMenu extends StatelessWidget {
           const PopupMenuItem(
             value: _TopMenuAction.language,
             child: _MenuItemContent(icon: Icons.language, text: 'Language'),
+          ),
+          const PopupMenuItem(
+            value: _TopMenuAction.personalization,
+            child: _MenuItemContent(
+              icon: Icons.tune_rounded,
+              text: 'Personalização',
+            ),
           ),
           const PopupMenuItem(
             value: _TopMenuAction.createActivity,
@@ -255,6 +272,7 @@ class TopOverflowMenu extends StatelessWidget {
 enum _TopMenuAction {
   account,
   language,
+  personalization,
   createActivity,
   myActivities,
   help,

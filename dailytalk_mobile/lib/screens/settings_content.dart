@@ -11,6 +11,7 @@ import 'language_selection_page.dart';
 import 'login_form_page.dart';
 import 'my_activities_page.dart';
 import 'private_notes_page.dart';
+import 'personalization_page.dart';
 import 'profile_selection_page.dart';
 import 'register_page.dart';
 
@@ -78,6 +79,23 @@ class SettingsContent extends StatelessWidget {
               : 'Alterar idiomas localmente durante o modo teste.',
           onTap: () async {
             await openLanguageSelectionFlow(context);
+          },
+        ),
+
+        const SizedBox(height: 22),
+        _buildSectionTitle('Personalização'),
+
+        _SettingsButton(
+          icon: Icons.tune_rounded,
+          title: 'Personalização',
+          description: 'Personalizar áudio e preferências da interface.',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) => const PersonalizationPage(),
+              ),
+            );
           },
         ),
 
