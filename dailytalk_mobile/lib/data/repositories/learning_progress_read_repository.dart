@@ -3,10 +3,10 @@ import 'package:sqflite/sqflite.dart';
 import '../../domain/learning/learning_enums.dart';
 import '../../domain/learning/progression_engine.dart';
 
-/// Linha persistida da projeÃ§Ã£o pedagÃ³gica.
+/// Linha persistida da projeção pedagógica.
 ///
-/// Ã‰ um read model derivado. Os factos durÃ¡veis continuam a ser as conclusÃµes
-/// e as evidÃªncias; esta projeÃ§Ã£o pode ser reconstruÃ­da pelo ProgressionEngine.
+/// É um read model derivado. Os factos duráveis continuam a ser as conclusões
+/// e as evidências; esta projeção pode ser reconstruída pelo ProgressionEngine.
 final class LearningProgressProjectionEntry {
   const LearningProgressProjectionEntry({
     required this.pathElementId,
@@ -29,9 +29,9 @@ final class LearningProgressProjectionEntry {
   bool get isRecommended => recommendationRank != null;
 }
 
-/// Estado tÃ©cnico de sincronizaÃ§Ã£o associado a uma atividade.
+/// Estado técnico de sincronização associado a uma atividade.
 ///
-/// Esta informaÃ§Ã£o Ã© deliberadamente independente do estado pedagÃ³gico.
+/// Esta informação é deliberadamente independente do estado pedagógico.
 /// Uma atividade pode, por exemplo, estar completed + pending.
 final class LearningActivitySyncEntry {
   const LearningActivitySyncEntry({
@@ -43,10 +43,10 @@ final class LearningActivitySyncEntry {
   final ProgressSyncState state;
 }
 
-/// API exclusivamente de leitura para a apresentaÃ§Ã£o da progressÃ£o.
+/// API exclusivamente de leitura para a apresentação da progressão.
 ///
-/// Esta classe nÃ£o executa ProgressionEngine e nÃ£o altera factos, projeÃ§Ãµes
-/// ou outbox. Apenas lÃª o estado local jÃ¡ persistido.
+/// Esta classe não executa ProgressionEngine e não altera factos, projeções
+/// ou outbox. Apenas lê o estado local já persistido.
 final class LearningProgressReadRepository {
   const LearningProgressReadRepository(this._db);
 
@@ -63,7 +63,7 @@ final class LearningProgressReadRepository {
       throw ArgumentError.value(
         accountId,
         'accountId',
-        'nÃ£o pode estar vazio',
+        'não pode estar vazio',
       );
     }
 
@@ -71,7 +71,7 @@ final class LearningProgressReadRepository {
       throw ArgumentError.value(
         learningPathId,
         'learningPathId',
-        'nÃ£o pode estar vazio',
+        'não pode estar vazio',
       );
     }
 
@@ -95,7 +95,7 @@ final class LearningProgressReadRepository {
       throw ArgumentError.value(
         accountId,
         'accountId',
-        'nÃ£o pode estar vazio',
+        'não pode estar vazio',
       );
     }
 
@@ -103,7 +103,7 @@ final class LearningProgressReadRepository {
       throw ArgumentError.value(
         learningPathId,
         'learningPathId',
-        'nÃ£o pode estar vazio',
+        'não pode estar vazio',
       );
     }
 
@@ -131,7 +131,7 @@ final class LearningProgressReadRepository {
       throw ArgumentError.value(
         accountId,
         'accountId',
-        'nÃ£o pode estar vazio',
+        'não pode estar vazio',
       );
     }
 
@@ -139,7 +139,7 @@ final class LearningProgressReadRepository {
       throw ArgumentError.value(
         learningPathId,
         'learningPathId',
-        'nÃ£o pode estar vazio',
+        'não pode estar vazio',
       );
     }
 

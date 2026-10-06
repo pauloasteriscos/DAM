@@ -2,11 +2,11 @@ import '../../domain/learning/learning_enums.dart';
 import '../../domain/learning/learning_models.dart';
 import '../../domain/learning/progression_engine.dart';
 
-/// Read model completo utilizado pela apresentaÃƒÂ§ÃƒÂ£o do percurso.
+/// Read model completo utilizado pela apresentação do percurso.
 ///
-/// NÃƒÂ£o contÃƒÂ©m SQLite, rede, ProgressionEngine nem dependÃƒÂªncias de Flutter.
-/// Quando esta instÃƒÂ¢ncia chega ÃƒÂ  UI, todas as decisÃƒÂµes pedagÃƒÂ³gicas relevantes
-/// jÃƒÂ¡ foram tomadas pelas camadas anteriores.
+/// Não contém SQLite, rede, ProgressionEngine nem dependências de Flutter.
+/// Quando esta instância chega à UI, todas as decisões pedagógicas relevantes
+/// já foram tomadas pelas camadas anteriores.
 final class LearningMapViewModel {
   LearningMapViewModel({
     required this.learningPathId,
@@ -25,7 +25,7 @@ final class LearningMapViewModel {
   final int packageVersion;
   final bool recoveredFromFallback;
 
-  /// Contagem relativa apenas ÃƒÂ s atividades existentes na projeÃƒÂ§ÃƒÂ£o ativa.
+  /// Contagem relativa apenas às atividades existentes na projeção ativa.
   final int completedActivityCount;
   final int totalActivityCount;
 
@@ -49,8 +49,8 @@ final class LearningMapViewModel {
 
   /// Primeiro elemento da ordem recomendada pelo ProgressionEngine.
   ///
-  /// recommendationRank == null significa que o elemento nÃƒÂ£o faz parte
-  /// da lista de recomendaÃƒÂ§ÃƒÂµes atual.
+  /// recommendationRank == null significa que o elemento não faz parte
+  /// da lista de recomendações atual.
   LearningMapElementViewModel? get nextRecommendedElement {
     LearningMapElementViewModel? selected;
 
@@ -115,10 +115,10 @@ final class LearningMapStageViewModel {
   }
 }
 
-/// Elemento jÃƒÂ¡ preparado para apresentaÃƒÂ§ÃƒÂ£o.
+/// Elemento já preparado para apresentação.
 ///
-/// Atividades possuem metadados da sua revisÃƒÂ£o atual. Elementos estruturais
-/// como checkpoint, scene e reward podem nÃƒÂ£o possuir activityId.
+/// Atividades possuem metadados da sua revisão atual. Elementos estruturais
+/// como checkpoint, scene e reward podem não possuir activityId.
 enum LearningMapPrerequisiteType {
   activityCompleted,
   competencyAchieved,
