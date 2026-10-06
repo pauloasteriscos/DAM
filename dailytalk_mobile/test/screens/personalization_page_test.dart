@@ -30,6 +30,27 @@ void main() {
     }
   });
 
+  test(
+    'Velocidade do áudio tem tradução própria em todos os idiomas da app',
+    () {
+      const expected = <String, String>{
+        'pt-PT': 'Velocidade do áudio',
+        'en-US': 'Audio speed',
+        'es-ES': 'Velocidad del audio',
+        'fr-FR': 'Vitesse audio',
+        'it-IT': 'Velocità audio',
+        'de-DE': 'Audiogeschwindigkeit',
+      };
+
+      for (final entry in expected.entries) {
+        expect(
+          AppTranslations.translate('Velocidade do áudio', entry.key),
+          entry.value,
+          reason: entry.key,
+        );
+      }
+    },
+  );
   testWidgets(
     'Personalização segue o idioma da app e localiza todo o conteúdo de áudio',
     (tester) async {
@@ -93,6 +114,8 @@ void main() {
       expect(find.text('Buttons'), findsOneWidget);
       expect(find.text('Slider'), findsOneWidget);
       expect(find.text('Compact'), findsOneWidget);
+      expect(find.text('Audio speed'), findsWidgets);
+      expect(find.text('Velocidade do áudio'), findsNothing);
       expect(
         find.text(
           'Five visible options with a clear highlight for the active speed.',

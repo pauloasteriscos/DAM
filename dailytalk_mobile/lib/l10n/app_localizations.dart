@@ -65,6 +65,7 @@ class AppTranslations {
     'en': {
       'Personalização': 'Personalization',
       'Áudio': 'Audio',
+      'Velocidade do áudio': 'Audio speed',
       'Estilo da velocidade do áudio': 'Audio speed control style',
       'Escolher como o controlo de velocidade aparece nas atividades.':
           'Choose how the speed control appears in activities.',
@@ -92,6 +93,7 @@ class AppTranslations {
     'es': {
       'Personalização': 'Personalización',
       'Áudio': 'Audio',
+      'Velocidade do áudio': 'Velocidad del audio',
       'Estilo da velocidade do áudio':
           'Estilo del control de velocidad del audio',
       'Escolher como o controlo de velocidade aparece nas atividades.':
@@ -120,6 +122,7 @@ class AppTranslations {
     'fr': {
       'Personalização': 'Personnalisation',
       'Áudio': 'Audio',
+      'Velocidade do áudio': 'Vitesse audio',
       'Estilo da velocidade do áudio': 'Style du contrôle de la vitesse audio',
       'Escolher como o controlo de velocidade aparece nas atividades.':
           'Choisis comment le contrôle de vitesse apparaît dans les activités.',
@@ -147,6 +150,7 @@ class AppTranslations {
     'it': {
       'Personalização': 'Personalizzazione',
       'Áudio': 'Audio',
+      'Velocidade do áudio': 'Velocità audio',
       'Estilo da velocidade do áudio':
           'Stile del controllo della velocità audio',
       'Escolher como o controlo de velocidade aparece nas atividades.':
@@ -175,6 +179,7 @@ class AppTranslations {
     'de': {
       'Personalização': 'Personalisierung',
       'Áudio': 'Audio',
+      'Velocidade do áudio': 'Audiogeschwindigkeit',
       'Estilo da velocidade do áudio':
           'Stil der Audiogeschwindigkeitssteuerung',
       'Escolher como o controlo de velocidade aparece nas atividades.':
