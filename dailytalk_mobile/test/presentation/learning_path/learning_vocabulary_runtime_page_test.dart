@@ -146,15 +146,30 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(
-      find.byKey(const ValueKey<String>('mission-vocab-audio-thanks')),
+    final thanksAudio = find.byKey(
+      const ValueKey<String>('mission-vocab-audio-thanks'),
     );
+    expect(
+      find.ancestor(of: thanksAudio, matching: find.byType(IconButton)),
+      findsNothing,
+    );
+
+    await tester.tap(thanksAudio);
     await tester.pump();
 
     expect(player.calls, hasLength(2));
     expect(player.calls.last.text, 'Grazie');
     expect(player.calls.last.locale, 'it-IT');
     expect(player.calls.last.speed, 0.5);
+
+    // The speaker is only a visual indicator inside the card. Tapping exactly
+    // on it must select the same card as any other point of the card.
+    await tester.tap(
+      find.byKey(const ValueKey<String>('mission-vocab-left-thanks')),
+    );
+    await tester.pump(const Duration(milliseconds: 450));
+
+    expect(find.text('1/2 · 1 tentativas'), findsOneWidget);
   });
 
   testWidgets('unavailable audio stays grey and never blocks card selection', (
@@ -180,15 +195,23 @@ void main() {
     );
     expect(audioFinder, findsOneWidget);
 
-    final button = tester.widget<IconButton>(audioFinder);
-    expect(button.onPressed, isNull);
-
-    await tester.tap(
-      find.byKey(const ValueKey<String>('mission-vocab-right-hello')),
+    final icon = tester.widget<Icon>(audioFinder);
+    expect(icon.color, const Color(0xFF9AAAB3));
+    expect(
+      find.ancestor(of: audioFinder, matching: find.byType(IconButton)),
+      findsNothing,
     );
+
+    // Even without TTS support, the whole card remains one interaction target.
+    await tester.tap(audioFinder);
     await tester.pump();
+    await tester.tap(
+      find.byKey(const ValueKey<String>('mission-vocab-left-hello')),
+    );
+    await tester.pump(const Duration(milliseconds: 450));
 
     expect(player.calls, isEmpty);
+    expect(find.text('1/2 · 1 tentativas'), findsOneWidget);
     expect(find.byType(SnackBar), findsNothing);
   });
 }

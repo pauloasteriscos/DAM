@@ -39,6 +39,7 @@ class AppTranslations {
 
   static String? _lookupExact(String source, String language) {
     return _translations[language]?[source] ??
+        _personalizationTranslations[language]?[source] ??
         _supplementalTranslations[language]?[source] ??
         _domainTranslations[language]?[source] ??
         _learningPathTranslations[language]?[source];
@@ -59,6 +60,147 @@ class AppTranslations {
 
     return source;
   }
+
+  static const Map<String, Map<String, String>> _personalizationTranslations = {
+    'en': {
+      'Personalização': 'Personalization',
+      'Áudio': 'Audio',
+      'Estilo da velocidade do áudio': 'Audio speed control style',
+      'Escolher como o controlo de velocidade aparece nas atividades.':
+          'Choose how the speed control appears in activities.',
+      'Botões': 'Buttons',
+      'Linha': 'Slider',
+      'Compacto': 'Compact',
+      'Personaliza a tua experiência': 'Customize your experience',
+      'Estas preferências alteram apenas a apresentação e a interação da aplicação.':
+          'These preferences only change the app’s presentation and interaction.',
+      'Escolhe como queres controlar a velocidade':
+          'Choose how you want to control the speed',
+      'A escolha muda apenas o estilo do controlo. As cinco velocidades e a lógica da atividade continuam exatamente iguais.':
+          'Your choice only changes the control style. The five speeds and the activity logic remain exactly the same.',
+      'A preferência é guardada neste dispositivo.':
+          'This preference is saved on this device.',
+      'Cinco opções visíveis com destaque claro da velocidade ativa.':
+          'Five visible options with a clear highlight for the active speed.',
+      'Uma linha com cinco posições para uma escolha mais fluida.':
+          'A slider with five positions for a smoother choice.',
+      'Barra reduzida que deixa mais espaço disponível para os cartões.':
+          'A compact bar that leaves more room for the cards.',
+      'Personalizar áudio e preferências da interface.':
+          'Customize audio and interface preferences.',
+    },
+    'es': {
+      'Personalização': 'Personalización',
+      'Áudio': 'Audio',
+      'Estilo da velocidade do áudio':
+          'Estilo del control de velocidad del audio',
+      'Escolher como o controlo de velocidade aparece nas atividades.':
+          'Elige cómo aparece el control de velocidad en las actividades.',
+      'Botões': 'Botones',
+      'Linha': 'Deslizador',
+      'Compacto': 'Compacto',
+      'Personaliza a tua experiência': 'Personaliza tu experiencia',
+      'Estas preferências alteram apenas a apresentação e a interação da aplicação.':
+          'Estas preferencias solo cambian la presentación y la interacción de la aplicación.',
+      'Escolhe como queres controlar a velocidade':
+          'Elige cómo quieres controlar la velocidad',
+      'A escolha muda apenas o estilo do controlo. As cinco velocidades e a lógica da atividade continuam exatamente iguais.':
+          'La elección solo cambia el estilo del control. Las cinco velocidades y la lógica de la actividad siguen siendo exactamente las mismas.',
+      'A preferência é guardada neste dispositivo.':
+          'La preferencia se guarda en este dispositivo.',
+      'Cinco opções visíveis com destaque claro da velocidade ativa.':
+          'Cinco opciones visibles con un resaltado claro de la velocidad activa.',
+      'Uma linha com cinco posições para uma escolha mais fluida.':
+          'Un deslizador con cinco posiciones para una selección más fluida.',
+      'Barra reduzida que deixa mais espaço disponível para os cartões.':
+          'Una barra compacta que deja más espacio para las tarjetas.',
+      'Personalizar áudio e preferências da interface.':
+          'Personaliza el audio y las preferencias de la interfaz.',
+    },
+    'fr': {
+      'Personalização': 'Personnalisation',
+      'Áudio': 'Audio',
+      'Estilo da velocidade do áudio': 'Style du contrôle de la vitesse audio',
+      'Escolher como o controlo de velocidade aparece nas atividades.':
+          'Choisis comment le contrôle de vitesse apparaît dans les activités.',
+      'Botões': 'Boutons',
+      'Linha': 'Curseur',
+      'Compacto': 'Compact',
+      'Personaliza a tua experiência': 'Personnalise ton expérience',
+      'Estas preferências alteram apenas a apresentação e a interação da aplicação.':
+          'Ces préférences modifient uniquement la présentation et l’interaction de l’application.',
+      'Escolhe como queres controlar a velocidade':
+          'Choisis comment tu veux contrôler la vitesse',
+      'A escolha muda apenas o estilo do controlo. As cinco velocidades e a lógica da atividade continuam exatamente iguais.':
+          'Le choix modifie uniquement le style du contrôle. Les cinq vitesses et la logique de l’activité restent exactement les mêmes.',
+      'A preferência é guardada neste dispositivo.':
+          'La préférence est enregistrée sur cet appareil.',
+      'Cinco opções visíveis com destaque claro da velocidade ativa.':
+          'Cinq options visibles avec une mise en évidence claire de la vitesse active.',
+      'Uma linha com cinco posições para uma escolha mais fluida.':
+          'Un curseur à cinq positions pour un choix plus fluide.',
+      'Barra reduzida que deixa mais espaço disponível para os cartões.':
+          'Une barre compacte qui laisse plus de place aux cartes.',
+      'Personalizar áudio e preferências da interface.':
+          'Personnalise l’audio et les préférences de l’interface.',
+    },
+    'it': {
+      'Personalização': 'Personalizzazione',
+      'Áudio': 'Audio',
+      'Estilo da velocidade do áudio':
+          'Stile del controllo della velocità audio',
+      'Escolher como o controlo de velocidade aparece nas atividades.':
+          'Scegli come appare il controllo della velocità nelle attività.',
+      'Botões': 'Pulsanti',
+      'Linha': 'Cursore',
+      'Compacto': 'Compatto',
+      'Personaliza a tua experiência': 'Personalizza la tua esperienza',
+      'Estas preferências alteram apenas a apresentação e a interação da aplicação.':
+          'Queste preferenze modificano solo la presentazione e l’interazione dell’applicazione.',
+      'Escolhe como queres controlar a velocidade':
+          'Scegli come vuoi controllare la velocità',
+      'A escolha muda apenas o estilo do controlo. As cinco velocidades e a lógica da atividade continuam exatamente iguais.':
+          'La scelta cambia solo lo stile del controllo. Le cinque velocità e la logica dell’attività restano esattamente le stesse.',
+      'A preferência é guardada neste dispositivo.':
+          'La preferenza viene salvata su questo dispositivo.',
+      'Cinco opções visíveis com destaque claro da velocidade ativa.':
+          'Cinque opzioni visibili con un’evidenziazione chiara della velocità attiva.',
+      'Uma linha com cinco posições para uma escolha mais fluida.':
+          'Un cursore con cinque posizioni per una scelta più fluida.',
+      'Barra reduzida que deixa mais espaço disponível para os cartões.':
+          'Una barra compatta che lascia più spazio alle schede.',
+      'Personalizar áudio e preferências da interface.':
+          'Personalizza l’audio e le preferenze dell’interfaccia.',
+    },
+    'de': {
+      'Personalização': 'Personalisierung',
+      'Áudio': 'Audio',
+      'Estilo da velocidade do áudio':
+          'Stil der Audiogeschwindigkeitssteuerung',
+      'Escolher como o controlo de velocidade aparece nas atividades.':
+          'Wähle aus, wie die Geschwindigkeitssteuerung in den Aktivitäten angezeigt wird.',
+      'Botões': 'Schaltflächen',
+      'Linha': 'Schieberegler',
+      'Compacto': 'Kompakt',
+      'Personaliza a tua experiência': 'Personalisiere dein Erlebnis',
+      'Estas preferências alteram apenas a apresentação e a interação da aplicação.':
+          'Diese Einstellungen ändern nur die Darstellung und Interaktion der Anwendung.',
+      'Escolhe como queres controlar a velocidade':
+          'Wähle aus, wie du die Geschwindigkeit steuern möchtest',
+      'A escolha muda apenas o estilo do controlo. As cinco velocidades e a lógica da atividade continuam exatamente iguais.':
+          'Die Auswahl ändert nur den Stil der Steuerung. Die fünf Geschwindigkeiten und die Logik der Aktivität bleiben genau gleich.',
+      'A preferência é guardada neste dispositivo.':
+          'Die Einstellung wird auf diesem Gerät gespeichert.',
+      'Cinco opções visíveis com destaque claro da velocidade ativa.':
+          'Fünf sichtbare Optionen mit klarer Hervorhebung der aktiven Geschwindigkeit.',
+      'Uma linha com cinco posições para uma escolha mais fluida.':
+          'Ein Schieberegler mit fünf Positionen für eine flüssigere Auswahl.',
+      'Barra reduzida que deixa mais espaço disponível para os cartões.':
+          'Eine kompakte Leiste, die mehr Platz für die Karten lässt.',
+      'Personalizar áudio e preferências da interface.':
+          'Audio- und Oberflächeneinstellungen personalisieren.',
+    },
+  };
 
   static const Map<String, Map<String, String>> _supplementalTranslations = {
     'en': {

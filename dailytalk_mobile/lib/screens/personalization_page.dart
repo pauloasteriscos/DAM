@@ -240,7 +240,7 @@ final class _PreferenceCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
+                    AppText(
                       value,
                       style: const TextStyle(
                         color: Color(0xFF35C8FF),

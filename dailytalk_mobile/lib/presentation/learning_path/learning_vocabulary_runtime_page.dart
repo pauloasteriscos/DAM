@@ -739,15 +739,6 @@ final class _LearningVocabularyRuntimePageState
                             : ValueKey<String>(
                                 'mission-vocab-audio-${items[index]!.id}',
                               ),
-                        audioTooltip: left ? null : copy.listen,
-                        onAudioTap: left || !audioEnabled
-                            ? null
-                            : () => unawaited(
-                                _speakPronunciation(
-                                  items[index]!,
-                                  languageCode,
-                                ),
-                              ),
                         onTap: () {
                           if (!left && audioEnabled) {
                             unawaited(
@@ -884,8 +875,6 @@ final class _PairCard extends StatelessWidget {
     this.showAudioIcon = false,
     this.audioEnabled = false,
     this.audioKey,
-    this.audioTooltip,
-    this.onAudioTap,
   });
 
   final String text;
@@ -896,8 +885,6 @@ final class _PairCard extends StatelessWidget {
   final bool showAudioIcon;
   final bool audioEnabled;
   final Key? audioKey;
-  final String? audioTooltip;
-  final VoidCallback? onAudioTap;
 
   @override
   Widget build(BuildContext context) {
@@ -947,16 +934,14 @@ final class _PairCard extends StatelessWidget {
                 ),
               ),
               if (showAudioIcon) ...<Widget>[
-                const SizedBox(width: 4),
-                IconButton(
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.volume_up_rounded,
                   key: audioKey,
-                  onPressed: audioEnabled ? onAudioTap : null,
-                  tooltip: audioTooltip,
-                  visualDensity: VisualDensity.compact,
-                  iconSize: 20,
-                  color: const Color(0xFF168CFF),
-                  disabledColor: const Color(0xFF9AAAB3),
-                  icon: const Icon(Icons.volume_up_rounded),
+                  size: 20,
+                  color: audioEnabled
+                      ? const Color(0xFF168CFF)
+                      : const Color(0xFF9AAAB3),
                 ),
               ],
               if (matched) ...<Widget>[
@@ -1071,7 +1056,6 @@ final class _VocabularyRuntimeCopy {
     required this.pairsMetric,
     required this.attemptsMetric,
     required this.audioSpeed,
-    required this.listen,
   });
 
   final String typeLabel;
@@ -1085,7 +1069,6 @@ final class _VocabularyRuntimeCopy {
   final String pairsMetric;
   final String attemptsMetric;
   final String audioSpeed;
-  final String listen;
 }
 
 _VocabularyRuntimeCopy _copyFor(String locale) {
@@ -1102,7 +1085,6 @@ _VocabularyRuntimeCopy _copyFor(String locale) {
       pairsMetric: 'Pairs',
       attemptsMetric: 'Attempts',
       audioSpeed: 'Audio speed',
-      listen: 'Listen',
     ),
     'es' => const _VocabularyRuntimeCopy(
       typeLabel: 'Vocabulario',
@@ -1116,7 +1098,6 @@ _VocabularyRuntimeCopy _copyFor(String locale) {
       pairsMetric: 'Parejas',
       attemptsMetric: 'Intentos',
       audioSpeed: 'Velocidad del audio',
-      listen: 'Escuchar',
     ),
     'fr' => const _VocabularyRuntimeCopy(
       typeLabel: 'Vocabulaire',
@@ -1130,7 +1111,6 @@ _VocabularyRuntimeCopy _copyFor(String locale) {
       pairsMetric: 'Paires',
       attemptsMetric: 'Tentatives',
       audioSpeed: 'Vitesse audio',
-      listen: 'Écouter',
     ),
     'it' => const _VocabularyRuntimeCopy(
       typeLabel: 'Vocabolario',
@@ -1144,7 +1124,6 @@ _VocabularyRuntimeCopy _copyFor(String locale) {
       pairsMetric: 'Coppie',
       attemptsMetric: 'Tentativi',
       audioSpeed: 'Velocità audio',
-      listen: 'Ascolta',
     ),
     'de' => const _VocabularyRuntimeCopy(
       typeLabel: 'Wortschatz',
@@ -1158,7 +1137,6 @@ _VocabularyRuntimeCopy _copyFor(String locale) {
       pairsMetric: 'Paare',
       attemptsMetric: 'Versuche',
       audioSpeed: 'Audiogeschwindigkeit',
-      listen: 'Anhören',
     ),
     _ => const _VocabularyRuntimeCopy(
       typeLabel: 'Vocabulário',
@@ -1172,7 +1150,6 @@ _VocabularyRuntimeCopy _copyFor(String locale) {
       pairsMetric: 'Pares',
       attemptsMetric: 'Tentativas',
       audioSpeed: 'Velocidade do áudio',
-      listen: 'Ouvir',
     ),
   };
 }

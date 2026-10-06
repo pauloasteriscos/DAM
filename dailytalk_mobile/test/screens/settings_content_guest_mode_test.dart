@@ -30,6 +30,10 @@ Widget _buildSettingsInTestMode() {
 }
 
 void main() {
+  setUp(() async {
+    await AppLocaleController.instance.setLanguageCode('pt-PT', persist: false);
+  });
+
   testWidgets('Ajustes em modo teste distingue preferências locais e conta', (
     tester,
   ) async {
@@ -45,6 +49,21 @@ void main() {
     expect(find.textContaining('Alterar idiomas localmente'), findsOneWidget);
     expect(find.textContaining('Escolher perfil localmente'), findsOneWidget);
     expect(find.textContaining('Entra para sincronizar'), findsOneWidget);
+  });
+
+  testWidgets('Personalização nos Ajustes segue o idioma da app', (
+    tester,
+  ) async {
+    await AppLocaleController.instance.setLanguageCode('en-US', persist: false);
+    await tester.pumpWidget(_buildSettingsInTestMode());
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Personalization'), findsWidgets);
+    expect(
+      find.text('Customize audio and interface preferences.'),
+      findsOneWidget,
+    );
+    expect(find.text('Personalização'), findsNothing);
   });
 
   testWidgets('Funcionalidade protegida mostra diálogo de conta necessária', (

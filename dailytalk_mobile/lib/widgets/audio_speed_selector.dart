@@ -36,32 +36,19 @@ final class AudioSpeedSelector extends StatelessWidget {
   Widget _buildButtons(BuildContext context) {
     return _Panel(
       title: title,
-      child: Wrap(
-        spacing: 6,
-        runSpacing: 6,
+      child: Row(
         children: <Widget>[
-          for (final speed in speeds)
-            ChoiceChip(
-              key: ValueKey<String>('$keyPrefix-${_speedKey(speed)}'),
-              label: Text(_formatSpeed(speed)),
-              selected: selectedSpeed == speed,
-              onSelected: (_) => onSelected(speed),
-              visualDensity: VisualDensity.compact,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              selectedColor: const Color(0xFFDDF7ED),
-              side: BorderSide(
-                color: selectedSpeed == speed
-                    ? const Color(0xFF18A875)
-                    : const Color(0xFFD5E2E9),
-              ),
-              labelStyle: TextStyle(
-                color: selectedSpeed == speed
-                    ? const Color(0xFF087A57)
-                    : const Color(0xFF425965),
-                fontWeight: FontWeight.w900,
-                fontSize: 12,
+          for (var index = 0; index < speeds.length; index++) ...<Widget>[
+            if (index > 0) const SizedBox(width: 5),
+            Expanded(
+              child: _ButtonSpeedButton(
+                key: ValueKey<String>('$keyPrefix-${_speedKey(speeds[index])}'),
+                label: _formatSpeed(speeds[index]),
+                selected: selectedSpeed == speeds[index],
+                onTap: () => onSelected(speeds[index]),
               ),
             ),
+          ],
         ],
       ),
     );
@@ -230,6 +217,60 @@ final class _Panel extends StatelessWidget {
           ],
           child,
         ],
+      ),
+    );
+  }
+}
+
+final class _ButtonSpeedButton extends StatelessWidget {
+  const _ButtonSpeedButton({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? const Color(0xFFDDF7ED) : const Color(0xFFF8FBFC),
+      borderRadius: BorderRadius.circular(11),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(11),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          constraints: const BoxConstraints(minHeight: 42),
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(11),
+            border: Border.all(
+              color: selected
+                  ? const Color(0xFF18A875)
+                  : const Color(0xFFD5E2E9),
+              width: selected ? 1.5 : 1,
+            ),
+          ),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              maxLines: 1,
+              style: TextStyle(
+                color: selected
+                    ? const Color(0xFF087A57)
+                    : const Color(0xFF425965),
+                fontWeight: FontWeight.w900,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

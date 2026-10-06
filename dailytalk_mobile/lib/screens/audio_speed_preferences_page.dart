@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/audio_speed_control_style.dart';
 import '../state/audio_speed_preferences_controller.dart';
 import '../widgets/audio_speed_selector.dart';
@@ -38,7 +39,7 @@ final class _AudioSpeedPreferencesPageState
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
-        title: const Text(
+        title: const AppText(
           'Estilo da velocidade do áudio',
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
@@ -93,7 +94,7 @@ final class _AudioSpeedPreferencesPageState
               Icon(Icons.tune_rounded, color: Color(0xFF35C8FF), size: 24),
               SizedBox(width: 10),
               Expanded(
-                child: Text(
+                child: AppText(
                   'Escolhe como queres controlar a velocidade',
                   style: TextStyle(
                     color: Colors.white,
@@ -105,7 +106,7 @@ final class _AudioSpeedPreferencesPageState
             ],
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             'A escolha muda apenas o estilo do controlo. As cinco velocidades e '
             'a lógica da atividade continuam exatamente iguais.',
             style: TextStyle(
@@ -114,7 +115,7 @@ final class _AudioSpeedPreferencesPageState
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             'A preferência é guardada neste dispositivo.',
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.54),
@@ -167,7 +168,7 @@ final class _StyleOptionCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(
+                        AppText(
                           _titleFor(style),
                           style: const TextStyle(
                             color: Colors.white,
@@ -176,7 +177,7 @@ final class _StyleOptionCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
+                        AppText(
                           _descriptionFor(style),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.66),
@@ -207,7 +208,7 @@ final class _StyleOptionCard extends StatelessWidget {
                   onSelected: (_) {},
                   title: style == AudioSpeedControlStyle.compact
                       ? null
-                      : 'Velocidade do áudio',
+                      : context.tr('Velocidade do áudio'),
                   keyPrefix: 'audio-style-preview-${style.storageValue}',
                 ),
               ),
