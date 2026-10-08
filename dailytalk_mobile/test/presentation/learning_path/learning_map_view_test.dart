@@ -138,6 +138,25 @@ void main() {
     },
   );
 
+  testWidgets('test mode can hide cloud sync badge without changing map', (
+    tester,
+  ) async {
+    final model = _model(
+      stageElements: <LearningMapElementViewModel>[
+        _activity(id: 'guest-open', state: LearningActivityState.available),
+      ],
+    );
+
+    await _pumpMap(tester, model, showSyncStatus: false);
+
+    expect(find.byKey(const Key('learning-map-header')), findsOneWidget);
+    expect(find.byKey(const Key('learning-map-hero-sync')), findsNothing);
+    expect(
+      find.byKey(const Key('learning-map-node-guest-open')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('stage progress is derived only from Stage ViewModel', (
     tester,
   ) async {
@@ -352,6 +371,7 @@ Future<void> _pumpMap(
   WidgetTester tester,
   LearningMapViewModel model, {
   LearningMapActivityTap? onActivityTap,
+  bool showSyncStatus = true,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -359,7 +379,11 @@ Future<void> _pumpMap(
         body: SizedBox(
           width: 420,
           height: 900,
-          child: LearningMapView(model: model, onActivityTap: onActivityTap),
+          child: LearningMapView(
+            model: model,
+            onActivityTap: onActivityTap,
+            showSyncStatus: showSyncStatus,
+          ),
         ),
       ),
     ),

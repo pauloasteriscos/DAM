@@ -30,6 +30,7 @@ final class LearningActivityCompletionCoordinator {
     required this.learningPath,
     required this.packageVersion,
     required LearningActivityCompletionWriter completeActivity,
+    this.syncEnabled = true,
     LearningActivityCompletionPersisted? onCompletionPersisted,
     DateTime Function()? clock,
     String Function()? clientCompletionIdFactory,
@@ -44,6 +45,7 @@ final class LearningActivityCompletionCoordinator {
     required LearningPath learningPath,
     required int packageVersion,
     required LearningProgressRepository repository,
+    bool syncEnabled = true,
     LearningActivityCompletionPersisted? onCompletionPersisted,
   }) {
     return LearningActivityCompletionCoordinator(
@@ -51,6 +53,7 @@ final class LearningActivityCompletionCoordinator {
       learningPath: learningPath,
       packageVersion: packageVersion,
       completeActivity: repository.completeActivity,
+      syncEnabled: syncEnabled,
       onCompletionPersisted: onCompletionPersisted,
     );
   }
@@ -58,6 +61,12 @@ final class LearningActivityCompletionCoordinator {
   final String accountId;
   final LearningPath learningPath;
   final int packageVersion;
+
+  /// Define se uma conclusão local deve entrar na outbox.
+  ///
+  /// O modo teste usa o mesmo motor e a mesma persistência pedagógica, mas
+  /// mantém este valor falso para nunca produzir tráfego de Secure Sync.
+  final bool syncEnabled;
 
   final LearningActivityCompletionWriter _completeActivity;
   final LearningActivityCompletionPersisted? _onCompletionPersisted;
@@ -102,6 +111,7 @@ final class LearningActivityCompletionCoordinator {
         packageVersion: packageVersion,
         completedAt: _clock(),
         practicePreference: element.practicePreference,
+        enqueueForSync: syncEnabled,
       );
 
       late Future<void> guarded;

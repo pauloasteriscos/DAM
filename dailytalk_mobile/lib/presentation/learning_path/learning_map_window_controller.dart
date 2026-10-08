@@ -416,6 +416,7 @@ final class LearningMapWindowViewport extends StatefulWidget {
     this.footer,
     this.autoLoad = true,
     this.showSegmentControls = true,
+    this.showSyncStatus = true,
     super.key,
   });
 
@@ -440,6 +441,11 @@ final class LearningMapWindowViewport extends StatefulWidget {
 
   final bool autoLoad;
   final bool showSegmentControls;
+
+  /// Controla apenas a apresentação do estado de cloud sync.
+  /// Em modo teste o progresso é local e este badge não deve sugerir que
+  /// existe uma conta remota onde os dados foram guardados.
+  final bool showSyncStatus;
 
   @override
   State<LearningMapWindowViewport> createState() =>
@@ -707,6 +713,7 @@ final class _LearningMapWindowViewportState
               model: composition.model,
               onActivityTap: _handleActivityTap,
               scrollController: _scrollController,
+              showSyncStatus: widget.showSyncStatus,
               footer: scrollFooter,
             ),
             if (widget.controller.isLoading)

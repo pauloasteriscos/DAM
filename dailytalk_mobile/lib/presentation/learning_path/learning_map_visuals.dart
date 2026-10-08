@@ -52,9 +52,14 @@ abstract final class LearningMapVisualTokens {
 
 /// Contextual header driven exclusively by [LearningMapViewModel].
 final class LearningMapContextHeader extends StatelessWidget {
-  const LearningMapContextHeader({required this.model, super.key});
+  const LearningMapContextHeader({
+    required this.model,
+    this.showSyncStatus = true,
+    super.key,
+  });
 
   final LearningMapViewModel model;
+  final bool showSyncStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -126,8 +131,10 @@ final class LearningMapContextHeader extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      _HeroSyncBadge(spec: syncSpec),
+                      if (showSyncStatus) ...<Widget>[
+                        const SizedBox(width: 10),
+                        _HeroSyncBadge(spec: syncSpec),
+                      ],
                     ],
                   ),
                   SizedBox(height: compact ? 15 : 18),

@@ -11,24 +11,64 @@ import '../../data/repositories/learning_progress_repository.dart';
 import '../../data/services/learning_progress_startup_reconciliation_service.dart';
 import '../../state/app_event_notifier.dart';
 import 'learning_activity_completion_coordinator.dart';
+import 'learning_map_activity_navigation.dart';
 import 'learning_map_window_controller.dart';
 import 'learning_map_window_session.dart';
 
 /// Fail-closed decision used by the application shell.
 ///
-/// The dynamic Learning Map is never selected without:
-/// - an effective feature flag;
-/// - an authenticated session;
-/// - a stable non-empty account identifier.
+/// The dynamic Learning Map is selected only when:
+/// - the feature flag is effective;
+/// - the session is authenticated or explicitly in test mode;
+/// - a stable local progress identifier exists.
+///
+/// Test mode uses an ephemeral local identifier and never enables Secure Sync.
 bool shouldUseLearningMapHome({
   required bool featureEnabled,
   required bool isAuthenticated,
+  required bool isTestMode,
   required String? accountId,
 }) {
   return featureEnabled &&
-      isAuthenticated &&
+      (isAuthenticated || isTestMode) &&
       accountId != null &&
       accountId.trim().isNotEmpty;
+}
+
+/// Ponte controlada entre a barra inferior e o Learning Map.
+///
+/// Quando o mapa está pronto, [LearningMapHomeHost] associa a ação que abre a
+/// recomendação global atual. Fora desse estado, o controller falha fechado e
+/// não tenta abrir atividades legadas por engano.
+final class LearningMapPracticeController {
+  Object? _owner;
+  Future<bool> Function()? _openRecommendedActivity;
+
+  bool get isReady => _openRecommendedActivity != null;
+
+  Future<bool> openRecommendedActivity() async {
+    final action = _openRecommendedActivity;
+
+    if (action == null) {
+      return false;
+    }
+
+    return action();
+  }
+
+  void attach(Object owner, Future<bool> Function() action) {
+    _owner = owner;
+    _openRecommendedActivity = action;
+  }
+
+  void detach(Object owner) {
+    if (!identical(_owner, owner)) {
+      return;
+    }
+
+    _owner = null;
+    _openRecommendedActivity = null;
+  }
 }
 
 /// Real application host for the bounded Learning Map.
@@ -50,7 +90,9 @@ final class LearningMapHomeHost extends StatefulWidget {
     required this.locale,
     required this.appLanguageCode,
     required this.learningLanguageCode,
+    required this.syncEnabled,
     required this.fallback,
+    this.practiceController,
     this.footer,
     super.key,
   });
@@ -65,6 +107,15 @@ final class LearningMapHomeHost extends StatefulWidget {
   final String appLanguageCode;
 
   final String learningLanguageCode;
+
+  /// Apenas sessões autenticadas podem produzir/consumir Secure Sync.
+  /// O modo teste usa o mesmo SQLite e Progression Engine com sync desligado.
+  final bool syncEnabled;
+
+  /// Permite que a ação "Praticar" do shell abra a recomendação global atual
+  /// do mesmo Learning Map, em vez de cair nos exercícios legados.
+  final LearningMapPracticeController? practiceController;
+
   final Widget fallback;
 
   /// Conteúdo pertencente à Home que deve surgir depois do percurso,
@@ -104,10 +155,19 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
   void didUpdateWidget(LearningMapHomeHost oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    if (!identical(oldWidget.practiceController, widget.practiceController)) {
+      oldWidget.practiceController?.detach(this);
+
+      if (_controller != null && _completionCoordinator != null && !_loading) {
+        widget.practiceController?.attach(this, _openRecommendedActivity);
+      }
+    }
+
     if (oldWidget.accountId != widget.accountId ||
         oldWidget.locale != widget.locale ||
         oldWidget.appLanguageCode != widget.appLanguageCode ||
-        oldWidget.learningLanguageCode != widget.learningLanguageCode) {
+        oldWidget.learningLanguageCode != widget.learningLanguageCode ||
+        oldWidget.syncEnabled != widget.syncEnabled) {
       _controller?.removeListener(_handleControllerChangedForSync);
       _controller?.dispose();
       _controller = null;
@@ -126,11 +186,17 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
   }
 
   void _startLoad() {
+    widget.practiceController?.detach(this);
+
     final generation = ++_generation;
     unawaited(_load(generation));
   }
 
   void _handleAppEvent() {
+    if (!widget.syncEnabled) {
+      return;
+    }
+
     final currentSyncVersion = AppEventNotifier.instance.syncVersion;
 
     if (currentSyncVersion == _lastSyncVersion) {
@@ -147,6 +213,7 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
     final controller = _controller;
 
     if (!mounted ||
+        !widget.syncEnabled ||
         !_syncRefreshQueued ||
         _syncRefreshExecution != null ||
         controller == null ||
@@ -162,6 +229,7 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
     final controller = _controller;
 
     if (!mounted ||
+        !widget.syncEnabled ||
         !_syncRefreshQueued ||
         _syncRefreshExecution != null ||
         controller == null ||
@@ -268,9 +336,12 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
             learningPath: active.path,
             packageVersion: active.package.packageVersion,
             repository: progressRepository,
-            onCompletionPersisted: LearningProgressStartupReconciliationService
-                .instance
-                .retryIfAuthenticated,
+            syncEnabled: widget.syncEnabled,
+            onCompletionPersisted: widget.syncEnabled
+                ? LearningProgressStartupReconciliationService
+                      .instance
+                      .retryIfAuthenticated
+                : null,
           );
 
       await progressRepository.ensureProjection(
@@ -307,9 +378,12 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
         _failed = false;
       });
 
+      widget.practiceController?.attach(this, _openRecommendedActivity);
+
       _scheduleSyncRefresh();
     } catch (error, stackTrace) {
       createdController?.dispose();
+      widget.practiceController?.detach(this);
 
       debugPrint('Learning Map Home preparation failed: $error');
       debugPrintStack(stackTrace: stackTrace);
@@ -327,9 +401,42 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
     }
   }
 
+  Future<bool> _openRecommendedActivity() async {
+    final controller = _controller;
+    final completionCoordinator = _completionCoordinator;
+
+    if (!mounted ||
+        controller == null ||
+        completionCoordinator == null ||
+        controller.isLoading ||
+        controller.isActivityFlowRunning) {
+      return false;
+    }
+
+    final target = await controller.focusGlobalRecommendation();
+
+    if (!mounted || target == null) {
+      return false;
+    }
+
+    final result = await controller.openActivityAndRefresh(
+      target,
+      openActivity: (element) => LearningMapActivityNavigation.open(
+        context,
+        element,
+        completionActionFactory: completionCoordinator.actionFor,
+      ),
+    );
+
+    return result?.navigationOutcome ==
+        LearningMapActivityNavigationOutcome.opened;
+  }
+
   @override
   void dispose() {
     _generation++;
+
+    widget.practiceController?.detach(this);
 
     AppEventNotifier.instance.removeListener(_handleAppEvent);
 
@@ -358,6 +465,7 @@ final class _LearningMapHomeHostState extends State<LearningMapHomeHost> {
     return LearningMapWindowViewport(
       controller: controller,
       completionActionFactory: completionCoordinator.actionFor,
+      showSyncStatus: widget.syncEnabled,
       footer: widget.footer,
     );
   }

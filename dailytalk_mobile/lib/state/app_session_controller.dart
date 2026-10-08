@@ -27,9 +27,34 @@ class AppSessionController extends ChangeNotifier {
 
   AppSessionStatus _status = AppSessionStatus.checking;
   AuthUser? _currentUser;
+  String? _testModeProgressAccountId;
+  int _testModeSequence = 0;
 
   AppSessionStatus get status => _status;
   AuthUser? get currentUser => _currentUser;
+
+  /// Identificador local usado pelo motor de progresso.
+  ///
+  /// Em sessão autenticada corresponde à conta real. Em modo teste é um
+  /// identificador efémero, válido apenas enquanto esta execução da aplicação
+  /// permanecer ativa. Nunca deve ser enviado ao backend.
+  String? get learningProgressAccountId {
+    if (isAuthenticated) {
+      final accountId = _currentUser?.id.trim();
+
+      if (accountId != null && accountId.isNotEmpty) {
+        return accountId;
+      }
+
+      return null;
+    }
+
+    if (isTestMode) {
+      return _testModeProgressAccountId;
+    }
+
+    return null;
+  }
 
   bool get isChecking => _status == AppSessionStatus.checking;
   bool get isAuthenticated => _status == AppSessionStatus.authenticated;
@@ -42,6 +67,7 @@ class AppSessionController extends ChangeNotifier {
   /// O utilizador continua a aceder aos dados em cache e a renovação é tentada
   /// silenciosamente quando a ligação estiver disponível.
   Future<void> checkStoredSession() async {
+    _testModeProgressAccountId = null;
     _setStatus(AppSessionStatus.checking);
 
     try {
@@ -70,6 +96,7 @@ class AppSessionController extends ChangeNotifier {
   /// locais e executar atividades, mas não sincroniza dados com a conta.
   void startTestMode() {
     _currentUser = null;
+    _testModeProgressAccountId = _createTestModeProgressAccountId();
     _setStatus(AppSessionStatus.testMode);
   }
 
@@ -79,6 +106,7 @@ class AppSessionController extends ChangeNotifier {
       _currentUser = user;
     }
 
+    _testModeProgressAccountId = null;
     _setStatus(AppSessionStatus.authenticated);
   }
 
@@ -101,7 +129,16 @@ class AppSessionController extends ChangeNotifier {
   Future<void> logout() async {
     await _authRepository.logout();
     _currentUser = null;
+    _testModeProgressAccountId = null;
     _setStatus(AppSessionStatus.unauthenticated);
+  }
+
+  String _createTestModeProgressAccountId() {
+    _testModeSequence += 1;
+
+    return 'guest-session:'
+        '${DateTime.now().toUtc().microsecondsSinceEpoch}:'
+        '$_testModeSequence';
   }
 
   void _setStatus(AppSessionStatus status) {

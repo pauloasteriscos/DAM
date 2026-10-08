@@ -55,6 +55,35 @@ void main() {
     expect(captured, hasLength(2));
   });
 
+  test('modo teste persiste localmente sem solicitar outbox', () async {
+    CompleteLearningActivityWrite? captured;
+
+    final coordinator = LearningActivityCompletionCoordinator(
+      accountId: 'guest-session:123:1',
+      learningPath: _path(),
+      packageVersion: 7,
+      syncEnabled: false,
+      completeActivity: (command) async {
+        captured = command;
+
+        return const CompleteLearningActivityResult(
+          completionId: 42,
+          alreadyCompleted: false,
+        );
+      },
+    );
+
+    final action = coordinator.actionFor(_element());
+
+    expect(action, isNotNull);
+
+    await action!();
+
+    expect(captured, isNotNull);
+    expect(captured!.accountId, 'guest-session:123:1');
+    expect(captured!.enqueueForSync, isFalse);
+  });
+
   test('elemento estrutural não recebe action de conclusão', () {
     final coordinator = LearningActivityCompletionCoordinator(
       accountId: 'account-1',

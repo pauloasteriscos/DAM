@@ -47,6 +47,8 @@ class _MainNavigationState extends State<MainNavigation> {
   final Random _random = Random();
   final GlobalKey<NavigatorState> _homeNavigatorKey =
       GlobalKey<NavigatorState>();
+  final LearningMapPracticeController _learningMapPracticeController =
+      LearningMapPracticeController();
 
   /// Índice atualmente selecionado no menu inferior.
   int _selectedIndex = 0;
@@ -89,7 +91,7 @@ class _MainNavigationState extends State<MainNavigation> {
       AppSessionScope.read(context).markAuthenticated();
     }
 
-    final accountId = session.currentUser?.id.trim();
+    final accountId = session.learningProgressAccountId?.trim();
     final appLanguageCode = AppLocaleController.instance.languageCode;
     final learningLanguageCode =
         AppLearningLanguageController.instance.languageCode;
@@ -97,9 +99,9 @@ class _MainNavigationState extends State<MainNavigation> {
     final useDynamicLearningMap = shouldUseLearningMapHome(
       featureEnabled: FeatureFlags.isEnabled(FeatureFlag.dynamicLearningMap),
       isAuthenticated: session.isAuthenticated,
+      isTestMode: session.isTestMode,
       accountId: accountId,
     );
-
     final Widget Function(Widget footer)? dynamicMapBuilder =
         useDynamicLearningMap
         ? (footer) => LearningMapHomeHost(
@@ -110,6 +112,8 @@ class _MainNavigationState extends State<MainNavigation> {
             locale: learningLanguageCode,
             appLanguageCode: appLanguageCode,
             learningLanguageCode: learningLanguageCode,
+            syncEnabled: session.isAuthenticated,
+            practiceController: _learningMapPracticeController,
             footer: footer,
             fallback: const Center(
               child: Padding(
@@ -169,11 +173,23 @@ class _MainNavigationState extends State<MainNavigation> {
 
   /// Atualiza a aba selecionada.
   ///
-  /// Quando o utilizador toca em "Praticar", a aplicação abre aleatoriamente
-  /// uma das atividades principais do DailyTalk.pt: Vocabulário, Diálogo ou Quiz.
-  /// Esta decisão reforça a lógica gamificada, evitando que o botão funcione
-  /// apenas como uma página estática intermédia.
+  /// Com o Learning Map ativo, "Praticar" é uma ação de continuação do
+  /// percurso: abre a recomendação global atual usando exatamente o mesmo
+  /// runtime e a mesma fronteira de conclusão do mapa.
+  ///
+  /// O comportamento aleatório legado é preservado apenas quando o Learning
+  /// Map não está ativo. Se o mapa estiver ativo mas ainda a carregar, a ação
+  /// falha fechada e nunca regressa silenciosamente à experiência antiga.
   Future<void> _onItemTapped(int index) async {
+    final session = AppSessionScope.read(context);
+    final accountId = session.learningProgressAccountId?.trim();
+    final dynamicLearningMapActive = shouldUseLearningMapHome(
+      featureEnabled: FeatureFlags.isEnabled(FeatureFlag.dynamicLearningMap),
+      isAuthenticated: session.isAuthenticated,
+      isTestMode: session.isTestMode,
+      accountId: accountId,
+    );
+
     // Home é sempre o ponto de regresso ao mapa. Se o utilizador estiver no
     // detalhe/runtime de uma missão, fecha a pilha interna antes de trocar.
     if (index == 0) {
@@ -183,6 +199,42 @@ class _MainNavigationState extends State<MainNavigation> {
           _selectedIndex = 0;
         });
       }
+      return;
+    }
+
+    if (index == 1 && dynamicLearningMapActive) {
+      _resetHomeRoute();
+
+      if (mounted && _selectedIndex != 0) {
+        setState(() {
+          _selectedIndex = 0;
+        });
+      }
+
+      if (!_learningMapPracticeController.isReady) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.tr('O percurso ainda está a carregar.')),
+            ),
+          );
+        }
+        return;
+      }
+
+      final opened = await _learningMapPracticeController
+          .openRecommendedActivity();
+
+      if (!opened && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.tr('Não há uma missão disponível neste momento.'),
+            ),
+          ),
+        );
+      }
+
       return;
     }
 

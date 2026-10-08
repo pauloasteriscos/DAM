@@ -30,6 +30,7 @@ final class CompleteLearningActivityWrite {
     required this.packageVersion,
     required this.completedAt,
     this.practicePreference = PracticePreference.balanced,
+    this.enqueueForSync = true,
     Iterable<ActivityId> activitiesInProgress = const <ActivityId>[],
   }) : activitiesInProgress = UnmodifiableSetView(
          Set<ActivityId>.of(activitiesInProgress),
@@ -46,6 +47,13 @@ final class CompleteLearningActivityWrite {
   final DateTime completedAt;
 
   final PracticePreference practicePreference;
+
+  /// Quando falso, a conclusão continua durável e pedagógica no SQLite local,
+  /// mas não cria qualquer operação de sincronização.
+  ///
+  /// Usado pelo modo teste, que não possui identidade remota.
+  final bool enqueueForSync;
+
   final Set<ActivityId> activitiesInProgress;
 }
 
@@ -136,10 +144,11 @@ final class MergeRemoteLearningProgressResult {
 ///   -> ProgressionFacts
 ///   -> ProgressionEngine
 ///   -> projection
-///   -> outbox
+///   -> outbox (apenas quando a sessão possui identidade remota)
 ///   -> COMMIT
 ///
-/// Não existe dependência de rede neste fluxo.
+/// Não existe dependência de rede neste fluxo. O modo teste usa exatamente a
+/// mesma transação pedagógica, mas sem criar outbox.
 final class LearningProgressRepository {
   LearningProgressRepository(
     this._db, {
@@ -287,37 +296,39 @@ final class LearningProgressRepository {
     }
 
     // --------------------------------------------------------
-    // 6. Outbox na mesma transação
+    // 6. Outbox na mesma transação, apenas quando existe identidade remota
     // --------------------------------------------------------
 
-    final payload = jsonEncode(<String, Object?>{
-      'type': 'ActivityCompleted',
-      'clientCompletionId': command.clientCompletionId,
-      'learningPathId': pathId,
-      'activityId': command.activityId.value,
-      'revisionId': command.revisionId.value,
-      'packageVersion': command.packageVersion,
-      'completedAt': completedAt,
-      'competencyIds': revisionCompetencies
-          .map((id) => id.value)
-          .toList(growable: false),
-    });
+    if (command.enqueueForSync) {
+      final payload = jsonEncode(<String, Object?>{
+        'type': 'ActivityCompleted',
+        'clientCompletionId': command.clientCompletionId,
+        'learningPathId': pathId,
+        'activityId': command.activityId.value,
+        'revisionId': command.revisionId.value,
+        'packageVersion': command.packageVersion,
+        'completedAt': completedAt,
+        'competencyIds': revisionCompetencies
+            .map((id) => id.value)
+            .toList(growable: false),
+      });
 
-    await txn.insert('sync_queue', <String, Object?>{
-      'entity_type': 'learning_progress_completion',
-      'entity_id': completionId,
-      'operation': 'ActivityCompleted',
-      'endpoint': '/api/sync/progress',
-      'method': 'POST',
-      'payload_json': payload,
-      'sync_status': 'pending',
-      'attempt_count': 0,
-      'last_error': null,
-      'created_at': createdAt,
-      'updated_at': createdAt,
-      'next_retry_at': null,
-      'processed_at': null,
-    });
+      await txn.insert('sync_queue', <String, Object?>{
+        'entity_type': 'learning_progress_completion',
+        'entity_id': completionId,
+        'operation': 'ActivityCompleted',
+        'endpoint': '/api/sync/progress',
+        'method': 'POST',
+        'payload_json': payload,
+        'sync_status': 'pending',
+        'attempt_count': 0,
+        'last_error': null,
+        'created_at': createdAt,
+        'updated_at': createdAt,
+        'next_retry_at': null,
+        'processed_at': null,
+      });
+    }
 
     return CompleteLearningActivityResult(
       completionId: completionId,

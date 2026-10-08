@@ -32,12 +32,14 @@ final class LearningMapView extends StatelessWidget {
     this.onActivityTap,
     this.scrollController,
     this.footer,
+    this.showSyncStatus = true,
     super.key,
   });
 
   final LearningMapViewModel model;
   final LearningMapActivityTap? onActivityTap;
   final ScrollController? scrollController;
+  final bool showSyncStatus;
 
   /// Conteúdo opcional renderizado depois da última jornada, dentro deste
   /// mesmo [CustomScrollView].
@@ -67,7 +69,10 @@ final class LearningMapView extends StatelessWidget {
                   constraints: const BoxConstraints(
                     maxWidth: _learningMapContentMaxWidth,
                   ),
-                  child: LearningMapContextHeader(model: model),
+                  child: LearningMapContextHeader(
+                    model: model,
+                    showSyncStatus: showSyncStatus,
+                  ),
                 ),
               ),
             ),

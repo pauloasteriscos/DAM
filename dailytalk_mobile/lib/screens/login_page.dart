@@ -4,7 +4,6 @@ import '../l10n/app_localizations.dart';
 
 import 'login_form_page.dart';
 import '../state/app_session_controller.dart';
-import 'main_navigation.dart';
 import 'register_page.dart';
 
 /// Ecrã inicial do DailyTalk.pt.
@@ -26,14 +25,12 @@ class LoginPage extends StatelessWidget {
   static const Color _accentColor = Color(0xFF35C8FF);
 
   void _openTestMode(BuildContext context) {
+    // O AuthGate é a única autoridade de routing da sessão. Ao mudar o
+    // estado global para testMode, a raiz reconstrói para MainNavigation.
+    // Não fazemos push de uma segunda MainNavigation: isso deixaria uma rota
+    // independente por cima do AuthGate e, após logout, essa rota poderia
+    // reconstruir para a Home legada em vez de regressar ao ecrã de entrada.
     AppSessionScope.read(context).startTestMode();
-
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => MainNavigation(onAuthenticated: onAuthenticated),
-      ),
-    );
   }
 
   void _openLoginForm(BuildContext context) {

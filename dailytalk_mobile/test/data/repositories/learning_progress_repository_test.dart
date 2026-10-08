@@ -52,6 +52,8 @@ void main() {
     String clientCompletionId = 'device-a-completion-0001',
     String activityId = 'arrival.dialogue-01',
     RevisionId? revisionId,
+    String accountId = 'user-phase3',
+    bool enqueueForSync = true,
   }) {
     final activity = learningPath.activities.singleWhere(
       (candidate) => candidate.id.value == activityId,
@@ -59,26 +61,28 @@ void main() {
 
     return CompleteLearningActivityWrite(
       clientCompletionId: clientCompletionId,
-      accountId: 'user-phase3',
+      accountId: accountId,
       learningPath: learningPath,
       activityId: activity.id,
       revisionId: revisionId ?? activity.currentRevisionId,
       packageVersion: 3,
       completedAt: DateTime.utc(2026, 9, 10, 16),
       practicePreference: PracticePreference.dialogue,
+      enqueueForSync: enqueueForSync,
     );
   }
 
   Future<Map<String, Object?>> projection(
     Database database,
-    String elementId,
-  ) async {
+    String elementId, {
+    String accountId = 'user-phase3',
+  }) async {
     final rows = await database.query(
       'learning_progress_projection',
       where:
           'account_id = ? AND learning_path_id = ? '
           'AND path_element_id = ?',
-      whereArgs: <Object?>['user-phase3', 'student.fr-fr.phase1', elementId],
+      whereArgs: <Object?>[accountId, 'student.fr-fr.phase1', elementId],
     );
 
     expect(
@@ -227,6 +231,64 @@ void main() {
         );
 
         expect(reopenedQueue, hasLength(1));
+      },
+    );
+
+    test(
+      'modo teste conclui e desbloqueia localmente sem criar outbox',
+      () async {
+        final learningPath = _loadReferenceJourney();
+        final path = p.join(tempDir.path, 'guest-local-only.db');
+
+        db = await AppDatabase.instance.openDatabaseForTesting(path);
+
+        final repository = LearningProgressRepository(db!);
+
+        final result = await repository.completeActivity(
+          command(
+            learningPath,
+            clientCompletionId: 'guest-completion-0001',
+            accountId: 'guest-session:123:1',
+            enqueueForSync: false,
+          ),
+        );
+
+        expect(result.alreadyCompleted, isFalse);
+
+        final completions = await db!.query(
+          'learning_progress_completions',
+          where: 'client_completion_id = ?',
+          whereArgs: const <Object?>['guest-completion-0001'],
+        );
+
+        expect(completions, hasLength(1));
+
+        expect(
+          (await projection(
+            db!,
+            'arrival.dialogue-01.element',
+            accountId: 'guest-session:123:1',
+          ))['state'],
+          'completed',
+        );
+
+        expect(
+          (await projection(
+            db!,
+            'arrival.dialogue-02.element',
+            accountId: 'guest-session:123:1',
+          ))['state'],
+          'available',
+        );
+
+        expect(
+          await db!.query(
+            'sync_queue',
+            where: 'entity_type = ?',
+            whereArgs: const <Object?>['learning_progress_completion'],
+          ),
+          isEmpty,
+        );
       },
     );
 

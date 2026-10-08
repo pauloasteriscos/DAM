@@ -11,6 +11,15 @@ import 'main_navigation.dart';
 /// O estado de sessão é centralizado em [AppSessionController].
 /// Assim, o modo teste deixa de ser um parâmetro isolado de uma página e passa
 /// a ser um estado global observado por toda a aplicação.
+/// Política de routing da raiz.
+///
+/// Tanto uma conta autenticada como o modo teste pertencem à mesma
+/// [MainNavigation]. Apenas o estado sem sessão regressa ao ecrã de entrada.
+bool shouldShowMainNavigationForSession(AppSessionStatus status) {
+  return status == AppSessionStatus.authenticated ||
+      status == AppSessionStatus.testMode;
+}
+
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
 
@@ -72,7 +81,7 @@ class _AuthGateState extends State<AuthGate> {
       );
     }
 
-    if (session.isAuthenticated) {
+    if (shouldShowMainNavigationForSession(session.status)) {
       return const MainNavigation();
     }
 
