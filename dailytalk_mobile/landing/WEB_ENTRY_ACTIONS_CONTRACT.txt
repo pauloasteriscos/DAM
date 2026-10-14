@@ -1,0 +1,44 @@
+DAILYTALK.PT — CONTRATO DE ENTRADA WEB A PARTIR DA LANDING
+Versão da landing: 1.1.1
+Baseline Web: v1.3.0
+
+OBJETIVO
+A landing não implementa autenticação, criação de conta ou modo guest.
+Ela apenas expressa a intenção do utilizador na URL e entrega a execução à app Flutter existente.
+
+URLs
+/web/?action=login
+/web/?action=register
+/web/?action=test
+
+COMPORTAMENTO ESPERADO
+action=login
+- utilizador não autenticado: abrir diretamente o ecrã de login;
+- utilizador já autenticado: manter a sessão e entrar no produto, sem forçar logout.
+
+action=register
+- utilizador não autenticado: abrir diretamente o ecrã de criação de conta;
+- utilizador já autenticado: manter a sessão; não apresentar registo sobre uma sessão ativa.
+
+action=test
+- utilizador não autenticado: iniciar testMode no AppSessionController;
+- AuthGate continua sendo a autoridade de roteamento;
+- abrir MainNavigation / Learning Map moderno;
+- não criar Outbox Secure Sync;
+- não exibir "Tudo guardado";
+- utilizador autenticado: manter sessão autenticada; não degradar para guest.
+
+INVERSÃO DE RESPONSABILIDADE PROIBIDA
+- Não criar formulários de login HTML.
+- Não guardar JWT na landing.
+- Não duplicar API de autenticação em JavaScript.
+- Não fazer Navigator.push manual para MainNavigation fora da autoridade do AuthGate.
+- Não criar uma segunda demo simplificada.
+
+TESTES MÍNIMOS
+1. /web/?action=login abre login diretamente quando logged-out.
+2. /web/?action=register abre criação de conta diretamente quando logged-out.
+3. /web/?action=test abre Learning Map moderno e marca estado guest local.
+4. Logout após sessão autenticada regressa ao ecrã inicial de autenticação.
+5. Test mode não cria factos cloud.
+6. Recarregar /web/?action=test não pode empilhar rotas.

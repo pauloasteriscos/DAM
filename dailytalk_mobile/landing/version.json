@@ -1,0 +1,46 @@
+{
+  "landingVersion": "1.1.4",
+  "appBaseline": "1.3.0",
+  "contentBaseline": 8,
+  "date": "2026-10-14",
+  "locales": [
+    "pt-PT",
+    "en-US",
+    "es-ES",
+    "fr-FR",
+    "it-IT",
+    "de-DE"
+  ],
+  "primaryAction": "/web/",
+  "siteMode": "multipage-static-localized",
+  "pages": [
+    "index.html",
+    "how-it-works.html",
+    "erasmus.html",
+    "resources.html",
+    "community.html",
+    "about.html"
+  ],
+  "appEntryActions": {
+    "login": "/web/?action=login",
+    "register": "/web/?action=register",
+    "test": "/web/?action=test"
+  },
+  "localizedInternalPages": {
+    "pt-PT": "",
+    "en-US": "en",
+    "es-ES": "es",
+    "fr-FR": "fr",
+    "it-IT": "it",
+    "de-DE": "de"
+  },
+  "slugConvention": "english-filenames-all-locales",
+  "fixes": [
+    "responsive-horizontal-logo",
+    "real-svg-language-flags",
+    "internal-language-selector",
+    "mockup-style-feature-icons",
+    "hero-experience-copy-position",
+    "remove-redundant-internal-cta-banner"
+  ]
+}
