@@ -1,8 +1,8 @@
 {
-  "landingVersion": "1.1.4",
+  "landingVersion": "1.1.5",
   "appBaseline": "1.3.0",
   "contentBaseline": 8,
-  "date": "2026-10-14",
+  "date": "2026-10-15",
   "locales": [
     "pt-PT",
     "en-US",

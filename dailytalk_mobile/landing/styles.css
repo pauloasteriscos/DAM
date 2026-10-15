@@ -190,7 +190,7 @@ footer a{color:#116ee5;font-weight:800}
   .hero{grid-template-columns:50% 50%;padding-inline:35px}
   h1{font-size:54px}.hero-lead{font-size:18px}
   .phone-left{left:100px}.phone-right{left:340px}
-  .scribble-experience{display:none}
+  .scribble-left,.scribble-experience{display:none}
   .feature-strip{grid-template-columns:repeat(3,1fr)}
   .situation-grid{grid-template-columns:repeat(3,1fr)}
 }
